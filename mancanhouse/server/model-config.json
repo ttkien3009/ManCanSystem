@@ -1,0 +1,98 @@
+{
+  "_meta": {
+    "sources": [
+      "loopback/common/models",
+      "loopback/server/models",
+      "../common/models",
+      "./models"
+    ],
+    "mixins": [
+      "loopback/common/mixins",
+      "loopback/server/mixins",
+      "../common/mixins",
+      "./mixins"
+    ]
+  },
+  "User": {
+    "dataSource": "db"
+  },
+  "AccessToken": {
+    "dataSource": "db",
+    "public": false
+  },
+  "ACL": {
+    "dataSource": "db",
+    "public": false
+  },
+  "RoleMapping": {
+    "dataSource": "db",
+    "public": false,
+    "options": {
+      "strictObjectIDCoercion": true
+    }
+  },
+  "Role": {
+    "dataSource": "db",
+    "public": false
+  },
+  "account": {
+    "dataSource": "canData",
+    "public": true
+  },
+  "manager": {
+    "dataSource": "canData",
+    "public": true
+  },
+  "department": {
+    "dataSource": "canData",
+    "public": true
+  },
+  "candidate": {
+    "dataSource": "canData",
+    "public": true
+  },
+  "community": {
+    "dataSource": "canData",
+    "public": true
+  },
+  "companion": {
+    "dataSource": "canData",
+    "public": true
+  },
+  "spiritualGuide": {
+    "dataSource": "canData",
+    "public": true
+  },
+  "groupCommunity": {
+    "dataSource": "canData",
+    "public": true
+  },
+  "teacher": {
+    "dataSource": "canData",
+    "public": true
+  },
+  "subject": {
+    "dataSource": "canData",
+    "public": true
+  },
+  "schedule": {
+    "dataSource": "canData",
+    "public": true
+  },
+  "scheduleCompanion": {
+    "dataSource": "canData",
+    "public": true
+  },
+  "role": {
+    "dataSource": "canData",
+    "public": true
+  },
+  "scheduleSpiritualGuide": {
+    "dataSource": "canData",
+    "public": true
+  },
+  "login": {
+    "dataSource": "canData",
+    "public": true
+  }
+}

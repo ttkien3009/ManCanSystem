@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <title>Thêm Phân quyền - Quản lý nhà ứng sinh Dòng Tên Việt Nam</title>
+  <link rel="shortcut icon" type="image/ico" href="/UNIVERSITY/YEAR_4_2/LUAN_VAN_TOT_NGHIEP/Images/favicon.ico" />
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+    integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+  <link href="/UNIVERSITY/YEAR_4_2/LUAN_VAN_TOT_NGHIEP/fontawesome-free-5.12.1-web/css/all.css" rel="stylesheet">
+  <link rel="stylesheet" type="text/css" href="/UNIVERSITY/YEAR_4_2/LUAN_VAN_TOT_NGHIEP/CANHOUSE/css/Home.css">
+  <link rel="stylesheet" type="text/css" href="/UNIVERSITY/YEAR_4_2/LUAN_VAN_TOT_NGHIEP/CANHOUSE/css/styles.css">
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
+
+  <script src="https://cdn.jsdelivr.net/npm/axios@0.12.0/dist/axios.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lodash@4.13.1/lodash.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vue@2.6.11"></script>
+</head>
+
+<body>
+  <div class="container-fluid bg-light rounded" id="useForAccountForm">
+    <my-website-header></my-website-header>
+    <div class="row">
+      <my-website-menu></my-website-menu>
+      <div class="col-lg-10">
+        <div class="row">
+          <div class="col-lg-12 bg-brown-yellow text-center h-55px text-white">
+            <p class="mb--15px">&nbsp;&nbsp;</p>
+            <span class="font-27px">Thêm Phân quyền</span>
+          </div>
+        </div>
+        <div class="row mt-4 ml-5 mr-5" style="height: 457px;">
+          <div class="col-lg-12">
+            <form @submit.prevent="submitAddAccountForm" action="GET" method="" autocomplete="off">
+              <!--autocomplete: if it is 'on', it save the information filled in the input at previous the times and it will propose that information for the next times. If it is 'off', it is opposite-->
+              <fieldset class="scheduler-border mt-4">
+                <legend class="scheduler-border font-weight-bold text-size-15px">Thông tin Phân quyền</legend>
+                <div class="row mt-2 mb-30px">
+                  <div class="col-lg-2 mt-1">
+                    <label class="text-size-15px" for="roleName">Tên phân quyền:</label>
+                  </div>
+                  <div class="col-lg-4">
+                    <input type="text" v-bind:title="titleRoleName" name="roleName" id="roleName" v-model="roleName"
+                      class="form-control rounded-0 text-size-13px ml--30px" placeholder="Nhập Tên phân quyền...">
+                    <div class="row ml--45px">
+                      <div class="col-12">
+                        <span v-if="!roleNameIsValid" class="text-danger text-size-13px">Yêu cầu nhập thông tin tên phân quyền</span>
+                        <span>&nbsp;</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </fieldset>
+              <div class="row mt--12px" style="margin-left: 155px;">
+                <div class="col-lg-8"></div>
+                <div class="col-lg-2">
+                  <button :disabled="!roleNameIsValid" @click="clearInputAddRoleForm"
+                    class="btn btn-primary rounded-0 ml-5 bg-brown-yellow btn-outline-dark align-middle text-dark text-size-15px btn-submit">
+                    <i class="fas fa-redo"></i>
+                    &nbsp;Làm mới
+                  </button>
+                </div>
+                <div class="col-lg-2">
+                  <button :disabled="!roleNameIsValid"
+                    class="btn btn-primary btn-outline-dark rounded-0 ml-4 bg-brown-yellow align-middle text-dark text-size-15px btn-submit"
+                    type="submit">
+                    <i class="fas fa-plus"></i>
+                    &nbsp;Thêm
+                  </button>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+        <my-website-footer></my-website-footer>
+      </div>
+    </div>
+  </div>
+  <script src="/UNIVERSITY/YEAR_4_2/LUAN_VAN_TOT_NGHIEP/CANHOUSE/js/Common.js"></script>
+</body>
+
+</html>

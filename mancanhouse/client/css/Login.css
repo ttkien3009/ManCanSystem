@@ -1,0 +1,125 @@
+.body-login {
+  background-image: url("../images/bg_login.jpg");
+  background-size: auto;
+  background-repeat: no-repeat;
+}
+
+.card-login {
+  border-radius: 3% !important;
+  font-family: sans-serif !important;
+  font-size: 14px !important;
+  height: 16rem !important;
+  width: 21.5rem !important;
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 1), 0 6px 20px 0 rgba(0, 0, 0, 0.89);
+}
+
+.input-login {
+  font-size: 15px !important;
+  border-radius: 5px !important;
+  width: 200px !important;
+}
+
+.card-title-login {
+  font-size: 18px !important;
+  padding-top: 15px !important;
+  padding-bottom: 10px !important;
+}
+
+.container {
+  padding-top: 10% !important;
+  padding-left: 29% !important;
+}
+
+.image-fluid {
+  height: 28% !important;
+  width: 18% !important;
+  margin-top: -20% !important;
+  margin-bottom: -5px !important;
+  margin-left: 13% !important;
+}
+
+.mb--10px {
+  margin-bottom: -10px !important;
+}
+
+.wrap-input100 {
+  position: relative;
+  width: 100%;
+  z-index: 1;
+}
+
+.input100 {
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 14px;
+  line-height: 1.2;
+  color: black;
+  display: block;
+  width: 95%;
+  background: #fff;
+  height: 40px;
+  padding: 0 10px 0 50px;
+  border-radius: 5px !important;
+}
+
+/*------------------------------------------------------------------
+    [ Focus ]*/
+.focus-input100 {
+  display: block;
+  position: absolute;
+  border-radius: 25px;
+  bottom: 0;
+  left: 0;
+  z-index: -1;
+  width: 100%;
+  height: 100%;
+  box-shadow: 0px 0px 0px 0px;
+  color: rgba(0, 91, 234, 0.6);
+}
+
+.input100:focus + .focus-input100 {
+  -webkit-animation: anim-shadow 0.5s ease-in-out forwards;
+  animation: anim-shadow 0.5s ease-in-out forwards;
+}
+
+.validate-input {
+  position: relative;
+}
+
+.symbol-input100 {
+  font-size: 15px;
+  color: dimgrey;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -moz-box;
+  display: -ms-flexbox;
+  display: flex;
+  align-items: center;
+  position: absolute;
+  border-radius: 25px;
+  bottom: 0;
+  left: -12px;
+  width: 100%;
+  height: 100%;
+  padding-left: 30px;
+  pointer-events: none;
+  -webkit-transition: all 0.4s;
+  -o-transition: all 0.4s;
+  -moz-transition: all 0.4s;
+  transition: all 0.4s;
+}
+
+.login100-form {
+  width: 100%;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -moz-box;
+  display: -ms-flexbox;
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+.btn-login {
+  background-color: #056299 !important;
+  color: white !important;
+}

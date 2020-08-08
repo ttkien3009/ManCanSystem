@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <title>Đăng nhập - Quản lý nhà ứng sinh Dòng Tên Việt Nam</title>
+  <link rel="shortcut icon" type="image/ico" href="/UNIVERSITY/YEAR_4_2/LUAN_VAN_TOT_NGHIEP/Images/favicon.ico" />
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+    integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+  <link rel="stylesheet" type="text/css" href="/UNIVERSITY/YEAR_4_2/LUAN_VAN_TOT_NGHIEP/CANHOUSE/css/Login.css">
+  <!--<script src="https://cdn.jsdelivr.net/npm/vue@2.6.10/dist/vue.js"></script>-->
+  <script src="https://cdn.jsdelivr.net/npm/axios@0.12.0/dist/axios.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lodash@4.13.1/lodash.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vue@2.6.11"></script>
+</head>
+
+<body>
+  <div class="container">
+    <img src="/UNIVERSITY/YEAR_4_2/LUAN_VAN_TOT_NGHIEP/Images/logoungsinh.png" class="image-fluid" alt="logo">
+    <div class="card bg-white">
+      <div class="card-title text-center font-weight-bold">Đăng Nhập Hệ Thống</div>
+      <div class="card-body" id="loginForm">
+        <form @submit.prevent="submitFormLogin" action="" method="POST" autocomplete="off">
+          <!--'Submit' event won't reload page-->
+          <div class="input-group mb-1">
+            <div class="row mb-1">
+              <div class="col-12">
+                <label for="username" class="font-weight-bold">Tài khoản:</label>
+                <input type="text" v-bind:title="title_username" name="username" id="username" v-model="username"
+                  class="form-control bg-light input-login" placeholder="Nhập Tài khoản....." aria-label="Password"
+                  aria-describedby="basic-addon1">
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-12">
+                <span v-if="!usernameIsValid" class="text-danger">Yêu cầu nhập thông tin tài khoản.</span>
+                <span>&nbsp;</span>
+              </div>
+            </div>
+          </div>
+          <div class="input-group mb-2">
+            <div class="row mb-1">
+              <div class="col-12">
+                <label for="password" class="font-weight-bold">Mật khẩu:</label>
+                <input type="password" v-bind:title="title_password" name="password" id="password" v-model="password"
+                  class="form-control bg-light input-login" placeholder="Nhập Mật khẩu....." aria-label="Password"
+                  aria-describedby="basic-addon1">
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-12">
+                <span v-if="!passwordIsValid" class="text-danger">Yêu cầu nhập thông tin mật khẩu.</span>
+                <span>&nbsp;</span>
+              </div>
+            </div>
+          </div>
+          <button :disabled="!formIsValid"
+            class="btn btn-info btn-lg btn-block btn-outline-dark align-middle text-dark font-weight-bold"
+            type="submit">Đăng nhập</button>
+        </form>
+      </div>
+    </div>
+  </div>
+  <script src="/UNIVERSITY/YEAR_4_2/LUAN_VAN_TOT_NGHIEP/CANHOUSE/js/Login.js"></script>
+</body>
+
+</html>

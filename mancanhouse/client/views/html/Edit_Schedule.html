@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <title>Chỉnh sửa Lịch học - Quản lý nhà ứng sinh Dòng Tên Việt Nam</title>
+  <link rel="shortcut icon" type="image/ico" href="/UNIVERSITY/YEAR_4_2/LUAN_VAN_TOT_NGHIEP/Images/favicon.ico" />
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+    integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+  <link href="/UNIVERSITY/YEAR_4_2/LUAN_VAN_TOT_NGHIEP/fontawesome-free-5.12.1-web/css/all.css" rel="stylesheet">
+  <link rel="stylesheet" type="text/css" href="/UNIVERSITY/YEAR_4_2/LUAN_VAN_TOT_NGHIEP/CANHOUSE/css/Home.css">
+  <link rel="stylesheet" type="text/css" href="/UNIVERSITY/YEAR_4_2/LUAN_VAN_TOT_NGHIEP/CANHOUSE/css/styles.css">
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
+
+  <script src="https://cdn.jsdelivr.net/npm/axios@0.12.0/dist/axios.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lodash@4.13.1/lodash.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vue@2.6.11"></script>
+</head>
+
+<body>
+  <div class="container-fluid bg-light rounded" id="useForCandidateForm">
+    <my-website-header></my-website-header>
+    <div class="row">
+      <my-website-menu></my-website-menu>
+      <div class="col-lg-10">
+        <div class="row">
+          <div class="col-lg-12 bg-brown-yellow text-center h-55px text-white">
+            <p class="mb--15px">&nbsp;&nbsp;</p>
+            <span class="font-27px">Chỉnh sửa Lịch học</span>
+          </div>
+        </div>
+        <div class="row mt-4 ml-5 mr-5" style="height: 457px;">
+          <div class="col-lg-12">
+            <form @submit.prevent="submitAddCommunityForm" action="GET" method="" autocomplete="off">
+              <!--autocomplete: if it is 'on', it save the information filled in the input at previous the times and it will propose that information for the next times. If it is 'off', it is opposite-->
+              <fieldset class="scheduler-border mt-4">
+                <legend class="scheduler-border font-weight-bold text-size-15px">Thông tin lịch học</legend>
+                <div class="row mt-2 mb-30px">
+                  <div class="col-lg-2 mt-1">
+                    <label class="text-size-15px" for="subject">Môn học:</label>
+                  </div>
+                  <div class="col-lg-4">
+                    <select class="custom-select rounded-0 text-size-13px ml--30px h-32px" v-model="subject"
+                      name="subject" id="subject">
+                      <option value="0" disabled selected>Chọn Môn học...</option>
+                      <option v-for="subject in subjects" v-key="subject.id">{{ subject.subject }}</option>
+                    </select>
+                    <div class="row ml--45px">
+                      <div class="col-12">
+                        <span v-if="!subjectIsValid" class="text-danger text-size-13px">Yêu cầu chọn thông tin môn
+                          học</span>
+                        <span>&nbsp;</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-lg-2 mt-1">
+                    <label class="text-size-15px" for="teacher">Giáo viên:</label>
+                  </div>
+                  <div class="col-lg-4">
+                    <select class="custom-select rounded-0 text-size-13px ml--30px h-32px" v-model="teacher"
+                      name="teacher" id="teacher">
+                      <option value="0" disabled selected>Chọn Giáo viên...</option>
+                      <option v-for="teacher in teachers" v-key="teacher.id">{{ teacher.lastName }}
+                        {{ teacher.firstName}} - {{ teacher.subject}}</option>
+                    </select>
+                    <div class="row ml--45px">
+                      <div class="col-12">
+                        <span v-if="!teacherIsValid" class="text-danger text-size-13px">Yêu cầu chọn thông tin giáo
+                          viên</span>
+                        <span>&nbsp;</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="row mt-3">
+                  <div class="col-lg-2 mt-1">
+                    <label class="text-size-15px" for="dayOfWeek">Ngày trong tuần:</label>
+                  </div>
+                  <div class="col-lg-4">
+                    <select class="custom-select rounded-0 text-size-13px ml--30px h-32px" v-model="dayOfWeek"
+                      name="dayOfWeek" id="dayOfWeek">
+                      <option value="null" disabled selected>Chọn Ngày trong tuần...</option>
+                      <option value="Thứ 2">Thứ 2</option>
+                      <option value="Thứ 3">Thứ 3</option>
+                      <option value="Thứ 4">Thứ 4</option>
+                      <option value="Thứ 5">Thứ 5</option>
+                      <option value="Thứ 6">Thứ 6</option>
+                      <option value="Thứ 7">Thứ 7</option>
+                      <option value="Chủ nhật">Chủ nhật</option>
+                    </select>
+                    <div class="row ml--45px">
+                      <div class="col-12">
+                        <span v-if="!dayOfWeekIsValid" class="text-danger text-size-13px">Yêu cầu chọn thông tin ngày
+                          trong tuần</span>
+                        <span>&nbsp;</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-lg-2 mt-1">
+                    <label class="text-size-15px">Ngày bắt đầu:</label>
+                  </div>
+                  <div class="col-lg-4">
+                    <input v-model="dayStart" name="dayStart" id="dayStart" type="date" :title="titleDayStart"
+                      class="form-control rounded-0 text-size-13px ml--30px">
+                    <div class="row ml--45px">
+                      <div class="col-12">
+                        <span v-if="!dayStartIsValid" class="text-danger text-size-13px">Yêu cầu nhập thông tin ngày bắt
+                          đầu</span>
+                        <span>&nbsp;</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="row mt-3">
+                  <div class="col-lg-2 mt-1">
+                    <label class="text-size-15px">Ngày kết thúc:</label>
+                  </div>
+                  <div class="col-lg-4">
+                    <input v-model="dayEnd" name="dayEnd" id="dayEnd" type="date" :title="titleDayEnd"
+                      class="form-control rounded-0 text-size-13px ml--30px">
+                    <div class="row ml--45px">
+                      <div class="col-12">
+                        <span v-if="!dayEndIsValid" class="text-danger text-size-13px">Yêu cầu nhập thông tin ngày kết
+                          thúc</span>
+                        <span>&nbsp;</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </fieldset>
+              <div class="row mt--12px" style="margin-left: 155px;">
+                <div class="col-lg-8"></div>
+                <div class="col-lg-2">
+                  <button :disabled="!refreshFormAddSchedule" @click="clearInputFormAddSchedule"
+                    class="btn btn-primary rounded-0 ml-3 bg-brown-yellow btn-outline-dark align-middle text-dark text-size-15px btn-submit">
+                    <i class="fas fa-redo"></i>
+                    &nbsp;Làm mới
+                  </button>
+                </div>
+                <div class="col-lg-2">
+                  <button :disabled="!formAddScheduleIsValid"
+                    class="btn btn-primary btn-outline-dark rounded-0 bg-brown-yellow align-middle text-dark text-size-15px ml--10px btn-submit"
+                    type="submit">
+                    <i class="fas fa-edit"></i>
+                    &nbsp;Chỉnh sửa
+                  </button>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+        <my-website-footer></my-website-footer>
+      </div>
+    </div>
+  </div>
+  <script src="/UNIVERSITY/YEAR_4_2/LUAN_VAN_TOT_NGHIEP/CANHOUSE/js/Common.js"></script>
+</body>
+
+</html>

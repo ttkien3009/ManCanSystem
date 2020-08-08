@@ -1,0 +1,12 @@
+{
+  "db": {
+    "name": "db",
+    "connector": "memory"
+  },
+  "canData": {
+    "name": "canData",
+    "localStorage": "",
+    "file": "database.json",
+    "connector": "memory"
+  }
+}

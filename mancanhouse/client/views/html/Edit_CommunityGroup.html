@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Chỉnh sửa nhóm cộng đoàn đồng hành - Quản lý nhà ứng sinh Dòng Tên Việt Nam</title>
+<link rel="shortcut icon" type="image/ico" href="/UNIVERSITY/YEAR_4_2/LUAN_VAN_TOT_NGHIEP/Images/favicon.ico"/>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+<link href="/UNIVERSITY/YEAR_4_2/LUAN_VAN_TOT_NGHIEP/fontawesome-free-5.12.1-web/css/all.css" rel="stylesheet">
+<link rel="stylesheet" type="text/css" href="/UNIVERSITY/YEAR_4_2/LUAN_VAN_TOT_NGHIEP/CANHOUSE/css/Home.css">
+<link rel="stylesheet" type="text/css" href="/UNIVERSITY/YEAR_4_2/LUAN_VAN_TOT_NGHIEP/CANHOUSE/css/styles.css">
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/axios@0.12.0/dist/axios.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lodash@4.13.1/lodash.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/vue@2.6.11"></script>
+
+</head>
+<body>
+    <div class="container-fluid bg-light rounded" id="useForCandidateForm">
+        <my-website-header></my-website-header>
+        <div class="row">
+            <my-website-menu></my-website-menu>
+            <div class="col-lg-10">
+                <div class="row">
+                    <div class="col-lg-12 bg-brown-yellow text-center h-55px text-white">
+                        <p class="mb--15px">&nbsp;&nbsp;</p>
+                        <span class="font-27px">Chỉnh sửa Nhóm Cộng đoàn đồng hành</span>
+                    </div>
+                </div>
+                <div class="row mt-3 ml-5 mr-5 h-465px">
+                    <div class="col-lg-12">
+                        <form action="GET" method="" autocomplete="off">
+                            <fieldset class="scheduler-border mt-2">
+                                <legend class="scheduler-border font-weight-bold text-size-15px">Thông tin nhóm cộng đoàn đồng hành</legend>
+                                <div class="row mt-2">
+                                    <div class="col-lg-2 mt-1">
+                                        <label class="text-size-15px">Tên nhóm:</label>
+                                    </div>
+                                    <div class="col-lg-4">
+                                        <input type="text" id="groupName" name="groupName" v-model="groupName" :title="titleGroupName"  class="form-control rounded-0 text-size-13px ml--30px" placeholder="Nhập Tên chính...">
+                                        <div class="row ml--45px">
+                                            <div class="col-12">
+                                                <span v-if="!groupNameIsValid" class="text-danger text-size-13px">Yêu cầu nhập thông tin tên nhóm cộng đoàn</span>
+                                                <span>&nbsp;</span>
+                                            </div>
+                                        </div>     
+                                    </div>
+                                    <div class="col-lg-2 mt-1">
+                                        <label class="text-size-15px">Cộng đoàn 1:</label>
+                                    </div>
+                                    <div class="col-lg-4">
+                                        <select v-model="firstCom" name="firstCom" id="firstCom" class="custom-select rounded-0 text-size-13px ml--30px h-33px">
+                                            <option value="0" disabled selected>Chọn Cộng đoàn...</option>
+                                            <option 
+                                                v-for="community in communities"
+                                                v-key="community.id">{{ community.communityName }}</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="row mt-3">
+                                    <div class="col-lg-2 mt-1 mb-8px">
+                                        <label class="text-size-15px">Cộng đoàn 2:</label>
+                                    </div>
+                                    <div class="col-lg-4">
+                                        <select v-model="secondCom" name="secondCom" id="secondCom" class="custom-select rounded-0 text-size-13px ml--30px h-33px">
+                                            <option value="0" disabled selected>Chọn Cộng đoàn...</option>
+                                            <option 
+                                                v-for="community in communities"
+                                                v-key="community.id">{{ community.communityName }}</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-lg-2 mt-1">
+                                        <label class="text-size-15px">Cộng đoàn 3:</label>
+                                    </div>
+                                    <div class="col-lg-4">
+                                        <select v-model="thirdCom" name="thirdCom" id="thirdCom" class="custom-select rounded-0 text-size-13px ml--30px h-33px">
+                                            <option value="0" disabled selected>Chọn Cộng đoàn...</option>
+                                            <option 
+                                                v-for="community in communities"
+                                                v-key="community.id">{{ community.communityName }}</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="row mt-3">
+                                    <div class="col-lg-2 mt-1 mb-8px">
+                                        <label class="text-size-15px">Cộng đoàn 4:</label>
+                                    </div>
+                                    <div class="col-lg-4">
+                                        <select v-model="fourthCom" name="fourthCom" id="fourthCom" class="custom-select rounded-0 text-size-13px ml--30px h-33px">
+                                            <option value="0" disabled selected>Chọn Cộng đoàn...</option>
+                                            <option 
+                                                v-for="community in communities"
+                                                v-key="community.id">{{ community.communityName }}</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-lg-2 mt-1">
+                                        <label class="text-size-15px">Cộng đoàn 5:</label>
+                                    </div>
+                                    <div class="col-lg-4">
+                                        <select v-model="fifthCom" name="fifthCom" id="fifthCom" class="custom-select rounded-0 text-size-13px ml--30px h-33px">
+                                            <option value="0" disabled selected>Chọn Cộng đoàn...</option>
+                                            <option 
+                                                v-for="community in communities"
+                                                v-key="community.id">{{ community.communityName }}</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </fieldset>
+                            <div class="row mt--12px" style="margin-left: 155px;">
+                                <div class="col-lg-8"></div>
+                                <div class="col-lg-2">
+                                    <button :disabled="!refreshFormGroupCommunity" @click="clearInputFormCommunityGroup" class="btn btn-primary rounded-0 ml-3 bg-brown-yellow btn-outline-dark align-middle text-dark text-size-15px btn-submit">
+                                        <i class="fas fa-redo"></i>
+                                        &nbsp;Làm mới
+                                    </button>
+                                </div>
+                                <div class="col-lg-2">
+                                    <button :disabled="!formGroupCommunityIsValid" class="btn btn-primary btn-outline-dark rounded-0 bg-brown-yellow align-middle text-dark text-size-15px ml--10px btn-submit" type="submit">
+                                        <i class="fas fa-edit"></i>
+                                        &nbsp;Chỉnh sửa
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <my-website-footer></my-website-footer>
+            </div>
+        </div>
+    </div>
+ 
+    <script src="/UNIVERSITY/YEAR_4_2/LUAN_VAN_TOT_NGHIEP/CANHOUSE/js/Common.js">
+</script>     
+</body>
+</html>

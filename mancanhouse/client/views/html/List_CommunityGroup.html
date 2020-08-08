@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Danh sách nhóm cộng đoàn đồng hành - Quản lý nhà ứng sinh Dòng Tên Việt Nam</title>
+<link rel="shortcut icon" type="image/ico" href="/UNIVERSITY/YEAR_4_2/LUAN_VAN_TOT_NGHIEP/Images/favicon.ico"/>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+<link href="/UNIVERSITY/YEAR_4_2/LUAN_VAN_TOT_NGHIEP/fontawesome-free-5.12.1-web/css/all.css" rel="stylesheet">
+<link rel="stylesheet" type="text/css" href="/UNIVERSITY/YEAR_4_2/LUAN_VAN_TOT_NGHIEP/CANHOUSE/css/Home.css">
+<link rel="stylesheet" type="text/css" href="/UNIVERSITY/YEAR_4_2/LUAN_VAN_TOT_NGHIEP/CANHOUSE/css/styles.css">
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/axios@0.12.0/dist/axios.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lodash@4.13.1/lodash.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/vue@2.6.11"></script>
+</head>
+<body>
+    <div class="container-fluid bg-light rounded" id="useForCandidateForm">
+        <my-website-header></my-website-header>
+        <div class="row">
+            <my-website-menu></my-website-menu>
+            <div class="col-lg-10">
+                <div class="row">
+                    <div class="col-lg-10 bg-brown-yellow text-center h-55px text-white">
+                        <p class="mb--15px">&nbsp;&nbsp;</p>
+                        <span class="font-27px ml-140px">Danh sách Nhóm Cộng đoàn đồng hành</span>
+                    </div>
+                    <div class="col-lg-2 bg-brown-yellow h-55px">
+                        <button v-bind:title="titleButtonAddGroupCommunity"  class="btn btn-sm btn-outline-none bg-brown-yellow mt-2px" style="margin-left: 100px;" type="button">
+                            <a href="Add_CommunityGroup.html">
+                                <i class="fas fa-plus-circle fa-3x icon-white"></i>
+                            </a>
+                        </button>
+                    </div>
+                </div>
+                <div class="row mt-4 ml-1 mr-1 text-size-13px" style="height: 457px;">
+                    <div class="table-responsive-sm">
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr class="text-center">
+                                    <th scope="col">#</th>
+                                    <th scope="col">Mã Nhóm</th>
+                                    <th scope="col">Tên nhóm</th>
+                                    <th scope="col">Cộng đoàn 1</th>
+                                    <th scope="col">Cộng đoàn 2</th>
+                                    <th scope="col">Cộng đoàn 3</th>
+                                    <th scope="col">Cộng đoàn 4</th>
+                                    <th scope="col">Cộng đoàn 5</th>
+                                    <th scope="col">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody class="text-center">
+                                <tr v-for="groupCommunity in paginatedDataGroupCommunity"
+                                    :key="groupCommunity.id">
+                                    <th class="align-middle" scope="row">{{ groupCommunity.id }}</th>
+                                    <td>{{ groupCommunity.groupID }}</td>
+                                    <td>{{ groupCommunity.groupName }}</td>
+                                    <td>{{ groupCommunity.firstCom }}</td>
+                                    <td>{{ groupCommunity.secondCom }}</td>
+                                    <td>{{ groupCommunity.thirdCom }}</td>
+                                    <td>{{ groupCommunity.fourthCom }}</td>
+                                    <td>{{ groupCommunity.fifthCom }}</td>
+                                    <td style="width: 70px;">
+                                        <div class="row" style="margin-right: -50px;">
+                                            <!--<div class="col-lg-4">
+                                                <button :title="titleButtonDisplay" data-toggle="modal" @click="getDetailGroupCommunity(groupCommunity)" data-target="#detailGroupCommunityModal" class="btn btn-primary btn-sm align-middle h-28px w-28px" type="submit">
+                                                    <i class="far fa-eye fa-md ml--3px"></i>
+                                                </button>
+                                            </div>-->
+                                            <div class="col-lg-4" style="margin-left: 5px;">
+                                                <button :title="titleButtonEdit"  class="btn btn-warning btn-sm h-28px w-28px ml--13px" type="submit">
+                                                    <i class="fas fa-edit fa-md ml--2px"></i>
+                                                </button>
+                                            </div>
+                                            <div class="col-lg-4" style="margin-left: 13px;">
+                                                <button :title="titleButtonDelete" data-toggle="modal" @click="getDetailGroupCommunity(groupCommunity)" data-target="#deleteGroupCommunityModal" class="btn btn-danger btn-sm h-28px w-28px ml--40px">
+                                                    <i class="far fa-trash-alt fa-md ml--1px"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                               <tr class="z-08 font-size-15px">
+                                   <td colspan="9">
+                                    <button  :disabled="!pagePrevGroupCommunityActive" @click="pagePrev" class="btn btn-sm h-28px w-28px ml--40px" style="margin-right: 100px;">
+                                        <i class="fas fa-backward"></i>
+                                    </button>
+                                    <span style="margin-right: 100px;margin-left: -50px;">{{ currentPage + 1 }} / {{ countPageGroupCommunity }}</span>
+                                    <button  :disabled="!pageNextGroupCommunityActive" @click="pageNext" class="btn  btn-sm h-28px w-28px ml--40px">
+                                        <i class="fas fa-forward"></i>
+                                    </button>
+                                   </td>
+                               </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <my-website-footer></my-website-footer>
+            </div>
+        </div>
+        <div class="modal fade" id="deleteGroupCommunityModal" tabindex="-1" role="dialog" aria-labelledby="deleteGroupCommunityModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document" style="width: 430px;">
+                <form class="modal-content" action="" style="background-color: #f4eecc;">
+                    <div class="container">
+                        <div class="row" style="margin-top: 20px;">
+                            <div class="col-lg-12 text-center">
+                                <div class="row">
+                                    <div class="col-lg-9 font-italic" style="font-size: 18px;color: #cfc89d;margin-left: -20px;">
+                                        Candidate House Management
+                                    </div>
+                                </div>
+                                <div class="row bg-white txt-title-detail">
+                                    <div class="col-lg-12 text-center">
+                                        <h3 class="mt-2">Xóa Nhóm đồng hành</h3>
+                                    </div>
+                                </div>
+                                <div class="row mt-3">
+                                    <div class="col-lg-12 icon-896248">
+                                        <p style="font-size: 18px;">Bạn có chắc chắn muốn xóa Nhóm đồng hành {{ groupID }}?</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mt-3" style="margin-bottom: 20px;">
+                            <div class="col-lg-1">&nbsp;</div>
+                            <div class="col-lg-5"> 
+                                <button type="button" class="btn btn-light rounded-0  align-middle text-dark text-size-15px" data-dismiss="modal" style="width: 150px;">
+                                    <i class="fas fa-times"></i>&nbsp;Hủy
+                                </button>
+                            </div>
+                            <div class="col-lg-5"> 
+                                <button type="button" class="btn btn-danger rounded-0  align-middle text-white text-size-15px" style="width: 150px;">
+                                    <i class="fas fa-check"></i>&nbsp;Đồng ý
+                                </button>
+                            </div>
+                            <div class="col-lg-1">&nbsp;</div> 
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <!--<div class="modal fade" id="detailGroupCommunityModal" tabindex="-1" role="dialog" aria-labelledby="detailGroupCommunityModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document" style="width: 450px;">
+              <div class="modal-content">
+                <div class="modal-body rounded" style="background-color: #f4eecc;">
+                    <div class="row">
+                        <div class="col-lg-9 font-italic" style="font-size: 18px;color: #cfc89d;">
+                            Candidate House Management
+                        </div>
+                    </div>
+                    <div class="row bg-white">
+                        <div class="col-lg-12">
+                            <div class="row">
+                                <div class="col-lg-12">
+                                    <span class="font-weight-bold txt-title-detail"> Nguyễn Ngọc Triêm </span>
+                                </div>
+                            </div>
+                            <div class="row" style="margin-top: -8px; font-size: 20px;font-family:Arial, Helvetica, sans-serif;">
+                                <div class="col-lg-9 font-weight-bold" style="color: #aaa476;">
+                                    <span>{{ userId }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mt-3">
+                        <div class="col-md-3">
+                            <i class="far fa-user-circle fa-lg icon-896248"></i>
+                        </div>
+                        <div class="col-md-9 icon-896248 ml--70px">
+                            <span>{{ username }}</span>
+                        </div>
+                    </div>
+                    <div class="row mt-2">
+                        <div class="col-md-3">
+                            <i class="fas fa-key fa-lg icon-896248"></i>
+                        </div>
+                        <div class="col-md-9 icon-896248 ml--70px">
+                            <span>{{ password }}</span>
+                        </div>
+                    </div>
+                    <div class="row mt-2">
+                        <div class="col-md-3">
+                            <i class="fas fa-user-tag fa-lg icon-896248"></i>
+                        </div>
+                        <div class="col-md-9 icon-896248 ml--70px">
+                            <span>{{ roleText }}</span>
+                        </div>
+                    </div>
+                    <div class="row mt-2" v-if="!isDisabled">
+                        <div class="col-md-3">
+                            <i class="fas fa-toggle-on fa-lg icon-896248"></i>
+                        </div>
+                        <div class="col-md-9 icon-896248 ml--70px">
+                            <span>{{ statusText }}</span>
+                        </div>
+                    </div>
+                    <div class="row mt-2" v-if="!isEnabled">
+                        <div class="col-md-3">
+                            <i class="fas fa-toggle-off fa-lg icon-896248"></i>
+                        </div>
+                        <div class="col-md-9 icon-896248 ml--70px">
+                            <span>{{ statusText }}</span>
+                        </div>
+                    </div>
+                    <div class="row mt-3 icon-896248" style="font-size: 15px;">
+                        <div class="col-lg-2">
+                            <i class="fab fa-google"></i>
+                        </div>
+                        <div class="col-lg-2 ml--30px">
+                            <i class="fab fa-facebook-f"></i>
+                        </div>
+                        <div class="col-lg-2 ml--30px">
+                            <i class="fab fa-twitter"></i>
+                        </div>
+                        <div class="col-lg-2 ml--30px">
+                            <i class="fab fa-skype"></i>
+                        </div>
+                    </div>
+                </div>
+              </div>
+            </div>
+        </div>-->
+    </div>
+    <script src="/UNIVERSITY/YEAR_4_2/LUAN_VAN_TOT_NGHIEP/CANHOUSE/js/Common.js"></script>
+</body>
+</html>

@@ -1,0 +1,34 @@
+{
+  "name": "schedule",
+  "base": "PersistedModel",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "properties": {
+    "teacher": {
+      "type": "number",
+      "required": true
+    },
+    "subject": {
+      "type": "number",
+      "required": true
+    },
+    "dayOfWeek": {
+      "type": "number",
+      "required": true
+    },
+    "dateStart": {
+      "type": "date",
+      "required": true
+    },
+    "dateEnd": {
+      "type": "date",
+      "required": true
+    }
+  },
+  "validations": [],
+  "relations": {},
+  "acls": [],
+  "methods": {}
+}

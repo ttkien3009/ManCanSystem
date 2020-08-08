@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <title>Thêm ứng sinh - Quản lý nhà ứng sinh Dòng Tên Việt Nam</title>
+  <link rel="shortcut icon" type="image/ico" href="/UNIVERSITY/YEAR_4_2/LUAN_VAN_TOT_NGHIEP/Images/favicon.ico" />
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+    integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+  <link href="/UNIVERSITY/YEAR_4_2/LUAN_VAN_TOT_NGHIEP/fontawesome-free-5.12.1-web/css/all.css" rel="stylesheet">
+  <link rel="stylesheet" type="text/css" href="/UNIVERSITY/YEAR_4_2/LUAN_VAN_TOT_NGHIEP/CANHOUSE/css/Home.css">
+  <link rel="stylesheet" type="text/css" href="/UNIVERSITY/YEAR_4_2/LUAN_VAN_TOT_NGHIEP/CANHOUSE/css/styles.css">
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
+
+  <script src="https://cdn.jsdelivr.net/npm/axios@0.12.0/dist/axios.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lodash@4.13.1/lodash.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vue@2.6.11"></script>
+
+</head>
+
+<body>
+  <div class="container-fluid bg-light rounded" id="useForCandidateForm">
+    <my-website-header></my-website-header>
+    <div class="row">
+      <my-website-menu></my-website-menu>
+      <div class="col-lg-10">
+        <div class="row">
+          <div class="col-lg-12 bg-brown-yellow text-center h-55px text-white">
+            <p class="mb--15px">&nbsp;&nbsp;</p>
+            <span class="font-27px">Thêm Ứng Sinh</span>
+          </div>
+        </div>
+        <div class="row mt-3 ml-5 mr-5" style="height: 465px;">
+          <div class="col-lg-12">
+            <form action="GET" method="" autocomplete="off">
+              <fieldset class="scheduler-border mt-2">
+                <legend class="scheduler-border font-weight-bold text-size-15px">Thông tin ứng sinh</legend>
+                <div class="row mt-2">
+                  <div class="col-lg-2 mt-1">
+                    <label class="text-size-15px">Tên chính:</label>
+                  </div>
+                  <div class="col-lg-4">
+                    <input type="text" id="firstName" name="firstName" v-model="firstName" :title="titleFirstName"
+                      class="form-control rounded-0 text-size-13px ml--30px" placeholder="Nhập Tên chính...">
+                    <div class="row ml--45px">
+                      <div class="col-12">
+                        <span v-if="!firstNameIsValid" class="text-danger text-size-13px">Yêu cầu nhập thông tin tên
+                          chính</span>
+                        <span>&nbsp;</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-lg-2 mt-1">
+                    <label class="text-size-15px">Họ và Tên đệm:</label>
+                  </div>
+                  <div class="col-lg-4">
+                    <input type="text" id="lastName" name="lastName" v-model="lastName" :title="titleLastName"
+                      class="form-control rounded-0 text-size-13px ml--30px" placeholder="Nhập Họ và Tên đệm...">
+                    <div class="row ml--45px">
+                      <div class="col-12">
+                        <span v-if="!lastNameIsValid" class="text-danger text-size-13px">Yêu cầu nhập thông tin họ và
+                          tên đệm</span>
+                        <span>&nbsp;</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="row mt-3">
+                  <div class="col-lg-2 mt-1 mb-8px">
+                    <label class="text-size-15px" for="">Tên Thánh:</label>
+                  </div>
+                  <div class="col-lg-4">
+                    <input type="text" :title="titleChristianName" name="christianName" id="christianName"
+                      v-model="christianName" class="form-control rounded-0 text-size-13px ml--30px"
+                      placeholder="Nhập Tên Thánh...">
+                    <div class="row ml--45px">
+                      <div class="col-12">
+                        <span v-if="!christianNameIsValid" class="text-danger text-size-13px">Yêu cầu nhập thông tin tên
+                          Thánh</span>
+                        <span>&nbsp;</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-lg-2 mt-1">
+                    <label class="text-size-15px">Cộng đoàn:</label>
+                  </div>
+                  <div class="col-lg-4">
+                    <select v-model="community" name="community" id="community"
+                      class="custom-select rounded-0 text-size-13px ml--30px h-33px">
+                      <option value="0" disabled selected>Chọn Cộng đoàn...</option>
+                      <option v-for="community in communities" v-key="community.id">{{ community.communityName }}
+                      </option>
+                    </select>
+                    <div class="row ml--45px">
+                      <div class="col-12">
+                        <span v-if="!communityIsValid" class="text-danger text-size-13px">Yêu cầu chọn thông tin cộng
+                          đoàn</span>
+                        <span>&nbsp;</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="row mt-3">
+                  <div class="col-lg-2 mt-1">
+                    <label class="text-size-15px">Ngày sinh:</label>
+                  </div>
+                  <div class="col-lg-4">
+                    <input v-model="birthday" name="birthday" id="birthday" type="date" :title="titleBirthday"
+                      class="form-control rounded-0 text-size-13px ml--30px">
+                    <div class="row ml--45px">
+                      <div class="col-12">
+                        <span v-if="!birthdayIsValid" class="text-danger text-size-13px">Yêu cầu nhập thông tin ngày
+                          sinh</span>
+                        <span>&nbsp;</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-lg-2 mt-1">
+                    <label class="text-size-15px">Chức vụ:</label>
+                  </div>
+                  <div class="col-lg-4">
+                    <select v-model="position" name="position" id="position"
+                      class="custom-select rounded-0 text-size-13px ml--30px h-33px">
+                      <option value="0" disabled selected>Chọn Chức vụ...</option>
+                      <option v-for="pos in positions" v-key="pos.id">{{ pos.position }} - {{ pos.department }}</option>
+                    </select>
+                    <div class="row ml--45px">
+                      <div class="col-12">
+                        <span v-if="!positionIsValid" class="text-danger text-size-13px">Yêu cầu chọn thông tin chức
+                          vụ</span>
+                        <span>&nbsp;</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="row mt-3">
+                  <div class="col-lg-2 mt-1">
+                    <label class="text-size-15px">Số điện thoại:</label>
+                  </div>
+                  <div class="col-lg-4">
+                    <input v-model="phone" name="phone" id="phone" type="text" :title="titlePhone"
+                      class="form-control rounded-0 text-size-13px ml--30px" placeholder="Nhập Số điện thoại...">
+                    <div class="row ml--45px">
+                      <div class="col-12">
+                        <span v-if="!phoneIsValid" class="text-danger text-size-13px">Yêu cầu nhập thông tin số điện
+                          thoại</span>
+                        <span v-else-if="!checkFormatPhone" class="text-danger text-size-13px">Số điện thoại không đúng
+                          định dạng</span>
+                        <span>&nbsp;</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-lg-2 mt-1">
+                    <label class="text-size-15px">Email:</label>
+                  </div>
+                  <div class="col-lg-4">
+                    <input v-model="email" name="email" id="email" type="text" :title="titleEmail"
+                      class="form-control rounded-0 text-size-13px ml--30px" placeholder="Nhập Địa chỉ email...">
+                    <div class="row ml--45px">
+                      <div class="col-12">
+                        <span v-if="!emailIsValid" class="text-danger text-size-13px">Yêu cầu nhập thông tin
+                          email</span>
+                        <span v-else-if="!checkFormatEmail" class="text-danger text-size-13px">Địa chỉ email không hợp
+                          lệ</span>
+                        <span>&nbsp;</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="row mt-3">
+                  <div class="col-lg-2 mt-1">
+                    <label class="text-size-15px">Quê quán:</label>
+                  </div>
+                  <div class="col-lg-4">
+                    <input v-model="homeland" name="homeland" id="homeland" type="text" :title="titleHomeland"
+                      class="form-control rounded-0 text-size-13px ml--30px" placeholder="Nhập Quê quán...">
+                    <div class="row ml--45px">
+                      <div class="col-12">
+                        <span v-if="!homelandIsValid" class="text-danger text-size-13px">Yêu cầu nhập thông tin quê
+                          quán</span>
+                        <span>&nbsp;</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-lg-2 mt-2">
+                    <label class="text-size-15px">Hình ảnh:</label>
+                  </div>
+                  <div class="col-lg-4">
+                    <div class="form-group">
+                      <input type="file" :title="titlePicture" class="form-control rounded-0 text-size-13px ml--30px" />
+                      <span asp-validation-for="HinhAnh" class="text-danger"></span>
+                    </div>
+                  </div>
+                </div>
+              </fieldset>
+              <div class="row mt--12px" style="margin-left: 155px;">
+                <div class="col-lg-8"></div>
+                <div class="col-lg-2">
+                  <button :disabled="!refreshFormCandidate" @click="clearInputFormCandidate"
+                    class="btn btn-primary rounded-0 ml-5 bg-brown-yellow btn-outline-dark align-middle text-dark text-size-15px btn-submit">
+                    <i class="fas fa-redo"></i>
+                    &nbsp;Làm mới
+                  </button>
+                </div>
+                <div class="col-lg-2">
+                  <button :disabled="!formCandidateIsValid"
+                    class="btn btn-primary btn-outline-dark rounded-0 ml-4 bg-brown-yellow align-middle text-dark text-size-15px btn-submit"
+                    type="submit">
+                    <i class="fas fa-plus"></i>
+                    &nbsp;Thêm
+                  </button>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+        <my-website-footer></my-website-footer>
+      </div>
+    </div>
+  </div>
+  <script src="/UNIVERSITY/YEAR_4_2/LUAN_VAN_TOT_NGHIEP/CANHOUSE/js/Common.js"></script>
+</body>
+
+</html>

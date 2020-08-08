@@ -1,0 +1,285 @@
+fieldset.scheduler-border {
+  border: 1px groove #ddd !important;
+  padding: 0 1.4em 1.4em 1.4em !important;
+  margin: 0 0 1.5em 0 !important;
+  -webkit-box-shadow: 0px 0px 0px 0px #000;
+  box-shadow: 0px 0px 0px 0px #000;
+}
+
+legend.scheduler-border {
+  width: auto;
+  padding: 0 3px;
+  border-bottom: none;
+}
+
+/*Candidate*/
+
+.text-size-15px {
+  font-size: 15px !important;
+}
+
+.text-size-13px {
+  font-size: 13px !important;
+}
+
+.ml--30px {
+  margin-left: -30px !important;
+}
+
+.mb-30px {
+  margin-bottom: 30px !important;
+}
+
+.mb-8px {
+  margin-bottom: 8px !important;
+}
+
+.h-33px {
+  height: 33px !important;
+}
+
+.h-32px {
+  height: 32px !important;
+}
+
+.mb-35px {
+  margin-bottom: 35px !important;
+}
+
+.mt--5px {
+  margin-top: -5px !important;
+}
+
+.text-color-main {
+  color: #cfb56a !important;
+}
+
+.text-size-small {
+  font-size: small !important;
+}
+
+.ml--10px {
+  margin-left: -10px !important;
+}
+
+.btn-none {
+  border: none !important;
+  background-color: white !important;
+}
+
+.btn-none:hover {
+  background-color: white !important;
+  border: none !important;
+}
+
+.btn-none:focus {
+  outline-style: none !important;
+}
+
+.mb-15px {
+  margin-bottom: 15px !important;
+}
+
+/* table tbody tr td {
+  vertical-align: middle !important;
+} */
+
+/* table thead tr th {
+  vertical-align: middle !important;
+} */
+
+.h-438px {
+  height: 443px !important;
+}
+
+.w-28px {
+  width: 28px !important;
+}
+
+.h-28px {
+  height: 28px !important;
+}
+
+.ml-5px {
+  margin-left: 5px !important;
+}
+
+.ml--20px {
+  margin-left: -20px !important;
+}
+
+.ml-35px {
+  margin-left: 35px !important;
+}
+
+.mt-3px {
+  margin-top: 3px !important;
+}
+
+.ml--3px {
+  margin-left: -3px !important;
+}
+
+.ml--2px {
+  margin-left: -2px !important;
+}
+
+.ml--1px {
+  margin-left: -1px !important;
+}
+
+.btn-bg-brown-yellow:hover {
+  background-color: #cfb56a !important;
+}
+
+.ml--13px {
+  margin-left: -13px !important;
+}
+
+.ml--40px {
+  margin-left: -40px !important;
+}
+
+.ml--43px {
+  margin-left: -43px !important;
+}
+
+.mr--27px {
+  margin-right: -27px !important;
+}
+
+.mr--80px {
+  margin-right: -80px !important;
+}
+
+.ml-140px {
+  margin-left: 140px !important;
+}
+
+.btn-add-none-hover:hover {
+  background-color: khaki !important;
+}
+
+.btn-outline-none:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+.btn-outline-none:active {
+  outline: none !important;
+  border: khaki !important;
+}
+
+.mt-2px {
+  margin-top: 2px !important;
+}
+
+.ml-20px {
+  margin-left: 20px !important;
+}
+
+.ml-85px {
+  margin-left: 85px !important;
+}
+
+.icon-896248 {
+  color: #896248 !important;
+}
+
+.txt-title-detail {
+  font-family: Arial, Helvetica, sans-serif !important;
+  font-size: 35px !important;
+  color: #69ac91 !important;
+  letter-spacing: 0.1em !important;
+  text-shadow: -1px -1px 1px #aaa476 !important;
+}
+
+.ml--70px {
+  margin-left: -70px !important;
+}
+
+.h-465px {
+  height: 465px !important;
+}
+
+.mt--12px {
+  margin-top: -12px !important;
+}
+
+.z-08 {
+  zoom: 0.8 !important;
+}
+
+.font-size-15px {
+  font-size: 15px !important;
+}
+
+/* Dashboard */
+.info-box {
+  box-shadow: 0 0 1px rgba(0, 0, 0, 0.125), 0 1px 3px rgba(0, 0, 0, 0.2);
+  border-radius: 0.25rem;
+  background: #fff;
+  display: -ms-flexbox;
+  display: flex;
+  margin-bottom: 1rem;
+  min-height: 80px;
+  padding: 0.5rem;
+  position: relative;
+  width: 100%;
+}
+
+.info-box-icon {
+  border-radius: 0.25rem;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -ms-flexbox;
+  display: flex;
+  font-size: 1.875rem;
+  -ms-flex-pack: center;
+  justify-content: center;
+  text-align: center;
+  width: 70px;
+}
+
+.elevation-1 {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24) !important;
+}
+
+.info-box-content {
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-direction: column;
+  flex-direction: column;
+  -ms-flex-pack: center;
+  justify-content: center;
+  line-height: 120%;
+  -ms-flex: 1;
+  flex: 1;
+  padding: 0 10px;
+}
+
+.info-box-text {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.info-box-number {
+  display: block;
+  margin-top: 0.25rem;
+  font-weight: 700;
+}
+
+.profile-user-img {
+  margin: 0 auto;
+  width: 150px;
+  height: 150px;
+  padding: 3px;
+  border: 3px solid #d2d6de;
+}
+
+.btn-hover-blue:hover{
+  background-color: #114c70 !important;
+}
+

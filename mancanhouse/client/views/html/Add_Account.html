@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <title>Thêm tài khoản - Quản lý nhà ứng sinh Dòng Tên Việt Nam</title>
+  <link rel="shortcut icon" type="image/ico" href="../images/favicon.ico" />
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+    integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+  <link href="/UNIVERSITY/YEAR_4_2/LUAN_VAN_TOT_NGHIEP/fontawesome-free-5.12.1-web/css/all.css" rel="stylesheet">
+  <link rel="stylesheet" type="text/css" href="../css/Home.css">
+  <link rel="stylesheet" type="text/css" href="../css/styles.css">
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
+
+  <script src="https://cdn.jsdelivr.net/npm/axios@0.12.0/dist/axios.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lodash@4.13.1/lodash.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vue@2.6.11"></script>
+</head>
+
+<body>
+  <div class="container-fluid bg-light rounded" id="useForAccountForm">
+    <my-website-header></my-website-header>
+    <div class="row">
+      <my-website-menu></my-website-menu>
+      <div class="col-lg-10">
+        <div class="row">
+          <div class="col-lg-12 text-center h-55px text-white" style="background-color:#056299;">
+            <p class="mb--15px">&nbsp;&nbsp;</p>
+            <span class="font-27px">Thêm Tài khoản</span>
+          </div>
+        </div>
+        <div class="row mt-3 ml-1 mr-1" style="height: 465px;">
+          <div class="col-lg-12">
+            <form @submit.prevent="submitAddAccountForm" action="GET" method="" autocomplete="off">
+              <!--autocomplete: if it is 'on', it save the information filled in the input at previous the times and it will propose that information for the next times. If it is 'off', it is opposite-->
+              <div class="row mt-2">
+                <div class="col-lg-4">
+                  <label class="font-weight-bold">Thông Tin Tài Khoản:</label>
+                  <p style="font-size: 15px;">Thông tin phục vụ cho việc quản lý nhiều Tài Khoản</p>
+                </div>
+                <div class="col-lg-4">
+                  <label class="text-size-15px font-weight-bold col-form-label" for="username">Tài Khoản</label>
+                  <label class="text-danger">*</label>
+                  <input type="text" v-bind:title="titleUsername" name="username" id="username" v-model="username"
+                    class="form-control rounded-0 text-size-13px " placeholder="Nhập Tài khoản..."
+                    style="margin-top: -5px;">
+                </div>
+                <div class="col-lg-4">
+                  <label class="text-size-15px font-weight-bold col-form-label" for="password">Mật Khẩu</label>
+                  <label class="text-danger">*</label>
+                  <input v-bind:title="titlePassword" v-model="password" id="password" name="password" type="password"
+                    class="form-control rounded-0 text-size-13px " placeholder="Nhập Mật khẩu..."
+                    style="margin-top: -5px;">
+                  <span v-if="passwordEnoughLength" class="text-danger text-size-13px">Mật khẩu phải trên 9
+                    ký tự</span>
+                  <span v-else-if="passwordStrong" class="text-success text-size-13px">Mật khẩu mạnh</span>
+                  <span v-else-if="passwordMiddle" class="text-warning text-size-13px">Mật khẩu trung bình</span>
+                  <span v-else-if="passwordWeak" class="text-danger text-size-13px">Mật khẩu yếu</span>
+                </div>
+              </div>
+              <div class="row mt-1">
+                <div class="col-lg-4"></div>
+                <div class="col-lg-4">
+                  <label class="text-size-15px font-weight-bold col-form-label" for="role">Phân Quyền</label>
+                  <label class="text-danger">*</label>
+                  <select class="custom-select rounded-0 text-size-13px  h-32px" v-model="role" id="role" name="role"
+                    style="margin-top: -5px;">
+                    <option value="0" disabled selected>--- Chọn Phân quyền ---</option>
+                    <option v-for="role in roles" v-key="role.id">{{ role.name }}</option>
+                  </select>
+                </div>
+                <div class="col-lg-4">
+                  <label class="text-size-15px font-weight-bold col-form-label" for="status">Tình Trạng</label>
+                  <label class="text-danger">*</label>
+                  <select class="custom-select rounded-0 text-size-13px h-32px form-control" v-model="status" name="status"
+                    id="status" style="margin-top: -5px;">
+                    <option value="0" disabled selected>--- Chọn Tình trạng ---</option>
+                    <option v-for="status in statuses" v-key="status.id">{{ status.name }}</option>
+                  </select>
+                </div>
+              </div>
+              <div class="row" style="margin-top: 30px;">
+                <div class="col-12">
+                  <div style="float:right">
+                    <button :disabled="!addAccountFormIsValid" type="submit" class="btn text-size-15px"
+                      style="background-color: #056299;color: white;">
+                      <i class="far fa-save fa-lg"></i>
+                      &nbsp;Lưu
+                    </button>
+                  </div>
+                  <div style="float:right; margin-right: 10px;">
+                    <button :disabled="!refreshForm" @click="clearInput" class="btn btn-success text-size-15px">
+                      <i class="fas fa-sync-alt"></i>
+                      &nbsp;Làm mới
+                    </button>
+                  </div>
+                  <div style="float:right; margin-right: 400px;">
+                    <button class="btn text-size-15px" style="background-color: #056299;color: white;">
+                      <i class="fas fa-fast-backward"></i>
+                      &nbsp;Quay lại
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+        <my-website-footer></my-website-footer>
+      </div>
+    </div>
+  </div>
+  <script src="/UNIVERSITY/YEAR_4_2/LUAN_VAN_TOT_NGHIEP/CANHOUSE/js/Common.js"></script>
+</body>
+
+</html>

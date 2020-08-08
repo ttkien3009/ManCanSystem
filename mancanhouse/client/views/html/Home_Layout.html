@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Trang Chủ - Quản lý nhà ứng sinh Dòng Tên Việt Nam</title>
+<link rel="shortcut icon" type="image/ico" href="/UNIVERSITY/YEAR_4_2/LUAN_VAN_TOT_NGHIEP/Images/favicon.ico"/>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+<link href="/UNIVERSITY/YEAR_4_2/LUAN_VAN_TOT_NGHIEP/fontawesome-free-5.12.1-web/css/all.css" rel="stylesheet">
+<link rel="stylesheet" type="text/css" href="/UNIVERSITY/YEAR_4_2/LUAN_VAN_TOT_NGHIEP/CANHOUSE/css/Home.css">
+<link rel="stylesheet" type="text/css" href="/UNIVERSITY/YEAR_4_2/LUAN_VAN_TOT_NGHIEP/CANHOUSE/css/styles.css">
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/axios@0.12.0/dist/axios.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lodash@4.13.1/lodash.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/vue@2.6.11"></script>
+</head>
+<body>
+    <div class="container-fluid bg-light rounded" id="layout">
+        <my-website-header></my-website-header>
+        <div class="row">
+            <my-website-menu></my-website-menu>
+            <div class="col-lg-10">
+                <div class="row">
+                    <div class="col-lg-12 bg-brown-yellow text-center h-55px text-white">
+                        <p class="mb--15px">&nbsp;&nbsp;</p>
+                        <span class="font-27px">Danh sách Ứng sinh</span>
+                    </div>
+                </div>
+                <div class="row mt-4 ml-1 mr-1 text-size-13px h-438px">
+                    <div class="table-responsive-sm">
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr class="text-center">
+                                    <th scope="col">#</th>
+                                    <th scope="col">Mã Ứng sinh</th>
+                                    <th scope="col">Tên Thánh</th>
+                                    <th scope="col">Họ và Tên đệm</th>
+                                    <th scope="col">Tên chính</th>
+                                    <th scope="col" >Ngày sinh</th>
+                                    <th scope="col" >Số điện thoại</th>
+                                    <th scope="col" >Email</th>
+                                    <th scope="col" >Chức vụ</th>
+                                    <th scope="col" >Cộng đoàn</th>
+                                    <th scope="col" >Giáo phận</th>
+                                    <th scope="col" >Action</th>
+                                </tr>
+                            </thead>
+                            <tbody class="text-center">
+                                <tr>
+                                    <th scope="row" >1</th>
+                                    <td>UC001</td>
+                                    <td>Peter</td>
+                                    <td>Hà Quốc</td>
+                                    <td>Bảo</td>
+                                    <td>20/10/1997</td>
+                                    <td>0978234764</td>
+                                    <td>haquocbao@gmail.com</td>
+                                    <td>Số 1</td>
+                                    <td>Anrew Phú Yên</td>
+                                    <td>Đắk Nông</td>
+                                    <td>
+                                        <div class="row">
+                                            <div class="col-lg-6">
+                                                <button class="btn btn-primary btn-sm align-middle h-28px w-28px ml-5px"  data-toggle="modal" data-target="#detailCandidateModal">
+                                                    <i class="far fa-eye fa-md ml--3px"></i>
+                                                </button>
+                                            </div>
+                                            <div class="col-lg-6">
+                                                <button class="btn btn-warning btn-sm h-28px w-28px ml--20px" type="submit">
+                                                    <i class="fas fa-edit fa-md ml--2px"></i>
+                                                </button>
+                                            </div>  
+                                            <div class="row">
+                                                <div class="col-lg-12">
+                                                    <button class="btn btn-danger btn-sm h-28px w-28px ml-35px mt-3px" data-toggle="modal" data-target="#deleteCandidateModal">
+                                                        <i class="far fa-trash-alt fa-md ml--1px"></i>
+                                                    </button>
+                                                </div>
+                                            </div>                                          
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th scope="row" >2</th>
+                                    <td >UC002</td>
+                                    <td >Joseph</td>
+                                    <td >Trần Trung</td>
+                                    <td >Kiên</td>
+                                    <td >20/10/1999</td>
+                                    <td >0978534764</td>
+                                    <td >trantrungkien@gmail.com</td>
+                                    <td >Ban Tông đồ</td>
+                                    <td >Anrew Phú Yên</td>
+                                    <td >Ninh Bình</td>
+                                    <td>
+                                        <div class="row">
+                                            <div class="col-lg-6">
+                                                <button class="btn btn-primary btn-sm align-middle h-28px w-28px ml-5px" type="submit">
+                                                    <i class="far fa-eye fa-md ml--3px"></i>
+                                                </button>
+                                            </div>
+                                            <div class="col-lg-6">
+                                                <button class="btn btn-warning btn-sm h-28px w-28px ml--20px" type="submit">
+                                                    <i class="fas fa-edit fa-md ml--2px"></i>
+                                                </button>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-lg-12">
+                                                    <button class="btn btn-danger btn-sm h-28px w-28px ml-35px mt-3px" type="submit">
+                                                        <i class="far fa-trash-alt fa-md ml--1px"></i>
+                                                    </button>
+                                                </div>
+                                            </div>                                          
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">3</th>
+                                    <td>UC003</td>
+                                    <td>John Baptist</td>
+                                    <td>Phan Văn</td>
+                                    <td>Hoàng</td>
+                                    <td>20/10/1997</td>
+                                    <td>0976234764</td>
+                                    <td>phanvanhoang@gmail.com</td>
+                                    <td>Ứng sinh</td>
+                                    <td>Anrew Phú Yên</td>
+                                    <td>Nghệ An</td>
+                                    <td>
+                                        <div class="row">
+                                            <div class="col-lg-6">
+                                                <button class="btn btn-primary btn-sm align-middle h-28px w-28px ml-5px" type="submit">
+                                                    <i class="far fa-eye fa-md ml--3px"></i>
+                                                </button>
+                                            </div>
+                                            <div class="col-lg-6">
+                                                <button class="btn btn-warning btn-sm h-28px w-28px ml--20px" type="submit">
+                                                    <i class="fas fa-edit fa-md ml--2px"></i>
+                                                </button>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-lg-12">
+                                                    <button class="btn btn-danger btn-sm h-28px w-28px ml-35px mt-3px" type="submit">
+                                                        <i class="far fa-trash-alt fa-md ml--1px"></i>
+                                                    </button>
+                                                </div>
+                                            </div>                                          
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">3</th>
+                                    <td>UC004</td>
+                                    <td>John Bosco</td>
+                                    <td>Lê Hoàng Quốc</td>
+                                    <td>Anh</td>
+                                    <td>20/10/1998</td>
+                                    <td>0976234364</td>
+                                    <td>lehoangquocanh@gmail.com</td>
+                                    <td>Ứng sinh</td>
+                                    <td>Anrew Phú Yên</td>
+                                    <td>Buôn Mê Thuật</td>
+                                    <td>
+                                        <div class="row">
+                                            <div class="col-lg-6">
+                                                <button class="btn btn-primary btn-sm align-middle h-28px w-28px ml-5px" type="submit">
+                                                    <i class="far fa-eye fa-md ml--3px"></i>
+                                                </button>
+                                            </div>
+                                            <div class="col-lg-6">
+                                                <button class="btn btn-warning btn-sm h-28px w-28px ml--20px" type="submit">
+                                                    <i class="fas fa-edit fa-md ml--2px"></i>
+                                                </button>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-lg-12">
+                                                    <button class="btn btn-danger btn-sm h-28px w-28px ml-35px mt-3px" type="submit">
+                                                        <i class="far fa-trash-alt fa-md ml--1px"></i>
+                                                    </button>
+                                                </div>
+                                            </div>                                          
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <my-website-footer style="padding-bottom: 3px;"></my-website-footer>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="deleteCandidateModal" tabindex="-1" role="dialog" aria-labelledby="deleteCandidateModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="deleteCandidateModalLabel">Xóa Ứng Sinh</h5>
+              <button type="button" class="close btn-none"  data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              Bạn có đồng ý xóa ứng sinh <b>Hà Quốc Bảo</b>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-primary rounded-0 bg-brown-yellow btn-outline-dark align-middle text-dark text-size-15px btn-bg-brown-yellow" data-dismiss="modal">
+                <i class="fas fa-times"></i>&nbsp;Hủy
+            </button>
+              <button type="button" class="btn btn-primary rounded-0 bg-brown-yellow btn-outline-dark align-middle text-dark text-size-15px btn-bg-brown-yellow">
+                <i class="fas fa-check"></i>&nbsp;Đồng ý
+                </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="modal fade" id="detailCandidateModal" tabindex="-1" role="dialog" aria-labelledby="detailCandidateModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="detailCandidateModalLabel">Chi tiết Ứng sinh <b>Hà Quốc Bảo</b></h5>
+              <button type="button" class="close btn-none"  data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              <div class="row mt-4 ml-5 mr-5">
+                  <div class="col-lg-12">
+                      <form action="GET" method="">
+                          <div class="row">
+                            <div class="col-lg-2">
+                              <label class="text-size-15px">Tên chính:</label>
+                            </div>
+                            <div class="col-lg-2">
+                              <label class="text-size-15px">Bảo</label>
+                            </div>
+                            <div class="col-lg-2">
+                              <label class="text-size-15px">Họ và Tên đệm:</label>
+                            </div>
+                            <div class="col-lg-2">
+                              <label class="text-size-15px">Hà Quốc</label>
+                            </div>
+                          </div>  
+                          <div class="row">
+                            <div class="col-lg-2">
+                              <label class="text-size-15px">Tên Thánh:</label>
+                            </div>
+                            <div class="col-lg-2">
+                              <label class="text-size-15px">Peter</label>
+                            </div>
+                            <div class="col-lg-2">
+                              <label class="text-size-15px">Cộng đoàn:</label>
+                            </div>
+                            <div class="col-lg-2">
+                              <label class="text-size-15px">Anrew Phú Yên</label>
+                            </div>
+                          </div>
+                          <div class="row">
+                            <div class="col-lg-2">
+                              <label class="text-size-15px">Ngày sinh:</label>
+                            </div>
+                            <div class="col-lg-2">
+                              <label class="text-size-15px">20/10/1997</label>
+                            </div>
+                            <div class="col-lg-2">
+                              <label class="text-size-15px">Chức vụ:</label>
+                            </div>
+                            <div class="col-lg-2">
+                              <label class="text-size-15px">Số 1</label>
+                            </div>
+                          </div>
+                          <div class="row">
+                            <div class="col-lg-2">
+                              <label class="text-size-15px">Số điện thoại:</label>
+                            </div>
+                            <div class="col-lg-2">
+                              <label class="text-size-15px">0978234764</label>
+                            </div>
+                            <div class="col-lg-2">
+                              <label class="text-size-15px">Email:</label>
+                            </div>
+                            <div class="col-lg-2">
+                              <label class="text-size-15px">haquocbao@gmail.com</label>
+                            </div>
+                          </div>  
+                          <div class="row">
+                            <div class="col-lg-2">
+                              <label class="text-size-15px">Giáo phận:</label>
+                            </div>
+                            <div class="col-lg-2">
+                              <label class="text-size-15px">Buôn Mê Thuột</label>
+                            </div>
+                            <div class="col-lg-2">
+                              <label class="text-size-15px">Hình ảnh:</label>
+                            </div>
+                            <div class="col-lg-2">
+                              <label class="text-size-15px">haquocbao.png</label>
+                            </div>
+                          </div>
+                      </form>
+                  </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <script src="/UNIVERSITY/YEAR_4_2/LUAN_VAN_TOT_NGHIEP/CANHOUSE/js/Layout.js"></script>
+</body>
+</html>

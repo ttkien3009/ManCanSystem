@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Danh sách Giáo viên - Quản lý nhà ứng sinh Dòng Tên Việt Nam</title>
+<link rel="shortcut icon" type="image/ico" href="/UNIVERSITY/YEAR_4_2/LUAN_VAN_TOT_NGHIEP/Images/favicon.ico"/>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+<link href="/UNIVERSITY/YEAR_4_2/LUAN_VAN_TOT_NGHIEP/fontawesome-free-5.12.1-web/css/all.css" rel="stylesheet">
+<link rel="stylesheet" type="text/css" href="/UNIVERSITY/YEAR_4_2/LUAN_VAN_TOT_NGHIEP/CANHOUSE/css/Home.css">
+<link rel="stylesheet" type="text/css" href="/UNIVERSITY/YEAR_4_2/LUAN_VAN_TOT_NGHIEP/CANHOUSE/css/styles.css">
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/axios@0.12.0/dist/axios.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lodash@4.13.1/lodash.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/vue@2.6.11"></script>
+</head>
+<body>
+    <div class="container-fluid bg-light rounded" id="useForCandidateForm">
+        <my-website-header></my-website-header>
+        <div class="row">
+            <my-website-menu></my-website-menu>
+            <div class="col-lg-10">
+                <div class="row">
+                    <div class="col-lg-10 bg-brown-yellow text-center h-55px text-white">
+                        <p class="mb--15px">&nbsp;&nbsp;</p>
+                        <span class="font-27px ml-140px">Danh sách Giáo viên</span>
+                    </div>
+                    <div class="col-lg-2 bg-brown-yellow h-55px">
+                        <button v-bind:title="titleButtonAddTeacher"  class="btn btn-sm btn-outline-none bg-brown-yellow mt-2px" style="margin-left: 100px;" type="button">
+                            <a href="Add_Teacher.html">
+                                <i class="fas fa-plus-circle fa-3x icon-white"></i>
+                            </a>
+                        </button>
+                    </div>
+                </div>
+                <div class="row mt-3 text-size-13px" style="margin-left: 0.1px; margin-right: 0.1px;height: 465px;">
+                    <div class="table-responsive-sm">
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr class="text-center">
+                                    <th scope="col">#</th>
+                                    <th scope="col">Mã Giáo viên</th>
+                                    <th scope="col">Họ và Tên đệm</th>
+                                    <th scope="col">Tên chính</th>
+                                    <th scope="col">Giới tính</th>
+                                    <th scope="col">Ngày sinh</th>
+                                    <th scope="col">SĐT</th>
+                                    <th scope="col">Email</th>
+                                    <th scope="col">Bộ môn</th>
+                                    <th scope="col">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody class="text-center">
+                                <tr v-for="teacher in paginatedDataTeacher"
+                                    :key="teacher.id">
+                                    <th class="align-middle" scope="row">{{ teacher.id }}</th>
+                                    <td>{{ teacher.teacherID }}</td>
+                                    <td>{{ teacher.lastName }}</td>
+                                    <td>{{ teacher.firstName }}</td>
+                                    <td>{{ teacher.gender }}</td>
+                                    <td>{{ teacher.birthday }}</td>
+                                    <td>{{ teacher.phone }}</td>
+                                    <td>{{ teacher.email }}</td>
+                                    <td>{{ teacher.subject }}</td>
+                                    
+                                    <td>
+                                      <div class="row mr--27px">
+                                          <div class="col-lg-4">
+                                              <button :title="titleButtonDisplay" data-toggle="modal" @click="getDetailTeacher(teacher)" data-target="#detailTeacherModal" class="btn btn-primary btn-sm align-middle h-28px w-28px" type="submit">
+                                                  <i class="far fa-eye fa-md ml--3px"></i>
+                                              </button>
+                                          </div>
+                                          <div class="col-lg-4">
+                                              <button :title="titleButtonEdit"  class="btn btn-warning btn-sm h-28px w-28px ml--13px" type="submit">
+                                                  <i class="fas fa-edit fa-md ml--2px"></i>
+                                              </button>
+                                          </div>
+                                          <div class="col-lg-4">
+                                              <button :title="titleButtonDelete" data-toggle="modal" @click="getDetailTeacher(teacher)" data-target="#deleteTeacherModal" class="btn btn-danger btn-sm h-28px w-28px ml--40px">
+                                                  <i class="far fa-trash-alt fa-md ml--1px"></i>
+                                              </button>
+                                          </div>
+                                      </div>
+                                  </td>
+                                </tr>
+                               <tr class="z-08 font-size-15px">
+                                   <td colspan="12">
+                                        <button  :disabled="!pagePrevTeacherActive" @click="pagePrev" class="btn btn-sm h-28px w-28px ml--40px" style="margin-right: 100px;">
+                                            <i class="fas fa-backward"></i>
+                                        </button>
+                                        <span style="margin-right: 100px;margin-left: -50px;">{{ currentPage + 1 }} / {{ countPageTeacher }}</span>
+                                        <button  :disabled="!pageNextTeacherActive" @click="pageNext" class="btn  btn-sm h-28px w-28px ml--40px">
+                                            <i class="fas fa-forward"></i>
+                                        </button>
+                                   </td>
+                               </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <my-website-footer></my-website-footer>
+            </div>
+        </div>
+        <div class="modal fade" id="deleteTeacherModal" tabindex="-1" role="dialog" aria-labelledby="deleteTeacherModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document" style="width: 430px;">
+                <form class="modal-content" action="" style="background-color: #f4eecc;">
+                    <div class="container">
+                        <div class="row" style="margin-top: 20px;">
+                            <div class="col-lg-12 text-center">
+                                <div class="row">
+                                    <div class="col-lg-9 font-italic" style="font-size: 18px;color: #cfc89d;margin-left: -20px;">
+                                        Candidate House Management
+                                    </div>
+                                </div>
+                                <div class="row bg-white txt-title-detail">
+                                    <div class="col-lg-12 text-center">
+                                        <h3 class="mt-2">Xóa Giáo viên</h3>
+                                    </div>
+                                </div>
+                                <div class="row mt-3">
+                                    <div class="col-lg-12 icon-896248">
+                                        <p style="font-size: 18px;">Bạn có chắc chắn muốn xóa Giáo viên {{ teacherID }}?</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mt-3" style="margin-bottom: 20px;">
+                            <div class="col-lg-1">&nbsp;</div>
+                            <div class="col-lg-5"> 
+                                <button type="button" class="btn btn-light rounded-0  align-middle text-dark text-size-15px" data-dismiss="modal" style="width: 150px;">
+                                    <i class="fas fa-times"></i>&nbsp;Hủy
+                                </button>
+                            </div>
+                            <div class="col-lg-5"> 
+                                <button type="button" class="btn btn-danger rounded-0  align-middle text-white text-size-15px" style="width: 150px;">
+                                    <i class="fas fa-check"></i>&nbsp;Đồng ý
+                                </button>
+                            </div>
+                            <div class="col-lg-1">&nbsp;</div> 
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div class="modal fade" id="detailTeacherModal" tabindex="-1" role="dialog" aria-labelledby="detailTeacherModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document" style="width: 500px;">
+              <div class="modal-content">
+                <div class="modal-body rounded bg-white">
+                    <div class="row">
+                        <div class="col-lg-9 font-italic" style="font-size: 18px;color: #cfc89d;">
+                            Candidate House Management
+                        </div>
+                    </div>
+                    <div class="row" style="background-color: #f4eecc;">
+                        <div class="col-lg-4">
+                            <div class="row mt-3 mb-1">
+                                <div class="col-lg-12 text-center">
+                                    <img class="rounded-circle " style="height: 100px;width: 110px;" alt="Image Info" src="/UNIVERSITY/YEAR_4_2/LUAN_VAN_TOT_NGHIEP/Images/kien.jpg" />
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-lg-12 text-center font-weight-bold" style="color: #aaa476;">
+                                    {{ teacherID }}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-8">
+                            <div class="row mt-4 mb-2" style="margin-left: -30px;">
+                                <div class="col-lg-12 font-weight-bold text-uppercase" style="font-size: 19px;color:#68c4a6;">
+                                    {{ christianName }} {{ lastName }} {{ firstName }}
+                                </div>
+                            </div>
+                            <div class="row mb-1">
+                              <div class="col-lg-3">
+                                <i class="fas fa-venus-mars fa-md icon-896248"></i>
+                              </div>
+                              <div class="col-lg-9 icon-896248" style="margin-left: -40px;">
+                                  <span>{{ gender}}</span>
+                              </div>
+                          </div>
+                            <div class="row mb-1">
+                                <div class="col-lg-3">
+                                    <i class="fas fa-birthday-cake fa-md icon-896248"></i>
+                                </div>
+                                <div class="col-lg-9 icon-896248" style="margin-left: -40px;">
+                                    <span>{{ birthday }}</span>
+                                </div>
+                            </div>
+                            <div class="row mb-1">
+                                <div class="col-lg-3">
+                                    <i class="fas fa-phone-alt fa-md icon-896248"></i>
+                                </div>
+                                <div class="col-lg-9 icon-896248" style="margin-left: -40px;">
+                                    <span>{{ phone }}</span>
+                                </div>
+                            </div>
+                            <div class="row mb-1">
+                                <div class="col-lg-3">
+                                    <i class="fas fa-envelope-open-text fa-md icon-896248"></i>
+                                </div>
+                                <div class="col-lg-9 icon-896248" style="margin-left: -40px;">
+                                    <span>{{ email }}</span>
+                                </div>
+                            </div>
+                            <div class="row mb-1">
+                              <div class="col-lg-3">
+                                <i class="fas fa-book fa-md icon-896248"></i>
+                              </div>
+                              <div class="col-lg-9 icon-896248" style="margin-left: -40px;">
+                                  <span>{{ subject }}</span>
+                              </div>
+                          </div>
+                        </div>
+                    </div>
+                    <div class="row text-right">
+                        <div class="col-lg-12">
+                            <a href="https://ungsinhdongten.net/">
+                                <p style="margin-top: 10px;font-style: italic;margin-bottom: -13px;font-size: 13px;color: black;">https://ungsinhdongten.net/</p>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+              </div>
+            </div>
+        </div>
+    </div>
+    <script src="/UNIVERSITY/YEAR_4_2/LUAN_VAN_TOT_NGHIEP/CANHOUSE/js/Common.js"></script>
+</body>
+</html>
