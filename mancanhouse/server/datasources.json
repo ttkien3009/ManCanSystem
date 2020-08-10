@@ -8,5 +8,12 @@
     "localStorage": "",
     "file": "database.json",
     "connector": "memory"
+  },
+  "assets": {
+    "name": "assets",
+    "connector": "loopback-component-storage",
+    "provider": "filesystem",
+    "root": "./assets",
+    "nameConflict": "makeUnique"
   }
 }

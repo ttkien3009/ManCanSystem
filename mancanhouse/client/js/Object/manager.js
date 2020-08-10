@@ -245,7 +245,7 @@ const AddManager = {
       birthday: null,
       phone: null,
       email: null,
-      file: null,
+      image: null,
       position: 0,
       homeland: null,
       titlePicture: "Chọn hình ảnh",
@@ -264,6 +264,7 @@ const AddManager = {
       ],
       positions: [],
       managers: [],
+      selectedFile: null,
     };
   },
   mounted() {
@@ -348,18 +349,26 @@ const AddManager = {
     },
   },
   methods: {
+    onFileSelected(event){
+      this.selectedFile = event.target.files[0];
+    },
     submitAddManagerForm() {
       if (this.addManagerFormIsValid) {
-        let lengthManagers = 0;
-        lengthManagers = this.managers.length;
-        if (lengthManagers > -1 && lengthManagers < 9) {
-          this.managerId = "MN00" + (lengthManagers + 1);
+        let lengthManagers = this.managers.length;
+        if ( lengthManagers == 0) {
+          this.managerId == 'MN001';
         }
-        if (lengthManagers > 8 && lengthManagers < 99) {
-          this.managerId = "MN0" + (lengthManagers + 1);
-        }
-        if (lengthManagers > 98 && lengthManagers < 999) {
-          this.managerId = "MN" + (lengthManagers + 1);
+        else {
+          let currentId = this.managers[lengthManagers - 1].id;
+          if (currentId > -1 && currentId < 9) {
+            this.managerId = "MN00" + (currentId + 1);
+          }
+          if (currentId > 8 && currentId < 99) {
+            this.managerId = "MN0" + (currentId + 1);
+          }
+          if (currentId > 98 && currentId < 999) {
+            this.managerId = "MN" + (currentId + 1);
+          }
         }
         axios
           .get(
@@ -385,7 +394,7 @@ const AddManager = {
                         alertify.success("Ok");
                       }
                     );
-                  } else if(crypt.getAge(this.birthday) < 28){
+                  } else if (crypt.getAge(this.birthday) < 28) {
                     alertify.alert(
                       "Thông báo",
                       "Tuổi của người quản lý nhỏ hơn 28!",
@@ -393,7 +402,7 @@ const AddManager = {
                         alertify.success("Ok");
                       }
                     );
-                  } else if(crypt.getAge(this.birthday) > 60){
+                  } else if (crypt.getAge(this.birthday) > 60) {
                     alertify.alert(
                       "Thông báo",
                       "Tuổi của người quản lý lớn hơn 60!",
@@ -402,6 +411,14 @@ const AddManager = {
                       }
                     );
                   } else {
+                    var fileName = null;
+                    const fd = new FormData();
+                    if(this.selectedFile != null) {
+                      fd.append("image", this.selectedFile, this.selectedFile.name);
+                      var start = this.selectedFile.name.lastIndexOf('.');
+                      var end = this.selectedFile.length;
+                      fileName = this.managerId + this.selectedFile.name.slice(start, end);
+                    }
                     const manager = {
                       managerId: this.managerId,
                       christianName: this.christianName,
@@ -409,7 +426,7 @@ const AddManager = {
                       birthday: this.birthday,
                       phone: this.phone,
                       email: this.email,
-                      file: this.file,
+                      image: fileName,
                       position: this.position,
                       homeland: this.homeland,
                       status: this.status,
@@ -442,17 +459,33 @@ const AddManager = {
                         ) {
                           role = 4;
                         }
-                        const account_manager = {
-                          userId: this.managerId,
-                          username: this.email,
-                          password: crypt.encrypt(this.phone),
-                          role: role,
-                          status: this.status,
-                        };
                         const url_1 = "http://localhost:3000/api/managers";
                         axios.post(url_1, manager);
-                        const url = "http://localhost:3000/api/accounts";
-                        axios.post(url, account_manager);
+                        
+                        axios
+                          .get(
+                            "http://localhost:3000/api/managers/findOne?filter[where][email]=" +
+                              this.email
+                          )
+                          .then((resp) => {
+                            const account_manager = {
+                              userId: resp.data.managerId,
+                              username: resp.data.email,
+                              password: crypt.encrypt(resp.data.phone),
+                              role: role,
+                              status: resp.data.status,
+                              idTable: resp.data.id,
+                            };
+                            const url = "http://localhost:3000/api/accounts";
+                            axios.post(url, account_manager);
+                            if(this.selectedFile != null){
+                              axios.post('http://localhost:3000/api/Photos/manager/upload?filename=' + fileName, fd)
+                                .then(res => {
+                                  console.log(res);
+                                })
+                                .catch(err => console.log(err));
+                            }
+                          });
                       });
                     setTimeout(() => {
                       this.$router.push("/managers");
@@ -591,9 +624,8 @@ const AddManager = {
         <div class="row mt-1">
           <div class="col-lg-4"></div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="file">Hình Ảnh</label>
-            <input type="file" id="file" v-model="file" name="file" ref="file" @change="handleFileUpload()"
-             :title="titlePicture" class="form-control rounded text-size-13px" style="margin-top: -5px;"/>
+            <label class="text-size-15px font-weight-bold col-form-label" for="image">Hình Ảnh</label>
+            <input type="file" id="image" @change="onFileSelected" :title="titlePicture" class="form-control rounded text-size-13px" style="margin-top: -5px;"/>
           </div>
         </div>
         <div class="row" style="margin-top: 30px;">
@@ -639,6 +671,7 @@ const EditManager = {
       phone: null,
       email: null,
       image: null,
+      imageEdit: null,
       position: 0,
       homeland: null,
       status: 0,
@@ -660,6 +693,7 @@ const EditManager = {
       positions: [],
       managers: [],
       manager: {},
+      selectedFile: null,
     };
   },
   mounted() {
@@ -679,12 +713,13 @@ const EditManager = {
         this.christianName = response.data.manager.christianName;
         this.fullName = response.data.manager.fullName;
         this.birthday = crypt.formatDate(response.data.manager.birthday);
-        this.position = response.data.manager.position;
-        this.homeland = response.data.manager.homeland;
         this.phone = response.data.manager.phone;
         this.phoneEdit = response.data.manager.phone;
         this.email = response.data.manager.email;
         this.emailEdit = response.data.manager.email;
+        this.imageEdit = response.data.manager.image;
+        this.position = response.data.manager.position;
+        this.homeland = response.data.manager.homeland;
         this.status = response.data.manager.status;
       });
   },
@@ -762,10 +797,13 @@ const EditManager = {
     },
   },
   methods: {
+    onFileSelected(event) {
+      this.selectedFile = event.target.files[0];
+    },
     submitEditManagerForm() {
       if (this.editManagerFormIsValid) {
         if (this.emailEdit == this.email && this.phoneEdit == this.phone) {
-          if(crypt.getAge(this.birthday) < 28){
+          if (crypt.getAge(this.birthday) < 28) {
             alertify.alert(
               "Thông báo",
               "Tuổi của người quản lý nhỏ hơn 28!",
@@ -773,7 +811,7 @@ const EditManager = {
                 alertify.success("Ok");
               }
             );
-          } else if(crypt.getAge(this.birthday) > 60){
+          } else if (crypt.getAge(this.birthday) > 60) {
             alertify.alert(
               "Thông báo",
               "Tuổi của người quản lý lớn hơn 60!",
@@ -782,21 +820,80 @@ const EditManager = {
               }
             );
           } else {
-            const manager = {
-              managerId: this.managerId,
-              christianName: this.christianName,
-              fullName: this.fullName,
-              birthday: this.birthday,
-              homeland: this.homeland,
-              position: this.position,
-              phone: this.phone,
-              email: this.email,
-              status: this.status,
-              id: this.$route.params.id,
-            };
-            const url =
-              "http://localhost:3000/api/managers/" + manager.id + "/replace";
-            axios.post(url, manager);
+            if (this.selectedFile != null) {
+              const fd = new FormData();
+              fd.append('image', this.selectedFile, this.selectedFile.name);
+              var start = this.selectedFile.name.lastIndexOf('.');
+              var end = this.selectedFile.length;
+              var fileName = this.managerId + this.selectedFile.name.slice(start, end);
+              if (this.imageEdit != null) {
+                const manager = {
+                  managerId: this.managerId,
+                  christianName: this.christianName,
+                  fullName: this.fullName,
+                  birthday: this.birthday,
+                  phone: this.phone,
+                  email: this.email,
+                  image: fileName,
+                  position: this.position,
+                  homeland: this.homeland,
+                  status: this.status,
+                  id: this.$route.params.id,
+                };
+                const url =
+                  "http://localhost:3000/api/managers/" + manager.id + "/replace";
+                axios.post(url, manager);
+                axios.delete("http://localhost:3000/api/Photos/manager/files/" + this.imageEdit)
+                  .then(resp => {
+                    console.log(resp);
+                  })
+                  .catch(err => console.log(err));
+                axios.post('http://localhost:3000/api/Photos/manager/upload?filename=' + fileName, fd)
+                  .then(res => {
+                    console.log(res);
+                  })
+                  .catch(err => console.log(err));
+              } else {
+                const manager = {
+                  managerId: this.managerId,
+                  christianName: this.christianName,
+                  fullName: this.fullName,
+                  birthday: this.birthday,
+                  phone: this.phone,
+                  email: this.email,
+                  image: fileName,
+                  position: this.position,
+                  homeland: this.homeland,
+                  status: this.status,
+                  id: this.$route.params.id,
+                };
+                const url =
+                  "http://localhost:3000/api/managers/" + manager.id + "/replace";
+                axios.post(url, manager);
+                axios.post("http://localhost:3000/api/Photos/manager/upload?filename=" + fileName, fd)
+                  .then(res => {
+                    console.log(res);
+                  })
+                  .catch(err => console.log(err));
+              }
+            } else {
+              const manager = {
+                managerId: this.managerId,
+                christianName: this.christianName,
+                fullName: this.fullName,
+                birthday: this.birthday,
+                phone: this.phone,
+                email: this.email,
+                image: this.imageEdit,
+                position: this.position,
+                homeland: this.homeland,
+                status: this.status,
+                id: this.$route.params.id,
+              };
+              const url =
+                "http://localhost:3000/api/managers/" + manager.id + "/replace";
+              axios.post(url, manager);
+            }
             this.$router.push("/managers");
             location.reload();
             return 0;
@@ -815,7 +912,7 @@ const EditManager = {
                 alertify.alert("Thông báo", "Email đã tồn tại!", function () {
                   alertify.success("Ok");
                 });
-              } else if(crypt.getAge(this.birthday) < 28){
+              } else if (crypt.getAge(this.birthday) < 28) {
                 alertify.alert(
                   "Thông báo",
                   "Tuổi của người quản lý nhỏ hơn 28!",
@@ -823,7 +920,7 @@ const EditManager = {
                     alertify.success("Ok");
                   }
                 );
-              } else if(crypt.getAge(this.birthday) > 60){
+              } else if (crypt.getAge(this.birthday) > 60) {
                 alertify.alert(
                   "Thông báo",
                   "Tuổi của người quản lý lớn hơn 60!",
@@ -832,23 +929,80 @@ const EditManager = {
                   }
                 );
               } else {
-                const manager = {
-                  managerId: this.managerId,
-                  christianName: this.christianName,
-                  fullName: this.fullName,
-                  birthday: this.birthday,
-                  homeland: this.homeland,
-                  position: this.position,
-                  phone: this.phone,
-                  email: this.email,
-                  status: this.status,
-                  id: this.$route.params.id,
-                };
-                const url =
-                  "http://localhost:3000/api/managers/" +
-                  manager.id +
-                  "/replace";
-                axios.post(url, manager);
+                if (this.selectedFile != null) {
+                  const fd = new FormData();
+                  fd.append('image', this.selectedFile, this.selectedFile.name);
+                  var start = this.selectedFile.name.lastIndexOf('.');
+                  var end = this.selectedFile.length;
+                  var fileName = this.managerId + this.selectedFile.name.slice(start, end);
+                  if (this.imageEdit != null) {
+                    const manager = {
+                      managerId: this.managerId,
+                      christianName: this.christianName,
+                      fullName: this.fullName,
+                      birthday: this.birthday,
+                      phone: this.phone,
+                      email: this.email,
+                      image: fileName,
+                      position: this.position,
+                      homeland: this.homeland,
+                      status: this.status,
+                      id: this.$route.params.id,
+                    };
+                    const url =
+                      "http://localhost:3000/api/managers/" + manager.id + "/replace";
+                    axios.post(url, manager);
+                    axios.delete("http://localhost:3000/api/Photos/manager/files/" + this.imageEdit)
+                      .then(resp => {
+                        console.log(resp);
+                      })
+                      .catch(err => console.log(err));
+                    axios.post('http://localhost:3000/api/Photos/manager/upload?filename=' + fileName, fd)
+                      .then(res => {
+                        console.log(res);
+                      })
+                      .catch(err => console.log(err));
+                  } else {
+                    const manager = {
+                      managerId: this.managerId,
+                      christianName: this.christianName,
+                      fullName: this.fullName,
+                      birthday: this.birthday,
+                      phone: this.phone,
+                      email: this.email,
+                      image: fileName,
+                      position: this.position,
+                      homeland: this.homeland,
+                      status: this.status,
+                      id: this.$route.params.id,
+                    };
+                    const url =
+                      "http://localhost:3000/api/managers/" + manager.id + "/replace";
+                    axios.post(url, manager);
+                    axios.post("http://localhost:3000/api/Photos/manager/upload?filename=" + fileName, fd)
+                      .then(res => {
+                        console.log(res);
+                      })
+                      .catch(err => console.log(err));
+                  }
+                } else {
+                  const manager = {
+                    managerId: this.managerId,
+                    christianName: this.christianName,
+                    fullName: this.fullName,
+                    birthday: this.birthday,
+                    phone: this.phone,
+                    email: this.email,
+                    image: this.imageEdit,
+                    position: this.position,
+                    homeland: this.homeland,
+                    status: this.status,
+                    id: this.$route.params.id,
+                  };
+                  const url =
+                    "http://localhost:3000/api/managers/" + manager.id + "/replace";
+                  axios.post(url, manager);
+                }
                 this.$router.push("/managers");
                 location.reload();
                 return 0;
@@ -872,7 +1026,7 @@ const EditManager = {
                     alertify.success("Ok");
                   }
                 );
-              } else if(crypt.getAge(this.birthday) < 28){
+              } else if (crypt.getAge(this.birthday) < 28) {
                 alertify.alert(
                   "Thông báo",
                   "Tuổi của người quản lý nhỏ hơn 28!",
@@ -880,7 +1034,7 @@ const EditManager = {
                     alertify.success("Ok");
                   }
                 );
-              } else if(crypt.getAge(this.birthday) > 60){
+              } else if (crypt.getAge(this.birthday) > 60) {
                 alertify.alert(
                   "Thông báo",
                   "Tuổi của người quản lý lớn hơn 60!",
@@ -889,23 +1043,80 @@ const EditManager = {
                   }
                 );
               } else {
-                const manager = {
-                  managerId: this.managerId,
-                  christianName: this.christianName,
-                  fullName: this.fullName,
-                  birthday: this.birthday,
-                  homeland: this.homeland,
-                  position: this.position,
-                  phone: this.phone,
-                  email: this.email,
-                  status: this.status,
-                  id: this.$route.params.id,
-                };
-                const url =
-                  "http://localhost:3000/api/managers/" +
-                  manager.id +
-                  "/replace";
-                axios.post(url, manager);
+                if (this.selectedFile != null) {
+                  const fd = new FormData();
+                  fd.append('image', this.selectedFile, this.selectedFile.name);
+                  var start = this.selectedFile.name.lastIndexOf('.');
+                  var end = this.selectedFile.length;
+                  var fileName = this.managerId + this.selectedFile.name.slice(start, end);
+                  if (this.imageEdit != null) {
+                    const manager = {
+                      managerId: this.managerId,
+                      christianName: this.christianName,
+                      fullName: this.fullName,
+                      birthday: this.birthday,
+                      phone: this.phone,
+                      email: this.email,
+                      image: fileName,
+                      position: this.position,
+                      homeland: this.homeland,
+                      status: this.status,
+                      id: this.$route.params.id,
+                    };
+                    const url =
+                      "http://localhost:3000/api/managers/" + manager.id + "/replace";
+                    axios.post(url, manager);
+                    axios.delete("http://localhost:3000/api/Photos/manager/files/" + this.imageEdit)
+                      .then(resp => {
+                        console.log(resp);
+                      })
+                      .catch(err => console.log(err));
+                    axios.post('http://localhost:3000/api/Photos/manager/upload?filename=' + fileName, fd)
+                      .then(res => {
+                        console.log(res);
+                      })
+                      .catch(err => console.log(err));
+                  } else {
+                    const manager = {
+                      managerId: this.managerId,
+                      christianName: this.christianName,
+                      fullName: this.fullName,
+                      birthday: this.birthday,
+                      phone: this.phone,
+                      email: this.email,
+                      image: fileName,
+                      position: this.position,
+                      homeland: this.homeland,
+                      status: this.status,
+                      id: this.$route.params.id,
+                    };
+                    const url =
+                      "http://localhost:3000/api/managers/" + manager.id + "/replace";
+                    axios.post(url, manager);
+                    axios.post("http://localhost:3000/api/Photos/manager/upload?filename=" + fileName, fd)
+                      .then(res => {
+                        console.log(res);
+                      })
+                      .catch(err => console.log(err));
+                  }
+                } else {
+                  const manager = {
+                    managerId: this.managerId,
+                    christianName: this.christianName,
+                    fullName: this.fullName,
+                    birthday: this.birthday,
+                    phone: this.phone,
+                    email: this.email,
+                    image: this.imageEdit,
+                    position: this.position,
+                    homeland: this.homeland,
+                    status: this.status,
+                    id: this.$route.params.id,
+                  };
+                  const url =
+                    "http://localhost:3000/api/managers/" + manager.id + "/replace";
+                  axios.post(url, manager);
+                }
                 this.$router.push("/managers");
                 location.reload();
                 return 0;
@@ -937,7 +1148,7 @@ const EditManager = {
                           alertify.success("Ok");
                         }
                       );
-                    } else if(crypt.getAge(this.birthday) < 28){
+                    } else if (crypt.getAge(this.birthday) < 28) {
                       alertify.alert(
                         "Thông báo",
                         "Tuổi của người quản lý nhỏ hơn 28!",
@@ -945,7 +1156,7 @@ const EditManager = {
                           alertify.success("Ok");
                         }
                       );
-                    } else if(crypt.getAge(this.birthday) > 60){
+                    } else if (crypt.getAge(this.birthday) > 60) {
                       alertify.alert(
                         "Thông báo",
                         "Tuổi của người quản lý lớn hơn 60!",
@@ -954,23 +1165,80 @@ const EditManager = {
                         }
                       );
                     } else {
-                      const manager = {
-                        managerId: this.managerId,
-                        christianName: this.christianName,
-                        fullName: this.fullName,
-                        birthday: this.birthday,
-                        homeland: this.homeland,
-                        position: this.position,
-                        phone: this.phone,
-                        email: this.email,
-                        status: this.status,
-                        id: this.$route.params.id,
-                      };
-                      const url =
-                        "http://localhost:3000/api/managers/" +
-                        manager.id +
-                        "/replace";
-                      axios.post(url, manager);
+                      if (this.selectedFile != null) {
+                        const fd = new FormData();
+                        fd.append('image', this.selectedFile, this.selectedFile.name);
+                        var start = this.selectedFile.name.lastIndexOf('.');
+                        var end = this.selectedFile.length;
+                        var fileName = this.managerId + this.selectedFile.name.slice(start, end);
+                        if (this.imageEdit != null) {
+                          const manager = {
+                            managerId: this.managerId,
+                            christianName: this.christianName,
+                            fullName: this.fullName,
+                            birthday: this.birthday,
+                            phone: this.phone,
+                            email: this.email,
+                            image: fileName,
+                            position: this.position,
+                            homeland: this.homeland,
+                            status: this.status,
+                            id: this.$route.params.id,
+                          };
+                          const url =
+                            "http://localhost:3000/api/managers/" + manager.id + "/replace";
+                          axios.post(url, manager);
+                          axios.delete("http://localhost:3000/api/Photos/manager/files/" + this.imageEdit)
+                            .then(resp => {
+                              console.log(resp);
+                            })
+                            .catch(err => console.log(err));
+                          axios.post('http://localhost:3000/api/Photos/manager/upload?filename=' + fileName, fd)
+                            .then(res => {
+                              console.log(res);
+                            })
+                            .catch(err => console.log(err));
+                        } else {
+                          const manager = {
+                            managerId: this.managerId,
+                            christianName: this.christianName,
+                            fullName: this.fullName,
+                            birthday: this.birthday,
+                            phone: this.phone,
+                            email: this.email,
+                            image: fileName,
+                            position: this.position,
+                            homeland: this.homeland,
+                            status: this.status,
+                            id: this.$route.params.id,
+                          };
+                          const url =
+                            "http://localhost:3000/api/managers/" + manager.id + "/replace";
+                          axios.post(url, manager);
+                          axios.post("http://localhost:3000/api/Photos/manager/upload?filename=" + fileName, fd)
+                            .then(res => {
+                              console.log(res);
+                            })
+                            .catch(err => console.log(err));
+                        }
+                      } else {
+                        const manager = {
+                          managerId: this.managerId,
+                          christianName: this.christianName,
+                          fullName: this.fullName,
+                          birthday: this.birthday,
+                          phone: this.phone,
+                          email: this.email,
+                          image: this.imageEdit,
+                          position: this.position,
+                          homeland: this.homeland,
+                          status: this.status,
+                          id: this.$route.params.id,
+                        };
+                        const url =
+                          "http://localhost:3000/api/managers/" + manager.id + "/replace";
+                        axios.post(url, manager);
+                      }
                       this.$router.push("/managers");
                       location.reload();
                       return 0;
@@ -1114,7 +1382,7 @@ const EditManager = {
           <div class="col-lg-4"></div>
           <div class="col-lg-4">
             <label class="text-size-15px font-weight-bold col-form-label" for="image">Hình Ảnh</label>
-            <input type="file" id="image" v-model="image" name="image" :title="titlePicture"
+            <input type="file" id="image" @change="onFileSelected" :title="titlePicture"
               class="form-control rounded text-size-13px" style="margin-top: -5px;" />
           </div>
         </div>

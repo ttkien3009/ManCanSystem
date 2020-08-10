@@ -198,7 +198,7 @@ Vue.component("page-header", {
           <router-link style="text-decoration: none; color: inherit;" :to="{ name: 'changePassword' }">
             <a class="nav-link" href="#"><i class="fas fa-key mr-3"></i> Đổi Mật Khẩu</a>
           </router-link>
-          <button class = "btn" @click="logout">
+          <button class="btn" style="background-color:white;margin-left:-10px;margin-top:-6px" @click="logout">
             <a class="nav-link" href="#"><i class="fas fa-sign-out-alt mr-3"></i> Đăng Xuất</a>
           </button>
         </div>
@@ -1474,7 +1474,7 @@ const AddManager = {
       birthday: null,
       phone: null,
       email: null,
-      file: null,
+      image: null,
       position: 0,
       homeland: null,
       titlePicture: "Chọn hình ảnh",
@@ -1493,6 +1493,7 @@ const AddManager = {
       ],
       positions: [],
       managers: [],
+      selectedFile: null,
     };
   },
   mounted() {
@@ -1577,18 +1578,26 @@ const AddManager = {
     },
   },
   methods: {
+    onFileSelected(event){
+      this.selectedFile = event.target.files[0];
+    },
     submitAddManagerForm() {
       if (this.addManagerFormIsValid) {
-        let lengthManagers = 0;
-        lengthManagers = this.managers.length;
-        if (lengthManagers > -1 && lengthManagers < 9) {
-          this.managerId = "MN00" + (lengthManagers + 1);
+        let lengthManagers = this.managers.length;
+        if ( lengthManagers == 0) {
+          this.managerId == 'MN001';
         }
-        if (lengthManagers > 8 && lengthManagers < 99) {
-          this.managerId = "MN0" + (lengthManagers + 1);
-        }
-        if (lengthManagers > 98 && lengthManagers < 999) {
-          this.managerId = "MN" + (lengthManagers + 1);
+        else {
+          let currentId = this.managers[lengthManagers - 1].id;
+          if (currentId > -1 && currentId < 9) {
+            this.managerId = "MN00" + (currentId + 1);
+          }
+          if (currentId > 8 && currentId < 99) {
+            this.managerId = "MN0" + (currentId + 1);
+          }
+          if (currentId > 98 && currentId < 999) {
+            this.managerId = "MN" + (currentId + 1);
+          }
         }
         axios
           .get(
@@ -1631,6 +1640,14 @@ const AddManager = {
                       }
                     );
                   } else {
+                    var fileName = null;
+                    const fd = new FormData();
+                    if(this.selectedFile != null) {
+                      fd.append("image", this.selectedFile, this.selectedFile.name);
+                      var start = this.selectedFile.name.lastIndexOf('.');
+                      var end = this.selectedFile.length;
+                      fileName = this.managerId + this.selectedFile.name.slice(start, end);
+                    }
                     const manager = {
                       managerId: this.managerId,
                       christianName: this.christianName,
@@ -1638,7 +1655,7 @@ const AddManager = {
                       birthday: this.birthday,
                       phone: this.phone,
                       email: this.email,
-                      file: this.file,
+                      image: fileName,
                       position: this.position,
                       homeland: this.homeland,
                       status: this.status,
@@ -1673,6 +1690,7 @@ const AddManager = {
                         }
                         const url_1 = "http://localhost:3000/api/managers";
                         axios.post(url_1, manager);
+                        
                         axios
                           .get(
                             "http://localhost:3000/api/managers/findOne?filter[where][email]=" +
@@ -1689,6 +1707,13 @@ const AddManager = {
                             };
                             const url = "http://localhost:3000/api/accounts";
                             axios.post(url, account_manager);
+                            if(this.selectedFile != null){
+                              axios.post('http://localhost:3000/api/Photos/manager/upload?filename=' + fileName, fd)
+                                .then(res => {
+                                  console.log(res);
+                                })
+                                .catch(err => console.log(err));
+                            }
                           });
                       });
                     setTimeout(() => {
@@ -1828,9 +1853,8 @@ const AddManager = {
         <div class="row mt-1">
           <div class="col-lg-4"></div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="file">Hình Ảnh</label>
-            <input type="file" id="file" v-model="file" name="file" ref="file" @change="handleFileUpload()"
-             :title="titlePicture" class="form-control rounded text-size-13px" style="margin-top: -5px;"/>
+            <label class="text-size-15px font-weight-bold col-form-label" for="image">Hình Ảnh</label>
+            <input type="file" id="image" @change="onFileSelected" :title="titlePicture" class="form-control rounded text-size-13px" style="margin-top: -5px;"/>
           </div>
         </div>
         <div class="row" style="margin-top: 30px;">
@@ -1876,6 +1900,7 @@ const EditManager = {
       phone: null,
       email: null,
       image: null,
+      imageEdit: null,
       position: 0,
       homeland: null,
       status: 0,
@@ -1897,6 +1922,7 @@ const EditManager = {
       positions: [],
       managers: [],
       manager: {},
+      selectedFile: null,
     };
   },
   mounted() {
@@ -1916,12 +1942,13 @@ const EditManager = {
         this.christianName = response.data.manager.christianName;
         this.fullName = response.data.manager.fullName;
         this.birthday = crypt.formatDate(response.data.manager.birthday);
-        this.position = response.data.manager.position;
-        this.homeland = response.data.manager.homeland;
         this.phone = response.data.manager.phone;
         this.phoneEdit = response.data.manager.phone;
         this.email = response.data.manager.email;
         this.emailEdit = response.data.manager.email;
+        this.imageEdit = response.data.manager.image;
+        this.position = response.data.manager.position;
+        this.homeland = response.data.manager.homeland;
         this.status = response.data.manager.status;
       });
   },
@@ -1999,6 +2026,9 @@ const EditManager = {
     },
   },
   methods: {
+    onFileSelected(event) {
+      this.selectedFile = event.target.files[0];
+    },
     submitEditManagerForm() {
       if (this.editManagerFormIsValid) {
         if (this.emailEdit == this.email && this.phoneEdit == this.phone) {
@@ -2019,21 +2049,80 @@ const EditManager = {
               }
             );
           } else {
-            const manager = {
-              managerId: this.managerId,
-              christianName: this.christianName,
-              fullName: this.fullName,
-              birthday: this.birthday,
-              homeland: this.homeland,
-              position: this.position,
-              phone: this.phone,
-              email: this.email,
-              status: this.status,
-              id: this.$route.params.id,
-            };
-            const url =
-              "http://localhost:3000/api/managers/" + manager.id + "/replace";
-            axios.post(url, manager);
+            if (this.selectedFile != null) {
+              const fd = new FormData();
+              fd.append('image', this.selectedFile, this.selectedFile.name);
+              var start = this.selectedFile.name.lastIndexOf('.');
+              var end = this.selectedFile.length;
+              var fileName = this.managerId + this.selectedFile.name.slice(start, end);
+              if (this.imageEdit != null) {
+                const manager = {
+                  managerId: this.managerId,
+                  christianName: this.christianName,
+                  fullName: this.fullName,
+                  birthday: this.birthday,
+                  phone: this.phone,
+                  email: this.email,
+                  image: fileName,
+                  position: this.position,
+                  homeland: this.homeland,
+                  status: this.status,
+                  id: this.$route.params.id,
+                };
+                const url =
+                  "http://localhost:3000/api/managers/" + manager.id + "/replace";
+                axios.post(url, manager);
+                axios.delete("http://localhost:3000/api/Photos/manager/files/" + this.imageEdit)
+                  .then(resp => {
+                    console.log(resp);
+                  })
+                  .catch(err => console.log(err));
+                axios.post('http://localhost:3000/api/Photos/manager/upload?filename=' + fileName, fd)
+                  .then(res => {
+                    console.log(res);
+                  })
+                  .catch(err => console.log(err));
+              } else {
+                const manager = {
+                  managerId: this.managerId,
+                  christianName: this.christianName,
+                  fullName: this.fullName,
+                  birthday: this.birthday,
+                  phone: this.phone,
+                  email: this.email,
+                  image: fileName,
+                  position: this.position,
+                  homeland: this.homeland,
+                  status: this.status,
+                  id: this.$route.params.id,
+                };
+                const url =
+                  "http://localhost:3000/api/managers/" + manager.id + "/replace";
+                axios.post(url, manager);
+                axios.post("http://localhost:3000/api/Photos/manager/upload?filename=" + fileName, fd)
+                  .then(res => {
+                    console.log(res);
+                  })
+                  .catch(err => console.log(err));
+              }
+            } else {
+              const manager = {
+                managerId: this.managerId,
+                christianName: this.christianName,
+                fullName: this.fullName,
+                birthday: this.birthday,
+                phone: this.phone,
+                email: this.email,
+                image: this.imageEdit,
+                position: this.position,
+                homeland: this.homeland,
+                status: this.status,
+                id: this.$route.params.id,
+              };
+              const url =
+                "http://localhost:3000/api/managers/" + manager.id + "/replace";
+              axios.post(url, manager);
+            }
             this.$router.push("/managers");
             location.reload();
             return 0;
@@ -2069,23 +2158,80 @@ const EditManager = {
                   }
                 );
               } else {
-                const manager = {
-                  managerId: this.managerId,
-                  christianName: this.christianName,
-                  fullName: this.fullName,
-                  birthday: this.birthday,
-                  homeland: this.homeland,
-                  position: this.position,
-                  phone: this.phone,
-                  email: this.email,
-                  status: this.status,
-                  id: this.$route.params.id,
-                };
-                const url =
-                  "http://localhost:3000/api/managers/" +
-                  manager.id +
-                  "/replace";
-                axios.post(url, manager);
+                if (this.selectedFile != null) {
+                  const fd = new FormData();
+                  fd.append('image', this.selectedFile, this.selectedFile.name);
+                  var start = this.selectedFile.name.lastIndexOf('.');
+                  var end = this.selectedFile.length;
+                  var fileName = this.managerId + this.selectedFile.name.slice(start, end);
+                  if (this.imageEdit != null) {
+                    const manager = {
+                      managerId: this.managerId,
+                      christianName: this.christianName,
+                      fullName: this.fullName,
+                      birthday: this.birthday,
+                      phone: this.phone,
+                      email: this.email,
+                      image: fileName,
+                      position: this.position,
+                      homeland: this.homeland,
+                      status: this.status,
+                      id: this.$route.params.id,
+                    };
+                    const url =
+                      "http://localhost:3000/api/managers/" + manager.id + "/replace";
+                    axios.post(url, manager);
+                    axios.delete("http://localhost:3000/api/Photos/manager/files/" + this.imageEdit)
+                      .then(resp => {
+                        console.log(resp);
+                      })
+                      .catch(err => console.log(err));
+                    axios.post('http://localhost:3000/api/Photos/manager/upload?filename=' + fileName, fd)
+                      .then(res => {
+                        console.log(res);
+                      })
+                      .catch(err => console.log(err));
+                  } else {
+                    const manager = {
+                      managerId: this.managerId,
+                      christianName: this.christianName,
+                      fullName: this.fullName,
+                      birthday: this.birthday,
+                      phone: this.phone,
+                      email: this.email,
+                      image: fileName,
+                      position: this.position,
+                      homeland: this.homeland,
+                      status: this.status,
+                      id: this.$route.params.id,
+                    };
+                    const url =
+                      "http://localhost:3000/api/managers/" + manager.id + "/replace";
+                    axios.post(url, manager);
+                    axios.post("http://localhost:3000/api/Photos/manager/upload?filename=" + fileName, fd)
+                      .then(res => {
+                        console.log(res);
+                      })
+                      .catch(err => console.log(err));
+                  }
+                } else {
+                  const manager = {
+                    managerId: this.managerId,
+                    christianName: this.christianName,
+                    fullName: this.fullName,
+                    birthday: this.birthday,
+                    phone: this.phone,
+                    email: this.email,
+                    image: this.imageEdit,
+                    position: this.position,
+                    homeland: this.homeland,
+                    status: this.status,
+                    id: this.$route.params.id,
+                  };
+                  const url =
+                    "http://localhost:3000/api/managers/" + manager.id + "/replace";
+                  axios.post(url, manager);
+                }
                 this.$router.push("/managers");
                 location.reload();
                 return 0;
@@ -2126,23 +2272,80 @@ const EditManager = {
                   }
                 );
               } else {
-                const manager = {
-                  managerId: this.managerId,
-                  christianName: this.christianName,
-                  fullName: this.fullName,
-                  birthday: this.birthday,
-                  homeland: this.homeland,
-                  position: this.position,
-                  phone: this.phone,
-                  email: this.email,
-                  status: this.status,
-                  id: this.$route.params.id,
-                };
-                const url =
-                  "http://localhost:3000/api/managers/" +
-                  manager.id +
-                  "/replace";
-                axios.post(url, manager);
+                if (this.selectedFile != null) {
+                  const fd = new FormData();
+                  fd.append('image', this.selectedFile, this.selectedFile.name);
+                  var start = this.selectedFile.name.lastIndexOf('.');
+                  var end = this.selectedFile.length;
+                  var fileName = this.managerId + this.selectedFile.name.slice(start, end);
+                  if (this.imageEdit != null) {
+                    const manager = {
+                      managerId: this.managerId,
+                      christianName: this.christianName,
+                      fullName: this.fullName,
+                      birthday: this.birthday,
+                      phone: this.phone,
+                      email: this.email,
+                      image: fileName,
+                      position: this.position,
+                      homeland: this.homeland,
+                      status: this.status,
+                      id: this.$route.params.id,
+                    };
+                    const url =
+                      "http://localhost:3000/api/managers/" + manager.id + "/replace";
+                    axios.post(url, manager);
+                    axios.delete("http://localhost:3000/api/Photos/manager/files/" + this.imageEdit)
+                      .then(resp => {
+                        console.log(resp);
+                      })
+                      .catch(err => console.log(err));
+                    axios.post('http://localhost:3000/api/Photos/manager/upload?filename=' + fileName, fd)
+                      .then(res => {
+                        console.log(res);
+                      })
+                      .catch(err => console.log(err));
+                  } else {
+                    const manager = {
+                      managerId: this.managerId,
+                      christianName: this.christianName,
+                      fullName: this.fullName,
+                      birthday: this.birthday,
+                      phone: this.phone,
+                      email: this.email,
+                      image: fileName,
+                      position: this.position,
+                      homeland: this.homeland,
+                      status: this.status,
+                      id: this.$route.params.id,
+                    };
+                    const url =
+                      "http://localhost:3000/api/managers/" + manager.id + "/replace";
+                    axios.post(url, manager);
+                    axios.post("http://localhost:3000/api/Photos/manager/upload?filename=" + fileName, fd)
+                      .then(res => {
+                        console.log(res);
+                      })
+                      .catch(err => console.log(err));
+                  }
+                } else {
+                  const manager = {
+                    managerId: this.managerId,
+                    christianName: this.christianName,
+                    fullName: this.fullName,
+                    birthday: this.birthday,
+                    phone: this.phone,
+                    email: this.email,
+                    image: this.imageEdit,
+                    position: this.position,
+                    homeland: this.homeland,
+                    status: this.status,
+                    id: this.$route.params.id,
+                  };
+                  const url =
+                    "http://localhost:3000/api/managers/" + manager.id + "/replace";
+                  axios.post(url, manager);
+                }
                 this.$router.push("/managers");
                 location.reload();
                 return 0;
@@ -2191,23 +2394,80 @@ const EditManager = {
                         }
                       );
                     } else {
-                      const manager = {
-                        managerId: this.managerId,
-                        christianName: this.christianName,
-                        fullName: this.fullName,
-                        birthday: this.birthday,
-                        homeland: this.homeland,
-                        position: this.position,
-                        phone: this.phone,
-                        email: this.email,
-                        status: this.status,
-                        id: this.$route.params.id,
-                      };
-                      const url =
-                        "http://localhost:3000/api/managers/" +
-                        manager.id +
-                        "/replace";
-                      axios.post(url, manager);
+                      if (this.selectedFile != null) {
+                        const fd = new FormData();
+                        fd.append('image', this.selectedFile, this.selectedFile.name);
+                        var start = this.selectedFile.name.lastIndexOf('.');
+                        var end = this.selectedFile.length;
+                        var fileName = this.managerId + this.selectedFile.name.slice(start, end);
+                        if (this.imageEdit != null) {
+                          const manager = {
+                            managerId: this.managerId,
+                            christianName: this.christianName,
+                            fullName: this.fullName,
+                            birthday: this.birthday,
+                            phone: this.phone,
+                            email: this.email,
+                            image: fileName,
+                            position: this.position,
+                            homeland: this.homeland,
+                            status: this.status,
+                            id: this.$route.params.id,
+                          };
+                          const url =
+                            "http://localhost:3000/api/managers/" + manager.id + "/replace";
+                          axios.post(url, manager);
+                          axios.delete("http://localhost:3000/api/Photos/manager/files/" + this.imageEdit)
+                            .then(resp => {
+                              console.log(resp);
+                            })
+                            .catch(err => console.log(err));
+                          axios.post('http://localhost:3000/api/Photos/manager/upload?filename=' + fileName, fd)
+                            .then(res => {
+                              console.log(res);
+                            })
+                            .catch(err => console.log(err));
+                        } else {
+                          const manager = {
+                            managerId: this.managerId,
+                            christianName: this.christianName,
+                            fullName: this.fullName,
+                            birthday: this.birthday,
+                            phone: this.phone,
+                            email: this.email,
+                            image: fileName,
+                            position: this.position,
+                            homeland: this.homeland,
+                            status: this.status,
+                            id: this.$route.params.id,
+                          };
+                          const url =
+                            "http://localhost:3000/api/managers/" + manager.id + "/replace";
+                          axios.post(url, manager);
+                          axios.post("http://localhost:3000/api/Photos/manager/upload?filename=" + fileName, fd)
+                            .then(res => {
+                              console.log(res);
+                            })
+                            .catch(err => console.log(err));
+                        }
+                      } else {
+                        const manager = {
+                          managerId: this.managerId,
+                          christianName: this.christianName,
+                          fullName: this.fullName,
+                          birthday: this.birthday,
+                          phone: this.phone,
+                          email: this.email,
+                          image: this.imageEdit,
+                          position: this.position,
+                          homeland: this.homeland,
+                          status: this.status,
+                          id: this.$route.params.id,
+                        };
+                        const url =
+                          "http://localhost:3000/api/managers/" + manager.id + "/replace";
+                        axios.post(url, manager);
+                      }
                       this.$router.push("/managers");
                       location.reload();
                       return 0;
@@ -2351,7 +2611,7 @@ const EditManager = {
           <div class="col-lg-4"></div>
           <div class="col-lg-4">
             <label class="text-size-15px font-weight-bold col-form-label" for="image">Hình Ảnh</label>
-            <input type="file" id="image" v-model="image" name="image" :title="titlePicture"
+            <input type="file" id="image" @change="onFileSelected" :title="titlePicture"
               class="form-control rounded text-size-13px" style="margin-top: -5px;" />
           </div>
         </div>
@@ -13461,7 +13721,8 @@ const ChangePassword = {
     //////////
     checkRenewPassword() {
       return (
-        !!this.renewPasswordIsValid && !!(this.newPassword != this.renewPassword)
+        !!this.renewPasswordIsValid &&
+        !!(this.newPassword != this.renewPassword)
       );
     },
 

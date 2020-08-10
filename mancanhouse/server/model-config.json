@@ -94,5 +94,9 @@
   "login": {
     "dataSource": "canData",
     "public": true
+  },
+  "Photos": {
+    "dataSource": "assets",
+    "public": true
   }
 }

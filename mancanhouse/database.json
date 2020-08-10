@@ -1,9 +1,9 @@
 {
   "ids": {
-    "account": 64,
+    "account": 70,
     "role": 21,
     "department": 15,
-    "manager": 26,
+    "manager": 40,
     "candidate": 12,
     "community": 10,
     "groupCommunity": 4,
@@ -14,7 +14,7 @@
     "schedule": 4,
     "scheduleCompanion": 786,
     "scheduleSpiritualGuide": 187,
-    "login": 9
+    "login": 10
   },
   "models": {
     "account": {
@@ -50,7 +50,13 @@
       "60": "{\"userId\":\"GV002\",\"username\":\"quockinhgd@gmail.com\",\"password\":\"U2FsdGVkX1/B3+ONRaBdvWnzia/bw04NxnGWoK2qOXk=\",\"role\":10,\"status\":2,\"id\":60}",
       "61": "{\"userId\":\"GV003\",\"username\":\"quockinhgda@gmail.com\",\"password\":\"U2FsdGVkX1+WSH+hfiRBdwNLcA3K0e+P1Aw041fUtI4=\",\"role\":10,\"status\":2,\"id\":61}",
       "62": "{\"userId\":\"GV004\",\"username\":\"quocbao253@gmail.com\",\"password\":\"U2FsdGVkX19eXRYg/djamEXIxH9y+h0mtMVwnH3nEP8=\",\"role\":10,\"status\":2,\"id\":62}",
-      "63": "{\"id\":63,\"userId\":\"AD001\",\"username\":\"admin@gmail.com\",\"password\":\"U2FsdGVkX18BP0JUUxBC3Kh5IiRt4PqucolB22adTHc=\",\"role\":1,\"status\":1,\"idTable\":25}"
+      "63": "{\"id\":63,\"userId\":\"AD001\",\"username\":\"admin@gmail.com\",\"password\":\"U2FsdGVkX18BP0JUUxBC3Kh5IiRt4PqucolB22adTHc=\",\"role\":1,\"status\":1,\"idTable\":25}",
+      "64": "{\"userId\":\"MN018\",\"username\":\"gd@gmail.com\",\"password\":\"U2FsdGVkX18Z8+ZHytze/u6mlrCDAotXcDCWrSUs8k8=\",\"role\":2,\"status\":1,\"idTable\":26,\"id\":64}",
+      "65": "{\"userId\":\"MN019\",\"username\":\"gd01@gmail.com\",\"password\":\"U2FsdGVkX1+jT5Jr+mttHFD+4jQwArEuSNkCjw+MhwQ=\",\"role\":3,\"status\":1,\"idTable\":27,\"id\":65}",
+      "66": "{\"userId\":\"MN021\",\"username\":\"manhcuong123562423@gmail.com\",\"password\":\"U2FsdGVkX19oEP4S8hYARuwKTJYEMSNdRFY0gLIJp0k=\",\"role\":3,\"status\":1,\"idTable\":34,\"id\":66}",
+      "67": "{\"userId\":\"MN037\",\"username\":\"gd04@gmail.com\",\"password\":\"U2FsdGVkX1+USHGxunS0/1mdm/jBaPrpN6LZwQrykA8=\",\"role\":3,\"status\":1,\"idTable\":37,\"id\":67}",
+      "68": "{\"userId\":\"MN038\",\"username\":\"gd02@gmail.com\",\"password\":\"U2FsdGVkX1/vtAXLTO/A/LKrLQam4kVUC2z6J+tfwQs=\",\"role\":4,\"status\":1,\"idTable\":38,\"id\":68}",
+      "69": "{\"userId\":\"MN039\",\"username\":\"manhcuonggh@gmail.com\",\"password\":\"U2FsdGVkX195GNgBuSRB8TzSvvlK/pIoW1VILRGoZSg=\",\"role\":4,\"status\":1,\"idTable\":39,\"id\":69}"
     },
     "department": {
       "1": "{\"name\":\"Headquarter\",\"positionType\":\"Giám đốc\",\"id\":1}",
@@ -67,8 +73,8 @@
       "14": "{\"name\":\"Sinh hoạt\",\"positionType\":\"Trưởng phòng\",\"id\":14}"
     },
     "manager": {
-      "9": "{\"id\":9,\"managerId\":\"MN001\",\"christianName\":\"John Baptish\",\"fullName\":\"Nguyễn Ngọc Triêm\",\"birthday\":\"2020-07-03T00:00:00.000Z\",\"phone\":\"0987654421\",\"email\":\"ngoctriem@gmail.com\",\"position\":5,\"homeland\":\"Nghệ An\",\"status\":1}",
-      "10": "{\"managerId\":\"MN002\",\"christianName\":\"a\",\"fullName\":\"Nguyễn Quốc Kính\",\"birthday\":\"2020-07-01T00:00:00.000Z\",\"phone\":\"0986754123\",\"email\":\"quockinh@gmail.com\",\"image\":null,\"position\":1,\"homeland\":\"sasd\",\"status\":1,\"id\":10}",
+      "9": "{\"id\":9,\"managerId\":\"MN001\",\"christianName\":\"John Baptish\",\"fullName\":\"Nguyễn Ngọc Triêm\",\"birthday\":\"1981-07-03T00:00:00.000Z\",\"phone\":\"0987654421\",\"email\":\"ngoctriem@gmail.com\",\"position\":4,\"homeland\":\"Nghệ An\",\"status\":1}",
+      "10": "{\"id\":10,\"managerId\":\"MN002\",\"christianName\":\"Dom\",\"fullName\":\"Nguyễn Quốc Kính\",\"birthday\":\"1982-07-01T00:00:00.000Z\",\"phone\":\"0986754123\",\"email\":\"quockinh@gmail.com\",\"image\":\"MN002.jpg\",\"position\":1,\"homeland\":\"Xuân Lộc\",\"status\":1}",
       "11": "{\"id\":11,\"managerId\":\"MN003\",\"christianName\":\"Peter\",\"fullName\":\"Hà Quốc Bảo\",\"birthday\":\"2020-07-13T00:00:00.000Z\",\"phone\":\"0978654123\",\"email\":\"quocbao@gmail.com\",\"position\":5,\"homeland\":\"Ban Mê Thuật\",\"status\":2}",
       "12": "{\"managerId\":\"MN004\",\"christianName\":\"dd\",\"fullName\":\"Hà Quốc Bảo\",\"birthday\":\"2020-07-21T00:00:00.000Z\",\"phone\":\"0978654123\",\"email\":\"quocbao@gmail.com\",\"image\":null,\"position\":1,\"homeland\":\"ad\",\"status\":1,\"id\":12}",
       "13": "{\"managerId\":\"MN005\",\"christianName\":\"dsf\",\"fullName\":\"Hà Quốc Bảo\",\"birthday\":\"2020-07-08T00:00:00.000Z\",\"phone\":\"0978654123\",\"email\":\"quocbao@gmail.com\",\"image\":null,\"position\":4,\"homeland\":\"sdf\",\"status\":1,\"id\":13}",
@@ -76,14 +82,22 @@
       "15": "{\"managerId\":\"MN007\",\"christianName\":\"Joseph\",\"fullName\":\"Nguyễn Quốc Kính\",\"birthday\":\"2020-07-10T00:00:00.000Z\",\"phone\":\"0986754123\",\"email\":\"quockinh@gmail.com\",\"image\":null,\"position\":1,\"homeland\":\"Xuân Lộc\",\"status\":1,\"id\":15}",
       "16": "{\"managerId\":\"MN008\",\"christianName\":\"sfsaf\",\"fullName\":\"Hà Quốc Bảo\",\"birthday\":\"2020-07-02T00:00:00.000Z\",\"phone\":\"0978654123\",\"email\":\"quocbao@gmail.com\",\"image\":null,\"position\":1,\"homeland\":\"asdfsd\",\"status\":1,\"id\":16}",
       "17": "{\"managerId\":\"MN009\",\"christianName\":\"afdsf\",\"fullName\":\"Nguyễn Ngọc Triêm\",\"birthday\":\"2020-07-02T00:00:00.000Z\",\"phone\":\"0987654432\",\"email\":\"triembao@gmail.com\",\"image\":null,\"position\":4,\"homeland\":\"asdfsdf\",\"status\":1,\"id\":17}",
-      "18": "{\"managerId\":\"MN010\",\"christianName\":\"sdf\",\"fullName\":\"Hà Quốc Bảo\",\"birthday\":\"2020-07-21T00:00:00.000Z\",\"phone\":\"0978654123\",\"email\":\"abc@gmail.com\",\"image\":null,\"position\":1,\"homeland\":\"asdfs\",\"status\":1,\"id\":18}",
+      "18": "{\"id\":18,\"managerId\":\"MN010\",\"christianName\":\"sdf\",\"fullName\":\"Hà Quốc Bảo\",\"birthday\":\"1981-07-01T00:00:00.000Z\",\"phone\":\"0978654123\",\"email\":\"abc@gmail.com\",\"position\":1,\"homeland\":\"asdfs\",\"status\":1}",
       "19": "{\"managerId\":\"MN011\",\"christianName\":\"asdfds\",\"fullName\":\"Nguyễn Ngọc Triêm\",\"birthday\":\"2020-07-31T00:00:00.000Z\",\"phone\":\"0987654432\",\"email\":\"cde3009@gmail.com\",\"image\":null,\"position\":5,\"homeland\":\"sdfs\",\"status\":1,\"id\":19}",
       "20": "{\"managerId\":\"MN012\",\"christianName\":\"sdfsd\",\"fullName\":\"Hà Quốc Bảo\",\"birthday\":\"2020-07-28T00:00:00.000Z\",\"phone\":\"0978654123\",\"email\":\"adews@gmail.com\",\"image\":null,\"position\":5,\"homeland\":\"sfaf\",\"status\":1,\"id\":20}",
       "21": "{\"managerId\":\"MN013\",\"christianName\":\"asdf\",\"fullName\":\"Hà Quốc Bảo\",\"birthday\":\"2020-07-14T00:00:00.000Z\",\"phone\":\"0978654123\",\"email\":\"quocbao12345676@gmail.com\",\"image\":null,\"position\":1,\"homeland\":\"fasdf\",\"status\":1,\"id\":21}",
       "22": "{\"managerId\":\"MN014\",\"christianName\":\"Joseph\",\"fullName\":\"Hà Quốc Bảo\",\"birthday\":\"2020-07-03T00:00:00.000Z\",\"phone\":\"0978654129\",\"email\":\"quocbaosjc@gmail.com\",\"position\":5,\"homeland\":\"An Giang\",\"status\":2,\"file\":null,\"id\":22}",
       "23": "{\"managerId\":\"MN015\",\"christianName\":\"Anton\",\"fullName\":\"Nguyễn Ngọc Triêm\",\"birthday\":\"2020-07-30T00:00:00.000Z\",\"phone\":\"0987654438\",\"email\":\"ngoctriemsj@gmail.com\",\"position\":4,\"homeland\":\"Nghệ An\",\"status\":2,\"file\":null,\"id\":23}",
       "24": "{\"managerId\":\"MN016\",\"christianName\":\"Dom\",\"fullName\":\"Nguyễn Quốc Kính\",\"birthday\":\"2020-07-30T00:00:00.000Z\",\"phone\":\"0986754127\",\"email\":\"quockinhsj@gmail.com\",\"position\":1,\"homeland\":\"Đồng Nai\",\"status\":2,\"file\":null,\"id\":24}",
-      "25": "{\"id\":25,\"managerId\":\"AD001\",\"christianName\":\"JB\",\"fullName\":\"Trần Mạnh Cường\",\"birthday\":\"1989-10-24T00:00:00.000Z\",\"phone\":\"0978123612\",\"email\":\"admin@gmail.com\",\"position\":1,\"homeland\":\"Xuân Lộc\",\"status\":1}"
+      "26": "{\"managerId\":\"MN018\",\"christianName\":\"abd\",\"fullName\":\"abc\",\"birthday\":\"1981-02-01T00:00:00.000Z\",\"phone\":\"0978641243\",\"email\":\"gd@gmail.com\",\"image\":\"C:\\\\fakepath\\\\user_08.jpg\",\"position\":1,\"homeland\":\"anc\",\"status\":1,\"id\":26}",
+      "27": "{\"managerId\":\"MN019\",\"christianName\":\"avc\",\"fullName\":\"abc\",\"birthday\":\"1982-02-12T00:00:00.000Z\",\"phone\":\"0978641201\",\"email\":\"gd01@gmail.com\",\"image\":\"C:\\\\fakepath\\\\user_08.jpg\",\"position\":4,\"homeland\":\"avc\",\"status\":1,\"id\":27}",
+      "31": "{\"managerId\":\"MN019\",\"christianName\":\"jb\",\"fullName\":\"abc\",\"birthday\":\"1981-01-01T00:00:00.000Z\",\"phone\":\"0978123610\",\"email\":\"manhcuong123@gmail.com\",\"image\":\"MN019.jpg\",\"position\":1,\"homeland\":\"adfs\",\"status\":2,\"id\":31}",
+      "33": "{\"managerId\":\"MN020\",\"christianName\":\"dfs\",\"fullName\":\"Trần Mạnh Cường\",\"birthday\":\"1981-01-01T00:00:00.000Z\",\"phone\":\"0978123612\",\"email\":\"manhcuong@gmail.com\",\"image\":\"MN020.jpg\",\"position\":4,\"homeland\":\"sdf\",\"status\":2,\"id\":33}",
+      "34": "{\"managerId\":\"MN021\",\"christianName\":\"dh\",\"fullName\":\"Trần Mạnh Cường\",\"birthday\":\"1981-01-01T00:00:00.000Z\",\"phone\":\"0978123611\",\"email\":\"manhcuong123562423@gmail.com\",\"image\":null,\"position\":4,\"homeland\":\"asdf\",\"status\":1,\"id\":34}",
+      "36": "{\"managerId\":\"MN035\",\"christianName\":\"dgds\",\"fullName\":\"abcd\",\"birthday\":\"1981-01-02T00:00:00.000Z\",\"phone\":\"0978641203\",\"email\":\"gd03@gmail.com\",\"image\":\"MN035.jpg\",\"position\":1,\"homeland\":\"fdsdsgf\",\"status\":1,\"id\":36}",
+      "37": "{\"managerId\":\"MN037\",\"christianName\":\"dsfdg\",\"fullName\":\"abcb\",\"birthday\":\"1989-06-05T00:00:00.000Z\",\"phone\":\"0978641204\",\"email\":\"gd04@gmail.com\",\"image\":\"MN037.jpg\",\"position\":4,\"homeland\":\"sdgdg\",\"status\":1,\"id\":37}",
+      "38": "{\"managerId\":\"MN038\",\"christianName\":\"sfsfs\",\"fullName\":\"abcfdsdsf\",\"birthday\":\"1987-04-01T00:00:00.000Z\",\"phone\":\"0978641202\",\"email\":\"gd02@gmail.com\",\"image\":\"MN038.jpg\",\"position\":5,\"homeland\":\"sdfsdfwe\",\"status\":1,\"id\":38}",
+      "39": "{\"id\":39,\"managerId\":\"MN039\",\"christianName\":\"JB\",\"fullName\":\"Trần Mạnh Cường\",\"birthday\":\"1987-10-04T00:00:00.000Z\",\"phone\":\"0978123698\",\"email\":\"manhcuonggh@gmail.com\",\"image\":\"MN039.png\",\"position\":5,\"homeland\":\"Long Xuyên\",\"status\":1}"
     },
     "candidate": {
       "1": "{\"id\":1,\"candidateId\":\"US001\",\"christianName\":\"John Bosco\",\"fullName\":\"Lê Hoàng Quốc Anh\",\"birthday\":\"2020-06-10T00:00:00.000Z\",\"phone\":\"0987654321\",\"email\":\"quocanh@gmail.com\",\"position\":11,\"community\":1,\"homeland\":\"Ban Mê Thuật\",\"status\":1}",
@@ -529,6 +543,8 @@
       "185": "{\"spiritualGuide\":1,\"candidate\":null,\"session\":\"14:00 - 15:00\",\"date\":\"31/08\",\"status\":1,\"groupSession\":31,\"id\":185}",
       "186": "{\"spiritualGuide\":1,\"candidate\":null,\"session\":\"15:00 - 16:00\",\"date\":\"31/08\",\"status\":1,\"groupSession\":31,\"id\":186}"
     },
-    "login": {}
+    "login": {
+      "9": "{\"idAccount\":63,\"userId\":\"AD001\",\"username\":\"admin@gmail.com\",\"password\":\"admin@2020\",\"role\":1,\"idTable\":25,\"token\":\"token\",\"id\":9}"
+    }
   }
 }
