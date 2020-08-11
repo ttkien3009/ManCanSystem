@@ -977,11 +977,13 @@ const AddAccount = {
 const EditAccount = {
   data() {
     return {
+      username: null,
       usernameEdit: null,
       passwordEdit: null,
       roleEdit: 0,
       statusEdit: 0,
       userIdEdit: null,
+      idTableEdit: null,
       titleUsername: "Nhập thông tin tài khoản",
       titlePassword: "Nhập thông tin mật khẩu",
       titleRole: "Chọn thông tin phân quyền",
@@ -1013,10 +1015,12 @@ const EditAccount = {
       )
       .then((response) => {
         this.userIdEdit = response.data.account.userId;
+        this.username = response.data.account.username;
         this.usernameEdit = response.data.account.username;
         this.passwordEdit = crypt.decrypt(response.data.account.password);
         this.roleEdit = response.data.account.role;
         this.statusEdit = response.data.account.status;
+        this.idTableEdit = response.data.account.idTable;
       });
   },
 
@@ -1102,11 +1106,12 @@ const EditAccount = {
     submitEditAccountForm() {
       if (this.editAccountFormIsValid) {
         const account = {
+          userId: this.userIdEdit,
           username: this.usernameEdit,
           password: crypt.encrypt(this.passwordEdit),
           role: this.roleEdit,
           status: this.statusEdit,
-          userId: this.userIdEdit,
+          idTable: this.idTableEdit,
           id: this.$route.params.id,
         };
         const url =
@@ -3680,12 +3685,17 @@ const AddCandidate = {
                             axios.post(url_2, community);
                             const url = "http://localhost:3000/api/accounts";
                             axios.post(url, account);
-                            if(this.selectedFile != null){
-                              axios.post('http://localhost:3000/api/Photos/candidate/upload?filename=' + fileName, fd)
-                                .then(res => {
+                            if (this.selectedFile != null) {
+                              axios
+                                .post(
+                                  "http://localhost:3000/api/Photos/candidate/upload?filename=" +
+                                    fileName,
+                                  fd
+                                )
+                                .then((res) => {
                                   console.log(res);
                                 })
-                                .catch(err => console.log(err));
+                                .catch((err) => console.log(err));
                             }
                           });
                       });
@@ -5551,10 +5561,13 @@ const ListCompanion = {
     },
     getDetailCompanion(companion) {
       this.companion = companion;
-      this.image = `
-      <img class="img-fluid img-thumbnail rounded-circle" src="../api/Photos/companion/download/` + this.companion.image + `" width="100px"
+      this.image =
+        `
+      <img class="img-fluid img-thumbnail rounded-circle" src="../api/Photos/companion/download/` +
+        this.companion.image +
+        `" width="100px"
       height="100px" alt="companion-image"/>
-      `
+      `;
       this.birthdayFormat = this.formatDate(this.companion.birthday);
     },
 
@@ -5869,16 +5882,15 @@ const AddCompanion = {
     },
   },
   methods: {
-    onFileSelected(event){
+    onFileSelected(event) {
       this.selectedFile = event.target.files[0];
     },
     submitAddCompanionForm() {
       if (this.addCompanionFormIsValid) {
         let lengthCompanions = this.companions.length;
-        if ( lengthCompanions == 0) {
-          this.companionId == 'DH001';
-        }
-        else {
+        if (lengthCompanions == 0) {
+          this.companionId == "DH001";
+        } else {
           let currentId = this.companions[lengthCompanions - 1].id;
           if (currentId > -1 && currentId < 9) {
             this.companionId = "DH00" + (currentId + 1);
@@ -5934,11 +5946,17 @@ const AddCompanion = {
                   } else {
                     var fileName = null;
                     const fd = new FormData();
-                    if(this.selectedFile != null) {
-                      fd.append("image", this.selectedFile, this.selectedFile.name);
-                      var start = this.selectedFile.name.lastIndexOf('.');
+                    if (this.selectedFile != null) {
+                      fd.append(
+                        "image",
+                        this.selectedFile,
+                        this.selectedFile.name
+                      );
+                      var start = this.selectedFile.name.lastIndexOf(".");
                       var end = this.selectedFile.length;
-                      fileName = this.companionId + this.selectedFile.name.slice(start, end);
+                      fileName =
+                        this.companionId +
+                        this.selectedFile.name.slice(start, end);
                     }
                     const companion = {
                       companionId: this.companionId,
@@ -5989,12 +6007,17 @@ const AddCompanion = {
                             };
                             const url = "http://localhost:3000/api/accounts";
                             axios.post(url, account_companion);
-                            if(this.selectedFile != null){
-                              axios.post('http://localhost:3000/api/Photos/companion/upload?filename=' + fileName, fd)
-                                .then(res => {
+                            if (this.selectedFile != null) {
+                              axios
+                                .post(
+                                  "http://localhost:3000/api/Photos/companion/upload?filename=" +
+                                    fileName,
+                                  fd
+                                )
+                                .then((res) => {
                                   console.log(res);
                                 })
-                                .catch(err => console.log(err));
+                                .catch((err) => console.log(err));
                             }
                           });
                       });
@@ -6335,13 +6358,14 @@ const EditCompanion = {
               }
             );
           } else {
-            if(this.selectedFile != null) {
+            if (this.selectedFile != null) {
               const fd = new FormData();
-              fd.append('image', this.selectedFile, this.selectedFile.name);
-              var start = this.selectedFile.name.lastIndexOf('.');
+              fd.append("image", this.selectedFile, this.selectedFile.name);
+              var start = this.selectedFile.name.lastIndexOf(".");
               var end = this.selectedFile.length;
-              var fileName = this.companionId + this.selectedFile.name.slice(start, end);
-              if(this.imageEdit != null) {
+              var fileName =
+                this.companionId + this.selectedFile.name.slice(start, end);
+              if (this.imageEdit != null) {
                 const companion = {
                   companionId: this.companionId,
                   christianName: this.christianName,
@@ -6360,16 +6384,25 @@ const EditCompanion = {
                   companion.id +
                   "/replace";
                 axios.post(url, companion);
-                axios.delete("http://localhost:3000/api/Photos/companion/files/" + this.imageEdit)
-                  .then(resp => {
+                axios
+                  .delete(
+                    "http://localhost:3000/api/Photos/companion/files/" +
+                      this.imageEdit
+                  )
+                  .then((resp) => {
                     console.log(resp);
                   })
-                  .catch(err => console.log(err));
-                axios.post('http://localhost:3000/api/Photos/companion/upload?filename=' + fileName, fd)
-                  .then(res => {
+                  .catch((err) => console.log(err));
+                axios
+                  .post(
+                    "http://localhost:3000/api/Photos/companion/upload?filename=" +
+                      fileName,
+                    fd
+                  )
+                  .then((res) => {
                     console.log(res);
                   })
-                  .catch(err => console.log(err));
+                  .catch((err) => console.log(err));
               } else {
                 const companion = {
                   companionId: this.companionId,
@@ -6389,11 +6422,16 @@ const EditCompanion = {
                   companion.id +
                   "/replace";
                 axios.post(url, companion);
-                axios.post("http://localhost:3000/api/Photos/companion/upload?filename=" + fileName, fd)
-                  .then(res => {
+                axios
+                  .post(
+                    "http://localhost:3000/api/Photos/companion/upload?filename=" +
+                      fileName,
+                    fd
+                  )
+                  .then((res) => {
                     console.log(res);
                   })
-                  .catch(err => console.log(err));
+                  .catch((err) => console.log(err));
               }
             } else {
               const companion = {
@@ -6452,13 +6490,14 @@ const EditCompanion = {
                   }
                 );
               } else {
-                if(this.selectedFile != null) {
+                if (this.selectedFile != null) {
                   const fd = new FormData();
-                  fd.append('image', this.selectedFile, this.selectedFile.name);
-                  var start = this.selectedFile.name.lastIndexOf('.');
+                  fd.append("image", this.selectedFile, this.selectedFile.name);
+                  var start = this.selectedFile.name.lastIndexOf(".");
                   var end = this.selectedFile.length;
-                  var fileName = this.companionId + this.selectedFile.name.slice(start, end);
-                  if(this.imageEdit != null) {
+                  var fileName =
+                    this.companionId + this.selectedFile.name.slice(start, end);
+                  if (this.imageEdit != null) {
                     const companion = {
                       companionId: this.companionId,
                       christianName: this.christianName,
@@ -6477,16 +6516,25 @@ const EditCompanion = {
                       companion.id +
                       "/replace";
                     axios.post(url, companion);
-                    axios.delete("http://localhost:3000/api/Photos/companion/files/" + this.imageEdit)
-                      .then(resp => {
+                    axios
+                      .delete(
+                        "http://localhost:3000/api/Photos/companion/files/" +
+                          this.imageEdit
+                      )
+                      .then((resp) => {
                         console.log(resp);
                       })
-                      .catch(err => console.log(err));
-                    axios.post('http://localhost:3000/api/Photos/companion/upload?filename=' + fileName, fd)
-                      .then(res => {
+                      .catch((err) => console.log(err));
+                    axios
+                      .post(
+                        "http://localhost:3000/api/Photos/companion/upload?filename=" +
+                          fileName,
+                        fd
+                      )
+                      .then((res) => {
                         console.log(res);
                       })
-                      .catch(err => console.log(err));
+                      .catch((err) => console.log(err));
                   } else {
                     const companion = {
                       companionId: this.companionId,
@@ -6506,11 +6554,16 @@ const EditCompanion = {
                       companion.id +
                       "/replace";
                     axios.post(url, companion);
-                    axios.post("http://localhost:3000/api/Photos/companion/upload?filename=" + fileName, fd)
-                      .then(res => {
+                    axios
+                      .post(
+                        "http://localhost:3000/api/Photos/companion/upload?filename=" +
+                          fileName,
+                        fd
+                      )
+                      .then((res) => {
                         console.log(res);
                       })
-                      .catch(err => console.log(err));
+                      .catch((err) => console.log(err));
                   }
                 } else {
                   const companion = {
@@ -6574,13 +6627,14 @@ const EditCompanion = {
                   }
                 );
               } else {
-                if(this.selectedFile != null) {
+                if (this.selectedFile != null) {
                   const fd = new FormData();
-                  fd.append('image', this.selectedFile, this.selectedFile.name);
-                  var start = this.selectedFile.name.lastIndexOf('.');
+                  fd.append("image", this.selectedFile, this.selectedFile.name);
+                  var start = this.selectedFile.name.lastIndexOf(".");
                   var end = this.selectedFile.length;
-                  var fileName = this.companionId + this.selectedFile.name.slice(start, end);
-                  if(this.imageEdit != null) {
+                  var fileName =
+                    this.companionId + this.selectedFile.name.slice(start, end);
+                  if (this.imageEdit != null) {
                     const companion = {
                       companionId: this.companionId,
                       christianName: this.christianName,
@@ -6599,16 +6653,25 @@ const EditCompanion = {
                       companion.id +
                       "/replace";
                     axios.post(url, companion);
-                    axios.delete("http://localhost:3000/api/Photos/companion/files/" + this.imageEdit)
-                      .then(resp => {
+                    axios
+                      .delete(
+                        "http://localhost:3000/api/Photos/companion/files/" +
+                          this.imageEdit
+                      )
+                      .then((resp) => {
                         console.log(resp);
                       })
-                      .catch(err => console.log(err));
-                    axios.post('http://localhost:3000/api/Photos/companion/upload?filename=' + fileName, fd)
-                      .then(res => {
+                      .catch((err) => console.log(err));
+                    axios
+                      .post(
+                        "http://localhost:3000/api/Photos/companion/upload?filename=" +
+                          fileName,
+                        fd
+                      )
+                      .then((res) => {
                         console.log(res);
                       })
-                      .catch(err => console.log(err));
+                      .catch((err) => console.log(err));
                   } else {
                     const companion = {
                       companionId: this.companionId,
@@ -6628,11 +6691,16 @@ const EditCompanion = {
                       companion.id +
                       "/replace";
                     axios.post(url, companion);
-                    axios.post("http://localhost:3000/api/Photos/companion/upload?filename=" + fileName, fd)
-                      .then(res => {
+                    axios
+                      .post(
+                        "http://localhost:3000/api/Photos/companion/upload?filename=" +
+                          fileName,
+                        fd
+                      )
+                      .then((res) => {
                         console.log(res);
                       })
-                      .catch(err => console.log(err));
+                      .catch((err) => console.log(err));
                   }
                 } else {
                   const companion = {
@@ -6704,13 +6772,19 @@ const EditCompanion = {
                         }
                       );
                     } else {
-                      if(this.selectedFile != null) {
+                      if (this.selectedFile != null) {
                         const fd = new FormData();
-                        fd.append('image', this.selectedFile, this.selectedFile.name);
-                        var start = this.selectedFile.name.lastIndexOf('.');
+                        fd.append(
+                          "image",
+                          this.selectedFile,
+                          this.selectedFile.name
+                        );
+                        var start = this.selectedFile.name.lastIndexOf(".");
                         var end = this.selectedFile.length;
-                        var fileName = this.companionId + this.selectedFile.name.slice(start, end);
-                        if(this.imageEdit != null) {
+                        var fileName =
+                          this.companionId +
+                          this.selectedFile.name.slice(start, end);
+                        if (this.imageEdit != null) {
                           const companion = {
                             companionId: this.companionId,
                             christianName: this.christianName,
@@ -6729,16 +6803,25 @@ const EditCompanion = {
                             companion.id +
                             "/replace";
                           axios.post(url, companion);
-                          axios.delete("http://localhost:3000/api/Photos/companion/files/" + this.imageEdit)
-                            .then(resp => {
+                          axios
+                            .delete(
+                              "http://localhost:3000/api/Photos/companion/files/" +
+                                this.imageEdit
+                            )
+                            .then((resp) => {
                               console.log(resp);
                             })
-                            .catch(err => console.log(err));
-                          axios.post('http://localhost:3000/api/Photos/companion/upload?filename=' + fileName, fd)
-                            .then(res => {
+                            .catch((err) => console.log(err));
+                          axios
+                            .post(
+                              "http://localhost:3000/api/Photos/companion/upload?filename=" +
+                                fileName,
+                              fd
+                            )
+                            .then((res) => {
                               console.log(res);
                             })
-                            .catch(err => console.log(err));
+                            .catch((err) => console.log(err));
                         } else {
                           const companion = {
                             companionId: this.companionId,
@@ -6758,11 +6841,16 @@ const EditCompanion = {
                             companion.id +
                             "/replace";
                           axios.post(url, companion);
-                          axios.post("http://localhost:3000/api/Photos/companion/upload?filename=" + fileName, fd)
-                            .then(res => {
+                          axios
+                            .post(
+                              "http://localhost:3000/api/Photos/companion/upload?filename=" +
+                                fileName,
+                              fd
+                            )
+                            .then((res) => {
                               console.log(res);
                             })
-                            .catch(err => console.log(err));
+                            .catch((err) => console.log(err));
                         }
                       } else {
                         const companion = {
@@ -6996,6 +7084,7 @@ const ListSpiritualGuide = {
       positions: [],
       birthdayFormat: null,
       groupCommunities: [],
+      image: null,
     };
   },
   mounted() {
@@ -7024,6 +7113,13 @@ const ListSpiritualGuide = {
     },
     getDetailSpiritualGuide(spiritualGuide) {
       this.spiritualGuide = spiritualGuide;
+      this.image =
+        `
+      <img class="img-fluid img-thumbnail rounded-circle" src="../api/Photos/spiritualGuide/download/` +
+        this.spiritualGuide.image +
+        `" width="100px"
+      height="100px" alt="spiritualGuide-image"/>
+      `;
       this.birthdayFormat = this.formatDate(this.spiritualGuide.birthday);
     },
 
@@ -7078,7 +7174,6 @@ const ListSpiritualGuide = {
               <th>Email</th>
               <th>Chức Vụ</th>
               <th>Nhóm Cộng Đoàn</th>
-              <th>Quê Quán</th>
               <th>Trạng Thái</th>
               <th>Action</th>
             </tr>
@@ -7091,7 +7186,6 @@ const ListSpiritualGuide = {
               <th>Email</th>
               <th>Chức Vụ</th>
               <th>Nhóm Cộng Đoàn</th>
-              <th>Quê Quán</th>
               <th>Trạng Thái</th>
               <th>Action</th>
             </tr>
@@ -7104,7 +7198,6 @@ const ListSpiritualGuide = {
               <td>{{ spiritualGuide.email }}</td>
               <td v-for="department in positions" v-if="department.id == spiritualGuide.position">{{ department.positionType }}-{{ department.name }}</td>
               <td v-for="grCom in groupCommunities" v-if="grCom.id == spiritualGuide.groupCommunity">{{ grCom.name }}</td>
-              <td>{{ spiritualGuide.homeland }}</td>
               <td v-if="spiritualGuide.status == 1">
                 <i class="fas fa-toggle-on fa-lg text-success"></i>
               </td>
@@ -7112,7 +7205,7 @@ const ListSpiritualGuide = {
                 <i class="fas fa-toggle-off fa-lg text-danger"></i>
               </td>
               <td>
-                <div class="row" style="margin-left:-25px;">
+                <div class="row" style="margin-left:-20px;">
                   <div class="col-lg-4">
                     <button :title="titleButtonDisplay" data-toggle="modal" @click="getDetailSpiritualGuide(spiritualGuide)"
                       data-target="#detailSpiritualGuideModal"
@@ -7123,14 +7216,14 @@ const ListSpiritualGuide = {
                   <div class="col-lg-4">
                     <button :title="titleButtonEdit" @click="getDataSpiritualGuideUpdate(spiritualGuide)"
                       class="btn btn-warning btn-sm h-28px w-28px rounded" type="submit"
-                      style="margin-left: -6px;">
+                      style="margin-left: -8px;">
                       <i class="fas fa-edit fa-md ml--2px"></i>
                     </button>
                   </div>
                   <div class="col-lg-4">
                     <button :title="titleButtonDelete" data-toggle="modal" @click="getDetailSpiritualGuide(spiritualGuide)"
                       data-target="#deleteSpiritualGuideModal" class="btn btn-danger btn-sm h-28px w-28px rounded"
-                      style="margin-left: -12px;">
+                      style="margin-left: -16px;">
                       <i class="far fa-trash-alt fa-md ml--1px"></i>
                     </button>
                   </div>
@@ -7177,9 +7270,13 @@ const ListSpiritualGuide = {
           </div>
           <div class="modal-body">
             <div class="row">
-              <div class="col-sm-4 text-center">
-                <img class="img-fluid img-thumbnail rounded-circle" src="../images/user_03.jpg" width="100px"
-                  height="100px" />
+              <div class="col-sm-4 text-center" v-if="spiritualGuide.image != null">
+                <div v-html="image"></div>
+                <p class="font-weight-bold" style="padding-top: 5px;">{{ spiritualGuide.spiritualGuideId }}</p>
+              </div>
+              <div class="col-sm-4 text-center" v-if="spiritualGuide.image == null">
+                <img class="img-fluid img-thumbnail rounded-circle" src="../images/default_image.png" width="100px"
+                  height="100px" alt="spiritualGuide-image"/>
                 <p class="font-weight-bold" style="padding-top: 5px;">{{ spiritualGuide.spiritualGuideId }}</p>
               </div>
               <div class="col-sm-8 mt-3">
@@ -7200,8 +7297,6 @@ const ListSpiritualGuide = {
                 <span class="font-weight-bold ">Nhóm Cộng Đoàn:</span>
                 <span v-for="grCom in groupCommunities" v-if="grCom.id == spiritualGuide.groupCommunity"> 
                 &nbsp;{{ grCom.name }}</span><br>
-                <span class="font-weight-bold ">Quê Quán:</span>
-                <span> &nbsp;&nbsp;&nbsp;{{ spiritualGuide.homeland }}</span><br>
                 <span class="font-weight-bold ">Trạng Thái:&nbsp;&nbsp;</span>
                 <span v-if="spiritualGuide.status == 1"> 
                   <i class="fas fa-toggle-on fa-lg text-success"></i>
@@ -7235,14 +7330,12 @@ const AddSpiritualGuide = {
       image: null,
       groupCommunity: 0,
       position: 0,
-      homeland: null,
       titlePicture: "Chọn hình ảnh",
       titleBirthday: "Nhập thông tin ngày sinh",
       titleChristianName: "Nhập thông tin tên Thánh",
       titleFullName: "Nhập thông tin họ và tên",
       titlePhone: "Nhập thông tin số điện thoại",
       titleEmail: "Nhập thông tin địa chỉ email",
-      titleHomeland: "Nhập thông tin quê quán",
       checkEmail: false,
       checkPhone: false,
       status: 0,
@@ -7253,6 +7346,7 @@ const AddSpiritualGuide = {
       positions: [],
       groupCommunities: [],
       spiritualGuides: [],
+      selectedFile: null,
     };
   },
   mounted() {
@@ -7295,10 +7389,6 @@ const AddSpiritualGuide = {
       return this.position;
     },
 
-    homelandIsValid() {
-      return this.homeland;
-    },
-
     birthdayIsValid() {
       return this.birthday;
     },
@@ -7322,7 +7412,6 @@ const AddSpiritualGuide = {
         this.phoneIsValid &&
         this.emailIsValid &&
         this.positionIsValid &&
-        this.homelandIsValid &&
         this.birthdayIsValid &&
         !this.checkFormatPhone &&
         !this.checkFormatEmail &&
@@ -7338,7 +7427,6 @@ const AddSpiritualGuide = {
         this.phoneIsValid ||
         this.emailIsValid ||
         this.positionIsValid ||
-        this.homelandIsValid ||
         this.birthdayIsValid ||
         this.statusIsValid ||
         this.groupCommunityIsValid
@@ -7346,18 +7434,25 @@ const AddSpiritualGuide = {
     },
   },
   methods: {
+    onFileSelected(event) {
+      this.selectedFile = event.target.files[0];
+    },
     submitAddSpiritualGuideForm() {
       if (this.addSpiritualGuideFormIsValid) {
-        let lengthSpiritualGuides = 0;
-        lengthSpiritualGuides = this.spiritualGuides.length;
-        if (lengthSpiritualGuides > -1 && lengthSpiritualGuides < 9) {
-          this.spiritualGuideId = "LH00" + (lengthSpiritualGuides + 1);
-        }
-        if (lengthSpiritualGuides > 8 && lengthSpiritualGuides < 99) {
-          this.spiritualGuideId = "LH0" + (lengthSpiritualGuides + 1);
-        }
-        if (lengthSpiritualGuides > 98 && lengthSpiritualGuides < 999) {
-          this.spiritualGuideId = "LH" + (lengthSpiritualGuides + 1);
+        let lengthSpiritualGuides = this.spiritualGuides.length;
+        if (lengthSpiritualGuides == 0) {
+          this.spiritualGuideId == "LH001";
+        } else {
+          let currentId = this.spiritualGuides[lengthSpiritualGuides - 1].id;
+          if (currentId > -1 && currentId < 9) {
+            this.spiritualGuideId = "LH00" + (currentId + 1);
+          }
+          if (currentId > 8 && currentId < 99) {
+            this.spiritualGuideId = "LH0" + (currentId + 1);
+          }
+          if (currentId > 98 && currentId < 999) {
+            this.spiritualGuideId = "LH" + (currentId + 1);
+          }
         }
         axios
           .get(
@@ -7401,6 +7496,20 @@ const AddSpiritualGuide = {
                       }
                     );
                   } else {
+                    var fileName = null;
+                    const fd = new FormData();
+                    if (this.selectedFile != null) {
+                      fd.append(
+                        "image",
+                        this.selectedFile,
+                        this.selectedFile.name
+                      );
+                      var start = this.selectedFile.name.lastIndexOf(".");
+                      var end = this.selectedFile.length;
+                      fileName =
+                        this.spiritualGuideId +
+                        this.selectedFile.name.slice(start, end);
+                    }
                     const spiritualGuide = {
                       spiritualGuideId: this.spiritualGuideId,
                       christianName: this.christianName,
@@ -7408,10 +7517,9 @@ const AddSpiritualGuide = {
                       birthday: this.birthday,
                       phone: this.phone,
                       email: this.email,
-                      image: this.image,
-                      position: this.position,
                       groupCommunity: this.groupCommunity,
-                      homeland: this.homeland,
+                      position: this.position,
+                      image: fileName,
                       status: this.status,
                     };
                     axios
@@ -7433,17 +7541,37 @@ const AddSpiritualGuide = {
                         } else {
                           role = 7;
                         }
-                        const accountSpiritualGuide = {
-                          userId: this.spiritualGuideId,
-                          username: this.email,
-                          password: crypt.encrypt(this.phone),
-                          role: role,
-                          status: this.status,
-                        };
-                        const url = `http://localhost:3000/api/accounts`;
-                        axios.post(url, accountSpiritualGuide);
                         const url_1 = `http://localhost:3000/api/spiritualGuides`;
                         axios.post(url_1, spiritualGuide);
+                        axios
+                          .get(
+                            "http://localhost:3000/api/spiritualGuides/findOne?filter[where][email]=" +
+                              this.email
+                          )
+                          .then((resp) => {
+                            const account_spiritualGuide = {
+                              userId: resp.data.spiritualGuideId,
+                              username: resp.data.email,
+                              password: crypt.encrypt(resp.data.phone),
+                              role: role,
+                              status: resp.data.status,
+                              idTable: resp.data.id,
+                            };
+                            const url = "http://localhost:3000/api/accounts";
+                            axios.post(url, account_spiritualGuide);
+                            if (this.selectedFile != null) {
+                              axios
+                                .post(
+                                  "http://localhost:3000/api/Photos/spiritualGuide/upload?filename=" +
+                                    fileName,
+                                  fd
+                                )
+                                .then((res) => {
+                                  console.log(res);
+                                })
+                                .catch((err) => console.log(err));
+                            }
+                          });
                       });
                     setTimeout(() => {
                       this.$router.push("/spiritualGuides");
@@ -7482,9 +7610,6 @@ const AddSpiritualGuide = {
       }
       if (this.birthdayIsValid) {
         this.birthday = null;
-      }
-      if (this.homelandIsValid) {
-        this.homeland = null;
       }
       if (this.statusIsValid) {
         this.status = 0;
@@ -7577,15 +7702,6 @@ const AddSpiritualGuide = {
             </select>
           </div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="homeland">Quê Quán</label>
-            <label class="text-danger">*</label>
-            <input v-model="homeland" name="homeland" id="homeland" type="text" :title="titleHomeland"
-              class="form-control  text-size-13px " placeholder="Nhập Quê quán..." style="margin-top: -5px;">
-          </div>
-        </div>
-        <div class="row mt-1">
-          <div class="col-lg-4"></div>
-          <div class="col-lg-4">
             <label class="text-size-15px font-weight-bold col-form-label" for="status">Trạng Thái</label>
             <label class="text-danger">*</label>
             <select class="custom-select  text-size-13px  h-32px" v-model="status" name="status" id="status"
@@ -7595,9 +7711,12 @@ const AddSpiritualGuide = {
               </option>
             </select>
           </div>
+        </div>
+        <div class="row mt-1">
+          <div class="col-lg-4"></div>
           <div class="col-lg-4">
             <label class="text-size-15px font-weight-bold col-form-label" for="image">Hình Ảnh</label>
-            <input type="file" id="image" v-model="image" name="image" :title="titlePicture"
+            <input type="file" id="image" @change="onFileSelected" :title="titlePicture"
               class="form-control rounded text-size-13px" style="margin-top: -5px;" />
           </div>
         </div>
@@ -7646,16 +7765,15 @@ const EditSpiritualGuide = {
       email: null,
       emailEdit: null,
       image: null,
+      imageEdit: null,
       groupCommunity: 0,
       position: 0,
-      homeland: null,
       titlePicture: "Chọn hình ảnh",
       titleBirthday: "Nhập thông tin ngày sinh",
       titleChristianName: "Nhập thông tin tên Thánh",
       titleFullName: "Nhập thông tin họ và tên",
       titlePhone: "Nhập thông tin số điện thoại",
       titleEmail: "Nhập thông tin địa chỉ email",
-      titleHomeland: "Nhập thông tin quê quán",
       checkEmail: false,
       checkPhone: false,
       status: 0,
@@ -7666,6 +7784,7 @@ const EditSpiritualGuide = {
       positions: [],
       groupCommunities: [],
       spiritualGuide: {},
+      selectedFile: null,
     };
   },
   mounted() {
@@ -7685,14 +7804,14 @@ const EditSpiritualGuide = {
         this.christianName = response.data.spiritualGuide.christianName;
         this.fullName = response.data.spiritualGuide.fullName;
         this.birthday = crypt.formatDate(response.data.spiritualGuide.birthday);
-        this.position = response.data.spiritualGuide.position;
-        this.homeland = response.data.spiritualGuide.homeland;
         this.phone = response.data.spiritualGuide.phone;
         this.phoneEdit = response.data.spiritualGuide.phone;
         this.email = response.data.spiritualGuide.email;
         this.emailEdit = response.data.spiritualGuide.email;
-        this.status = response.data.spiritualGuide.status;
         this.groupCommunity = response.data.spiritualGuide.groupCommunity;
+        this.position = response.data.spiritualGuide.position;
+        this.imageEdit = response.data.spiritualGuide.image;
+        this.status = response.data.spiritualGuide.status;
       });
   },
   computed: {
@@ -7724,10 +7843,6 @@ const EditSpiritualGuide = {
       return this.position;
     },
 
-    homelandIsValid() {
-      return this.homeland;
-    },
-
     birthdayIsValid() {
       return this.birthday;
     },
@@ -7751,7 +7866,6 @@ const EditSpiritualGuide = {
         this.phoneIsValid &&
         this.emailIsValid &&
         this.positionIsValid &&
-        this.homelandIsValid &&
         this.birthdayIsValid &&
         !this.checkFormatPhone &&
         !this.checkFormatEmail &&
@@ -7767,7 +7881,6 @@ const EditSpiritualGuide = {
         this.phoneIsValid ||
         this.emailIsValid ||
         this.positionIsValid ||
-        this.homelandIsValid ||
         this.birthdayIsValid ||
         this.statusIsValid ||
         this.groupCommunityIsValid
@@ -7775,6 +7888,9 @@ const EditSpiritualGuide = {
     },
   },
   methods: {
+    onFileSelected(event) {
+      this.selectedFile = event.target.files[0];
+    },
     submitEditSpiritualGuideForm() {
       if (this.editSpiritualGuideFormIsValid) {
         if (this.emailEdit == this.email && this.phoneEdit == this.phone) {
@@ -7795,24 +7911,102 @@ const EditSpiritualGuide = {
               }
             );
           } else {
-            const spiritualGuide = {
-              spiritualGuideId: this.spiritualGuideId,
-              christianName: this.christianName,
-              fullName: this.fullName,
-              birthday: this.birthday,
-              position: this.position,
-              homeland: this.homeland,
-              phone: this.phone,
-              email: this.email,
-              status: this.status,
-              groupCommunity: this.groupCommunity,
-              id: this.$route.params.id,
-            };
-            const url =
-              "http://localhost:3000/api/spiritualGuides/" +
-              spiritualGuide.id +
-              "/replace";
-            axios.post(url, spiritualGuide);
+            if (this.selectedFile != null) {
+              const fd = new FormData();
+              fd.append("image", this.selectedFile, this.selectedFile.name);
+              var start = this.selectedFile.name.lastIndexOf(".");
+              var end = this.selectedFile.length;
+              var fileName =
+                this.spiritualGuideId +
+                this.selectedFile.name.slice(start, end);
+              if (this.imageEdit != null) {
+                const spiritualGuide = {
+                  spiritualGuideId: this.spiritualGuideId,
+                  christianName: this.christianName,
+                  fullName: this.fullName,
+                  birthday: this.birthday,
+                  phone: this.phone,
+                  email: this.email,
+                  groupCommunity: this.groupCommunity,
+                  position: this.position,
+                  image: fileName,
+                  status: this.status,
+                  id: this.$route.params.id,
+                };
+                const url =
+                  "http://localhost:3000/api/spiritualGuides/" +
+                  spiritualGuide.id +
+                  "/replace";
+                axios.post(url, spiritualGuide);
+                axios
+                  .delete(
+                    "http://localhost:3000/api/Photos/spiritualGuide/files/" +
+                      this.imageEdit
+                  )
+                  .then((resp) => {
+                    console.log(resp);
+                  })
+                  .catch((err) => console.log(err));
+                axios
+                  .post(
+                    "http://localhost:3000/api/Photos/spiritualGuide/upload?filename=" +
+                      fileName,
+                    fd
+                  )
+                  .then((res) => {
+                    console.log(res);
+                  })
+                  .catch((err) => console.log(err));
+              } else {
+                const spiritualGuide = {
+                  spiritualGuideId: this.spiritualGuideId,
+                  christianName: this.christianName,
+                  fullName: this.fullName,
+                  birthday: this.birthday,
+                  phone: this.phone,
+                  email: this.email,
+                  groupCommunity: this.groupCommunity,
+                  position: this.position,
+                  image: fileName,
+                  status: this.status,
+                  id: this.$route.params.id,
+                };
+                const url =
+                  "http://localhost:3000/api/spiritualGuides/" +
+                  spiritualGuide.id +
+                  "/replace";
+                axios.post(url, spiritualGuide);
+                axios
+                  .post(
+                    "http://localhost:3000/api/Photos/spiritualGuide/upload?filename=" +
+                      fileName,
+                    fd
+                  )
+                  .then((res) => {
+                    console.log(res);
+                  })
+                  .catch((err) => console.log(err));
+              }
+            } else {
+              const spiritualGuide = {
+                spiritualGuideId: this.spiritualGuideId,
+                christianName: this.christianName,
+                fullName: this.fullName,
+                birthday: this.birthday,
+                phone: this.phone,
+                email: this.email,
+                groupCommunity: this.groupCommunity,
+                position: this.position,
+                image: this.imageEdit,
+                status: this.status,
+                id: this.$route.params.id,
+              };
+              const url =
+                "http://localhost:3000/api/spiritualGuides/" +
+                spiritualGuide.id +
+                "/replace";
+              axios.post(url, spiritualGuide);
+            }
             setTimeout(() => {
               this.$router.push("/spiritualGuides");
               location.reload();
@@ -7850,24 +8044,102 @@ const EditSpiritualGuide = {
                   }
                 );
               } else {
-                const spiritualGuide = {
-                  spiritualGuideId: this.spiritualGuideId,
-                  christianName: this.christianName,
-                  fullName: this.fullName,
-                  birthday: this.birthday,
-                  position: this.position,
-                  homeland: this.homeland,
-                  phone: this.phone,
-                  email: this.email,
-                  status: this.status,
-                  groupCommunity: this.groupCommunity,
-                  id: this.$route.params.id,
-                };
-                const url =
-                  "http://localhost:3000/api/spiritualGuides/" +
-                  spiritualGuide.id +
-                  "/replace";
-                axios.post(url, spiritualGuide);
+                if (this.selectedFile != null) {
+                  const fd = new FormData();
+                  fd.append("image", this.selectedFile, this.selectedFile.name);
+                  var start = this.selectedFile.name.lastIndexOf(".");
+                  var end = this.selectedFile.length;
+                  var fileName =
+                    this.spiritualGuideId +
+                    this.selectedFile.name.slice(start, end);
+                  if (this.imageEdit != null) {
+                    const spiritualGuide = {
+                      spiritualGuideId: this.spiritualGuideId,
+                      christianName: this.christianName,
+                      fullName: this.fullName,
+                      birthday: this.birthday,
+                      phone: this.phone,
+                      email: this.email,
+                      groupCommunity: this.groupCommunity,
+                      position: this.position,
+                      image: fileName,
+                      status: this.status,
+                      id: this.$route.params.id,
+                    };
+                    const url =
+                      "http://localhost:3000/api/spiritualGuides/" +
+                      spiritualGuide.id +
+                      "/replace";
+                    axios.post(url, spiritualGuide);
+                    axios
+                      .delete(
+                        "http://localhost:3000/api/Photos/spiritualGuide/files/" +
+                          this.imageEdit
+                      )
+                      .then((resp) => {
+                        console.log(resp);
+                      })
+                      .catch((err) => console.log(err));
+                    axios
+                      .post(
+                        "http://localhost:3000/api/Photos/spiritualGuide/upload?filename=" +
+                          fileName,
+                        fd
+                      )
+                      .then((res) => {
+                        console.log(res);
+                      })
+                      .catch((err) => console.log(err));
+                  } else {
+                    const spiritualGuide = {
+                      spiritualGuideId: this.spiritualGuideId,
+                      christianName: this.christianName,
+                      fullName: this.fullName,
+                      birthday: this.birthday,
+                      phone: this.phone,
+                      email: this.email,
+                      groupCommunity: this.groupCommunity,
+                      position: this.position,
+                      image: fileName,
+                      status: this.status,
+                      id: this.$route.params.id,
+                    };
+                    const url =
+                      "http://localhost:3000/api/spiritualGuides/" +
+                      spiritualGuide.id +
+                      "/replace";
+                    axios.post(url, spiritualGuide);
+                    axios
+                      .post(
+                        "http://localhost:3000/api/Photos/spiritualGuide/upload?filename=" +
+                          fileName,
+                        fd
+                      )
+                      .then((res) => {
+                        console.log(res);
+                      })
+                      .catch((err) => console.log(err));
+                  }
+                } else {
+                  const spiritualGuide = {
+                    spiritualGuideId: this.spiritualGuideId,
+                    christianName: this.christianName,
+                    fullName: this.fullName,
+                    birthday: this.birthday,
+                    phone: this.phone,
+                    email: this.email,
+                    groupCommunity: this.groupCommunity,
+                    position: this.position,
+                    image: this.imageEdit,
+                    status: this.status,
+                    id: this.$route.params.id,
+                  };
+                  const url =
+                    "http://localhost:3000/api/spiritualGuides/" +
+                    spiritualGuide.id +
+                    "/replace";
+                  axios.post(url, spiritualGuide);
+                }
                 setTimeout(() => {
                   this.$router.push("/spiritualGuides");
                   location.reload();
@@ -7910,24 +8182,102 @@ const EditSpiritualGuide = {
                   }
                 );
               } else {
-                const spiritualGuide = {
-                  spiritualGuideId: this.spiritualGuideId,
-                  christianName: this.christianName,
-                  fullName: this.fullName,
-                  birthday: this.birthday,
-                  position: this.position,
-                  homeland: this.homeland,
-                  phone: this.phone,
-                  email: this.email,
-                  status: this.status,
-                  groupCommunity: this.groupCommunity,
-                  id: this.$route.params.id,
-                };
-                const url =
-                  "http://localhost:3000/api/spiritualGuides/" +
-                  spiritualGuide.id +
-                  "/replace";
-                axios.post(url, spiritualGuide);
+                if (this.selectedFile != null) {
+                  const fd = new FormData();
+                  fd.append("image", this.selectedFile, this.selectedFile.name);
+                  var start = this.selectedFile.name.lastIndexOf(".");
+                  var end = this.selectedFile.length;
+                  var fileName =
+                    this.spiritualGuideId +
+                    this.selectedFile.name.slice(start, end);
+                  if (this.imageEdit != null) {
+                    const spiritualGuide = {
+                      spiritualGuideId: this.spiritualGuideId,
+                      christianName: this.christianName,
+                      fullName: this.fullName,
+                      birthday: this.birthday,
+                      phone: this.phone,
+                      email: this.email,
+                      groupCommunity: this.groupCommunity,
+                      position: this.position,
+                      image: fileName,
+                      status: this.status,
+                      id: this.$route.params.id,
+                    };
+                    const url =
+                      "http://localhost:3000/api/spiritualGuides/" +
+                      spiritualGuide.id +
+                      "/replace";
+                    axios.post(url, spiritualGuide);
+                    axios
+                      .delete(
+                        "http://localhost:3000/api/Photos/spiritualGuide/files/" +
+                          this.imageEdit
+                      )
+                      .then((resp) => {
+                        console.log(resp);
+                      })
+                      .catch((err) => console.log(err));
+                    axios
+                      .post(
+                        "http://localhost:3000/api/Photos/spiritualGuide/upload?filename=" +
+                          fileName,
+                        fd
+                      )
+                      .then((res) => {
+                        console.log(res);
+                      })
+                      .catch((err) => console.log(err));
+                  } else {
+                    const spiritualGuide = {
+                      spiritualGuideId: this.spiritualGuideId,
+                      christianName: this.christianName,
+                      fullName: this.fullName,
+                      birthday: this.birthday,
+                      phone: this.phone,
+                      email: this.email,
+                      groupCommunity: this.groupCommunity,
+                      position: this.position,
+                      image: fileName,
+                      status: this.status,
+                      id: this.$route.params.id,
+                    };
+                    const url =
+                      "http://localhost:3000/api/spiritualGuides/" +
+                      spiritualGuide.id +
+                      "/replace";
+                    axios.post(url, spiritualGuide);
+                    axios
+                      .post(
+                        "http://localhost:3000/api/Photos/spiritualGuide/upload?filename=" +
+                          fileName,
+                        fd
+                      )
+                      .then((res) => {
+                        console.log(res);
+                      })
+                      .catch((err) => console.log(err));
+                  }
+                } else {
+                  const spiritualGuide = {
+                    spiritualGuideId: this.spiritualGuideId,
+                    christianName: this.christianName,
+                    fullName: this.fullName,
+                    birthday: this.birthday,
+                    phone: this.phone,
+                    email: this.email,
+                    groupCommunity: this.groupCommunity,
+                    position: this.position,
+                    image: this.imageEdit,
+                    status: this.status,
+                    id: this.$route.params.id,
+                  };
+                  const url =
+                    "http://localhost:3000/api/spiritualGuides/" +
+                    spiritualGuide.id +
+                    "/replace";
+                  axios.post(url, spiritualGuide);
+                }
                 setTimeout(() => {
                   this.$router.push("/spiritualGuides");
                   location.reload();
@@ -7978,24 +8328,106 @@ const EditSpiritualGuide = {
                         }
                       );
                     } else {
-                      const spiritualGuide = {
-                        spiritualGuideId: this.spiritualGuideId,
-                        christianName: this.christianName,
-                        fullName: this.fullName,
-                        birthday: this.birthday,
-                        position: this.position,
-                        homeland: this.homeland,
-                        phone: this.phone,
-                        email: this.email,
-                        status: this.status,
-                        groupCommunity: this.groupCommunity,
-                        id: this.$route.params.id,
-                      };
-                      const url =
-                        "http://localhost:3000/api/spiritualGuides/" +
-                        spiritualGuide.id +
-                        "/replace";
-                      axios.post(url, spiritualGuide);
+                      if (this.selectedFile != null) {
+                        const fd = new FormData();
+                        fd.append(
+                          "image",
+                          this.selectedFile,
+                          this.selectedFile.name
+                        );
+                        var start = this.selectedFile.name.lastIndexOf(".");
+                        var end = this.selectedFile.length;
+                        var fileName =
+                          this.spiritualGuideId +
+                          this.selectedFile.name.slice(start, end);
+                        if (this.imageEdit != null) {
+                          const spiritualGuide = {
+                            spiritualGuideId: this.spiritualGuideId,
+                            christianName: this.christianName,
+                            fullName: this.fullName,
+                            birthday: this.birthday,
+                            phone: this.phone,
+                            email: this.email,
+                            groupCommunity: this.groupCommunity,
+                            position: this.position,
+                            image: fileName,
+                            status: this.status,
+                            id: this.$route.params.id,
+                          };
+                          const url =
+                            "http://localhost:3000/api/spiritualGuides/" +
+                            spiritualGuide.id +
+                            "/replace";
+                          axios.post(url, spiritualGuide);
+                          axios
+                            .delete(
+                              "http://localhost:3000/api/Photos/spiritualGuide/files/" +
+                                this.imageEdit
+                            )
+                            .then((resp) => {
+                              console.log(resp);
+                            })
+                            .catch((err) => console.log(err));
+                          axios
+                            .post(
+                              "http://localhost:3000/api/Photos/spiritualGuide/upload?filename=" +
+                                fileName,
+                              fd
+                            )
+                            .then((res) => {
+                              console.log(res);
+                            })
+                            .catch((err) => console.log(err));
+                        } else {
+                          const spiritualGuide = {
+                            spiritualGuideId: this.spiritualGuideId,
+                            christianName: this.christianName,
+                            fullName: this.fullName,
+                            birthday: this.birthday,
+                            phone: this.phone,
+                            email: this.email,
+                            groupCommunity: this.groupCommunity,
+                            position: this.position,
+                            image: fileName,
+                            status: this.status,
+                            id: this.$route.params.id,
+                          };
+                          const url =
+                            "http://localhost:3000/api/spiritualGuides/" +
+                            spiritualGuide.id +
+                            "/replace";
+                          axios.post(url, spiritualGuide);
+                          axios
+                            .post(
+                              "http://localhost:3000/api/Photos/spiritualGuide/upload?filename=" +
+                                fileName,
+                              fd
+                            )
+                            .then((res) => {
+                              console.log(res);
+                            })
+                            .catch((err) => console.log(err));
+                        }
+                      } else {
+                        const spiritualGuide = {
+                          spiritualGuideId: this.spiritualGuideId,
+                          christianName: this.christianName,
+                          fullName: this.fullName,
+                          birthday: this.birthday,
+                          phone: this.phone,
+                          email: this.email,
+                          groupCommunity: this.groupCommunity,
+                          position: this.position,
+                          image: this.imageEdit,
+                          status: this.status,
+                          id: this.$route.params.id,
+                        };
+                        const url =
+                          "http://localhost:3000/api/spiritualGuides/" +
+                          spiritualGuide.id +
+                          "/replace";
+                        axios.post(url, spiritualGuide);
+                      }
                       setTimeout(() => {
                         this.$router.push("/spiritualGuides");
                         location.reload();
@@ -8034,9 +8466,6 @@ const EditSpiritualGuide = {
       }
       if (this.birthdayIsValid) {
         this.birthday = null;
-      }
-      if (this.homelandIsValid) {
-        this.homeland = null;
       }
       if (this.statusIsValid) {
         this.status = 0;
@@ -8135,16 +8564,6 @@ const EditSpiritualGuide = {
             </select>
           </div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="homeland">Quê Quán</label>
-            <label class="text-danger">*</label>
-            <input v-model="homeland" name="homeland" id="homeland" type="text" :title="titleHomeland"
-            :value="homeland" v-on:keyup="homeland = $event.target.value"
-              class="form-control  text-size-13px " placeholder="Nhập Quê quán..." style="margin-top: -5px;">
-          </div>
-        </div>
-        <div class="row mt-1">
-          <div class="col-lg-4"></div>
-          <div class="col-lg-4">
             <label class="text-size-15px font-weight-bold col-form-label" for="status">Trạng Thái</label>
             <label class="text-danger">*</label>
             <select class="custom-select  text-size-13px  h-32px" v-model="status" name="status" id="status"
@@ -8154,9 +8573,12 @@ const EditSpiritualGuide = {
               </option>
             </select>
           </div>
+        </div>
+        <div class="row mt-1">
+          <div class="col-lg-4"></div>
           <div class="col-lg-4">
             <label class="text-size-15px font-weight-bold col-form-label" for="image">Hình Ảnh</label>
-            <input type="file" id="image" v-model="image" name="image" :title="titlePicture"
+            <input type="file" id="image" @change="onFileSelected" :title="titlePicture"
               class="form-control rounded text-size-13px" style="margin-top: -5px;" />
           </div>
         </div>
@@ -8828,6 +9250,7 @@ const ListTeacher = {
         { id: "1", name: "Nam" },
         { id: "2", name: "Nữ" },
       ],
+      image: null,
     };
   },
   mounted() {
@@ -8853,6 +9276,13 @@ const ListTeacher = {
     },
     getDetailTeacher(teacher) {
       this.teacher = teacher;
+      this.image =
+        `
+      <img class="img-fluid img-thumbnail rounded-circle" src="../api/Photos/teacher/download/` +
+        this.teacher.image +
+        `" width="100px"
+      height="100px" alt="teacher-image"/>
+      `;
       this.birthdayFormat = this.formatDate(this.teacher.birthday);
     },
 
@@ -9000,9 +9430,13 @@ const ListTeacher = {
           </div>
           <div class="modal-body">
             <div class="row">
-              <div class="col-sm-4 text-center">
-                <img class="img-fluid img-thumbnail rounded-circle" src="../images/user_03.jpg" width="100px"
-                  height="100px" />
+              <div class="col-sm-4 text-center" v-if="teacher.image != null">
+                <div v-html="image"></div>
+                <p class="font-weight-bold" style="padding-top: 5px;">{{ teacher.teacherId }}</p>
+              </div>
+              <div class="col-sm-4 text-center" v-if="teacher.image == null">
+                <img class="img-fluid img-thumbnail rounded-circle" src="../images/default_image.png" width="100px"
+                  height="100px" alt="teacher-image"/>
                 <p class="font-weight-bold" style="padding-top: 5px;">{{ teacher.teacherId }}</p>
               </div>
               <div class="col-sm-8 mt-3">
@@ -9073,6 +9507,7 @@ const AddTeacher = {
       ],
       subjects: [],
       teachers: [],
+      selectedFile: null,
     };
   },
   mounted() {
@@ -9151,19 +9586,25 @@ const AddTeacher = {
     },
   },
   methods: {
+    onFileSelected(event) {
+      this.selectedFile = event.target.files[0];
+    },
     submitAddTeacherForm() {
       if (this.addTeacherFormIsValid) {
-        let lengthTeachers = 0;
-        let role = 0;
-        lengthTeachers = this.teachers.length;
-        if (lengthTeachers > -1 && lengthTeachers < 9) {
-          this.teacherId = "GV00" + (lengthTeachers + 1);
-        }
-        if (lengthTeachers > 8 && lengthTeachers < 99) {
-          this.teacherId = "GV0" + (lengthTeachers + 1);
-        }
-        if (lengthTeachers > 98 && lengthTeachers < 999) {
-          this.teacherId = "GV" + (lengthTeachers + 1);
+        let lengthTeachers = this.teachers.length;
+        if (lengthTeachers == 0) {
+          this.teacherId == "GV001";
+        } else {
+          let currentId = this.teachers[lengthTeachers - 1].id;
+          if (currentId > -1 && currentId < 9) {
+            this.teacherId = "GV00" + (currentId + 1);
+          }
+          if (currentId > 8 && currentId < 99) {
+            this.teacherId = "GV0" + (currentId + 1);
+          }
+          if (currentId > 98 && currentId < 999) {
+            this.teacherId = "GV" + (currentId + 1);
+          }
         }
         axios
           .get(
@@ -9207,28 +9648,62 @@ const AddTeacher = {
                         }
                       );
                     } else {
+                      var fileName = null;
+                      const fd = new FormData();
+                      if (this.selectedFile != null) {
+                        fd.append(
+                          "image",
+                          this.selectedFile,
+                          this.selectedFile.name
+                        );
+                        var start = this.selectedFile.name.lastIndexOf(".");
+                        var end = this.selectedFile.length;
+                        fileName =
+                          this.teacherId +
+                          this.selectedFile.name.slice(start, end);
+                      }
                       const teacher = {
                         teacherId: this.teacherId,
-                        gender: this.gender,
                         fullName: this.fullName,
+                        gender: this.gender,
                         birthday: this.birthday,
                         phone: this.phone,
                         email: this.email,
-                        image: this.image,
+                        image: fileName,
                         subject: this.subject,
                         status: this.status,
                       };
                       const url_1 = `http://localhost:3000/api/teachers`;
                       axios.post(url_1, teacher);
-                      const account = {
-                        userId: this.teacherId,
-                        username: this.email,
-                        password: crypt.encrypt(this.phone),
-                        role: 10,
-                        status: this.status,
-                      };
-                      const url = `http://localhost:3000/api/accounts`;
-                      axios.post(url, account);
+                      axios
+                        .get(
+                          "http://localhost:3000/api/teachers/findOne?filter[where][email]=" +
+                            this.email
+                        )
+                        .then((resp) => {
+                          const account_teacher = {
+                            userId: resp.data.teacherId,
+                            username: resp.data.email,
+                            password: crypt.encrypt(resp.data.phone),
+                            role: 10,
+                            status: resp.data.status,
+                            idTable: resp.data.id,
+                          };
+                          const url = "http://localhost:3000/api/accounts";
+                          axios.post(url, account_teacher);
+                          if (this.selectedFile != null) {
+                            axios
+                              .post(
+                                "http://localhost:3000/api/Photos/teacher/upload?filename=" +
+                                  fileName,
+                                fd
+                              )
+                              .then((res) => {
+                                console.log(res);
+                              })
+                              .catch((err) => console.log(err));
+                          }
+                        });
                       setTimeout(() => {
                         this.$router.push("/teachers");
                         location.reload();
@@ -9358,7 +9833,7 @@ const AddTeacher = {
           </div>
           <div class="col-lg-4">
             <label class="text-size-15px font-weight-bold col-form-label" for="image">Hình Ảnh</label>
-            <input type="file" id="image" v-model="image" name="image" :title="titlePicture"
+            <input type="file" id="image" @change="onFileSelected" :title="titlePicture"
               class="form-control rounded text-size-13px" style="margin-top: -5px;" />
           </div>
         </div>
@@ -9407,6 +9882,7 @@ const EditTeacher = {
       email: null,
       emailEdit: null,
       image: null,
+      imageEdit: null,
       subject: 0,
       titlePicture: "Chọn hình ảnh",
       titleBirthday: "Nhập thông tin ngày sinh",
@@ -9427,6 +9903,7 @@ const EditTeacher = {
       subjects: [],
       teachers: [],
       teacher: {},
+      selectedFile: null,
     };
   },
   mounted() {
@@ -9443,14 +9920,15 @@ const EditTeacher = {
       )
       .then((response) => {
         this.teacherId = response.data.teacher.teacherId;
-        this.gender = response.data.teacher.gender;
         this.fullName = response.data.teacher.fullName;
+        this.gender = response.data.teacher.gender;
         this.birthday = crypt.formatDate(response.data.teacher.birthday);
-        this.subject = response.data.teacher.subject;
         this.phone = response.data.teacher.phone;
         this.phoneEdit = response.data.teacher.phone;
         this.email = response.data.teacher.email;
         this.emailEdit = response.data.teacher.email;
+        this.imageEdit = response.data.teacher.image;
+        this.subject = response.data.teacher.subject;
         this.status = response.data.teacher.status;
       });
   },
@@ -9522,6 +10000,9 @@ const EditTeacher = {
     },
   },
   methods: {
+    onFileSelected(event) {
+      this.selectedFile = event.target.files[0];
+    },
     submitEditTeacherForm() {
       if (this.editTeacherFormIsValid) {
         if (this.emailEdit == this.email && this.phoneEdit == this.phone) {
@@ -9542,20 +10023,96 @@ const EditTeacher = {
               }
             );
           } else {
-            const teacher = {
-              teacherId: this.teacherId,
-              gender: this.gender,
-              fullName: this.fullName,
-              birthday: this.birthday,
-              subject: this.subject,
-              phone: this.phone,
-              email: this.email,
-              status: this.status,
-              id: this.$route.params.id,
-            };
-            const url =
-              "http://localhost:3000/api/teachers/" + teacher.id + "/replace";
-            axios.post(url, teacher);
+            if (this.selectedFile != null) {
+              const fd = new FormData();
+              fd.append("image", this.selectedFile, this.selectedFile.name);
+              var start = this.selectedFile.name.lastIndexOf(".");
+              var end = this.selectedFile.length;
+              var fileName =
+                this.teacherId + this.selectedFile.name.slice(start, end);
+              if (this.imageEdit != null) {
+                const teacher = {
+                  teacherId: this.teacherId,
+                  fullName: this.fullName,
+                  gender: this.gender,
+                  birthday: this.birthday,
+                  phone: this.phone,
+                  email: this.email,
+                  image: fileName,
+                  subject: this.subject,
+                  status: this.status,
+                  id: this.$route.params.id,
+                };
+                const url =
+                  "http://localhost:3000/api/teachers/" +
+                  teacher.id +
+                  "/replace";
+                axios.post(url, teacher);
+                axios
+                  .delete(
+                    "http://localhost:3000/api/Photos/teacher/files/" +
+                      this.imageEdit
+                  )
+                  .then((resp) => {
+                    console.log(resp);
+                  })
+                  .catch((err) => console.log(err));
+                axios
+                  .post(
+                    "http://localhost:3000/api/Photos/teacher/upload?filename=" +
+                      fileName,
+                    fd
+                  )
+                  .then((res) => {
+                    console.log(res);
+                  })
+                  .catch((err) => console.log(err));
+              } else {
+                const teacher = {
+                  teacherId: this.teacherId,
+                  fullName: this.fullName,
+                  gender: this.gender,
+                  birthday: this.birthday,
+                  phone: this.phone,
+                  email: this.email,
+                  image: fileName,
+                  subject: this.subject,
+                  status: this.status,
+                  id: this.$route.params.id,
+                };
+                const url =
+                  "http://localhost:3000/api/teachers/" +
+                  teacher.id +
+                  "/replace";
+                axios.post(url, teacher);
+                axios
+                  .post(
+                    "http://localhost:3000/api/Photos/teacher/upload?filename=" +
+                      fileName,
+                    fd
+                  )
+                  .then((res) => {
+                    console.log(res);
+                  })
+                  .catch((err) => console.log(err));
+              }
+            } else {
+              const teacher = {
+                teacherId: this.teacherId,
+                fullName: this.fullName,
+                gender: this.gender,
+                birthday: this.birthday,
+                phone: this.phone,
+                email: this.email,
+                image: this.imageEdit,
+                subject: this.subject,
+                status: this.status,
+                id: this.$route.params.id,
+              };
+              const url =
+                "http://localhost:3000/api/teachers/" + teacher.id + "/replace";
+              axios.post(url, teacher);
+            }
             setTimeout(() => {
               this.$router.push("/teachers");
               location.reload();
@@ -9594,22 +10151,102 @@ const EditTeacher = {
                     }
                   );
                 } else {
-                  const teacher = {
-                    teacherId: this.teacherId,
-                    gender: this.gender,
-                    fullName: this.fullName,
-                    birthday: this.birthday,
-                    subject: this.subject,
-                    phone: this.phone,
-                    email: this.email,
-                    status: this.status,
-                    id: this.$route.params.id,
-                  };
-                  const url =
-                    "http://localhost:3000/api/teachers/" +
-                    teacher.id +
-                    "/replace";
-                  axios.post(url, teacher);
+                  if (this.selectedFile != null) {
+                    const fd = new FormData();
+                    fd.append(
+                      "image",
+                      this.selectedFile,
+                      this.selectedFile.name
+                    );
+                    var start = this.selectedFile.name.lastIndexOf(".");
+                    var end = this.selectedFile.length;
+                    var fileName =
+                      this.teacherId + this.selectedFile.name.slice(start, end);
+                    if (this.imageEdit != null) {
+                      const teacher = {
+                        teacherId: this.teacherId,
+                        fullName: this.fullName,
+                        gender: this.gender,
+                        birthday: this.birthday,
+                        phone: this.phone,
+                        email: this.email,
+                        image: fileName,
+                        subject: this.subject,
+                        status: this.status,
+                        id: this.$route.params.id,
+                      };
+                      const url =
+                        "http://localhost:3000/api/teachers/" +
+                        teacher.id +
+                        "/replace";
+                      axios.post(url, teacher);
+                      axios
+                        .delete(
+                          "http://localhost:3000/api/Photos/teacher/files/" +
+                            this.imageEdit
+                        )
+                        .then((resp) => {
+                          console.log(resp);
+                        })
+                        .catch((err) => console.log(err));
+                      axios
+                        .post(
+                          "http://localhost:3000/api/Photos/teacher/upload?filename=" +
+                            fileName,
+                          fd
+                        )
+                        .then((res) => {
+                          console.log(res);
+                        })
+                        .catch((err) => console.log(err));
+                    } else {
+                      const teacher = {
+                        teacherId: this.teacherId,
+                        fullName: this.fullName,
+                        gender: this.gender,
+                        birthday: this.birthday,
+                        phone: this.phone,
+                        email: this.email,
+                        image: fileName,
+                        subject: this.subject,
+                        status: this.status,
+                        id: this.$route.params.id,
+                      };
+                      const url =
+                        "http://localhost:3000/api/teachers/" +
+                        teacher.id +
+                        "/replace";
+                      axios.post(url, teacher);
+                      axios
+                        .post(
+                          "http://localhost:3000/api/Photos/teacher/upload?filename=" +
+                            fileName,
+                          fd
+                        )
+                        .then((res) => {
+                          console.log(res);
+                        })
+                        .catch((err) => console.log(err));
+                    }
+                  } else {
+                    const teacher = {
+                      teacherId: this.teacherId,
+                      fullName: this.fullName,
+                      gender: this.gender,
+                      birthday: this.birthday,
+                      phone: this.phone,
+                      email: this.email,
+                      image: this.imageEdit,
+                      subject: this.subject,
+                      status: this.status,
+                      id: this.$route.params.id,
+                    };
+                    const url =
+                      "http://localhost:3000/api/teachers/" +
+                      teacher.id +
+                      "/replace";
+                    axios.post(url, teacher);
+                  }
                   setTimeout(() => {
                     this.$router.push("/teachers");
                     location.reload();
@@ -9654,22 +10291,102 @@ const EditTeacher = {
                     }
                   );
                 } else {
-                  const teacher = {
-                    teacherId: this.teacherId,
-                    gender: this.gender,
-                    fullName: this.fullName,
-                    birthday: this.birthday,
-                    subject: this.subject,
-                    phone: this.phone,
-                    email: this.email,
-                    status: this.status,
-                    id: this.$route.params.id,
-                  };
-                  const url =
-                    "http://localhost:3000/api/teachers/" +
-                    teacher.id +
-                    "/replace";
-                  axios.post(url, teacher);
+                  if (this.selectedFile != null) {
+                    const fd = new FormData();
+                    fd.append(
+                      "image",
+                      this.selectedFile,
+                      this.selectedFile.name
+                    );
+                    var start = this.selectedFile.name.lastIndexOf(".");
+                    var end = this.selectedFile.length;
+                    var fileName =
+                      this.teacherId + this.selectedFile.name.slice(start, end);
+                    if (this.imageEdit != null) {
+                      const teacher = {
+                        teacherId: this.teacherId,
+                        fullName: this.fullName,
+                        gender: this.gender,
+                        birthday: this.birthday,
+                        phone: this.phone,
+                        email: this.email,
+                        image: fileName,
+                        subject: this.subject,
+                        status: this.status,
+                        id: this.$route.params.id,
+                      };
+                      const url =
+                        "http://localhost:3000/api/teachers/" +
+                        teacher.id +
+                        "/replace";
+                      axios.post(url, teacher);
+                      axios
+                        .delete(
+                          "http://localhost:3000/api/Photos/teacher/files/" +
+                            this.imageEdit
+                        )
+                        .then((resp) => {
+                          console.log(resp);
+                        })
+                        .catch((err) => console.log(err));
+                      axios
+                        .post(
+                          "http://localhost:3000/api/Photos/teacher/upload?filename=" +
+                            fileName,
+                          fd
+                        )
+                        .then((res) => {
+                          console.log(res);
+                        })
+                        .catch((err) => console.log(err));
+                    } else {
+                      const teacher = {
+                        teacherId: this.teacherId,
+                        fullName: this.fullName,
+                        gender: this.gender,
+                        birthday: this.birthday,
+                        phone: this.phone,
+                        email: this.email,
+                        image: fileName,
+                        subject: this.subject,
+                        status: this.status,
+                        id: this.$route.params.id,
+                      };
+                      const url =
+                        "http://localhost:3000/api/teachers/" +
+                        teacher.id +
+                        "/replace";
+                      axios.post(url, teacher);
+                      axios
+                        .post(
+                          "http://localhost:3000/api/Photos/teacher/upload?filename=" +
+                            fileName,
+                          fd
+                        )
+                        .then((res) => {
+                          console.log(res);
+                        })
+                        .catch((err) => console.log(err));
+                    }
+                  } else {
+                    const teacher = {
+                      teacherId: this.teacherId,
+                      fullName: this.fullName,
+                      gender: this.gender,
+                      birthday: this.birthday,
+                      phone: this.phone,
+                      email: this.email,
+                      image: this.imageEdit,
+                      subject: this.subject,
+                      status: this.status,
+                      id: this.$route.params.id,
+                    };
+                    const url =
+                      "http://localhost:3000/api/teachers/" +
+                      teacher.id +
+                      "/replace";
+                    axios.post(url, teacher);
+                  }
                   setTimeout(() => {
                     this.$router.push("/teachers");
                     location.reload();
@@ -9722,22 +10439,103 @@ const EditTeacher = {
                           }
                         );
                       } else {
-                        const teacher = {
-                          teacherId: this.teacherId,
-                          gender: this.gender,
-                          fullName: this.fullName,
-                          birthday: this.birthday,
-                          subject: this.subject,
-                          phone: this.phone,
-                          email: this.email,
-                          status: this.status,
-                          id: this.$route.params.id,
-                        };
-                        const url =
-                          "http://localhost:3000/api/teachers/" +
-                          teacher.id +
-                          "/replace";
-                        axios.post(url, teacher);
+                        if (this.selectedFile != null) {
+                          const fd = new FormData();
+                          fd.append(
+                            "image",
+                            this.selectedFile,
+                            this.selectedFile.name
+                          );
+                          var start = this.selectedFile.name.lastIndexOf(".");
+                          var end = this.selectedFile.length;
+                          var fileName =
+                            this.teacherId +
+                            this.selectedFile.name.slice(start, end);
+                          if (this.imageEdit != null) {
+                            const teacher = {
+                              teacherId: this.teacherId,
+                              fullName: this.fullName,
+                              gender: this.gender,
+                              birthday: this.birthday,
+                              phone: this.phone,
+                              email: this.email,
+                              image: fileName,
+                              subject: this.subject,
+                              status: this.status,
+                              id: this.$route.params.id,
+                            };
+                            const url =
+                              "http://localhost:3000/api/teachers/" +
+                              teacher.id +
+                              "/replace";
+                            axios.post(url, teacher);
+                            axios
+                              .delete(
+                                "http://localhost:3000/api/Photos/teacher/files/" +
+                                  this.imageEdit
+                              )
+                              .then((resp) => {
+                                console.log(resp);
+                              })
+                              .catch((err) => console.log(err));
+                            axios
+                              .post(
+                                "http://localhost:3000/api/Photos/teacher/upload?filename=" +
+                                  fileName,
+                                fd
+                              )
+                              .then((res) => {
+                                console.log(res);
+                              })
+                              .catch((err) => console.log(err));
+                          } else {
+                            const teacher = {
+                              teacherId: this.teacherId,
+                              fullName: this.fullName,
+                              gender: this.gender,
+                              birthday: this.birthday,
+                              phone: this.phone,
+                              email: this.email,
+                              image: fileName,
+                              subject: this.subject,
+                              status: this.status,
+                              id: this.$route.params.id,
+                            };
+                            const url =
+                              "http://localhost:3000/api/teachers/" +
+                              teacher.id +
+                              "/replace";
+                            axios.post(url, teacher);
+                            axios
+                              .post(
+                                "http://localhost:3000/api/Photos/teacher/upload?filename=" +
+                                  fileName,
+                                fd
+                              )
+                              .then((res) => {
+                                console.log(res);
+                              })
+                              .catch((err) => console.log(err));
+                          }
+                        } else {
+                          const teacher = {
+                            teacherId: this.teacherId,
+                            fullName: this.fullName,
+                            gender: this.gender,
+                            birthday: this.birthday,
+                            phone: this.phone,
+                            email: this.email,
+                            image: this.imageEdit,
+                            subject: this.subject,
+                            status: this.status,
+                            id: this.$route.params.id,
+                          };
+                          const url =
+                            "http://localhost:3000/api/teachers/" +
+                            teacher.id +
+                            "/replace";
+                          axios.post(url, teacher);
+                        }
                         setTimeout(() => {
                           this.$router.push("/teachers");
                           location.reload();
@@ -9872,7 +10670,7 @@ const EditTeacher = {
           </div>
           <div class="col-lg-4">
             <label class="text-size-15px font-weight-bold col-form-label" for="image">Hình Ảnh</label>
-            <input type="file" id="image" v-model="image" name="image" :title="titlePicture"
+            <input type="file" id="image" @change="onFileSelected" :title="titlePicture"
               class="form-control rounded text-size-13px" style="margin-top: -5px;" />
           </div>
         </div>
@@ -10582,7 +11380,7 @@ const EditSchedule = {
   </div>
   `,
 };
-
+// ROLE
 const Role = {
   template: `
   <div>
@@ -10939,7 +11737,7 @@ const EditRole = {
   </div>
   `,
 };
-
+// LAYOUT
 const Layout = {
   data() {
     return {};
@@ -10976,7 +11774,7 @@ const Layout = {
   </div>
   `,
 };
-
+// 404 PAGE
 const Page404 = {
   methods: {
     backToHome() {
@@ -12711,6 +13509,7 @@ const DetailProfile = {
       email: null,
       emailEdit: null,
       image: null,
+      imageEdit: null,
       position: 0,
       status: 0,
       community: 0,
@@ -12733,6 +13532,8 @@ const DetailProfile = {
       groupCommunity: 0,
       role: 0,
       idTable: 0,
+      selectedFile: null,
+      htmlImage: null,
     };
   },
   mounted() {
@@ -12766,13 +13567,21 @@ const DetailProfile = {
               this.christianName = response.data.manager.christianName;
               this.fullName = response.data.manager.fullName;
               this.birthday = crypt.formatDate(response.data.manager.birthday);
-              this.position = response.data.manager.position;
-              this.homeland = response.data.manager.homeland;
               this.phone = response.data.manager.phone;
               this.phoneEdit = response.data.manager.phone;
               this.email = response.data.manager.email;
               this.emailEdit = response.data.manager.email;
+              this.imageEdit = response.data.manager.image;
+              this.position = response.data.manager.position;
+              this.homeland = response.data.manager.homeland;
               this.status = response.data.manager.status;
+              this.htmlImage =
+                `
+              <img class="profile-user-img img-fluid rounded-circle img-thumbnail" id="image"
+              src="../api/Photos/manager/download/` +
+                this.imageEdit +
+                `" alt="User Image">
+              `;
             });
         }
         if (this.role == 5) {
@@ -12788,15 +13597,23 @@ const DetailProfile = {
               this.birthday = crypt.formatDate(
                 response.data.candidate.birthday
               );
-              this.position = response.data.candidate.position;
-              this.homeland = response.data.candidate.homeland;
               this.phone = response.data.candidate.phone;
               this.phoneEdit = response.data.candidate.phone;
               this.email = response.data.candidate.email;
               this.emailEdit = response.data.candidate.email;
-              this.status = response.data.candidate.status;
+              this.imageEdit = response.data.candidate.image;
+              this.position = response.data.candidate.position;
               this.community = response.data.candidate.community;
               this.communityEdit = response.data.candidate.community;
+              this.homeland = response.data.candidate.homeland;
+              this.status = response.data.candidate.status;
+              this.htmlImage =
+                `
+              <img class="profile-user-img img-fluid rounded-circle img-thumbnail" id="image"
+              src="../api/Photos/candidate/download/` +
+                this.imageEdit +
+                `" alt="User Image">
+              `;
             });
         }
         if (this.role == 6 || this.role == 7) {
@@ -12813,38 +13630,51 @@ const DetailProfile = {
               this.birthday = crypt.formatDate(
                 response.data.spiritualGuide.birthday
               );
-              this.position = response.data.spiritualGuide.position;
-              this.homeland = response.data.spiritualGuide.homeland;
               this.phone = response.data.spiritualGuide.phone;
               this.phoneEdit = response.data.spiritualGuide.phone;
               this.email = response.data.spiritualGuide.email;
               this.emailEdit = response.data.spiritualGuide.email;
-              this.status = response.data.spiritualGuide.status;
               this.groupCommunity = response.data.spiritualGuide.groupCommunity;
+              this.position = response.data.spiritualGuide.position;
+              this.imageEdit = response.data.spiritualGuide.image;
+              this.status = response.data.spiritualGuide.status;
+              this.htmlImage =
+                `
+              <img class="profile-user-img img-fluid rounded-circle img-thumbnail" id="image"
+              src="../api/Photos/spiritualGuide/download/` +
+                this.imageEdit +
+                `" alt="User Image">
+              `;
             });
         }
         if (this.role == 8 || this.role == 9) {
           axios
             .get(
-              "http://localhost:3000/api/spiritualGuides/getSpiritualGuide?id=" +
+              "http://localhost:3000/api/companions/getCompanion?id=" +
                 this.idTable
             )
             .then((response) => {
-              this.spiritualGuideId =
-                response.data.spiritualGuide.spiritualGuideId;
-              this.christianName = response.data.spiritualGuide.christianName;
-              this.fullName = response.data.spiritualGuide.fullName;
+              this.companionId = response.data.companion.companionId;
+              this.christianName = response.data.companion.christianName;
+              this.fullName = response.data.companion.fullName;
               this.birthday = crypt.formatDate(
-                response.data.spiritualGuide.birthday
+                response.data.companion.birthday
               );
-              this.position = response.data.spiritualGuide.position;
-              this.homeland = response.data.spiritualGuide.homeland;
-              this.phone = response.data.spiritualGuide.phone;
-              this.phoneEdit = response.data.spiritualGuide.phone;
-              this.email = response.data.spiritualGuide.email;
-              this.emailEdit = response.data.spiritualGuide.email;
-              this.status = response.data.spiritualGuide.status;
-              this.groupCommunity = response.data.spiritualGuide.groupCommunity;
+              this.phone = response.data.companion.phone;
+              this.phoneEdit = response.data.companion.phone;
+              this.email = response.data.companion.email;
+              this.emailEdit = response.data.companion.email;
+              this.groupCommunity = response.data.companion.groupCommunity;
+              this.position = response.data.companion.position;
+              this.imageEdit = response.data.companion.image;
+              this.status = response.data.companion.status;
+              this.htmlImage =
+                `
+              <img class="profile-user-img img-fluid rounded-circle img-thumbnail" id="image"
+              src="../api/Photos/companion/download/` +
+                this.imageEdit +
+                `" alt="User Image">
+              `;
             });
         }
         if (this.role == 10) {
@@ -12854,15 +13684,23 @@ const DetailProfile = {
             )
             .then((response) => {
               this.teacherId = response.data.teacher.teacherId;
-              this.gender = response.data.teacher.gender;
               this.fullName = response.data.teacher.fullName;
+              this.gender = response.data.teacher.gender;
               this.birthday = crypt.formatDate(response.data.teacher.birthday);
-              this.subject = response.data.teacher.subject;
               this.phone = response.data.teacher.phone;
               this.phoneEdit = response.data.teacher.phone;
               this.email = response.data.teacher.email;
               this.emailEdit = response.data.teacher.email;
+              this.imageEdit = response.data.teacher.image;
+              this.subject = response.data.teacher.subject;
               this.status = response.data.teacher.status;
+              this.htmlImage =
+                `
+              <img class="profile-user-img img-fluid rounded-circle img-thumbnail" id="image"
+              src="../api/Photos/teacher/download/` +
+                this.imageEdit +
+                `" alt="User Image">
+              `;
             });
         }
       });
@@ -12982,22 +13820,102 @@ const DetailProfile = {
                 }
               );
             } else {
-              const manager = {
-                managerId: this.managerId,
-                christianName: this.christianName,
-                fullName: this.fullName,
-                birthday: this.birthday,
-                homeland: this.homeland,
-                position: this.position,
-                phone: this.phone,
-                email: this.email,
-                status: this.status,
-                id: this.idTable,
-              };
-              const url =
-                "http://localhost:3000/api/managers/" + manager.id + "/replace";
-              axios.post(url, manager);
-              this.$router.push("/");
+              if (this.selectedFile != null) {
+                const fd = new FormData();
+                fd.append("image", this.selectedFile, this.selectedFile.name);
+                var start = this.selectedFile.name.lastIndexOf(".");
+                var end = this.selectedFile.length;
+                var fileName =
+                  this.managerId + this.selectedFile.name.slice(start, end);
+                if (this.imageEdit != null) {
+                  const manager = {
+                    managerId: this.managerId,
+                    christianName: this.christianName,
+                    fullName: this.fullName,
+                    birthday: this.birthday,
+                    phone: this.phone,
+                    email: this.email,
+                    image: fileName,
+                    position: this.position,
+                    homeland: this.homeland,
+                    status: this.status,
+                    id: this.$route.params.id,
+                  };
+                  const url =
+                    "http://localhost:3000/api/managers/" +
+                    manager.id +
+                    "/replace";
+                  axios.post(url, manager);
+                  axios
+                    .delete(
+                      "http://localhost:3000/api/Photos/manager/files/" +
+                        this.imageEdit
+                    )
+                    .then((resp) => {
+                      console.log(resp);
+                    })
+                    .catch((err) => console.log(err));
+                  axios
+                    .post(
+                      "http://localhost:3000/api/Photos/manager/upload?filename=" +
+                        fileName,
+                      fd
+                    )
+                    .then((res) => {
+                      console.log(res);
+                    })
+                    .catch((err) => console.log(err));
+                } else {
+                  const manager = {
+                    managerId: this.managerId,
+                    christianName: this.christianName,
+                    fullName: this.fullName,
+                    birthday: this.birthday,
+                    phone: this.phone,
+                    email: this.email,
+                    image: fileName,
+                    position: this.position,
+                    homeland: this.homeland,
+                    status: this.status,
+                    id: this.$route.params.id,
+                  };
+                  const url =
+                    "http://localhost:3000/api/managers/" +
+                    manager.id +
+                    "/replace";
+                  axios.post(url, manager);
+                  axios
+                    .post(
+                      "http://localhost:3000/api/Photos/manager/upload?filename=" +
+                        fileName,
+                      fd
+                    )
+                    .then((res) => {
+                      console.log(res);
+                    })
+                    .catch((err) => console.log(err));
+                }
+              } else {
+                const manager = {
+                  managerId: this.managerId,
+                  christianName: this.christianName,
+                  fullName: this.fullName,
+                  birthday: this.birthday,
+                  phone: this.phone,
+                  email: this.email,
+                  image: this.imageEdit,
+                  position: this.position,
+                  homeland: this.homeland,
+                  status: this.status,
+                  id: this.$route.params.id,
+                };
+                const url =
+                  "http://localhost:3000/api/managers/" +
+                  manager.id +
+                  "/replace";
+                axios.post(url, manager);
+              }
+              this.$router.push("/managers");
               location.reload();
               return 0;
             }
@@ -13032,24 +13950,106 @@ const DetailProfile = {
                     }
                   );
                 } else {
-                  const manager = {
-                    managerId: this.managerId,
-                    christianName: this.christianName,
-                    fullName: this.fullName,
-                    birthday: this.birthday,
-                    homeland: this.homeland,
-                    position: this.position,
-                    phone: this.phone,
-                    email: this.email,
-                    status: this.status,
-                    id: this.idTable,
-                  };
-                  const url =
-                    "http://localhost:3000/api/managers/" +
-                    manager.id +
-                    "/replace";
-                  axios.post(url, manager);
-                  this.$router.push("/");
+                  if (this.selectedFile != null) {
+                    const fd = new FormData();
+                    fd.append(
+                      "image",
+                      this.selectedFile,
+                      this.selectedFile.name
+                    );
+                    var start = this.selectedFile.name.lastIndexOf(".");
+                    var end = this.selectedFile.length;
+                    var fileName =
+                      this.managerId + this.selectedFile.name.slice(start, end);
+                    if (this.imageEdit != null) {
+                      const manager = {
+                        managerId: this.managerId,
+                        christianName: this.christianName,
+                        fullName: this.fullName,
+                        birthday: this.birthday,
+                        phone: this.phone,
+                        email: this.email,
+                        image: fileName,
+                        position: this.position,
+                        homeland: this.homeland,
+                        status: this.status,
+                        id: this.$route.params.id,
+                      };
+                      const url =
+                        "http://localhost:3000/api/managers/" +
+                        manager.id +
+                        "/replace";
+                      axios.post(url, manager);
+                      axios
+                        .delete(
+                          "http://localhost:3000/api/Photos/manager/files/" +
+                            this.imageEdit
+                        )
+                        .then((resp) => {
+                          console.log(resp);
+                        })
+                        .catch((err) => console.log(err));
+                      axios
+                        .post(
+                          "http://localhost:3000/api/Photos/manager/upload?filename=" +
+                            fileName,
+                          fd
+                        )
+                        .then((res) => {
+                          console.log(res);
+                        })
+                        .catch((err) => console.log(err));
+                    } else {
+                      const manager = {
+                        managerId: this.managerId,
+                        christianName: this.christianName,
+                        fullName: this.fullName,
+                        birthday: this.birthday,
+                        phone: this.phone,
+                        email: this.email,
+                        image: fileName,
+                        position: this.position,
+                        homeland: this.homeland,
+                        status: this.status,
+                        id: this.$route.params.id,
+                      };
+                      const url =
+                        "http://localhost:3000/api/managers/" +
+                        manager.id +
+                        "/replace";
+                      axios.post(url, manager);
+                      axios
+                        .post(
+                          "http://localhost:3000/api/Photos/manager/upload?filename=" +
+                            fileName,
+                          fd
+                        )
+                        .then((res) => {
+                          console.log(res);
+                        })
+                        .catch((err) => console.log(err));
+                    }
+                  } else {
+                    const manager = {
+                      managerId: this.managerId,
+                      christianName: this.christianName,
+                      fullName: this.fullName,
+                      birthday: this.birthday,
+                      phone: this.phone,
+                      email: this.email,
+                      image: this.imageEdit,
+                      position: this.position,
+                      homeland: this.homeland,
+                      status: this.status,
+                      id: this.$route.params.id,
+                    };
+                    const url =
+                      "http://localhost:3000/api/managers/" +
+                      manager.id +
+                      "/replace";
+                    axios.post(url, manager);
+                  }
+                  this.$router.push("/managers");
                   location.reload();
                   return 0;
                 }
@@ -13089,24 +14089,106 @@ const DetailProfile = {
                     }
                   );
                 } else {
-                  const manager = {
-                    managerId: this.managerId,
-                    christianName: this.christianName,
-                    fullName: this.fullName,
-                    birthday: this.birthday,
-                    homeland: this.homeland,
-                    position: this.position,
-                    phone: this.phone,
-                    email: this.email,
-                    status: this.status,
-                    id: this.idTable,
-                  };
-                  const url =
-                    "http://localhost:3000/api/managers/" +
-                    manager.id +
-                    "/replace";
-                  axios.post(url, manager);
-                  this.$router.push("/");
+                  if (this.selectedFile != null) {
+                    const fd = new FormData();
+                    fd.append(
+                      "image",
+                      this.selectedFile,
+                      this.selectedFile.name
+                    );
+                    var start = this.selectedFile.name.lastIndexOf(".");
+                    var end = this.selectedFile.length;
+                    var fileName =
+                      this.managerId + this.selectedFile.name.slice(start, end);
+                    if (this.imageEdit != null) {
+                      const manager = {
+                        managerId: this.managerId,
+                        christianName: this.christianName,
+                        fullName: this.fullName,
+                        birthday: this.birthday,
+                        phone: this.phone,
+                        email: this.email,
+                        image: fileName,
+                        position: this.position,
+                        homeland: this.homeland,
+                        status: this.status,
+                        id: this.$route.params.id,
+                      };
+                      const url =
+                        "http://localhost:3000/api/managers/" +
+                        manager.id +
+                        "/replace";
+                      axios.post(url, manager);
+                      axios
+                        .delete(
+                          "http://localhost:3000/api/Photos/manager/files/" +
+                            this.imageEdit
+                        )
+                        .then((resp) => {
+                          console.log(resp);
+                        })
+                        .catch((err) => console.log(err));
+                      axios
+                        .post(
+                          "http://localhost:3000/api/Photos/manager/upload?filename=" +
+                            fileName,
+                          fd
+                        )
+                        .then((res) => {
+                          console.log(res);
+                        })
+                        .catch((err) => console.log(err));
+                    } else {
+                      const manager = {
+                        managerId: this.managerId,
+                        christianName: this.christianName,
+                        fullName: this.fullName,
+                        birthday: this.birthday,
+                        phone: this.phone,
+                        email: this.email,
+                        image: fileName,
+                        position: this.position,
+                        homeland: this.homeland,
+                        status: this.status,
+                        id: this.$route.params.id,
+                      };
+                      const url =
+                        "http://localhost:3000/api/managers/" +
+                        manager.id +
+                        "/replace";
+                      axios.post(url, manager);
+                      axios
+                        .post(
+                          "http://localhost:3000/api/Photos/manager/upload?filename=" +
+                            fileName,
+                          fd
+                        )
+                        .then((res) => {
+                          console.log(res);
+                        })
+                        .catch((err) => console.log(err));
+                    }
+                  } else {
+                    const manager = {
+                      managerId: this.managerId,
+                      christianName: this.christianName,
+                      fullName: this.fullName,
+                      birthday: this.birthday,
+                      phone: this.phone,
+                      email: this.email,
+                      image: this.imageEdit,
+                      position: this.position,
+                      homeland: this.homeland,
+                      status: this.status,
+                      id: this.$route.params.id,
+                    };
+                    const url =
+                      "http://localhost:3000/api/managers/" +
+                      manager.id +
+                      "/replace";
+                    axios.post(url, manager);
+                  }
+                  this.$router.push("/managers");
                   location.reload();
                   return 0;
                 }
@@ -13154,24 +14236,107 @@ const DetailProfile = {
                           }
                         );
                       } else {
-                        const manager = {
-                          managerId: this.managerId,
-                          christianName: this.christianName,
-                          fullName: this.fullName,
-                          birthday: this.birthday,
-                          homeland: this.homeland,
-                          position: this.position,
-                          phone: this.phone,
-                          email: this.email,
-                          status: this.status,
-                          id: this.idTable,
-                        };
-                        const url =
-                          "http://localhost:3000/api/managers/" +
-                          manager.id +
-                          "/replace";
-                        axios.post(url, manager);
-                        this.$router.push("/");
+                        if (this.selectedFile != null) {
+                          const fd = new FormData();
+                          fd.append(
+                            "image",
+                            this.selectedFile,
+                            this.selectedFile.name
+                          );
+                          var start = this.selectedFile.name.lastIndexOf(".");
+                          var end = this.selectedFile.length;
+                          var fileName =
+                            this.managerId +
+                            this.selectedFile.name.slice(start, end);
+                          if (this.imageEdit != null) {
+                            const manager = {
+                              managerId: this.managerId,
+                              christianName: this.christianName,
+                              fullName: this.fullName,
+                              birthday: this.birthday,
+                              phone: this.phone,
+                              email: this.email,
+                              image: fileName,
+                              position: this.position,
+                              homeland: this.homeland,
+                              status: this.status,
+                              id: this.$route.params.id,
+                            };
+                            const url =
+                              "http://localhost:3000/api/managers/" +
+                              manager.id +
+                              "/replace";
+                            axios.post(url, manager);
+                            axios
+                              .delete(
+                                "http://localhost:3000/api/Photos/manager/files/" +
+                                  this.imageEdit
+                              )
+                              .then((resp) => {
+                                console.log(resp);
+                              })
+                              .catch((err) => console.log(err));
+                            axios
+                              .post(
+                                "http://localhost:3000/api/Photos/manager/upload?filename=" +
+                                  fileName,
+                                fd
+                              )
+                              .then((res) => {
+                                console.log(res);
+                              })
+                              .catch((err) => console.log(err));
+                          } else {
+                            const manager = {
+                              managerId: this.managerId,
+                              christianName: this.christianName,
+                              fullName: this.fullName,
+                              birthday: this.birthday,
+                              phone: this.phone,
+                              email: this.email,
+                              image: fileName,
+                              position: this.position,
+                              homeland: this.homeland,
+                              status: this.status,
+                              id: this.$route.params.id,
+                            };
+                            const url =
+                              "http://localhost:3000/api/managers/" +
+                              manager.id +
+                              "/replace";
+                            axios.post(url, manager);
+                            axios
+                              .post(
+                                "http://localhost:3000/api/Photos/manager/upload?filename=" +
+                                  fileName,
+                                fd
+                              )
+                              .then((res) => {
+                                console.log(res);
+                              })
+                              .catch((err) => console.log(err));
+                          }
+                        } else {
+                          const manager = {
+                            managerId: this.managerId,
+                            christianName: this.christianName,
+                            fullName: this.fullName,
+                            birthday: this.birthday,
+                            phone: this.phone,
+                            email: this.email,
+                            image: this.imageEdit,
+                            position: this.position,
+                            homeland: this.homeland,
+                            status: this.status,
+                            id: this.$route.params.id,
+                          };
+                          const url =
+                            "http://localhost:3000/api/managers/" +
+                            manager.id +
+                            "/replace";
+                          axios.post(url, manager);
+                        }
+                        this.$router.push("/managers");
                         location.reload();
                         return 0;
                       }
@@ -13209,26 +14374,106 @@ const DetailProfile = {
                 }
               );
             } else {
-              const candidate = {
-                candidateId: this.candidateId,
-                christianName: this.christianName,
-                fullName: this.fullName,
-                birthday: this.birthday,
-                position: this.position,
-                homeland: this.homeland,
-                phone: this.phone,
-                email: this.email,
-                status: this.status,
-                community: this.community,
-                id: this.idTable,
-              };
-              const url =
-                "http://localhost:3000/api/candidates/" +
-                candidate.id +
-                "/replace";
-              axios.post(url, candidate);
+              if (this.selectedFile != null) {
+                const fd = new FormData();
+                fd.append("image", this.selectedFile, this.selectedFile.name);
+                var start = this.selectedFile.name.lastIndexOf(".");
+                var end = this.selectedFile.length;
+                var fileName =
+                  this.candidateId + this.selectedFile.name.slice(start, end);
+                if (this.imageEdit != null) {
+                  const candidate = {
+                    candidateId: this.candidateId,
+                    christianName: this.christianName,
+                    fullName: this.fullName,
+                    birthday: this.birthday,
+                    phone: this.phone,
+                    email: this.email,
+                    image: fileName,
+                    position: this.position,
+                    community: this.community,
+                    homeland: this.homeland,
+                    status: this.status,
+                    id: this.$route.params.id,
+                  };
+                  const url =
+                    "http://localhost:3000/api/candidates/" +
+                    candidate.id +
+                    "/replace";
+                  axios.post(url, candidate);
+                  axios
+                    .delete(
+                      "http://localhost:3000/api/Photos/candidate/files/" +
+                        this.imageEdit
+                    )
+                    .then((resp) => {
+                      console.log(resp);
+                    })
+                    .catch((err) => console.log(err));
+                  axios
+                    .post(
+                      "http://localhost:3000/api/Photos/candidate/upload?filename=" +
+                        fileName,
+                      fd
+                    )
+                    .then((res) => {
+                      console.log(res);
+                    })
+                    .catch((err) => console.log(err));
+                } else {
+                  const candidate = {
+                    candidateId: this.candidateId,
+                    christianName: this.christianName,
+                    fullName: this.fullName,
+                    birthday: this.birthday,
+                    phone: this.phone,
+                    email: this.email,
+                    image: fileName,
+                    position: this.position,
+                    community: this.community,
+                    homeland: this.homeland,
+                    status: this.status,
+                    id: this.$route.params.id,
+                  };
+                  const url =
+                    "http://localhost:3000/api/candidates/" +
+                    candidate.id +
+                    "/replace";
+                  axios.post(url, candidate);
+                  axios
+                    .post(
+                      "http://localhost:3000/api/Photos/candidate/upload?filename=" +
+                        fileName,
+                      fd
+                    )
+                    .then((res) => {
+                      console.log(res);
+                    })
+                    .catch((err) => console.log(err));
+                }
+              } else {
+                const candidate = {
+                  candidateId: this.candidateId,
+                  christianName: this.christianName,
+                  fullName: this.fullName,
+                  birthday: this.birthday,
+                  phone: this.phone,
+                  email: this.email,
+                  image: this.imageEdit,
+                  position: this.position,
+                  community: this.community,
+                  homeland: this.homeland,
+                  status: this.status,
+                  id: this.$route.params.id,
+                };
+                const url =
+                  "http://localhost:3000/api/candidates/" +
+                  candidate.id +
+                  "/replace";
+                axios.post(url, candidate);
+              }
               setTimeout(() => {
-                this.$router.push("/");
+                this.$router.push("/candidates");
                 location.reload();
               }, 500);
               return 0;
@@ -13265,25 +14510,114 @@ const DetailProfile = {
                   );
                 } else {
                   const candidate = {
-                    candidateId: this.candidateId,
-                    christianName: this.christianName,
-                    fullName: this.fullName,
-                    birthday: this.birthday,
-                    position: this.position,
-                    homeland: this.homeland,
-                    phone: this.phone,
-                    email: this.email,
-                    status: this.status,
-                    community: this.community,
-                    id: this.idTable,
+                    candidateId: null,
+                    christianName: null,
+                    fullName: null,
+                    birthday: null,
+                    phone: null,
+                    email: null,
+                    image: null,
+                    position: null,
+                    community: null,
+                    homeland: null,
+                    status: null,
+                    id: null,
                   };
-                  const url =
-                    "http://localhost:3000/api/candidates/" +
-                    candidate.id +
-                    "/replace";
-                  axios.post(url, candidate);
+                  if (this.selectedFile != null) {
+                    const fd = new FormData();
+                    fd.append(
+                      "image",
+                      this.selectedFile,
+                      this.selectedFile.name
+                    );
+                    var start = this.selectedFile.name.lastIndexOf(".");
+                    var end = this.selectedFile.length;
+                    var fileName =
+                      this.candidateId +
+                      this.selectedFile.name.slice(start, end);
+                    if (this.imageEdit != null) {
+                      candidate = {
+                        candidateId: this.candidateId,
+                        christianName: this.christianName,
+                        fullName: this.fullName,
+                        birthday: this.birthday,
+                        phone: this.phone,
+                        email: this.email,
+                        image: fileName,
+                        position: this.position,
+                        community: this.community,
+                        homeland: this.homeland,
+                        status: this.status,
+                        id: this.$route.params.id,
+                      };
+                      axios
+                        .delete(
+                          "http://localhost:3000/api/Photos/candidate/files/" +
+                            this.imageEdit
+                        )
+                        .then((resp) => {
+                          console.log(resp);
+                        })
+                        .catch((err) => console.log(err));
+                      axios
+                        .post(
+                          "http://localhost:3000/api/Photos/candidate/upload?filename=" +
+                            fileName,
+                          fd
+                        )
+                        .then((res) => {
+                          console.log(res);
+                        })
+                        .catch((err) => console.log(err));
+                    } else {
+                      candidate = {
+                        candidateId: this.candidateId,
+                        christianName: this.christianName,
+                        fullName: this.fullName,
+                        birthday: this.birthday,
+                        phone: this.phone,
+                        email: this.email,
+                        image: fileName,
+                        position: this.position,
+                        community: this.community,
+                        homeland: this.homeland,
+                        status: this.status,
+                        id: this.$route.params.id,
+                      };
+                      axios
+                        .post(
+                          "http://localhost:3000/api/Photos/candidate/upload?filename=" +
+                            fileName,
+                          fd
+                        )
+                        .then((res) => {
+                          console.log(res);
+                        })
+                        .catch((err) => console.log(err));
+                    }
+                  } else {
+                    candidate = {
+                      candidateId: this.candidateId,
+                      christianName: this.christianName,
+                      fullName: this.fullName,
+                      birthday: this.birthday,
+                      phone: this.phone,
+                      email: this.email,
+                      image: this.imageEdit,
+                      position: this.position,
+                      community: this.community,
+                      homeland: this.homeland,
+                      status: this.status,
+                      id: this.$route.params.id,
+                    };
+                    const url =
+                      "http://localhost:3000/api/candidates/" +
+                      candidate.id +
+                      "/replace";
+                    axios.post(url, candidate);
+                  }
                   setTimeout(() => {
-                    this.$router.push("/");
+                    this.$router.push("/candidates");
                     location.reload();
                   }, 100);
                   return 0;
@@ -13325,25 +14659,114 @@ const DetailProfile = {
                   );
                 } else {
                   const candidate = {
-                    candidateId: this.candidateId,
-                    christianName: this.christianName,
-                    fullName: this.fullName,
-                    birthday: this.birthday,
-                    position: this.position,
-                    homeland: this.homeland,
-                    phone: this.phone,
-                    email: this.email,
-                    status: this.status,
-                    community: this.community,
-                    id: this.idTable,
+                    candidateId: null,
+                    christianName: null,
+                    fullName: null,
+                    birthday: null,
+                    phone: null,
+                    email: null,
+                    image: null,
+                    position: null,
+                    community: null,
+                    homeland: null,
+                    status: null,
+                    id: null,
                   };
-                  const url =
-                    "http://localhost:3000/api/candidates/" +
-                    candidate.id +
-                    "/replace";
-                  axios.post(url, candidate);
+                  if (this.selectedFile != null) {
+                    const fd = new FormData();
+                    fd.append(
+                      "image",
+                      this.selectedFile,
+                      this.selectedFile.name
+                    );
+                    var start = this.selectedFile.name.lastIndexOf(".");
+                    var end = this.selectedFile.length;
+                    var fileName =
+                      this.candidateId +
+                      this.selectedFile.name.slice(start, end);
+                    if (this.imageEdit != null) {
+                      candidate = {
+                        candidateId: this.candidateId,
+                        christianName: this.christianName,
+                        fullName: this.fullName,
+                        birthday: this.birthday,
+                        phone: this.phone,
+                        email: this.email,
+                        image: fileName,
+                        position: this.position,
+                        community: this.community,
+                        homeland: this.homeland,
+                        status: this.status,
+                        id: this.$route.params.id,
+                      };
+                      axios
+                        .delete(
+                          "http://localhost:3000/api/Photos/candidate/files/" +
+                            this.imageEdit
+                        )
+                        .then((resp) => {
+                          console.log(resp);
+                        })
+                        .catch((err) => console.log(err));
+                      axios
+                        .post(
+                          "http://localhost:3000/api/Photos/candidate/upload?filename=" +
+                            fileName,
+                          fd
+                        )
+                        .then((res) => {
+                          console.log(res);
+                        })
+                        .catch((err) => console.log(err));
+                    } else {
+                      candidate = {
+                        candidateId: this.candidateId,
+                        christianName: this.christianName,
+                        fullName: this.fullName,
+                        birthday: this.birthday,
+                        phone: this.phone,
+                        email: this.email,
+                        image: fileName,
+                        position: this.position,
+                        community: this.community,
+                        homeland: this.homeland,
+                        status: this.status,
+                        id: this.$route.params.id,
+                      };
+                      axios
+                        .post(
+                          "http://localhost:3000/api/Photos/candidate/upload?filename=" +
+                            fileName,
+                          fd
+                        )
+                        .then((res) => {
+                          console.log(res);
+                        })
+                        .catch((err) => console.log(err));
+                    }
+                  } else {
+                    candidate = {
+                      candidateId: this.candidateId,
+                      christianName: this.christianName,
+                      fullName: this.fullName,
+                      birthday: this.birthday,
+                      phone: this.phone,
+                      email: this.email,
+                      image: this.imageEdit,
+                      position: this.position,
+                      community: this.community,
+                      homeland: this.homeland,
+                      status: this.status,
+                      id: this.$route.params.id,
+                    };
+                    const url =
+                      "http://localhost:3000/api/candidates/" +
+                      candidate.id +
+                      "/replace";
+                    axios.post(url, candidate);
+                  }
                   setTimeout(() => {
-                    this.$router.push("/");
+                    this.$router.push("/candidates");
                     location.reload();
                   }, 100);
                   return 0;
@@ -13393,25 +14816,114 @@ const DetailProfile = {
                         );
                       } else {
                         const candidate = {
-                          candidateId: this.candidateId,
-                          christianName: this.christianName,
-                          fullName: this.fullName,
-                          birthday: this.birthday,
-                          position: this.position,
-                          homeland: this.homeland,
-                          phone: this.phone,
-                          email: this.email,
-                          status: this.status,
-                          community: this.community,
-                          id: this.idTable,
+                          candidateId: null,
+                          christianName: null,
+                          fullName: null,
+                          birthday: null,
+                          phone: null,
+                          email: null,
+                          image: null,
+                          position: null,
+                          community: null,
+                          homeland: null,
+                          status: null,
+                          id: null,
                         };
-                        const url =
-                          "http://localhost:3000/api/candidates/" +
-                          candidate.id +
-                          "/replace";
-                        axios.post(url, candidate);
+                        if (this.selectedFile != null) {
+                          const fd = new FormData();
+                          fd.append(
+                            "image",
+                            this.selectedFile,
+                            this.selectedFile.name
+                          );
+                          var start = this.selectedFile.name.lastIndexOf(".");
+                          var end = this.selectedFile.length;
+                          var fileName =
+                            this.candidateId +
+                            this.selectedFile.name.slice(start, end);
+                          if (this.imageEdit != null) {
+                            candidate = {
+                              candidateId: this.candidateId,
+                              christianName: this.christianName,
+                              fullName: this.fullName,
+                              birthday: this.birthday,
+                              phone: this.phone,
+                              email: this.email,
+                              image: fileName,
+                              position: this.position,
+                              community: this.community,
+                              homeland: this.homeland,
+                              status: this.status,
+                              id: this.$route.params.id,
+                            };
+                            axios
+                              .delete(
+                                "http://localhost:3000/api/Photos/candidate/files/" +
+                                  this.imageEdit
+                              )
+                              .then((resp) => {
+                                console.log(resp);
+                              })
+                              .catch((err) => console.log(err));
+                            axios
+                              .post(
+                                "http://localhost:3000/api/Photos/candidate/upload?filename=" +
+                                  fileName,
+                                fd
+                              )
+                              .then((res) => {
+                                console.log(res);
+                              })
+                              .catch((err) => console.log(err));
+                          } else {
+                            candidate = {
+                              candidateId: this.candidateId,
+                              christianName: this.christianName,
+                              fullName: this.fullName,
+                              birthday: this.birthday,
+                              phone: this.phone,
+                              email: this.email,
+                              image: fileName,
+                              position: this.position,
+                              community: this.community,
+                              homeland: this.homeland,
+                              status: this.status,
+                              id: this.$route.params.id,
+                            };
+                            axios
+                              .post(
+                                "http://localhost:3000/api/Photos/candidate/upload?filename=" +
+                                  fileName,
+                                fd
+                              )
+                              .then((res) => {
+                                console.log(res);
+                              })
+                              .catch((err) => console.log(err));
+                          }
+                        } else {
+                          candidate = {
+                            candidateId: this.candidateId,
+                            christianName: this.christianName,
+                            fullName: this.fullName,
+                            birthday: this.birthday,
+                            phone: this.phone,
+                            email: this.email,
+                            image: this.imageEdit,
+                            position: this.position,
+                            community: this.community,
+                            homeland: this.homeland,
+                            status: this.status,
+                            id: this.$route.params.id,
+                          };
+                          const url =
+                            "http://localhost:3000/api/candidates/" +
+                            candidate.id +
+                            "/replace";
+                          axios.post(url, candidate);
+                        }
                         setTimeout(() => {
-                          this.$router.push("/");
+                          this.$router.push("/candidates");
                           location.reload();
                         }, 100);
                         return 0;
@@ -13446,26 +14958,104 @@ const DetailProfile = {
                 }
               );
             } else {
-              const spiritualGuide = {
-                spiritualGuideId: this.spiritualGuideId,
-                christianName: this.christianName,
-                fullName: this.fullName,
-                birthday: this.birthday,
-                position: this.position,
-                homeland: this.homeland,
-                phone: this.phone,
-                email: this.email,
-                status: this.status,
-                groupCommunity: this.groupCommunity,
-                id: this.idTable,
-              };
-              const url =
-                "http://localhost:3000/api/spiritualGuides/" +
-                spiritualGuide.id +
-                "/replace";
-              axios.post(url, spiritualGuide);
+              if (this.selectedFile != null) {
+                const fd = new FormData();
+                fd.append("image", this.selectedFile, this.selectedFile.name);
+                var start = this.selectedFile.name.lastIndexOf(".");
+                var end = this.selectedFile.length;
+                var fileName =
+                  this.spiritualGuideId +
+                  this.selectedFile.name.slice(start, end);
+                if (this.imageEdit != null) {
+                  const spiritualGuide = {
+                    spiritualGuideId: this.spiritualGuideId,
+                    christianName: this.christianName,
+                    fullName: this.fullName,
+                    birthday: this.birthday,
+                    phone: this.phone,
+                    email: this.email,
+                    groupCommunity: this.groupCommunity,
+                    position: this.position,
+                    image: fileName,
+                    status: this.status,
+                    id: this.$route.params.id,
+                  };
+                  const url =
+                    "http://localhost:3000/api/spiritualGuides/" +
+                    spiritualGuide.id +
+                    "/replace";
+                  axios.post(url, spiritualGuide);
+                  axios
+                    .delete(
+                      "http://localhost:3000/api/Photos/spiritualGuide/files/" +
+                        this.imageEdit
+                    )
+                    .then((resp) => {
+                      console.log(resp);
+                    })
+                    .catch((err) => console.log(err));
+                  axios
+                    .post(
+                      "http://localhost:3000/api/Photos/spiritualGuide/upload?filename=" +
+                        fileName,
+                      fd
+                    )
+                    .then((res) => {
+                      console.log(res);
+                    })
+                    .catch((err) => console.log(err));
+                } else {
+                  const spiritualGuide = {
+                    spiritualGuideId: this.spiritualGuideId,
+                    christianName: this.christianName,
+                    fullName: this.fullName,
+                    birthday: this.birthday,
+                    phone: this.phone,
+                    email: this.email,
+                    groupCommunity: this.groupCommunity,
+                    position: this.position,
+                    image: fileName,
+                    status: this.status,
+                    id: this.$route.params.id,
+                  };
+                  const url =
+                    "http://localhost:3000/api/spiritualGuides/" +
+                    spiritualGuide.id +
+                    "/replace";
+                  axios.post(url, spiritualGuide);
+                  axios
+                    .post(
+                      "http://localhost:3000/api/Photos/spiritualGuide/upload?filename=" +
+                        fileName,
+                      fd
+                    )
+                    .then((res) => {
+                      console.log(res);
+                    })
+                    .catch((err) => console.log(err));
+                }
+              } else {
+                const spiritualGuide = {
+                  spiritualGuideId: this.spiritualGuideId,
+                  christianName: this.christianName,
+                  fullName: this.fullName,
+                  birthday: this.birthday,
+                  phone: this.phone,
+                  email: this.email,
+                  groupCommunity: this.groupCommunity,
+                  position: this.position,
+                  image: this.imageEdit,
+                  status: this.status,
+                  id: this.$route.params.id,
+                };
+                const url =
+                  "http://localhost:3000/api/spiritualGuides/" +
+                  spiritualGuide.id +
+                  "/replace";
+                axios.post(url, spiritualGuide);
+              }
               setTimeout(() => {
-                this.$router.push("/");
+                this.$router.push("/spiritualGuides");
                 location.reload();
               }, 100);
               return 0;
@@ -13501,26 +15091,108 @@ const DetailProfile = {
                     }
                   );
                 } else {
-                  const spiritualGuide = {
-                    spiritualGuideId: this.spiritualGuideId,
-                    christianName: this.christianName,
-                    fullName: this.fullName,
-                    birthday: this.birthday,
-                    position: this.position,
-                    homeland: this.homeland,
-                    phone: this.phone,
-                    email: this.email,
-                    status: this.status,
-                    groupCommunity: this.groupCommunity,
-                    id: this.idTable,
-                  };
-                  const url =
-                    "http://localhost:3000/api/spiritualGuides/" +
-                    spiritualGuide.id +
-                    "/replace";
-                  axios.post(url, spiritualGuide);
+                  if (this.selectedFile != null) {
+                    const fd = new FormData();
+                    fd.append(
+                      "image",
+                      this.selectedFile,
+                      this.selectedFile.name
+                    );
+                    var start = this.selectedFile.name.lastIndexOf(".");
+                    var end = this.selectedFile.length;
+                    var fileName =
+                      this.spiritualGuideId +
+                      this.selectedFile.name.slice(start, end);
+                    if (this.imageEdit != null) {
+                      const spiritualGuide = {
+                        spiritualGuideId: this.spiritualGuideId,
+                        christianName: this.christianName,
+                        fullName: this.fullName,
+                        birthday: this.birthday,
+                        phone: this.phone,
+                        email: this.email,
+                        groupCommunity: this.groupCommunity,
+                        position: this.position,
+                        image: fileName,
+                        status: this.status,
+                        id: this.$route.params.id,
+                      };
+                      const url =
+                        "http://localhost:3000/api/spiritualGuides/" +
+                        spiritualGuide.id +
+                        "/replace";
+                      axios.post(url, spiritualGuide);
+                      axios
+                        .delete(
+                          "http://localhost:3000/api/Photos/spiritualGuide/files/" +
+                            this.imageEdit
+                        )
+                        .then((resp) => {
+                          console.log(resp);
+                        })
+                        .catch((err) => console.log(err));
+                      axios
+                        .post(
+                          "http://localhost:3000/api/Photos/spiritualGuide/upload?filename=" +
+                            fileName,
+                          fd
+                        )
+                        .then((res) => {
+                          console.log(res);
+                        })
+                        .catch((err) => console.log(err));
+                    } else {
+                      const spiritualGuide = {
+                        spiritualGuideId: this.spiritualGuideId,
+                        christianName: this.christianName,
+                        fullName: this.fullName,
+                        birthday: this.birthday,
+                        phone: this.phone,
+                        email: this.email,
+                        groupCommunity: this.groupCommunity,
+                        position: this.position,
+                        image: fileName,
+                        status: this.status,
+                        id: this.$route.params.id,
+                      };
+                      const url =
+                        "http://localhost:3000/api/spiritualGuides/" +
+                        spiritualGuide.id +
+                        "/replace";
+                      axios.post(url, spiritualGuide);
+                      axios
+                        .post(
+                          "http://localhost:3000/api/Photos/spiritualGuide/upload?filename=" +
+                            fileName,
+                          fd
+                        )
+                        .then((res) => {
+                          console.log(res);
+                        })
+                        .catch((err) => console.log(err));
+                    }
+                  } else {
+                    const spiritualGuide = {
+                      spiritualGuideId: this.spiritualGuideId,
+                      christianName: this.christianName,
+                      fullName: this.fullName,
+                      birthday: this.birthday,
+                      phone: this.phone,
+                      email: this.email,
+                      groupCommunity: this.groupCommunity,
+                      position: this.position,
+                      image: this.imageEdit,
+                      status: this.status,
+                      id: this.$route.params.id,
+                    };
+                    const url =
+                      "http://localhost:3000/api/spiritualGuides/" +
+                      spiritualGuide.id +
+                      "/replace";
+                    axios.post(url, spiritualGuide);
+                  }
                   setTimeout(() => {
-                    this.$router.push("/");
+                    this.$router.push("/spiritualGuides");
                     location.reload();
                   }, 100);
                   return 0;
@@ -13561,26 +15233,108 @@ const DetailProfile = {
                     }
                   );
                 } else {
-                  const spiritualGuide = {
-                    spiritualGuideId: this.spiritualGuideId,
-                    christianName: this.christianName,
-                    fullName: this.fullName,
-                    birthday: this.birthday,
-                    position: this.position,
-                    homeland: this.homeland,
-                    phone: this.phone,
-                    email: this.email,
-                    status: this.status,
-                    groupCommunity: this.groupCommunity,
-                    id: this.idTable,
-                  };
-                  const url =
-                    "http://localhost:3000/api/spiritualGuides/" +
-                    spiritualGuide.id +
-                    "/replace";
-                  axios.post(url, spiritualGuide);
+                  if (this.selectedFile != null) {
+                    const fd = new FormData();
+                    fd.append(
+                      "image",
+                      this.selectedFile,
+                      this.selectedFile.name
+                    );
+                    var start = this.selectedFile.name.lastIndexOf(".");
+                    var end = this.selectedFile.length;
+                    var fileName =
+                      this.spiritualGuideId +
+                      this.selectedFile.name.slice(start, end);
+                    if (this.imageEdit != null) {
+                      const spiritualGuide = {
+                        spiritualGuideId: this.spiritualGuideId,
+                        christianName: this.christianName,
+                        fullName: this.fullName,
+                        birthday: this.birthday,
+                        phone: this.phone,
+                        email: this.email,
+                        groupCommunity: this.groupCommunity,
+                        position: this.position,
+                        image: fileName,
+                        status: this.status,
+                        id: this.$route.params.id,
+                      };
+                      const url =
+                        "http://localhost:3000/api/spiritualGuides/" +
+                        spiritualGuide.id +
+                        "/replace";
+                      axios.post(url, spiritualGuide);
+                      axios
+                        .delete(
+                          "http://localhost:3000/api/Photos/spiritualGuide/files/" +
+                            this.imageEdit
+                        )
+                        .then((resp) => {
+                          console.log(resp);
+                        })
+                        .catch((err) => console.log(err));
+                      axios
+                        .post(
+                          "http://localhost:3000/api/Photos/spiritualGuide/upload?filename=" +
+                            fileName,
+                          fd
+                        )
+                        .then((res) => {
+                          console.log(res);
+                        })
+                        .catch((err) => console.log(err));
+                    } else {
+                      const spiritualGuide = {
+                        spiritualGuideId: this.spiritualGuideId,
+                        christianName: this.christianName,
+                        fullName: this.fullName,
+                        birthday: this.birthday,
+                        phone: this.phone,
+                        email: this.email,
+                        groupCommunity: this.groupCommunity,
+                        position: this.position,
+                        image: fileName,
+                        status: this.status,
+                        id: this.$route.params.id,
+                      };
+                      const url =
+                        "http://localhost:3000/api/spiritualGuides/" +
+                        spiritualGuide.id +
+                        "/replace";
+                      axios.post(url, spiritualGuide);
+                      axios
+                        .post(
+                          "http://localhost:3000/api/Photos/spiritualGuide/upload?filename=" +
+                            fileName,
+                          fd
+                        )
+                        .then((res) => {
+                          console.log(res);
+                        })
+                        .catch((err) => console.log(err));
+                    }
+                  } else {
+                    const spiritualGuide = {
+                      spiritualGuideId: this.spiritualGuideId,
+                      christianName: this.christianName,
+                      fullName: this.fullName,
+                      birthday: this.birthday,
+                      phone: this.phone,
+                      email: this.email,
+                      groupCommunity: this.groupCommunity,
+                      position: this.position,
+                      image: this.imageEdit,
+                      status: this.status,
+                      id: this.$route.params.id,
+                    };
+                    const url =
+                      "http://localhost:3000/api/spiritualGuides/" +
+                      spiritualGuide.id +
+                      "/replace";
+                    axios.post(url, spiritualGuide);
+                  }
                   setTimeout(() => {
-                    this.$router.push("/");
+                    this.$router.push("/spiritualGuides");
                     location.reload();
                   }, 100);
                   return 0;
@@ -13629,26 +15383,108 @@ const DetailProfile = {
                           }
                         );
                       } else {
-                        const spiritualGuide = {
-                          spiritualGuideId: this.spiritualGuideId,
-                          christianName: this.christianName,
-                          fullName: this.fullName,
-                          birthday: this.birthday,
-                          position: this.position,
-                          homeland: this.homeland,
-                          phone: this.phone,
-                          email: this.email,
-                          status: this.status,
-                          groupCommunity: this.groupCommunity,
-                          id: this.idTable,
-                        };
-                        const url =
-                          "http://localhost:3000/api/spiritualGuides/" +
-                          spiritualGuide.id +
-                          "/replace";
-                        axios.post(url, spiritualGuide);
+                        if (this.selectedFile != null) {
+                          const fd = new FormData();
+                          fd.append(
+                            "image",
+                            this.selectedFile,
+                            this.selectedFile.name
+                          );
+                          var start = this.selectedFile.name.lastIndexOf(".");
+                          var end = this.selectedFile.length;
+                          var fileName =
+                            this.spiritualGuideId +
+                            this.selectedFile.name.slice(start, end);
+                          if (this.imageEdit != null) {
+                            const spiritualGuide = {
+                              spiritualGuideId: this.spiritualGuideId,
+                              christianName: this.christianName,
+                              fullName: this.fullName,
+                              birthday: this.birthday,
+                              phone: this.phone,
+                              email: this.email,
+                              groupCommunity: this.groupCommunity,
+                              position: this.position,
+                              image: fileName,
+                              status: this.status,
+                              id: this.$route.params.id,
+                            };
+                            const url =
+                              "http://localhost:3000/api/spiritualGuides/" +
+                              spiritualGuide.id +
+                              "/replace";
+                            axios.post(url, spiritualGuide);
+                            axios
+                              .delete(
+                                "http://localhost:3000/api/Photos/spiritualGuide/files/" +
+                                  this.imageEdit
+                              )
+                              .then((resp) => {
+                                console.log(resp);
+                              })
+                              .catch((err) => console.log(err));
+                            axios
+                              .post(
+                                "http://localhost:3000/api/Photos/spiritualGuide/upload?filename=" +
+                                  fileName,
+                                fd
+                              )
+                              .then((res) => {
+                                console.log(res);
+                              })
+                              .catch((err) => console.log(err));
+                          } else {
+                            const spiritualGuide = {
+                              spiritualGuideId: this.spiritualGuideId,
+                              christianName: this.christianName,
+                              fullName: this.fullName,
+                              birthday: this.birthday,
+                              phone: this.phone,
+                              email: this.email,
+                              groupCommunity: this.groupCommunity,
+                              position: this.position,
+                              image: fileName,
+                              status: this.status,
+                              id: this.$route.params.id,
+                            };
+                            const url =
+                              "http://localhost:3000/api/spiritualGuides/" +
+                              spiritualGuide.id +
+                              "/replace";
+                            axios.post(url, spiritualGuide);
+                            axios
+                              .post(
+                                "http://localhost:3000/api/Photos/spiritualGuide/upload?filename=" +
+                                  fileName,
+                                fd
+                              )
+                              .then((res) => {
+                                console.log(res);
+                              })
+                              .catch((err) => console.log(err));
+                          }
+                        } else {
+                          const spiritualGuide = {
+                            spiritualGuideId: this.spiritualGuideId,
+                            christianName: this.christianName,
+                            fullName: this.fullName,
+                            birthday: this.birthday,
+                            phone: this.phone,
+                            email: this.email,
+                            groupCommunity: this.groupCommunity,
+                            position: this.position,
+                            image: this.imageEdit,
+                            status: this.status,
+                            id: this.$route.params.id,
+                          };
+                          const url =
+                            "http://localhost:3000/api/spiritualGuides/" +
+                            spiritualGuide.id +
+                            "/replace";
+                          axios.post(url, spiritualGuide);
+                        }
                         setTimeout(() => {
-                          this.$router.push("/");
+                          this.$router.push("/spiritualGuides");
                           location.reload();
                         }, 100);
                         return 0;
@@ -13687,26 +15523,103 @@ const DetailProfile = {
                 }
               );
             } else {
-              const companion = {
-                companionId: this.companionId,
-                christianName: this.christianName,
-                fullName: this.fullName,
-                birthday: this.birthday,
-                position: this.position,
-                homeland: this.homeland,
-                phone: this.phone,
-                email: this.email,
-                status: this.status,
-                groupCommunity: this.groupCommunity,
-                id: this.idTable,
-              };
-              const url =
-                "http://localhost:3000/api/companions/" +
-                companion.id +
-                "/replace";
-              axios.post(url, companion);
+              if (this.selectedFile != null) {
+                const fd = new FormData();
+                fd.append("image", this.selectedFile, this.selectedFile.name);
+                var start = this.selectedFile.name.lastIndexOf(".");
+                var end = this.selectedFile.length;
+                var fileName =
+                  this.companionId + this.selectedFile.name.slice(start, end);
+                if (this.imageEdit != null) {
+                  const companion = {
+                    companionId: this.companionId,
+                    christianName: this.christianName,
+                    fullName: this.fullName,
+                    birthday: this.birthday,
+                    phone: this.phone,
+                    email: this.email,
+                    groupCommunity: this.groupCommunity,
+                    position: this.position,
+                    image: fileName,
+                    status: this.status,
+                    id: this.$route.params.id,
+                  };
+                  const url =
+                    "http://localhost:3000/api/companions/" +
+                    companion.id +
+                    "/replace";
+                  axios.post(url, companion);
+                  axios
+                    .delete(
+                      "http://localhost:3000/api/Photos/companion/files/" +
+                        this.imageEdit
+                    )
+                    .then((resp) => {
+                      console.log(resp);
+                    })
+                    .catch((err) => console.log(err));
+                  axios
+                    .post(
+                      "http://localhost:3000/api/Photos/companion/upload?filename=" +
+                        fileName,
+                      fd
+                    )
+                    .then((res) => {
+                      console.log(res);
+                    })
+                    .catch((err) => console.log(err));
+                } else {
+                  const companion = {
+                    companionId: this.companionId,
+                    christianName: this.christianName,
+                    fullName: this.fullName,
+                    birthday: this.birthday,
+                    phone: this.phone,
+                    email: this.email,
+                    groupCommunity: this.groupCommunity,
+                    position: this.position,
+                    image: fileName,
+                    status: this.status,
+                    id: this.$route.params.id,
+                  };
+                  const url =
+                    "http://localhost:3000/api/companions/" +
+                    companion.id +
+                    "/replace";
+                  axios.post(url, companion);
+                  axios
+                    .post(
+                      "http://localhost:3000/api/Photos/companion/upload?filename=" +
+                        fileName,
+                      fd
+                    )
+                    .then((res) => {
+                      console.log(res);
+                    })
+                    .catch((err) => console.log(err));
+                }
+              } else {
+                const companion = {
+                  companionId: this.companionId,
+                  christianName: this.christianName,
+                  fullName: this.fullName,
+                  birthday: this.birthday,
+                  phone: this.phone,
+                  email: this.email,
+                  groupCommunity: this.groupCommunity,
+                  position: this.position,
+                  image: this.imageEdit,
+                  status: this.status,
+                  id: this.$route.params.id,
+                };
+                const url =
+                  "http://localhost:3000/api/companions/" +
+                  companion.id +
+                  "/replace";
+                axios.post(url, companion);
+              }
               setTimeout(() => {
-                this.$router.push("/");
+                this.$router.push("/companions");
                 location.reload();
               }, 100);
               return 0;
@@ -13742,26 +15655,108 @@ const DetailProfile = {
                     }
                   );
                 } else {
-                  const companion = {
-                    companionId: this.companionId,
-                    christianName: this.christianName,
-                    fullName: this.fullName,
-                    birthday: this.birthday,
-                    position: this.position,
-                    homeland: this.homeland,
-                    phone: this.phone,
-                    email: this.email,
-                    status: this.status,
-                    groupCommunity: this.groupCommunity,
-                    id: this.idTable,
-                  };
-                  const url =
-                    "http://localhost:3000/api/companions/" +
-                    companion.id +
-                    "/replace";
-                  axios.post(url, companion);
+                  if (this.selectedFile != null) {
+                    const fd = new FormData();
+                    fd.append(
+                      "image",
+                      this.selectedFile,
+                      this.selectedFile.name
+                    );
+                    var start = this.selectedFile.name.lastIndexOf(".");
+                    var end = this.selectedFile.length;
+                    var fileName =
+                      this.companionId +
+                      this.selectedFile.name.slice(start, end);
+                    if (this.imageEdit != null) {
+                      const companion = {
+                        companionId: this.companionId,
+                        christianName: this.christianName,
+                        fullName: this.fullName,
+                        birthday: this.birthday,
+                        phone: this.phone,
+                        email: this.email,
+                        groupCommunity: this.groupCommunity,
+                        position: this.position,
+                        image: fileName,
+                        status: this.status,
+                        id: this.$route.params.id,
+                      };
+                      const url =
+                        "http://localhost:3000/api/companions/" +
+                        companion.id +
+                        "/replace";
+                      axios.post(url, companion);
+                      axios
+                        .delete(
+                          "http://localhost:3000/api/Photos/companion/files/" +
+                            this.imageEdit
+                        )
+                        .then((resp) => {
+                          console.log(resp);
+                        })
+                        .catch((err) => console.log(err));
+                      axios
+                        .post(
+                          "http://localhost:3000/api/Photos/companion/upload?filename=" +
+                            fileName,
+                          fd
+                        )
+                        .then((res) => {
+                          console.log(res);
+                        })
+                        .catch((err) => console.log(err));
+                    } else {
+                      const companion = {
+                        companionId: this.companionId,
+                        christianName: this.christianName,
+                        fullName: this.fullName,
+                        birthday: this.birthday,
+                        phone: this.phone,
+                        email: this.email,
+                        groupCommunity: this.groupCommunity,
+                        position: this.position,
+                        image: fileName,
+                        status: this.status,
+                        id: this.$route.params.id,
+                      };
+                      const url =
+                        "http://localhost:3000/api/companions/" +
+                        companion.id +
+                        "/replace";
+                      axios.post(url, companion);
+                      axios
+                        .post(
+                          "http://localhost:3000/api/Photos/companion/upload?filename=" +
+                            fileName,
+                          fd
+                        )
+                        .then((res) => {
+                          console.log(res);
+                        })
+                        .catch((err) => console.log(err));
+                    }
+                  } else {
+                    const companion = {
+                      companionId: this.companionId,
+                      christianName: this.christianName,
+                      fullName: this.fullName,
+                      birthday: this.birthday,
+                      phone: this.phone,
+                      email: this.email,
+                      groupCommunity: this.groupCommunity,
+                      position: this.position,
+                      image: this.imageEdit,
+                      status: this.status,
+                      id: this.$route.params.id,
+                    };
+                    const url =
+                      "http://localhost:3000/api/companions/" +
+                      companion.id +
+                      "/replace";
+                    axios.post(url, companion);
+                  }
                   setTimeout(() => {
-                    this.$router.push("/");
+                    this.$router.push("/companions");
                     location.reload();
                   }, 100);
                   return 0;
@@ -13802,26 +15797,108 @@ const DetailProfile = {
                     }
                   );
                 } else {
-                  const companion = {
-                    companionId: this.companionId,
-                    christianName: this.christianName,
-                    fullName: this.fullName,
-                    birthday: this.birthday,
-                    position: this.position,
-                    homeland: this.homeland,
-                    phone: this.phone,
-                    email: this.email,
-                    status: this.status,
-                    groupCommunity: this.groupCommunity,
-                    id: this.idTable,
-                  };
-                  const url =
-                    "http://localhost:3000/api/companions/" +
-                    companion.id +
-                    "/replace";
-                  axios.post(url, companion);
+                  if (this.selectedFile != null) {
+                    const fd = new FormData();
+                    fd.append(
+                      "image",
+                      this.selectedFile,
+                      this.selectedFile.name
+                    );
+                    var start = this.selectedFile.name.lastIndexOf(".");
+                    var end = this.selectedFile.length;
+                    var fileName =
+                      this.companionId +
+                      this.selectedFile.name.slice(start, end);
+                    if (this.imageEdit != null) {
+                      const companion = {
+                        companionId: this.companionId,
+                        christianName: this.christianName,
+                        fullName: this.fullName,
+                        birthday: this.birthday,
+                        phone: this.phone,
+                        email: this.email,
+                        groupCommunity: this.groupCommunity,
+                        position: this.position,
+                        image: fileName,
+                        status: this.status,
+                        id: this.$route.params.id,
+                      };
+                      const url =
+                        "http://localhost:3000/api/companions/" +
+                        companion.id +
+                        "/replace";
+                      axios.post(url, companion);
+                      axios
+                        .delete(
+                          "http://localhost:3000/api/Photos/companion/files/" +
+                            this.imageEdit
+                        )
+                        .then((resp) => {
+                          console.log(resp);
+                        })
+                        .catch((err) => console.log(err));
+                      axios
+                        .post(
+                          "http://localhost:3000/api/Photos/companion/upload?filename=" +
+                            fileName,
+                          fd
+                        )
+                        .then((res) => {
+                          console.log(res);
+                        })
+                        .catch((err) => console.log(err));
+                    } else {
+                      const companion = {
+                        companionId: this.companionId,
+                        christianName: this.christianName,
+                        fullName: this.fullName,
+                        birthday: this.birthday,
+                        phone: this.phone,
+                        email: this.email,
+                        groupCommunity: this.groupCommunity,
+                        position: this.position,
+                        image: fileName,
+                        status: this.status,
+                        id: this.$route.params.id,
+                      };
+                      const url =
+                        "http://localhost:3000/api/companions/" +
+                        companion.id +
+                        "/replace";
+                      axios.post(url, companion);
+                      axios
+                        .post(
+                          "http://localhost:3000/api/Photos/companion/upload?filename=" +
+                            fileName,
+                          fd
+                        )
+                        .then((res) => {
+                          console.log(res);
+                        })
+                        .catch((err) => console.log(err));
+                    }
+                  } else {
+                    const companion = {
+                      companionId: this.companionId,
+                      christianName: this.christianName,
+                      fullName: this.fullName,
+                      birthday: this.birthday,
+                      phone: this.phone,
+                      email: this.email,
+                      groupCommunity: this.groupCommunity,
+                      position: this.position,
+                      image: this.imageEdit,
+                      status: this.status,
+                      id: this.$route.params.id,
+                    };
+                    const url =
+                      "http://localhost:3000/api/companions/" +
+                      companion.id +
+                      "/replace";
+                    axios.post(url, companion);
+                  }
                   setTimeout(() => {
-                    this.$router.push("/");
+                    this.$router.push("/companions");
                     location.reload();
                   }, 100);
                   return 0;
@@ -13870,26 +15947,108 @@ const DetailProfile = {
                           }
                         );
                       } else {
-                        const companion = {
-                          companionId: this.companionId,
-                          christianName: this.christianName,
-                          fullName: this.fullName,
-                          birthday: this.birthday,
-                          position: this.position,
-                          homeland: this.homeland,
-                          phone: this.phone,
-                          email: this.email,
-                          status: this.status,
-                          groupCommunity: this.groupCommunity,
-                          id: this.idTable,
-                        };
-                        const url =
-                          "http://localhost:3000/api/companions/" +
-                          companion.id +
-                          "/replace";
-                        axios.post(url, companion);
+                        if (this.selectedFile != null) {
+                          const fd = new FormData();
+                          fd.append(
+                            "image",
+                            this.selectedFile,
+                            this.selectedFile.name
+                          );
+                          var start = this.selectedFile.name.lastIndexOf(".");
+                          var end = this.selectedFile.length;
+                          var fileName =
+                            this.companionId +
+                            this.selectedFile.name.slice(start, end);
+                          if (this.imageEdit != null) {
+                            const companion = {
+                              companionId: this.companionId,
+                              christianName: this.christianName,
+                              fullName: this.fullName,
+                              birthday: this.birthday,
+                              phone: this.phone,
+                              email: this.email,
+                              groupCommunity: this.groupCommunity,
+                              position: this.position,
+                              image: fileName,
+                              status: this.status,
+                              id: this.$route.params.id,
+                            };
+                            const url =
+                              "http://localhost:3000/api/companions/" +
+                              companion.id +
+                              "/replace";
+                            axios.post(url, companion);
+                            axios
+                              .delete(
+                                "http://localhost:3000/api/Photos/companion/files/" +
+                                  this.imageEdit
+                              )
+                              .then((resp) => {
+                                console.log(resp);
+                              })
+                              .catch((err) => console.log(err));
+                            axios
+                              .post(
+                                "http://localhost:3000/api/Photos/companion/upload?filename=" +
+                                  fileName,
+                                fd
+                              )
+                              .then((res) => {
+                                console.log(res);
+                              })
+                              .catch((err) => console.log(err));
+                          } else {
+                            const companion = {
+                              companionId: this.companionId,
+                              christianName: this.christianName,
+                              fullName: this.fullName,
+                              birthday: this.birthday,
+                              phone: this.phone,
+                              email: this.email,
+                              groupCommunity: this.groupCommunity,
+                              position: this.position,
+                              image: fileName,
+                              status: this.status,
+                              id: this.$route.params.id,
+                            };
+                            const url =
+                              "http://localhost:3000/api/companions/" +
+                              companion.id +
+                              "/replace";
+                            axios.post(url, companion);
+                            axios
+                              .post(
+                                "http://localhost:3000/api/Photos/companion/upload?filename=" +
+                                  fileName,
+                                fd
+                              )
+                              .then((res) => {
+                                console.log(res);
+                              })
+                              .catch((err) => console.log(err));
+                          }
+                        } else {
+                          const companion = {
+                            companionId: this.companionId,
+                            christianName: this.christianName,
+                            fullName: this.fullName,
+                            birthday: this.birthday,
+                            phone: this.phone,
+                            email: this.email,
+                            groupCommunity: this.groupCommunity,
+                            position: this.position,
+                            image: this.imageEdit,
+                            status: this.status,
+                            id: this.$route.params.id,
+                          };
+                          const url =
+                            "http://localhost:3000/api/companions/" +
+                            companion.id +
+                            "/replace";
+                          axios.post(url, companion);
+                        }
                         setTimeout(() => {
-                          this.$router.push("/");
+                          this.$router.push("/companions");
                           location.reload();
                         }, 100);
                         return 0;
@@ -13928,22 +16087,100 @@ const DetailProfile = {
                 }
               );
             } else {
-              const teacher = {
-                teacherId: this.teacherId,
-                gender: this.gender,
-                fullName: this.fullName,
-                birthday: this.birthday,
-                subject: this.subject,
-                phone: this.phone,
-                email: this.email,
-                status: this.status,
-                id: this.idTable,
-              };
-              const url =
-                "http://localhost:3000/api/teachers/" + teacher.id + "/replace";
-              axios.post(url, teacher);
+              if (this.selectedFile != null) {
+                const fd = new FormData();
+                fd.append("image", this.selectedFile, this.selectedFile.name);
+                var start = this.selectedFile.name.lastIndexOf(".");
+                var end = this.selectedFile.length;
+                var fileName =
+                  this.teacherId + this.selectedFile.name.slice(start, end);
+                if (this.imageEdit != null) {
+                  const teacher = {
+                    teacherId: this.teacherId,
+                    fullName: this.fullName,
+                    gender: this.gender,
+                    birthday: this.birthday,
+                    phone: this.phone,
+                    email: this.email,
+                    image: fileName,
+                    subject: this.subject,
+                    status: this.status,
+                    id: this.$route.params.id,
+                  };
+                  const url =
+                    "http://localhost:3000/api/teachers/" +
+                    teacher.id +
+                    "/replace";
+                  axios.post(url, teacher);
+                  axios
+                    .delete(
+                      "http://localhost:3000/api/Photos/teacher/files/" +
+                        this.imageEdit
+                    )
+                    .then((resp) => {
+                      console.log(resp);
+                    })
+                    .catch((err) => console.log(err));
+                  axios
+                    .post(
+                      "http://localhost:3000/api/Photos/teacher/upload?filename=" +
+                        fileName,
+                      fd
+                    )
+                    .then((res) => {
+                      console.log(res);
+                    })
+                    .catch((err) => console.log(err));
+                } else {
+                  const teacher = {
+                    teacherId: this.teacherId,
+                    fullName: this.fullName,
+                    gender: this.gender,
+                    birthday: this.birthday,
+                    phone: this.phone,
+                    email: this.email,
+                    image: fileName,
+                    subject: this.subject,
+                    status: this.status,
+                    id: this.$route.params.id,
+                  };
+                  const url =
+                    "http://localhost:3000/api/teachers/" +
+                    teacher.id +
+                    "/replace";
+                  axios.post(url, teacher);
+                  axios
+                    .post(
+                      "http://localhost:3000/api/Photos/teacher/upload?filename=" +
+                        fileName,
+                      fd
+                    )
+                    .then((res) => {
+                      console.log(res);
+                    })
+                    .catch((err) => console.log(err));
+                }
+              } else {
+                const teacher = {
+                  teacherId: this.teacherId,
+                  fullName: this.fullName,
+                  gender: this.gender,
+                  birthday: this.birthday,
+                  phone: this.phone,
+                  email: this.email,
+                  image: this.imageEdit,
+                  subject: this.subject,
+                  status: this.status,
+                  id: this.$route.params.id,
+                };
+                const url =
+                  "http://localhost:3000/api/teachers/" +
+                  teacher.id +
+                  "/replace";
+                axios.post(url, teacher);
+              }
               setTimeout(() => {
-                this.$router.push("/");
+                this.$router.push("/teachers");
                 location.reload();
               }, 100);
               return 0;
@@ -13980,24 +16217,105 @@ const DetailProfile = {
                       }
                     );
                   } else {
-                    const teacher = {
-                      teacherId: this.teacherId,
-                      gender: this.gender,
-                      fullName: this.fullName,
-                      birthday: this.birthday,
-                      subject: this.subject,
-                      phone: this.phone,
-                      email: this.email,
-                      status: this.status,
-                      id: this.idTable,
-                    };
-                    const url =
-                      "http://localhost:3000/api/teachers/" +
-                      teacher.id +
-                      "/replace";
-                    axios.post(url, teacher);
+                    if (this.selectedFile != null) {
+                      const fd = new FormData();
+                      fd.append(
+                        "image",
+                        this.selectedFile,
+                        this.selectedFile.name
+                      );
+                      var start = this.selectedFile.name.lastIndexOf(".");
+                      var end = this.selectedFile.length;
+                      var fileName =
+                        this.teacherId +
+                        this.selectedFile.name.slice(start, end);
+                      if (this.imageEdit != null) {
+                        const teacher = {
+                          teacherId: this.teacherId,
+                          fullName: this.fullName,
+                          gender: this.gender,
+                          birthday: this.birthday,
+                          phone: this.phone,
+                          email: this.email,
+                          image: fileName,
+                          subject: this.subject,
+                          status: this.status,
+                          id: this.$route.params.id,
+                        };
+                        const url =
+                          "http://localhost:3000/api/teachers/" +
+                          teacher.id +
+                          "/replace";
+                        axios.post(url, teacher);
+                        axios
+                          .delete(
+                            "http://localhost:3000/api/Photos/teacher/files/" +
+                              this.imageEdit
+                          )
+                          .then((resp) => {
+                            console.log(resp);
+                          })
+                          .catch((err) => console.log(err));
+                        axios
+                          .post(
+                            "http://localhost:3000/api/Photos/teacher/upload?filename=" +
+                              fileName,
+                            fd
+                          )
+                          .then((res) => {
+                            console.log(res);
+                          })
+                          .catch((err) => console.log(err));
+                      } else {
+                        const teacher = {
+                          teacherId: this.teacherId,
+                          fullName: this.fullName,
+                          gender: this.gender,
+                          birthday: this.birthday,
+                          phone: this.phone,
+                          email: this.email,
+                          image: fileName,
+                          subject: this.subject,
+                          status: this.status,
+                          id: this.$route.params.id,
+                        };
+                        const url =
+                          "http://localhost:3000/api/teachers/" +
+                          teacher.id +
+                          "/replace";
+                        axios.post(url, teacher);
+                        axios
+                          .post(
+                            "http://localhost:3000/api/Photos/teacher/upload?filename=" +
+                              fileName,
+                            fd
+                          )
+                          .then((res) => {
+                            console.log(res);
+                          })
+                          .catch((err) => console.log(err));
+                      }
+                    } else {
+                      const teacher = {
+                        teacherId: this.teacherId,
+                        fullName: this.fullName,
+                        gender: this.gender,
+                        birthday: this.birthday,
+                        phone: this.phone,
+                        email: this.email,
+                        image: this.imageEdit,
+                        subject: this.subject,
+                        status: this.status,
+                        id: this.$route.params.id,
+                      };
+                      const url =
+                        "http://localhost:3000/api/teachers/" +
+                        teacher.id +
+                        "/replace";
+                      axios.post(url, teacher);
+                    }
                     setTimeout(() => {
-                      this.$router.push("/");
+                      this.$router.push("/teachers");
                       location.reload();
                     }, 100);
                     return 0;
@@ -14040,24 +16358,105 @@ const DetailProfile = {
                       }
                     );
                   } else {
-                    const teacher = {
-                      teacherId: this.teacherId,
-                      gender: this.gender,
-                      fullName: this.fullName,
-                      birthday: this.birthday,
-                      subject: this.subject,
-                      phone: this.phone,
-                      email: this.email,
-                      status: this.status,
-                      id: this.idTable,
-                    };
-                    const url =
-                      "http://localhost:3000/api/teachers/" +
-                      teacher.id +
-                      "/replace";
-                    axios.post(url, teacher);
+                    if (this.selectedFile != null) {
+                      const fd = new FormData();
+                      fd.append(
+                        "image",
+                        this.selectedFile,
+                        this.selectedFile.name
+                      );
+                      var start = this.selectedFile.name.lastIndexOf(".");
+                      var end = this.selectedFile.length;
+                      var fileName =
+                        this.teacherId +
+                        this.selectedFile.name.slice(start, end);
+                      if (this.imageEdit != null) {
+                        const teacher = {
+                          teacherId: this.teacherId,
+                          fullName: this.fullName,
+                          gender: this.gender,
+                          birthday: this.birthday,
+                          phone: this.phone,
+                          email: this.email,
+                          image: fileName,
+                          subject: this.subject,
+                          status: this.status,
+                          id: this.$route.params.id,
+                        };
+                        const url =
+                          "http://localhost:3000/api/teachers/" +
+                          teacher.id +
+                          "/replace";
+                        axios.post(url, teacher);
+                        axios
+                          .delete(
+                            "http://localhost:3000/api/Photos/teacher/files/" +
+                              this.imageEdit
+                          )
+                          .then((resp) => {
+                            console.log(resp);
+                          })
+                          .catch((err) => console.log(err));
+                        axios
+                          .post(
+                            "http://localhost:3000/api/Photos/teacher/upload?filename=" +
+                              fileName,
+                            fd
+                          )
+                          .then((res) => {
+                            console.log(res);
+                          })
+                          .catch((err) => console.log(err));
+                      } else {
+                        const teacher = {
+                          teacherId: this.teacherId,
+                          fullName: this.fullName,
+                          gender: this.gender,
+                          birthday: this.birthday,
+                          phone: this.phone,
+                          email: this.email,
+                          image: fileName,
+                          subject: this.subject,
+                          status: this.status,
+                          id: this.$route.params.id,
+                        };
+                        const url =
+                          "http://localhost:3000/api/teachers/" +
+                          teacher.id +
+                          "/replace";
+                        axios.post(url, teacher);
+                        axios
+                          .post(
+                            "http://localhost:3000/api/Photos/teacher/upload?filename=" +
+                              fileName,
+                            fd
+                          )
+                          .then((res) => {
+                            console.log(res);
+                          })
+                          .catch((err) => console.log(err));
+                      }
+                    } else {
+                      const teacher = {
+                        teacherId: this.teacherId,
+                        fullName: this.fullName,
+                        gender: this.gender,
+                        birthday: this.birthday,
+                        phone: this.phone,
+                        email: this.email,
+                        image: this.imageEdit,
+                        subject: this.subject,
+                        status: this.status,
+                        id: this.$route.params.id,
+                      };
+                      const url =
+                        "http://localhost:3000/api/teachers/" +
+                        teacher.id +
+                        "/replace";
+                      axios.post(url, teacher);
+                    }
                     setTimeout(() => {
-                      this.$router.push("/");
+                      this.$router.push("/teachers");
                       location.reload();
                     }, 100);
                     return 0;
@@ -14108,24 +16507,105 @@ const DetailProfile = {
                             }
                           );
                         } else {
-                          const teacher = {
-                            teacherId: this.teacherId,
-                            gender: this.gender,
-                            fullName: this.fullName,
-                            birthday: this.birthday,
-                            subject: this.subject,
-                            phone: this.phone,
-                            email: this.email,
-                            status: this.status,
-                            id: this.idTable,
-                          };
-                          const url =
-                            "http://localhost:3000/api/teachers/" +
-                            teacher.id +
-                            "/replace";
-                          axios.post(url, teacher);
+                          if (this.selectedFile != null) {
+                            const fd = new FormData();
+                            fd.append(
+                              "image",
+                              this.selectedFile,
+                              this.selectedFile.name
+                            );
+                            var start = this.selectedFile.name.lastIndexOf(".");
+                            var end = this.selectedFile.length;
+                            var fileName =
+                              this.teacherId +
+                              this.selectedFile.name.slice(start, end);
+                            if (this.imageEdit != null) {
+                              const teacher = {
+                                teacherId: this.teacherId,
+                                fullName: this.fullName,
+                                gender: this.gender,
+                                birthday: this.birthday,
+                                phone: this.phone,
+                                email: this.email,
+                                image: fileName,
+                                subject: this.subject,
+                                status: this.status,
+                                id: this.$route.params.id,
+                              };
+                              const url =
+                                "http://localhost:3000/api/teachers/" +
+                                teacher.id +
+                                "/replace";
+                              axios.post(url, teacher);
+                              axios
+                                .delete(
+                                  "http://localhost:3000/api/Photos/teacher/files/" +
+                                    this.imageEdit
+                                )
+                                .then((resp) => {
+                                  console.log(resp);
+                                })
+                                .catch((err) => console.log(err));
+                              axios
+                                .post(
+                                  "http://localhost:3000/api/Photos/teacher/upload?filename=" +
+                                    fileName,
+                                  fd
+                                )
+                                .then((res) => {
+                                  console.log(res);
+                                })
+                                .catch((err) => console.log(err));
+                            } else {
+                              const teacher = {
+                                teacherId: this.teacherId,
+                                fullName: this.fullName,
+                                gender: this.gender,
+                                birthday: this.birthday,
+                                phone: this.phone,
+                                email: this.email,
+                                image: fileName,
+                                subject: this.subject,
+                                status: this.status,
+                                id: this.$route.params.id,
+                              };
+                              const url =
+                                "http://localhost:3000/api/teachers/" +
+                                teacher.id +
+                                "/replace";
+                              axios.post(url, teacher);
+                              axios
+                                .post(
+                                  "http://localhost:3000/api/Photos/teacher/upload?filename=" +
+                                    fileName,
+                                  fd
+                                )
+                                .then((res) => {
+                                  console.log(res);
+                                })
+                                .catch((err) => console.log(err));
+                            }
+                          } else {
+                            const teacher = {
+                              teacherId: this.teacherId,
+                              fullName: this.fullName,
+                              gender: this.gender,
+                              birthday: this.birthday,
+                              phone: this.phone,
+                              email: this.email,
+                              image: this.imageEdit,
+                              subject: this.subject,
+                              status: this.status,
+                              id: this.$route.params.id,
+                            };
+                            const url =
+                              "http://localhost:3000/api/teachers/" +
+                              teacher.id +
+                              "/replace";
+                            axios.post(url, teacher);
+                          }
                           setTimeout(() => {
-                            this.$router.push("/");
+                            this.$router.push("/teachers");
                             location.reload();
                           }, 100);
                           return 0;
@@ -14192,14 +16672,14 @@ const DetailProfile = {
     },
 
     onFileSelected(event) {
-      var selectedFile = event.target.files[0];
+      this.selectedFile = event.target.files[0];
       var reader = new FileReader();
       var imgtag = document.getElementById("image");
-      imgtag.title = selectedFile.name;
+      imgtag.title = this.selectedFile.name;
       reader.onload = function (event) {
         imgtag.src = event.target.result;
       };
-      reader.readAsDataURL(selectedFile);
+      reader.readAsDataURL(this.selectedFile);
     },
   },
   template: `
@@ -14213,9 +16693,12 @@ const DetailProfile = {
         <div class="col-lg-12">
           <div class="row">
             <div class="col-sm-3">
-              <div class="text-center">
+              <div class="text-center" v-if="imageEdit != null">
+                <div v-html="htmlImage"></div>
+              </div>
+              <div class="text-center" v-if="imageEdit == null">
                 <img class="profile-user-img img-fluid rounded-circle img-thumbnail" id="image"
-                src="../images/user_02.png" alt="User Image">
+                src="../images/default_image.png" alt="User Image">
               </div>
               <div class="row">
                 <div class="col-sm-12 text-center mt-2">
@@ -14295,7 +16778,7 @@ const DetailProfile = {
                 </div>
                 <div class="col-lg-6">
                   <label class="text-size-15px font-weight-bold col-form-label" for="image">Hình Ảnh</label>
-                  <input type="file" id="image" v-model="image" name="image" :title="titlePicture"
+                  <input type="file" id="image" :title="titlePicture"
                     class="form-control rounded text-size-13px" style="margin-top: -5px;" @input="onFileSelected(event)"/>
                 </div>
               </div>
@@ -14324,7 +16807,7 @@ const DetailProfile = {
               <div class="row mt-2" v-show="role == 1 || role == 2 || role == 3 || role == 4 || role == 5 || role == 6 || role == 7 || role == 8 || role == 9">
                 <div class="col-lg-6">
                   <label class="text-size-15px font-weight-bold col-form-label" for="image">Hình Ảnh</label>
-                  <input type="file" id="image" v-model="image" name="image" :title="titlePicture"
+                  <input type="file" id="image" :title="titlePicture"
                     class="form-control rounded text-size-13px" style="margin-top: -5px;" @input="onFileSelected(event)"/>
                 </div>
               </div>
@@ -14379,6 +16862,7 @@ const DetailProfile = {
   `,
 };
 
+//CHANGE PASSWORD
 const LayoutChangePassword = {
   template: `
   <div>

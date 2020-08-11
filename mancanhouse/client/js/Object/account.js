@@ -100,7 +100,7 @@ const ListAccount = {
               <th class="align-middle" scope="row">{{ index + 1 }}</th>
               <td>{{ account.userId }}</td>
               <td>{{ account.username }}</td>
-              <td v-for="role in roles" v-if="role.id == account.role">{{ role.name }}</td>
+              <td v-for="role in roles" v-if="role.id == account.role">{{ role.roleName }}</td>
               <td v-if="account.status == 1">
                 <i class="fas fa-toggle-on fa-lg text-success"></i>
               </td>
@@ -305,6 +305,7 @@ const AddAccount = {
                 password: crypt.encrypt(this.password),
                 role: this.role,
                 status: this.status,
+                idTable: 0,
               };
               const url = `http://localhost:3000/api/accounts`;
               axios.post(url, account);
@@ -378,7 +379,7 @@ const AddAccount = {
             <select class="custom-select  text-size-13px  h-32px" v-model="role" id="role" name="role"
               style="margin-top: -5px;">
               <option value="0" disabled selected>--- Chọn Phân quyền ---</option>
-              <option v-for="role in roles" v-bind:value="role.id">{{ role.name }}</option>
+              <option v-for="role in roles" v-bind:value="role.id">{{ role.roleName }}</option>
             </select>
           </div>
           <div class="col-lg-4">
@@ -425,11 +426,13 @@ const AddAccount = {
 const EditAccount = {
   data() {
     return {
+      username: null,
       usernameEdit: null,
       passwordEdit: null,
       roleEdit: 0,
       statusEdit: 0,
       userIdEdit: null,
+      idTableEdit: null,
       titleUsername: "Nhập thông tin tài khoản",
       titlePassword: "Nhập thông tin mật khẩu",
       titleRole: "Chọn thông tin phân quyền",
@@ -461,10 +464,12 @@ const EditAccount = {
       )
       .then((response) => {
         this.userIdEdit = response.data.account.userId;
+        this.username = response.data.account.username;
         this.usernameEdit = response.data.account.username;
         this.passwordEdit = crypt.decrypt(response.data.account.password);
         this.roleEdit = response.data.account.role;
         this.statusEdit = response.data.account.status;
+        this.idTableEdit = response.data.account.idTable;
       });
   },
 
@@ -550,11 +555,12 @@ const EditAccount = {
     submitEditAccountForm() {
       if (this.editAccountFormIsValid) {
         const account = {
+          userId: this.userIdEdit,
           username: this.usernameEdit,
           password: crypt.encrypt(this.passwordEdit),
           role: this.roleEdit,
           status: this.statusEdit,
-          userId: this.userIdEdit,
+          idTable: this.idTableEdit,
           id: this.$route.params.id,
         };
         const url =
@@ -629,7 +635,7 @@ const EditAccount = {
           <select class="custom-select  text-size-13px  h-32px" v-model="roleEdit" id="roleEdit" name="roleEdit"
             style="margin-top: -5px;">
             <option value="0" disabled>--- Chọn Phân quyền ---</option>
-            <option v-for="role in roles" v-bind:value ="role.id" :selected="role.id == roleEdit">{{ role.name }}</option>
+            <option v-for="role in roles" v-bind:value ="role.id" :selected="role.id == roleEdit">{{ role.roleName }}</option>
           </select>
         </div>
         <div class="col-lg-4">

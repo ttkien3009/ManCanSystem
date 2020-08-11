@@ -104,7 +104,8 @@ const ChangePassword = {
     //////////
     checkRenewPassword() {
       return (
-        !!this.renewPasswordIsValid && !!(this.newPassword != this.renewPassword)
+        !!this.renewPasswordIsValid &&
+        !!(this.newPassword != this.renewPassword)
       );
     },
 

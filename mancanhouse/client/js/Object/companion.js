@@ -22,6 +22,7 @@ const ListCompanion = {
       positions: [],
       birthdayFormat: null,
       groupCommunities: [],
+      image: null,
     };
   },
   mounted() {
@@ -50,6 +51,10 @@ const ListCompanion = {
     },
     getDetailCompanion(companion) {
       this.companion = companion;
+      this.image = `
+      <img class="img-fluid img-thumbnail rounded-circle" src="../api/Photos/companion/download/` + this.companion.image + `" width="100px"
+      height="100px" alt="companion-image"/>
+      `
       this.birthdayFormat = this.formatDate(this.companion.birthday);
     },
 
@@ -104,7 +109,6 @@ const ListCompanion = {
               <th>Email</th>
               <th>Chức Vụ</th>
               <th>Nhóm Cộng Đoàn</th>
-              <th>Quê Quán</th>
               <th>Trạng Thái</th>
               <th>Action</th>
             </tr>
@@ -117,7 +121,6 @@ const ListCompanion = {
               <th>Email</th>
               <th>Chức Vụ</th>
               <th>Nhóm Cộng Đoàn</th>
-              <th>Quê Quán</th>
               <th>Trạng Thái</th>
               <th>Action</th>
             </tr>
@@ -130,7 +133,6 @@ const ListCompanion = {
               <td>{{ companion.email }}</td>
               <td v-for="department in positions" v-if="department.id == companion.position">{{ department.positionType }}-{{ department.name }}</td>
               <td v-for="grCom in groupCommunities" v-if="grCom.id == companion.groupCommunity">{{ grCom.name }}</td>
-              <td>{{ companion.homeland }}</td>
               <td v-if="companion.status == 1">
                 <i class="fas fa-toggle-on fa-lg text-success"></i>
               </td>
@@ -138,7 +140,7 @@ const ListCompanion = {
                 <i class="fas fa-toggle-off fa-lg text-danger"></i>
               </td>
               <td>
-                <div class="row" style="margin-left:-25px;">
+                <div class="row" style="margin-left:-19px;">
                   <div class="col-lg-4">
                     <button :title="titleButtonDisplay" data-toggle="modal" @click="getDetailCompanion(companion)"
                       data-target="#detailCompanionModal"
@@ -149,14 +151,14 @@ const ListCompanion = {
                   <div class="col-lg-4">
                     <button :title="titleButtonEdit" @click="getDataCompanionUpdate(companion)"
                       class="btn btn-warning btn-sm h-28px w-28px rounded" type="submit"
-                      style="margin-left: -6px;">
+                      style="margin-left: -8px;">
                       <i class="fas fa-edit fa-md ml--2px"></i>
                     </button>
                   </div>
                   <div class="col-lg-4">
                     <button :title="titleButtonDelete" data-toggle="modal" @click="getDetailCompanion(companion)"
                       data-target="#deleteCompanionModal" class="btn btn-danger btn-sm h-28px w-28px rounded"
-                      style="margin-left: -12px;">
+                      style="margin-left: -16.5px;">
                       <i class="far fa-trash-alt fa-md ml--1px"></i>
                     </button>
                   </div>
@@ -203,9 +205,13 @@ const ListCompanion = {
           </div>
           <div class="modal-body">
             <div class="row">
-              <div class="col-sm-4 text-center">
-                <img class="img-fluid img-thumbnail rounded-circle" src="../images/user_03.jpg" width="100px"
-                  height="100px" />
+              <div class="col-sm-4 text-center" v-if="companion.image != null">
+                <div v-html="image"></div>
+                <p class="font-weight-bold" style="padding-top: 5px;">{{ companion.companionId }}</p>
+              </div>
+              <div class="col-sm-4 text-center" v-if="companion.image == null">
+                <img class="img-fluid img-thumbnail rounded-circle" src="../images/default_image.png" width="100px"
+                  height="100px" alt="companion-image"/>
                 <p class="font-weight-bold" style="padding-top: 5px;">{{ companion.companionId }}</p>
               </div>
               <div class="col-sm-8 mt-3">
@@ -226,8 +232,6 @@ const ListCompanion = {
                 <span class="font-weight-bold ">Nhóm Cộng Đoàn:</span>
                 <span v-for="grCom in groupCommunities" v-if="grCom.id == companion.groupCommunity"> 
                 &nbsp;{{ grCom.name }}</span><br>
-                <span class="font-weight-bold ">Quê Quán:</span>
-                <span> &nbsp;&nbsp;&nbsp;{{ companion.homeland }}</span><br>
                 <span class="font-weight-bold ">Trạng Thái:&nbsp;&nbsp;</span>
                 <span v-if="companion.status == 1"> 
                   <i class="fas fa-toggle-on fa-lg text-success"></i>
@@ -261,14 +265,12 @@ const AddCompanion = {
       image: null,
       groupCommunity: 0,
       position: 0,
-      homeland: null,
       titlePicture: "Chọn hình ảnh",
       titleBirthday: "Nhập thông tin ngày sinh",
       titleChristianName: "Nhập thông tin tên Thánh",
       titleFullName: "Nhập thông tin họ và tên",
       titlePhone: "Nhập thông tin số điện thoại",
       titleEmail: "Nhập thông tin địa chỉ email",
-      titleHomeland: "Nhập thông tin quê quán",
       checkEmail: false,
       checkPhone: false,
       status: 0,
@@ -279,6 +281,7 @@ const AddCompanion = {
       positions: [],
       groupCommunities: [],
       companions: [],
+      selectedFile: null,
     };
   },
   mounted() {
@@ -321,10 +324,6 @@ const AddCompanion = {
       return this.position;
     },
 
-    homelandIsValid() {
-      return this.homeland;
-    },
-
     birthdayIsValid() {
       return this.birthday;
     },
@@ -348,7 +347,6 @@ const AddCompanion = {
         this.phoneIsValid &&
         this.emailIsValid &&
         this.positionIsValid &&
-        this.homelandIsValid &&
         this.birthdayIsValid &&
         !this.checkFormatPhone &&
         !this.checkFormatEmail &&
@@ -364,7 +362,6 @@ const AddCompanion = {
         this.phoneIsValid ||
         this.emailIsValid ||
         this.positionIsValid ||
-        this.homelandIsValid ||
         this.birthdayIsValid ||
         this.statusIsValid ||
         this.groupCommunityIsValid
@@ -372,18 +369,26 @@ const AddCompanion = {
     },
   },
   methods: {
+    onFileSelected(event){
+      this.selectedFile = event.target.files[0];
+    },
     submitAddCompanionForm() {
       if (this.addCompanionFormIsValid) {
-        let lengthCompanions = 0;
-        lengthCompanions = this.companions.length;
-        if (lengthCompanions > -1 && lengthCompanions < 9) {
-          this.companionId = "DH00" + (lengthCompanions + 1);
+        let lengthCompanions = this.companions.length;
+        if ( lengthCompanions == 0) {
+          this.companionId == 'DH001';
         }
-        if (lengthCompanions > 8 && lengthCompanions < 99) {
-          this.companionId = "DH0" + (lengthCompanions + 1);
-        }
-        if (lengthCompanions > 98 && lengthCompanions < 999) {
-          this.companionId = "DH" + (lengthCompanions + 1);
+        else {
+          let currentId = this.companions[lengthCompanions - 1].id;
+          if (currentId > -1 && currentId < 9) {
+            this.companionId = "DH00" + (currentId + 1);
+          }
+          if (currentId > 8 && currentId < 99) {
+            this.companionId = "DH0" + (currentId + 1);
+          }
+          if (currentId > 98 && currentId < 999) {
+            this.companionId = "DH" + (currentId + 1);
+          }
         }
         axios
           .get(
@@ -410,7 +415,7 @@ const AddCompanion = {
                         alertify.success("Ok");
                       }
                     );
-                  } else if(crypt.getAge(this.birthday) < 28){
+                  } else if (crypt.getAge(this.birthday) < 28) {
                     alertify.alert(
                       "Thông báo",
                       "Tuổi của người đồng hành nhỏ hơn 28!",
@@ -418,7 +423,7 @@ const AddCompanion = {
                         alertify.success("Ok");
                       }
                     );
-                  } else if(crypt.getAge(this.birthday) > 60){
+                  } else if (crypt.getAge(this.birthday) > 60) {
                     alertify.alert(
                       "Thông báo",
                       "Tuổi của người đồng hành lớn hơn 60!",
@@ -427,6 +432,14 @@ const AddCompanion = {
                       }
                     );
                   } else {
+                    var fileName = null;
+                    const fd = new FormData();
+                    if(this.selectedFile != null) {
+                      fd.append("image", this.selectedFile, this.selectedFile.name);
+                      var start = this.selectedFile.name.lastIndexOf('.');
+                      var end = this.selectedFile.length;
+                      fileName = this.companionId + this.selectedFile.name.slice(start, end);
+                    }
                     const companion = {
                       companionId: this.companionId,
                       christianName: this.christianName,
@@ -434,10 +447,9 @@ const AddCompanion = {
                       birthday: this.birthday,
                       phone: this.phone,
                       email: this.email,
-                      image: this.image,
-                      position: this.position,
                       groupCommunity: this.groupCommunity,
-                      homeland: this.homeland,
+                      position: this.position,
+                      image: fileName,
                       status: this.status,
                     };
                     axios
@@ -459,17 +471,32 @@ const AddCompanion = {
                         } else {
                           role = 9;
                         }
-                        const accountCompanion = {
-                          userId: this.companionId,
-                          username: this.email,
-                          password: crypt.encrypt(this.phone),
-                          role: role,
-                          status: this.status,
-                        };
-                        const url = `http://localhost:3000/api/accounts`;
-                        axios.post(url, accountCompanion);
                         const url_1 = `http://localhost:3000/api/companions`;
                         axios.post(url_1, companion);
+                        axios
+                          .get(
+                            "http://localhost:3000/api/companions/findOne?filter[where][email]=" +
+                              this.email
+                          )
+                          .then((resp) => {
+                            const account_companion = {
+                              userId: resp.data.companionId,
+                              username: resp.data.email,
+                              password: crypt.encrypt(resp.data.phone),
+                              role: role,
+                              status: resp.data.status,
+                              idTable: resp.data.id,
+                            };
+                            const url = "http://localhost:3000/api/accounts";
+                            axios.post(url, account_companion);
+                            if(this.selectedFile != null){
+                              axios.post('http://localhost:3000/api/Photos/companion/upload?filename=' + fileName, fd)
+                                .then(res => {
+                                  console.log(res);
+                                })
+                                .catch(err => console.log(err));
+                            }
+                          });
                       });
                     setTimeout(() => {
                       this.$router.push("/companions");
@@ -508,9 +535,6 @@ const AddCompanion = {
       }
       if (this.birthdayIsValid) {
         this.birthday = null;
-      }
-      if (this.homelandIsValid) {
-        this.homeland = null;
       }
       if (this.statusIsValid) {
         this.status = 0;
@@ -602,15 +626,6 @@ const AddCompanion = {
             </select>
           </div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="homeland">Quê Quán</label>
-            <label class="text-danger">*</label>
-            <input v-model="homeland" name="homeland" id="homeland" type="text" :title="titleHomeland"
-              class="form-control  text-size-13px " placeholder="Nhập Quê quán..." style="margin-top: -5px;">
-          </div>
-        </div>
-        <div class="row mt-2">
-          <div class="col-lg-4"></div>
-          <div class="col-lg-4">
             <label class="text-size-15px font-weight-bold col-form-label" for="status">Trạng Thái</label>
             <label class="text-danger">*</label>
             <select class="custom-select  text-size-13px  h-32px" v-model="status" name="status" id="status"
@@ -620,9 +635,12 @@ const AddCompanion = {
               </option>
             </select>
           </div>
+        </div>
+        <div class="row mt-2">
+          <div class="col-lg-4"></div>
           <div class="col-lg-4">
             <label class="text-size-15px font-weight-bold col-form-label" for="image">Hình Ảnh</label>
-            <input type="file" id="image" v-model="image" name="image" :title="titlePicture"
+            <input type="file" id="image" @change="onFileSelected" :title="titlePicture"
               class="form-control rounded text-size-13px" style="margin-top: -5px;" />
           </div>
         </div>
@@ -671,16 +689,15 @@ const EditCompanion = {
       email: null,
       emailEdit: null,
       image: null,
+      imageEdit: null,
       groupCommunity: 0,
       position: 0,
-      homeland: null,
       titlePicture: "Chọn hình ảnh",
       titleBirthday: "Nhập thông tin ngày sinh",
       titleChristianName: "Nhập thông tin tên Thánh",
       titleFullName: "Nhập thông tin họ và tên",
       titlePhone: "Nhập thông tin số điện thoại",
       titleEmail: "Nhập thông tin địa chỉ email",
-      titleHomeland: "Nhập thông tin quê quán",
       checkEmail: false,
       checkPhone: false,
       status: 0,
@@ -691,6 +708,7 @@ const EditCompanion = {
       positions: [],
       groupCommunities: [],
       companion: {},
+      selectedFile: null,
     };
   },
   mounted() {
@@ -710,14 +728,14 @@ const EditCompanion = {
         this.christianName = response.data.companion.christianName;
         this.fullName = response.data.companion.fullName;
         this.birthday = crypt.formatDate(response.data.companion.birthday);
-        this.position = response.data.companion.position;
-        this.homeland = response.data.companion.homeland;
         this.phone = response.data.companion.phone;
         this.phoneEdit = response.data.companion.phone;
         this.email = response.data.companion.email;
         this.emailEdit = response.data.companion.email;
-        this.status = response.data.companion.status;
         this.groupCommunity = response.data.companion.groupCommunity;
+        this.position = response.data.companion.position;
+        this.imageEdit = response.data.companion.image;
+        this.status = response.data.companion.status;
       });
   },
   computed: {
@@ -749,10 +767,6 @@ const EditCompanion = {
       return this.position;
     },
 
-    homelandIsValid() {
-      return this.homeland;
-    },
-
     birthdayIsValid() {
       return this.birthday;
     },
@@ -776,7 +790,6 @@ const EditCompanion = {
         this.phoneIsValid &&
         this.emailIsValid &&
         this.positionIsValid &&
-        this.homelandIsValid &&
         this.birthdayIsValid &&
         !this.checkFormatPhone &&
         !this.checkFormatEmail &&
@@ -792,7 +805,6 @@ const EditCompanion = {
         this.phoneIsValid ||
         this.emailIsValid ||
         this.positionIsValid ||
-        this.homelandIsValid ||
         this.birthdayIsValid ||
         this.statusIsValid ||
         this.groupCommunityIsValid
@@ -800,10 +812,13 @@ const EditCompanion = {
     },
   },
   methods: {
+    onFileSelected(event) {
+      this.selectedFile = event.target.files[0];
+    },
     submitEditCompanionForm() {
       if (this.editCompanionFormIsValid) {
         if (this.emailEdit == this.email && this.phoneEdit == this.phone) {
-          if(crypt.getAge(this.birthday) < 28){
+          if (crypt.getAge(this.birthday) < 28) {
             alertify.alert(
               "Thông báo",
               "Tuổi của người đồng hành nhỏ hơn 28!",
@@ -811,7 +826,7 @@ const EditCompanion = {
                 alertify.success("Ok");
               }
             );
-          } else if(crypt.getAge(this.birthday) > 60){
+          } else if (crypt.getAge(this.birthday) > 60) {
             alertify.alert(
               "Thông báo",
               "Tuổi của người đồng hành lớn hơn 60!",
@@ -819,23 +834,87 @@ const EditCompanion = {
                 alertify.success("Ok");
               }
             );
-          } else{
-            const companion = {
-              companionId: this.companionId,
-              christianName: this.christianName,
-              fullName: this.fullName,
-              birthday: this.birthday,
-              position: this.position,
-              homeland: this.homeland,
-              phone: this.phone,
-              email: this.email,
-              status: this.status,
-              groupCommunity: this.groupCommunity,
-              id: this.$route.params.id,
-            };
-            const url =
-              "http://localhost:3000/api/companions/" + companion.id + "/replace";
-            axios.post(url, companion);
+          } else {
+            if(this.selectedFile != null) {
+              const fd = new FormData();
+              fd.append('image', this.selectedFile, this.selectedFile.name);
+              var start = this.selectedFile.name.lastIndexOf('.');
+              var end = this.selectedFile.length;
+              var fileName = this.companionId + this.selectedFile.name.slice(start, end);
+              if(this.imageEdit != null) {
+                const companion = {
+                  companionId: this.companionId,
+                  christianName: this.christianName,
+                  fullName: this.fullName,
+                  birthday: this.birthday,
+                  phone: this.phone,
+                  email: this.email,
+                  groupCommunity: this.groupCommunity,
+                  position: this.position,
+                  image: fileName,
+                  status: this.status,
+                  id: this.$route.params.id,
+                };
+                const url =
+                  "http://localhost:3000/api/companions/" +
+                  companion.id +
+                  "/replace";
+                axios.post(url, companion);
+                axios.delete("http://localhost:3000/api/Photos/companion/files/" + this.imageEdit)
+                  .then(resp => {
+                    console.log(resp);
+                  })
+                  .catch(err => console.log(err));
+                axios.post('http://localhost:3000/api/Photos/companion/upload?filename=' + fileName, fd)
+                  .then(res => {
+                    console.log(res);
+                  })
+                  .catch(err => console.log(err));
+              } else {
+                const companion = {
+                  companionId: this.companionId,
+                  christianName: this.christianName,
+                  fullName: this.fullName,
+                  birthday: this.birthday,
+                  phone: this.phone,
+                  email: this.email,
+                  groupCommunity: this.groupCommunity,
+                  position: this.position,
+                  image: fileName,
+                  status: this.status,
+                  id: this.$route.params.id,
+                };
+                const url =
+                  "http://localhost:3000/api/companions/" +
+                  companion.id +
+                  "/replace";
+                axios.post(url, companion);
+                axios.post("http://localhost:3000/api/Photos/companion/upload?filename=" + fileName, fd)
+                  .then(res => {
+                    console.log(res);
+                  })
+                  .catch(err => console.log(err));
+              }
+            } else {
+              const companion = {
+                companionId: this.companionId,
+                christianName: this.christianName,
+                fullName: this.fullName,
+                birthday: this.birthday,
+                phone: this.phone,
+                email: this.email,
+                groupCommunity: this.groupCommunity,
+                position: this.position,
+                image: this.imageEdit,
+                status: this.status,
+                id: this.$route.params.id,
+              };
+              const url =
+                "http://localhost:3000/api/companions/" +
+                companion.id +
+                "/replace";
+              axios.post(url, companion);
+            }
             setTimeout(() => {
               this.$router.push("/companions");
               location.reload();
@@ -856,7 +935,7 @@ const EditCompanion = {
                 alertify.alert("Thông báo", "Email đã tồn tại!", function () {
                   alertify.success("Ok");
                 });
-              } else if(crypt.getAge(this.birthday) < 28){
+              } else if (crypt.getAge(this.birthday) < 28) {
                 alertify.alert(
                   "Thông báo",
                   "Tuổi của người đồng hành nhỏ hơn 28!",
@@ -864,7 +943,7 @@ const EditCompanion = {
                     alertify.success("Ok");
                   }
                 );
-              } else if(crypt.getAge(this.birthday) > 60){
+              } else if (crypt.getAge(this.birthday) > 60) {
                 alertify.alert(
                   "Thông báo",
                   "Tuổi của người đồng hành lớn hơn 60!",
@@ -873,24 +952,86 @@ const EditCompanion = {
                   }
                 );
               } else {
-                const companion = {
-                  companionId: this.companionId,
-                  christianName: this.christianName,
-                  fullName: this.fullName,
-                  birthday: this.birthday,
-                  position: this.position,
-                  homeland: this.homeland,
-                  phone: this.phone,
-                  email: this.email,
-                  status: this.status,
-                  groupCommunity: this.groupCommunity,
-                  id: this.$route.params.id,
-                };
-                const url =
-                  "http://localhost:3000/api/companions/" +
-                  companion.id +
-                  "/replace";
-                axios.post(url, companion);
+                if(this.selectedFile != null) {
+                  const fd = new FormData();
+                  fd.append('image', this.selectedFile, this.selectedFile.name);
+                  var start = this.selectedFile.name.lastIndexOf('.');
+                  var end = this.selectedFile.length;
+                  var fileName = this.companionId + this.selectedFile.name.slice(start, end);
+                  if(this.imageEdit != null) {
+                    const companion = {
+                      companionId: this.companionId,
+                      christianName: this.christianName,
+                      fullName: this.fullName,
+                      birthday: this.birthday,
+                      phone: this.phone,
+                      email: this.email,
+                      groupCommunity: this.groupCommunity,
+                      position: this.position,
+                      image: fileName,
+                      status: this.status,
+                      id: this.$route.params.id,
+                    };
+                    const url =
+                      "http://localhost:3000/api/companions/" +
+                      companion.id +
+                      "/replace";
+                    axios.post(url, companion);
+                    axios.delete("http://localhost:3000/api/Photos/companion/files/" + this.imageEdit)
+                      .then(resp => {
+                        console.log(resp);
+                      })
+                      .catch(err => console.log(err));
+                    axios.post('http://localhost:3000/api/Photos/companion/upload?filename=' + fileName, fd)
+                      .then(res => {
+                        console.log(res);
+                      })
+                      .catch(err => console.log(err));
+                  } else {
+                    const companion = {
+                      companionId: this.companionId,
+                      christianName: this.christianName,
+                      fullName: this.fullName,
+                      birthday: this.birthday,
+                      phone: this.phone,
+                      email: this.email,
+                      groupCommunity: this.groupCommunity,
+                      position: this.position,
+                      image: fileName,
+                      status: this.status,
+                      id: this.$route.params.id,
+                    };
+                    const url =
+                      "http://localhost:3000/api/companions/" +
+                      companion.id +
+                      "/replace";
+                    axios.post(url, companion);
+                    axios.post("http://localhost:3000/api/Photos/companion/upload?filename=" + fileName, fd)
+                      .then(res => {
+                        console.log(res);
+                      })
+                      .catch(err => console.log(err));
+                  }
+                } else {
+                  const companion = {
+                    companionId: this.companionId,
+                    christianName: this.christianName,
+                    fullName: this.fullName,
+                    birthday: this.birthday,
+                    phone: this.phone,
+                    email: this.email,
+                    groupCommunity: this.groupCommunity,
+                    position: this.position,
+                    image: this.imageEdit,
+                    status: this.status,
+                    id: this.$route.params.id,
+                  };
+                  const url =
+                    "http://localhost:3000/api/companions/" +
+                    companion.id +
+                    "/replace";
+                  axios.post(url, companion);
+                }
                 setTimeout(() => {
                   this.$router.push("/companions");
                   location.reload();
@@ -916,7 +1057,7 @@ const EditCompanion = {
                     alertify.success("Ok");
                   }
                 );
-              } else if(crypt.getAge(this.birthday) < 28){
+              } else if (crypt.getAge(this.birthday) < 28) {
                 alertify.alert(
                   "Thông báo",
                   "Tuổi của người đồng hành nhỏ hơn 28!",
@@ -924,7 +1065,7 @@ const EditCompanion = {
                     alertify.success("Ok");
                   }
                 );
-              } else if(crypt.getAge(this.birthday) > 60){
+              } else if (crypt.getAge(this.birthday) > 60) {
                 alertify.alert(
                   "Thông báo",
                   "Tuổi của người đồng hành lớn hơn 60!",
@@ -933,24 +1074,86 @@ const EditCompanion = {
                   }
                 );
               } else {
-                const companion = {
-                  companionId: this.companionId,
-                  christianName: this.christianName,
-                  fullName: this.fullName,
-                  birthday: this.birthday,
-                  position: this.position,
-                  homeland: this.homeland,
-                  phone: this.phone,
-                  email: this.email,
-                  status: this.status,
-                  groupCommunity: this.groupCommunity,
-                  id: this.$route.params.id,
-                };
-                const url =
-                  "http://localhost:3000/api/companions/" +
-                  companion.id +
-                  "/replace";
-                axios.post(url, companion);
+                if(this.selectedFile != null) {
+                  const fd = new FormData();
+                  fd.append('image', this.selectedFile, this.selectedFile.name);
+                  var start = this.selectedFile.name.lastIndexOf('.');
+                  var end = this.selectedFile.length;
+                  var fileName = this.companionId + this.selectedFile.name.slice(start, end);
+                  if(this.imageEdit != null) {
+                    const companion = {
+                      companionId: this.companionId,
+                      christianName: this.christianName,
+                      fullName: this.fullName,
+                      birthday: this.birthday,
+                      phone: this.phone,
+                      email: this.email,
+                      groupCommunity: this.groupCommunity,
+                      position: this.position,
+                      image: fileName,
+                      status: this.status,
+                      id: this.$route.params.id,
+                    };
+                    const url =
+                      "http://localhost:3000/api/companions/" +
+                      companion.id +
+                      "/replace";
+                    axios.post(url, companion);
+                    axios.delete("http://localhost:3000/api/Photos/companion/files/" + this.imageEdit)
+                      .then(resp => {
+                        console.log(resp);
+                      })
+                      .catch(err => console.log(err));
+                    axios.post('http://localhost:3000/api/Photos/companion/upload?filename=' + fileName, fd)
+                      .then(res => {
+                        console.log(res);
+                      })
+                      .catch(err => console.log(err));
+                  } else {
+                    const companion = {
+                      companionId: this.companionId,
+                      christianName: this.christianName,
+                      fullName: this.fullName,
+                      birthday: this.birthday,
+                      phone: this.phone,
+                      email: this.email,
+                      groupCommunity: this.groupCommunity,
+                      position: this.position,
+                      image: fileName,
+                      status: this.status,
+                      id: this.$route.params.id,
+                    };
+                    const url =
+                      "http://localhost:3000/api/companions/" +
+                      companion.id +
+                      "/replace";
+                    axios.post(url, companion);
+                    axios.post("http://localhost:3000/api/Photos/companion/upload?filename=" + fileName, fd)
+                      .then(res => {
+                        console.log(res);
+                      })
+                      .catch(err => console.log(err));
+                  }
+                } else {
+                  const companion = {
+                    companionId: this.companionId,
+                    christianName: this.christianName,
+                    fullName: this.fullName,
+                    birthday: this.birthday,
+                    phone: this.phone,
+                    email: this.email,
+                    groupCommunity: this.groupCommunity,
+                    position: this.position,
+                    image: this.imageEdit,
+                    status: this.status,
+                    id: this.$route.params.id,
+                  };
+                  const url =
+                    "http://localhost:3000/api/companions/" +
+                    companion.id +
+                    "/replace";
+                  axios.post(url, companion);
+                }
                 setTimeout(() => {
                   this.$router.push("/companions");
                   location.reload();
@@ -984,7 +1187,7 @@ const EditCompanion = {
                           alertify.success("Ok");
                         }
                       );
-                    } else if(crypt.getAge(this.birthday) < 28){
+                    } else if (crypt.getAge(this.birthday) < 28) {
                       alertify.alert(
                         "Thông báo",
                         "Tuổi của người đồng hành nhỏ hơn 28!",
@@ -992,7 +1195,7 @@ const EditCompanion = {
                           alertify.success("Ok");
                         }
                       );
-                    } else if(crypt.getAge(this.birthday) > 60){
+                    } else if (crypt.getAge(this.birthday) > 60) {
                       alertify.alert(
                         "Thông báo",
                         "Tuổi của người đồng hành lớn hơn 60!",
@@ -1001,24 +1204,86 @@ const EditCompanion = {
                         }
                       );
                     } else {
-                      const companion = {
-                        companionId: this.companionId,
-                        christianName: this.christianName,
-                        fullName: this.fullName,
-                        birthday: this.birthday,
-                        position: this.position,
-                        homeland: this.homeland,
-                        phone: this.phone,
-                        email: this.email,
-                        status: this.status,
-                        groupCommunity: this.groupCommunity,
-                        id: this.$route.params.id,
-                      };
-                      const url =
-                        "http://localhost:3000/api/companions/" +
-                        companion.id +
-                        "/replace";
-                      axios.post(url, companion);
+                      if(this.selectedFile != null) {
+                        const fd = new FormData();
+                        fd.append('image', this.selectedFile, this.selectedFile.name);
+                        var start = this.selectedFile.name.lastIndexOf('.');
+                        var end = this.selectedFile.length;
+                        var fileName = this.companionId + this.selectedFile.name.slice(start, end);
+                        if(this.imageEdit != null) {
+                          const companion = {
+                            companionId: this.companionId,
+                            christianName: this.christianName,
+                            fullName: this.fullName,
+                            birthday: this.birthday,
+                            phone: this.phone,
+                            email: this.email,
+                            groupCommunity: this.groupCommunity,
+                            position: this.position,
+                            image: fileName,
+                            status: this.status,
+                            id: this.$route.params.id,
+                          };
+                          const url =
+                            "http://localhost:3000/api/companions/" +
+                            companion.id +
+                            "/replace";
+                          axios.post(url, companion);
+                          axios.delete("http://localhost:3000/api/Photos/companion/files/" + this.imageEdit)
+                            .then(resp => {
+                              console.log(resp);
+                            })
+                            .catch(err => console.log(err));
+                          axios.post('http://localhost:3000/api/Photos/companion/upload?filename=' + fileName, fd)
+                            .then(res => {
+                              console.log(res);
+                            })
+                            .catch(err => console.log(err));
+                        } else {
+                          const companion = {
+                            companionId: this.companionId,
+                            christianName: this.christianName,
+                            fullName: this.fullName,
+                            birthday: this.birthday,
+                            phone: this.phone,
+                            email: this.email,
+                            groupCommunity: this.groupCommunity,
+                            position: this.position,
+                            image: fileName,
+                            status: this.status,
+                            id: this.$route.params.id,
+                          };
+                          const url =
+                            "http://localhost:3000/api/companions/" +
+                            companion.id +
+                            "/replace";
+                          axios.post(url, companion);
+                          axios.post("http://localhost:3000/api/Photos/companion/upload?filename=" + fileName, fd)
+                            .then(res => {
+                              console.log(res);
+                            })
+                            .catch(err => console.log(err));
+                        }
+                      } else {
+                        const companion = {
+                          companionId: this.companionId,
+                          christianName: this.christianName,
+                          fullName: this.fullName,
+                          birthday: this.birthday,
+                          phone: this.phone,
+                          email: this.email,
+                          groupCommunity: this.groupCommunity,
+                          position: this.position,
+                          image: this.imageEdit,
+                          status: this.status,
+                          id: this.$route.params.id,
+                        };
+                        const url =
+                          "http://localhost:3000/api/companions/" +
+                          companion.id +
+                          "/replace";
+                        axios.post(url, companion);
+                      }
                       setTimeout(() => {
                         this.$router.push("/companions");
                         location.reload();
@@ -1157,16 +1422,6 @@ const EditCompanion = {
             </select>
           </div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="homeland">Quê Quán</label>
-            <label class="text-danger">*</label>
-            <input v-model="homeland" name="homeland" id="homeland" type="text" :title="titleHomeland"
-            :value="homeland" v-on:keyup="homeland = $event.target.value"
-              class="form-control  text-size-13px " placeholder="Nhập Quê quán..." style="margin-top: -5px;">
-          </div>
-        </div>
-        <div class="row mt-2">
-          <div class="col-lg-4"></div>
-          <div class="col-lg-4">
             <label class="text-size-15px font-weight-bold col-form-label" for="status">Trạng Thái</label>
             <label class="text-danger">*</label>
             <select class="custom-select  text-size-13px  h-32px" v-model="status" name="status" id="status"
@@ -1176,9 +1431,12 @@ const EditCompanion = {
               </option>
             </select>
           </div>
+        </div>
+        <div class="row mt-2">
+          <div class="col-lg-4"></div>
           <div class="col-lg-4">
             <label class="text-size-15px font-weight-bold col-form-label" for="image">Hình Ảnh</label>
-            <input type="file" id="image" v-model="image" name="image" :title="titlePicture"
+            <input type="file" id="image" @change="onFileSelected" :title="titlePicture"
               class="form-control rounded text-size-13px" style="margin-top: -5px;" />
           </div>
         </div>

@@ -9,6 +9,7 @@ module.exports = function (Account) {
         password: instance.password,
         role: instance.role,
         status: instance.status,
+        idTable: instance.idTable,
       };
       cb(null, account);
     });

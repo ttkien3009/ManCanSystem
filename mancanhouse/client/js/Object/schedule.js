@@ -254,7 +254,11 @@ const AddSchedule = {
         var dateE = new Date(this.dateEnd);
         var today = new Date();
         console.log(today.getFullYear());
-        if(today.getFullYear() === dateS.getFullYear() && today.getMonth() === dateS.getMonth() && today.getDate() > dateS.getDate()){
+        if (
+          today.getFullYear() === dateS.getFullYear() &&
+          today.getMonth() === dateS.getMonth() &&
+          today.getDate() > dateS.getDate()
+        ) {
           alertify.alert(
             "Thông báo",
             "Ngày bắt đầu nhỏ hơn ngày hiện tại!",

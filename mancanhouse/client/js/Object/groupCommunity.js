@@ -103,11 +103,16 @@ const ListGroupCommunity = {
             <tr v-for="(groupCommunity, index) in groupCommunities" :key="groupCommunity.id">
               <th>{{ index + 1 }}</th>
               <td>{{ groupCommunity.name }}</td>
-              <td v-for="com in communities" v-if="com.id == groupCommunity.firstCom">{{ com.communityName }}</td>
-              <td v-for="com in communities" v-if="com.id == groupCommunity.secondCom">{{ com.communityName }}</td>
-              <td v-for="com in communities" v-if="com.id == groupCommunity.thirdCom">{{ com.communityName }}</td>
-              <td v-for="com in communities" v-if="com.id == groupCommunity.fourthCom">{{ com.communityName }}</td>
-              <td v-for="com in communities" v-if="com.id == groupCommunity.fifthCom">{{ com.communityName }}</td>
+              <td v-for="com in communities" v-if="groupCommunity.firstCom != 0 && com.id == groupCommunity.firstCom">{{ com.communityName }}</td>
+              <td v-if="groupCommunity.firstCom == 0"></td>
+              <td v-for="com in communities" v-if="groupCommunity.secondCom != 0 && com.id == groupCommunity.secondCom">{{ com.communityName }}</td>
+              <td v-if="groupCommunity.secondCom == 0"></td>
+              <td v-for="com in communities" v-if="groupCommunity.thirdCom != 0 && com.id == groupCommunity.thirdCom">{{ com.communityName }}</td>
+              <td v-if="groupCommunity.thirdCom == 0"></td>
+              <td v-for="com in communities" v-if="groupCommunity.fourthCom != 0 && com.id == groupCommunity.fourthCom">{{ com.communityName }}</td>
+              <td v-if="groupCommunity.fourthCom == 0"></td>
+              <td v-for="com in communities" v-if="groupCommunity.fifthCom != 0 && com.id == groupCommunity.fifthCom">{{ com.communityName }}</td>
+              <td v-if="groupCommunity.fifthCom == 0"></td>
               <td>
                 <div class="row" style="margin-left:-15px;">
                   <div class="col-lg-4">

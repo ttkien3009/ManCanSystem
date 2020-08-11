@@ -5,12 +5,13 @@ module.exports = function(Teacher) {
     Teacher.findById(id, function (err, instance) {
       var teacher = {
         teacherId: instance.teacherId,
-        gender: instance.gender,
         fullName: instance.fullName,
+        gender: instance.gender,
         birthday: instance.birthday,
-        subject: instance.subject,
         phone: instance.phone,
         email: instance.email,
+        image: instance.image,
+        subject: instance.subject,
         status: instance.status,
       };
       cb(null, teacher);

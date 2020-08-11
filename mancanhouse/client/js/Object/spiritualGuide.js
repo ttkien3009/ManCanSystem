@@ -22,6 +22,7 @@ const ListSpiritualGuide = {
       positions: [],
       birthdayFormat: null,
       groupCommunities: [],
+      image: null,
     };
   },
   mounted() {
@@ -50,6 +51,10 @@ const ListSpiritualGuide = {
     },
     getDetailSpiritualGuide(spiritualGuide) {
       this.spiritualGuide = spiritualGuide;
+      this.image = `
+      <img class="img-fluid img-thumbnail rounded-circle" src="../api/Photos/spiritualGuide/download/` + this.spiritualGuide.image + `" width="100px"
+      height="100px" alt="spiritualGuide-image"/>
+      `
       this.birthdayFormat = this.formatDate(this.spiritualGuide.birthday);
     },
 
@@ -104,7 +109,6 @@ const ListSpiritualGuide = {
               <th>Email</th>
               <th>Chức Vụ</th>
               <th>Nhóm Cộng Đoàn</th>
-              <th>Quê Quán</th>
               <th>Trạng Thái</th>
               <th>Action</th>
             </tr>
@@ -117,7 +121,6 @@ const ListSpiritualGuide = {
               <th>Email</th>
               <th>Chức Vụ</th>
               <th>Nhóm Cộng Đoàn</th>
-              <th>Quê Quán</th>
               <th>Trạng Thái</th>
               <th>Action</th>
             </tr>
@@ -130,7 +133,6 @@ const ListSpiritualGuide = {
               <td>{{ spiritualGuide.email }}</td>
               <td v-for="department in positions" v-if="department.id == spiritualGuide.position">{{ department.positionType }}-{{ department.name }}</td>
               <td v-for="grCom in groupCommunities" v-if="grCom.id == spiritualGuide.groupCommunity">{{ grCom.name }}</td>
-              <td>{{ spiritualGuide.homeland }}</td>
               <td v-if="spiritualGuide.status == 1">
                 <i class="fas fa-toggle-on fa-lg text-success"></i>
               </td>
@@ -138,7 +140,7 @@ const ListSpiritualGuide = {
                 <i class="fas fa-toggle-off fa-lg text-danger"></i>
               </td>
               <td>
-                <div class="row" style="margin-left:-25px;">
+                <div class="row" style="margin-left:-20px;">
                   <div class="col-lg-4">
                     <button :title="titleButtonDisplay" data-toggle="modal" @click="getDetailSpiritualGuide(spiritualGuide)"
                       data-target="#detailSpiritualGuideModal"
@@ -149,14 +151,14 @@ const ListSpiritualGuide = {
                   <div class="col-lg-4">
                     <button :title="titleButtonEdit" @click="getDataSpiritualGuideUpdate(spiritualGuide)"
                       class="btn btn-warning btn-sm h-28px w-28px rounded" type="submit"
-                      style="margin-left: -6px;">
+                      style="margin-left: -8px;">
                       <i class="fas fa-edit fa-md ml--2px"></i>
                     </button>
                   </div>
                   <div class="col-lg-4">
                     <button :title="titleButtonDelete" data-toggle="modal" @click="getDetailSpiritualGuide(spiritualGuide)"
                       data-target="#deleteSpiritualGuideModal" class="btn btn-danger btn-sm h-28px w-28px rounded"
-                      style="margin-left: -12px;">
+                      style="margin-left: -16px;">
                       <i class="far fa-trash-alt fa-md ml--1px"></i>
                     </button>
                   </div>
@@ -203,9 +205,13 @@ const ListSpiritualGuide = {
           </div>
           <div class="modal-body">
             <div class="row">
-              <div class="col-sm-4 text-center">
-                <img class="img-fluid img-thumbnail rounded-circle" src="../images/user_03.jpg" width="100px"
-                  height="100px" />
+              <div class="col-sm-4 text-center" v-if="spiritualGuide.image != null">
+                <div v-html="image"></div>
+                <p class="font-weight-bold" style="padding-top: 5px;">{{ spiritualGuide.spiritualGuideId }}</p>
+              </div>
+              <div class="col-sm-4 text-center" v-if="spiritualGuide.image == null">
+                <img class="img-fluid img-thumbnail rounded-circle" src="../images/default_image.png" width="100px"
+                  height="100px" alt="spiritualGuide-image"/>
                 <p class="font-weight-bold" style="padding-top: 5px;">{{ spiritualGuide.spiritualGuideId }}</p>
               </div>
               <div class="col-sm-8 mt-3">
@@ -226,8 +232,6 @@ const ListSpiritualGuide = {
                 <span class="font-weight-bold ">Nhóm Cộng Đoàn:</span>
                 <span v-for="grCom in groupCommunities" v-if="grCom.id == spiritualGuide.groupCommunity"> 
                 &nbsp;{{ grCom.name }}</span><br>
-                <span class="font-weight-bold ">Quê Quán:</span>
-                <span> &nbsp;&nbsp;&nbsp;{{ spiritualGuide.homeland }}</span><br>
                 <span class="font-weight-bold ">Trạng Thái:&nbsp;&nbsp;</span>
                 <span v-if="spiritualGuide.status == 1"> 
                   <i class="fas fa-toggle-on fa-lg text-success"></i>
@@ -261,14 +265,12 @@ const AddSpiritualGuide = {
       image: null,
       groupCommunity: 0,
       position: 0,
-      homeland: null,
       titlePicture: "Chọn hình ảnh",
       titleBirthday: "Nhập thông tin ngày sinh",
       titleChristianName: "Nhập thông tin tên Thánh",
       titleFullName: "Nhập thông tin họ và tên",
       titlePhone: "Nhập thông tin số điện thoại",
       titleEmail: "Nhập thông tin địa chỉ email",
-      titleHomeland: "Nhập thông tin quê quán",
       checkEmail: false,
       checkPhone: false,
       status: 0,
@@ -279,6 +281,7 @@ const AddSpiritualGuide = {
       positions: [],
       groupCommunities: [],
       spiritualGuides: [],
+      selectedFile: null,
     };
   },
   mounted() {
@@ -321,10 +324,6 @@ const AddSpiritualGuide = {
       return this.position;
     },
 
-    homelandIsValid() {
-      return this.homeland;
-    },
-
     birthdayIsValid() {
       return this.birthday;
     },
@@ -348,7 +347,6 @@ const AddSpiritualGuide = {
         this.phoneIsValid &&
         this.emailIsValid &&
         this.positionIsValid &&
-        this.homelandIsValid &&
         this.birthdayIsValid &&
         !this.checkFormatPhone &&
         !this.checkFormatEmail &&
@@ -364,7 +362,6 @@ const AddSpiritualGuide = {
         this.phoneIsValid ||
         this.emailIsValid ||
         this.positionIsValid ||
-        this.homelandIsValid ||
         this.birthdayIsValid ||
         this.statusIsValid ||
         this.groupCommunityIsValid
@@ -372,18 +369,26 @@ const AddSpiritualGuide = {
     },
   },
   methods: {
+    onFileSelected(event){
+      this.selectedFile = event.target.files[0];
+    },
     submitAddSpiritualGuideForm() {
       if (this.addSpiritualGuideFormIsValid) {
-        let lengthSpiritualGuides = 0;
-        lengthSpiritualGuides = this.spiritualGuides.length;
-        if (lengthSpiritualGuides > -1 && lengthSpiritualGuides < 9) {
-          this.spiritualGuideId = "LH00" + (lengthSpiritualGuides + 1);
+        let lengthSpiritualGuides = this.spiritualGuides.length;
+        if ( lengthSpiritualGuides == 0) {
+          this.spiritualGuideId == 'LH001';
         }
-        if (lengthSpiritualGuides > 8 && lengthSpiritualGuides < 99) {
-          this.spiritualGuideId = "LH0" + (lengthSpiritualGuides + 1);
-        }
-        if (lengthSpiritualGuides > 98 && lengthSpiritualGuides < 999) {
-          this.spiritualGuideId = "LH" + (lengthSpiritualGuides + 1);
+        else {
+          let currentId = this.spiritualGuides[lengthSpiritualGuides - 1].id;
+          if (currentId > -1 && currentId < 9) {
+            this.spiritualGuideId = "LH00" + (currentId + 1);
+          }
+          if (currentId > 8 && currentId < 99) {
+            this.spiritualGuideId = "LH0" + (currentId + 1);
+          }
+          if (currentId > 98 && currentId < 999) {
+            this.spiritualGuideId = "LH" + (currentId + 1);
+          }
         }
         axios
           .get(
@@ -410,7 +415,7 @@ const AddSpiritualGuide = {
                         alertify.success("Ok");
                       }
                     );
-                  } else if(crypt.getAge(this.birthday) < 28){
+                  } else if (crypt.getAge(this.birthday) < 28) {
                     alertify.alert(
                       "Thông báo",
                       "Tuổi của người linh hướng nhỏ hơn 28!",
@@ -418,7 +423,7 @@ const AddSpiritualGuide = {
                         alertify.success("Ok");
                       }
                     );
-                  } else if(crypt.getAge(this.birthday) > 60){
+                  } else if (crypt.getAge(this.birthday) > 60) {
                     alertify.alert(
                       "Thông báo",
                       "Tuổi của người linh hướng lớn hơn 60!",
@@ -427,6 +432,14 @@ const AddSpiritualGuide = {
                       }
                     );
                   } else {
+                    var fileName = null;
+                    const fd = new FormData();
+                    if(this.selectedFile != null) {
+                      fd.append("image", this.selectedFile, this.selectedFile.name);
+                      var start = this.selectedFile.name.lastIndexOf('.');
+                      var end = this.selectedFile.length;
+                      fileName = this.spiritualGuideId + this.selectedFile.name.slice(start, end);
+                    }
                     const spiritualGuide = {
                       spiritualGuideId: this.spiritualGuideId,
                       christianName: this.christianName,
@@ -434,10 +447,9 @@ const AddSpiritualGuide = {
                       birthday: this.birthday,
                       phone: this.phone,
                       email: this.email,
-                      image: this.image,
-                      position: this.position,
                       groupCommunity: this.groupCommunity,
-                      homeland: this.homeland,
+                      position: this.position,
+                      image: fileName,
                       status: this.status,
                     };
                     axios
@@ -459,17 +471,32 @@ const AddSpiritualGuide = {
                         } else {
                           role = 7;
                         }
-                        const accountSpiritualGuide = {
-                          userId: this.spiritualGuideId,
-                          username: this.email,
-                          password: crypt.encrypt(this.phone),
-                          role: role,
-                          status: this.status,
-                        };
-                        const url = `http://localhost:3000/api/accounts`;
-                        axios.post(url, accountSpiritualGuide);
                         const url_1 = `http://localhost:3000/api/spiritualGuides`;
                         axios.post(url_1, spiritualGuide);
+                        axios
+                          .get(
+                            "http://localhost:3000/api/spiritualGuides/findOne?filter[where][email]=" +
+                              this.email
+                          )
+                          .then((resp) => {
+                            const account_spiritualGuide = {
+                              userId: resp.data.spiritualGuideId,
+                              username: resp.data.email,
+                              password: crypt.encrypt(resp.data.phone),
+                              role: role,
+                              status: resp.data.status,
+                              idTable: resp.data.id,
+                            };
+                            const url = "http://localhost:3000/api/accounts";
+                            axios.post(url, account_spiritualGuide);
+                            if(this.selectedFile != null){
+                              axios.post('http://localhost:3000/api/Photos/spiritualGuide/upload?filename=' + fileName, fd)
+                                .then(res => {
+                                  console.log(res);
+                                })
+                                .catch(err => console.log(err));
+                            }
+                          });
                       });
                     setTimeout(() => {
                       this.$router.push("/spiritualGuides");
@@ -508,9 +535,6 @@ const AddSpiritualGuide = {
       }
       if (this.birthdayIsValid) {
         this.birthday = null;
-      }
-      if (this.homelandIsValid) {
-        this.homeland = null;
       }
       if (this.statusIsValid) {
         this.status = 0;
@@ -603,15 +627,6 @@ const AddSpiritualGuide = {
             </select>
           </div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="homeland">Quê Quán</label>
-            <label class="text-danger">*</label>
-            <input v-model="homeland" name="homeland" id="homeland" type="text" :title="titleHomeland"
-              class="form-control  text-size-13px " placeholder="Nhập Quê quán..." style="margin-top: -5px;">
-          </div>
-        </div>
-        <div class="row mt-1">
-          <div class="col-lg-4"></div>
-          <div class="col-lg-4">
             <label class="text-size-15px font-weight-bold col-form-label" for="status">Trạng Thái</label>
             <label class="text-danger">*</label>
             <select class="custom-select  text-size-13px  h-32px" v-model="status" name="status" id="status"
@@ -621,9 +636,12 @@ const AddSpiritualGuide = {
               </option>
             </select>
           </div>
+        </div>
+        <div class="row mt-1">
+          <div class="col-lg-4"></div>
           <div class="col-lg-4">
             <label class="text-size-15px font-weight-bold col-form-label" for="image">Hình Ảnh</label>
-            <input type="file" id="image" v-model="image" name="image" :title="titlePicture"
+            <input type="file" id="image" @change="onFileSelected" :title="titlePicture"
               class="form-control rounded text-size-13px" style="margin-top: -5px;" />
           </div>
         </div>
@@ -672,16 +690,15 @@ const EditSpiritualGuide = {
       email: null,
       emailEdit: null,
       image: null,
+      imageEdit: null,
       groupCommunity: 0,
       position: 0,
-      homeland: null,
       titlePicture: "Chọn hình ảnh",
       titleBirthday: "Nhập thông tin ngày sinh",
       titleChristianName: "Nhập thông tin tên Thánh",
       titleFullName: "Nhập thông tin họ và tên",
       titlePhone: "Nhập thông tin số điện thoại",
       titleEmail: "Nhập thông tin địa chỉ email",
-      titleHomeland: "Nhập thông tin quê quán",
       checkEmail: false,
       checkPhone: false,
       status: 0,
@@ -692,6 +709,7 @@ const EditSpiritualGuide = {
       positions: [],
       groupCommunities: [],
       spiritualGuide: {},
+      selectedFile: null,
     };
   },
   mounted() {
@@ -711,14 +729,14 @@ const EditSpiritualGuide = {
         this.christianName = response.data.spiritualGuide.christianName;
         this.fullName = response.data.spiritualGuide.fullName;
         this.birthday = crypt.formatDate(response.data.spiritualGuide.birthday);
-        this.position = response.data.spiritualGuide.position;
-        this.homeland = response.data.spiritualGuide.homeland;
         this.phone = response.data.spiritualGuide.phone;
         this.phoneEdit = response.data.spiritualGuide.phone;
         this.email = response.data.spiritualGuide.email;
         this.emailEdit = response.data.spiritualGuide.email;
-        this.status = response.data.spiritualGuide.status;
         this.groupCommunity = response.data.spiritualGuide.groupCommunity;
+        this.position = response.data.spiritualGuide.position;
+        this.imageEdit = response.data.spiritualGuide.image;
+        this.status = response.data.spiritualGuide.status;
       });
   },
   computed: {
@@ -750,10 +768,6 @@ const EditSpiritualGuide = {
       return this.position;
     },
 
-    homelandIsValid() {
-      return this.homeland;
-    },
-
     birthdayIsValid() {
       return this.birthday;
     },
@@ -777,7 +791,6 @@ const EditSpiritualGuide = {
         this.phoneIsValid &&
         this.emailIsValid &&
         this.positionIsValid &&
-        this.homelandIsValid &&
         this.birthdayIsValid &&
         !this.checkFormatPhone &&
         !this.checkFormatEmail &&
@@ -793,7 +806,6 @@ const EditSpiritualGuide = {
         this.phoneIsValid ||
         this.emailIsValid ||
         this.positionIsValid ||
-        this.homelandIsValid ||
         this.birthdayIsValid ||
         this.statusIsValid ||
         this.groupCommunityIsValid
@@ -801,10 +813,13 @@ const EditSpiritualGuide = {
     },
   },
   methods: {
+    onFileSelected(event) {
+      this.selectedFile = event.target.files[0];
+    },
     submitEditSpiritualGuideForm() {
       if (this.editSpiritualGuideFormIsValid) {
         if (this.emailEdit == this.email && this.phoneEdit == this.phone) {
-          if(crypt.getAge(this.birthday) < 28){
+          if (crypt.getAge(this.birthday) < 28) {
             alertify.alert(
               "Thông báo",
               "Tuổi của người linh hướng nhỏ hơn 28!",
@@ -812,7 +827,7 @@ const EditSpiritualGuide = {
                 alertify.success("Ok");
               }
             );
-          } else if(crypt.getAge(this.birthday) > 60){
+          } else if (crypt.getAge(this.birthday) > 60) {
             alertify.alert(
               "Thông báo",
               "Tuổi của người linh hướng lớn hơn 60!",
@@ -821,24 +836,86 @@ const EditSpiritualGuide = {
               }
             );
           } else {
-            const spiritualGuide = {
-              spiritualGuideId: this.spiritualGuideId,
-              christianName: this.christianName,
-              fullName: this.fullName,
-              birthday: this.birthday,
-              position: this.position,
-              homeland: this.homeland,
-              phone: this.phone,
-              email: this.email,
-              status: this.status,
-              groupCommunity: this.groupCommunity,
-              id: this.$route.params.id,
-            };
-            const url =
-              "http://localhost:3000/api/spiritualGuides/" +
-              spiritualGuide.id +
-              "/replace";
-            axios.post(url, spiritualGuide);
+            if(this.selectedFile != null) {
+              const fd = new FormData();
+              fd.append('image', this.selectedFile, this.selectedFile.name);
+              var start = this.selectedFile.name.lastIndexOf('.');
+              var end = this.selectedFile.length;
+              var fileName = this.spiritualGuideId + this.selectedFile.name.slice(start, end);
+              if (this.imageEdit != null) {
+                const spiritualGuide = {
+                  spiritualGuideId: this.spiritualGuideId,
+                  christianName: this.christianName,
+                  fullName: this.fullName,
+                  birthday: this.birthday,
+                  phone: this.phone,
+                  email: this.email,
+                  groupCommunity: this.groupCommunity,
+                  position: this.position,
+                  image: fileName,
+                  status: this.status,
+                  id: this.$route.params.id,
+                };
+                const url =
+                  "http://localhost:3000/api/spiritualGuides/" +
+                  spiritualGuide.id +
+                  "/replace";
+                axios.post(url, spiritualGuide);
+                axios.delete("http://localhost:3000/api/Photos/spiritualGuide/files/" + this.imageEdit)
+                  .then(resp => {
+                    console.log(resp);
+                  })
+                  .catch(err => console.log(err));
+                axios.post('http://localhost:3000/api/Photos/spiritualGuide/upload?filename=' + fileName, fd)
+                  .then(res => {
+                    console.log(res);
+                  })
+                  .catch(err => console.log(err));
+              } else {
+                const spiritualGuide = {
+                  spiritualGuideId: this.spiritualGuideId,
+                  christianName: this.christianName,
+                  fullName: this.fullName,
+                  birthday: this.birthday,
+                  phone: this.phone,
+                  email: this.email,
+                  groupCommunity: this.groupCommunity,
+                  position: this.position,
+                  image: fileName,
+                  status: this.status,
+                  id: this.$route.params.id,
+                };
+                const url =
+                  "http://localhost:3000/api/spiritualGuides/" +
+                  spiritualGuide.id +
+                  "/replace";
+                axios.post(url, spiritualGuide);
+                axios.post('http://localhost:3000/api/Photos/spiritualGuide/upload?filename=' + fileName, fd)
+                  .then(res => {
+                    console.log(res);
+                  })
+                  .catch(err => console.log(err));
+              }
+            } else {
+              const spiritualGuide = {
+                spiritualGuideId: this.spiritualGuideId,
+                christianName: this.christianName,
+                fullName: this.fullName,
+                birthday: this.birthday,
+                phone: this.phone,
+                email: this.email,
+                groupCommunity: this.groupCommunity,
+                position: this.position,
+                image: this.imageEdit,
+                status: this.status,
+                id: this.$route.params.id,
+              };
+              const url =
+                "http://localhost:3000/api/spiritualGuides/" +
+                spiritualGuide.id +
+                "/replace";
+              axios.post(url, spiritualGuide);
+            }
             setTimeout(() => {
               this.$router.push("/spiritualGuides");
               location.reload();
@@ -859,7 +936,7 @@ const EditSpiritualGuide = {
                 alertify.alert("Thông báo", "Email đã tồn tại!", function () {
                   alertify.success("Ok");
                 });
-              } else if(crypt.getAge(this.birthday) < 28){
+              } else if (crypt.getAge(this.birthday) < 28) {
                 alertify.alert(
                   "Thông báo",
                   "Tuổi của người linh hướng nhỏ hơn 28!",
@@ -867,7 +944,7 @@ const EditSpiritualGuide = {
                     alertify.success("Ok");
                   }
                 );
-              } else if(crypt.getAge(this.birthday) > 60){
+              } else if (crypt.getAge(this.birthday) > 60) {
                 alertify.alert(
                   "Thông báo",
                   "Tuổi của người linh hướng lớn hơn 60!",
@@ -876,24 +953,86 @@ const EditSpiritualGuide = {
                   }
                 );
               } else {
-                const spiritualGuide = {
-                  spiritualGuideId: this.spiritualGuideId,
-                  christianName: this.christianName,
-                  fullName: this.fullName,
-                  birthday: this.birthday,
-                  position: this.position,
-                  homeland: this.homeland,
-                  phone: this.phone,
-                  email: this.email,
-                  status: this.status,
-                  groupCommunity: this.groupCommunity,
-                  id: this.$route.params.id,
-                };
-                const url =
-                  "http://localhost:3000/api/spiritualGuides/" +
-                  spiritualGuide.id +
-                  "/replace";
-                axios.post(url, spiritualGuide);
+                if(this.selectedFile != null) {
+                  const fd = new FormData();
+                  fd.append('image', this.selectedFile, this.selectedFile.name);
+                  var start = this.selectedFile.name.lastIndexOf('.');
+                  var end = this.selectedFile.length;
+                  var fileName = this.spiritualGuideId + this.selectedFile.name.slice(start, end);
+                  if (this.imageEdit != null) {
+                    const spiritualGuide = {
+                      spiritualGuideId: this.spiritualGuideId,
+                      christianName: this.christianName,
+                      fullName: this.fullName,
+                      birthday: this.birthday,
+                      phone: this.phone,
+                      email: this.email,
+                      groupCommunity: this.groupCommunity,
+                      position: this.position,
+                      image: fileName,
+                      status: this.status,
+                      id: this.$route.params.id,
+                    };
+                    const url =
+                      "http://localhost:3000/api/spiritualGuides/" +
+                      spiritualGuide.id +
+                      "/replace";
+                    axios.post(url, spiritualGuide);
+                    axios.delete("http://localhost:3000/api/Photos/spiritualGuide/files/" + this.imageEdit)
+                      .then(resp => {
+                        console.log(resp);
+                      })
+                      .catch(err => console.log(err));
+                    axios.post('http://localhost:3000/api/Photos/spiritualGuide/upload?filename=' + fileName, fd)
+                      .then(res => {
+                        console.log(res);
+                      })
+                      .catch(err => console.log(err));
+                  } else {
+                    const spiritualGuide = {
+                      spiritualGuideId: this.spiritualGuideId,
+                      christianName: this.christianName,
+                      fullName: this.fullName,
+                      birthday: this.birthday,
+                      phone: this.phone,
+                      email: this.email,
+                      groupCommunity: this.groupCommunity,
+                      position: this.position,
+                      image: fileName,
+                      status: this.status,
+                      id: this.$route.params.id,
+                    };
+                    const url =
+                      "http://localhost:3000/api/spiritualGuides/" +
+                      spiritualGuide.id +
+                      "/replace";
+                    axios.post(url, spiritualGuide);
+                    axios.post('http://localhost:3000/api/Photos/spiritualGuide/upload?filename=' + fileName, fd)
+                      .then(res => {
+                        console.log(res);
+                      })
+                      .catch(err => console.log(err));
+                  }
+                } else {
+                  const spiritualGuide = {
+                    spiritualGuideId: this.spiritualGuideId,
+                    christianName: this.christianName,
+                    fullName: this.fullName,
+                    birthday: this.birthday,
+                    phone: this.phone,
+                    email: this.email,
+                    groupCommunity: this.groupCommunity,
+                    position: this.position,
+                    image: this.imageEdit,
+                    status: this.status,
+                    id: this.$route.params.id,
+                  };
+                  const url =
+                    "http://localhost:3000/api/spiritualGuides/" +
+                    spiritualGuide.id +
+                    "/replace";
+                  axios.post(url, spiritualGuide);
+                }
                 setTimeout(() => {
                   this.$router.push("/spiritualGuides");
                   location.reload();
@@ -919,7 +1058,7 @@ const EditSpiritualGuide = {
                     alertify.success("Ok");
                   }
                 );
-              } else if(crypt.getAge(this.birthday) < 28){
+              } else if (crypt.getAge(this.birthday) < 28) {
                 alertify.alert(
                   "Thông báo",
                   "Tuổi của người linh hướng nhỏ hơn 28!",
@@ -927,7 +1066,7 @@ const EditSpiritualGuide = {
                     alertify.success("Ok");
                   }
                 );
-              } else if(crypt.getAge(this.birthday) > 60){
+              } else if (crypt.getAge(this.birthday) > 60) {
                 alertify.alert(
                   "Thông báo",
                   "Tuổi của người linh hướng lớn hơn 60!",
@@ -936,24 +1075,86 @@ const EditSpiritualGuide = {
                   }
                 );
               } else {
-                const spiritualGuide = {
-                  spiritualGuideId: this.spiritualGuideId,
-                  christianName: this.christianName,
-                  fullName: this.fullName,
-                  birthday: this.birthday,
-                  position: this.position,
-                  homeland: this.homeland,
-                  phone: this.phone,
-                  email: this.email,
-                  status: this.status,
-                  groupCommunity: this.groupCommunity,
-                  id: this.$route.params.id,
-                };
-                const url =
-                  "http://localhost:3000/api/spiritualGuides/" +
-                  spiritualGuide.id +
-                  "/replace";
-                axios.post(url, spiritualGuide);
+                if(this.selectedFile != null) {
+                  const fd = new FormData();
+                  fd.append('image', this.selectedFile, this.selectedFile.name);
+                  var start = this.selectedFile.name.lastIndexOf('.');
+                  var end = this.selectedFile.length;
+                  var fileName = this.spiritualGuideId + this.selectedFile.name.slice(start, end);
+                  if (this.imageEdit != null) {
+                    const spiritualGuide = {
+                      spiritualGuideId: this.spiritualGuideId,
+                      christianName: this.christianName,
+                      fullName: this.fullName,
+                      birthday: this.birthday,
+                      phone: this.phone,
+                      email: this.email,
+                      groupCommunity: this.groupCommunity,
+                      position: this.position,
+                      image: fileName,
+                      status: this.status,
+                      id: this.$route.params.id,
+                    };
+                    const url =
+                      "http://localhost:3000/api/spiritualGuides/" +
+                      spiritualGuide.id +
+                      "/replace";
+                    axios.post(url, spiritualGuide);
+                    axios.delete("http://localhost:3000/api/Photos/spiritualGuide/files/" + this.imageEdit)
+                      .then(resp => {
+                        console.log(resp);
+                      })
+                      .catch(err => console.log(err));
+                    axios.post('http://localhost:3000/api/Photos/spiritualGuide/upload?filename=' + fileName, fd)
+                      .then(res => {
+                        console.log(res);
+                      })
+                      .catch(err => console.log(err));
+                  } else {
+                    const spiritualGuide = {
+                      spiritualGuideId: this.spiritualGuideId,
+                      christianName: this.christianName,
+                      fullName: this.fullName,
+                      birthday: this.birthday,
+                      phone: this.phone,
+                      email: this.email,
+                      groupCommunity: this.groupCommunity,
+                      position: this.position,
+                      image: fileName,
+                      status: this.status,
+                      id: this.$route.params.id,
+                    };
+                    const url =
+                      "http://localhost:3000/api/spiritualGuides/" +
+                      spiritualGuide.id +
+                      "/replace";
+                    axios.post(url, spiritualGuide);
+                    axios.post('http://localhost:3000/api/Photos/spiritualGuide/upload?filename=' + fileName, fd)
+                      .then(res => {
+                        console.log(res);
+                      })
+                      .catch(err => console.log(err));
+                  }
+                } else {
+                  const spiritualGuide = {
+                    spiritualGuideId: this.spiritualGuideId,
+                    christianName: this.christianName,
+                    fullName: this.fullName,
+                    birthday: this.birthday,
+                    phone: this.phone,
+                    email: this.email,
+                    groupCommunity: this.groupCommunity,
+                    position: this.position,
+                    image: this.imageEdit,
+                    status: this.status,
+                    id: this.$route.params.id,
+                  };
+                  const url =
+                    "http://localhost:3000/api/spiritualGuides/" +
+                    spiritualGuide.id +
+                    "/replace";
+                  axios.post(url, spiritualGuide);
+                }
                 setTimeout(() => {
                   this.$router.push("/spiritualGuides");
                   location.reload();
@@ -987,7 +1188,7 @@ const EditSpiritualGuide = {
                           alertify.success("Ok");
                         }
                       );
-                    } else if(crypt.getAge(this.birthday) < 28){
+                    } else if (crypt.getAge(this.birthday) < 28) {
                       alertify.alert(
                         "Thông báo",
                         "Tuổi của người linh hướng nhỏ hơn 28!",
@@ -995,7 +1196,7 @@ const EditSpiritualGuide = {
                           alertify.success("Ok");
                         }
                       );
-                    } else if(crypt.getAge(this.birthday) > 60){
+                    } else if (crypt.getAge(this.birthday) > 60) {
                       alertify.alert(
                         "Thông báo",
                         "Tuổi của người linh hướng lớn hơn 60!",
@@ -1004,24 +1205,86 @@ const EditSpiritualGuide = {
                         }
                       );
                     } else {
-                      const spiritualGuide = {
-                        spiritualGuideId: this.spiritualGuideId,
-                        christianName: this.christianName,
-                        fullName: this.fullName,
-                        birthday: this.birthday,
-                        position: this.position,
-                        homeland: this.homeland,
-                        phone: this.phone,
-                        email: this.email,
-                        status: this.status,
-                        groupCommunity: this.groupCommunity,
-                        id: this.$route.params.id,
-                      };
-                      const url =
-                        "http://localhost:3000/api/spiritualGuides/" +
-                        spiritualGuide.id +
-                        "/replace";
-                      axios.post(url, spiritualGuide);
+                      if(this.selectedFile != null) {
+                        const fd = new FormData();
+                        fd.append('image', this.selectedFile, this.selectedFile.name);
+                        var start = this.selectedFile.name.lastIndexOf('.');
+                        var end = this.selectedFile.length;
+                        var fileName = this.spiritualGuideId + this.selectedFile.name.slice(start, end);
+                        if (this.imageEdit != null) {
+                          const spiritualGuide = {
+                            spiritualGuideId: this.spiritualGuideId,
+                            christianName: this.christianName,
+                            fullName: this.fullName,
+                            birthday: this.birthday,
+                            phone: this.phone,
+                            email: this.email,
+                            groupCommunity: this.groupCommunity,
+                            position: this.position,
+                            image: fileName,
+                            status: this.status,
+                            id: this.$route.params.id,
+                          };
+                          const url =
+                            "http://localhost:3000/api/spiritualGuides/" +
+                            spiritualGuide.id +
+                            "/replace";
+                          axios.post(url, spiritualGuide);
+                          axios.delete("http://localhost:3000/api/Photos/spiritualGuide/files/" + this.imageEdit)
+                            .then(resp => {
+                              console.log(resp);
+                            })
+                            .catch(err => console.log(err));
+                          axios.post('http://localhost:3000/api/Photos/spiritualGuide/upload?filename=' + fileName, fd)
+                            .then(res => {
+                              console.log(res);
+                            })
+                            .catch(err => console.log(err));
+                        } else {
+                          const spiritualGuide = {
+                            spiritualGuideId: this.spiritualGuideId,
+                            christianName: this.christianName,
+                            fullName: this.fullName,
+                            birthday: this.birthday,
+                            phone: this.phone,
+                            email: this.email,
+                            groupCommunity: this.groupCommunity,
+                            position: this.position,
+                            image: fileName,
+                            status: this.status,
+                            id: this.$route.params.id,
+                          };
+                          const url =
+                            "http://localhost:3000/api/spiritualGuides/" +
+                            spiritualGuide.id +
+                            "/replace";
+                          axios.post(url, spiritualGuide);
+                          axios.post('http://localhost:3000/api/Photos/spiritualGuide/upload?filename=' + fileName, fd)
+                            .then(res => {
+                              console.log(res);
+                            })
+                            .catch(err => console.log(err));
+                        }
+                      } else {
+                        const spiritualGuide = {
+                          spiritualGuideId: this.spiritualGuideId,
+                          christianName: this.christianName,
+                          fullName: this.fullName,
+                          birthday: this.birthday,
+                          phone: this.phone,
+                          email: this.email,
+                          groupCommunity: this.groupCommunity,
+                          position: this.position,
+                          image: this.imageEdit,
+                          status: this.status,
+                          id: this.$route.params.id,
+                        };
+                        const url =
+                          "http://localhost:3000/api/spiritualGuides/" +
+                          spiritualGuide.id +
+                          "/replace";
+                        axios.post(url, spiritualGuide);
+                      }
                       setTimeout(() => {
                         this.$router.push("/spiritualGuides");
                         location.reload();
@@ -1060,9 +1323,6 @@ const EditSpiritualGuide = {
       }
       if (this.birthdayIsValid) {
         this.birthday = null;
-      }
-      if (this.homelandIsValid) {
-        this.homeland = null;
       }
       if (this.statusIsValid) {
         this.status = 0;
@@ -1161,16 +1421,6 @@ const EditSpiritualGuide = {
             </select>
           </div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="homeland">Quê Quán</label>
-            <label class="text-danger">*</label>
-            <input v-model="homeland" name="homeland" id="homeland" type="text" :title="titleHomeland"
-            :value="homeland" v-on:keyup="homeland = $event.target.value"
-              class="form-control  text-size-13px " placeholder="Nhập Quê quán..." style="margin-top: -5px;">
-          </div>
-        </div>
-        <div class="row mt-1">
-          <div class="col-lg-4"></div>
-          <div class="col-lg-4">
             <label class="text-size-15px font-weight-bold col-form-label" for="status">Trạng Thái</label>
             <label class="text-danger">*</label>
             <select class="custom-select  text-size-13px  h-32px" v-model="status" name="status" id="status"
@@ -1180,9 +1430,12 @@ const EditSpiritualGuide = {
               </option>
             </select>
           </div>
+        </div>
+        <div class="row mt-1">
+          <div class="col-lg-4"></div>
           <div class="col-lg-4">
             <label class="text-size-15px font-weight-bold col-form-label" for="image">Hình Ảnh</label>
-            <input type="file" id="image" v-model="image" name="image" :title="titlePicture"
+            <input type="file" id="image" @change="onFileSelected" :title="titlePicture"
               class="form-control rounded text-size-13px" style="margin-top: -5px;" />
           </div>
         </div>

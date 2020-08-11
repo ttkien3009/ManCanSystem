@@ -25,6 +25,7 @@ const ListTeacher = {
         { id: "1", name: "Nam" },
         { id: "2", name: "Nữ" },
       ],
+      image: null,
     };
   },
   mounted() {
@@ -50,6 +51,10 @@ const ListTeacher = {
     },
     getDetailTeacher(teacher) {
       this.teacher = teacher;
+      this.image = `
+      <img class="img-fluid img-thumbnail rounded-circle" src="../api/Photos/teacher/download/` + this.teacher.image + `" width="100px"
+      height="100px" alt="teacher-image"/>
+      `
       this.birthdayFormat = this.formatDate(this.teacher.birthday);
     },
 
@@ -197,9 +202,13 @@ const ListTeacher = {
           </div>
           <div class="modal-body">
             <div class="row">
-              <div class="col-sm-4 text-center">
-                <img class="img-fluid img-thumbnail rounded-circle" src="../images/user_03.jpg" width="100px"
-                  height="100px" />
+              <div class="col-sm-4 text-center" v-if="teacher.image != null">
+                <div v-html="image"></div>
+                <p class="font-weight-bold" style="padding-top: 5px;">{{ teacher.teacherId }}</p>
+              </div>
+              <div class="col-sm-4 text-center" v-if="teacher.image == null">
+                <img class="img-fluid img-thumbnail rounded-circle" src="../images/default_image.png" width="100px"
+                  height="100px" alt="teacher-image"/>
                 <p class="font-weight-bold" style="padding-top: 5px;">{{ teacher.teacherId }}</p>
               </div>
               <div class="col-sm-8 mt-3">
@@ -270,6 +279,7 @@ const AddTeacher = {
       ],
       subjects: [],
       teachers: [],
+      selectedFile: null,
     };
   },
   mounted() {
@@ -348,19 +358,26 @@ const AddTeacher = {
     },
   },
   methods: {
+    onFileSelected(event){
+      this.selectedFile = event.target.files[0];
+    },
     submitAddTeacherForm() {
       if (this.addTeacherFormIsValid) {
-        let lengthTeachers = 0;
-        let role = 0;
-        lengthTeachers = this.teachers.length;
-        if (lengthTeachers > -1 && lengthTeachers < 9) {
-          this.teacherId = "GV00" + (lengthTeachers + 1);
+        let lengthTeachers = this.teachers.length;
+        if ( lengthTeachers == 0) {
+          this.teacherId == 'GV001';
         }
-        if (lengthTeachers > 8 && lengthTeachers < 99) {
-          this.teacherId = "GV0" + (lengthTeachers + 1);
-        }
-        if (lengthTeachers > 98 && lengthTeachers < 999) {
-          this.teacherId = "GV" + (lengthTeachers + 1);
+        else {
+          let currentId = this.teachers[lengthTeachers - 1].id;
+          if (currentId > -1 && currentId < 9) {
+            this.teacherId = "GV00" + (currentId + 1);
+          }
+          if (currentId > 8 && currentId < 99) {
+            this.teacherId = "GV0" + (currentId + 1);
+          }
+          if (currentId > 98 && currentId < 999) {
+            this.teacherId = "GV" + (currentId + 1);
+          }
         }
         axios
           .get(
@@ -404,28 +421,51 @@ const AddTeacher = {
                         }
                       );
                     } else {
+                      var fileName = null;
+                      const fd = new FormData();
+                      if(this.selectedFile != null) {
+                        fd.append("image", this.selectedFile, this.selectedFile.name);
+                        var start = this.selectedFile.name.lastIndexOf('.');
+                        var end = this.selectedFile.length;
+                        fileName = this.teacherId + this.selectedFile.name.slice(start, end);
+                      }
                       const teacher = {
                         teacherId: this.teacherId,
-                        gender: this.gender,
                         fullName: this.fullName,
+                        gender: this.gender,
                         birthday: this.birthday,
                         phone: this.phone,
                         email: this.email,
-                        image: this.image,
+                        image: fileName,
                         subject: this.subject,
                         status: this.status,
                       };
                       const url_1 = `http://localhost:3000/api/teachers`;
                       axios.post(url_1, teacher);
-                      const account = {
-                        userId: this.teacherId,
-                        username: this.email,
-                        password: crypt.encrypt(this.phone),
-                        role: 10,
-                        status: this.status,
-                      };
-                      const url = `http://localhost:3000/api/accounts`;
-                      axios.post(url, account);
+                      axios
+                        .get(
+                          "http://localhost:3000/api/teachers/findOne?filter[where][email]=" +
+                            this.email
+                        )
+                        .then((resp) => {
+                          const account_teacher = {
+                            userId: resp.data.teacherId,
+                            username: resp.data.email,
+                            password: crypt.encrypt(resp.data.phone),
+                            role: 10,
+                            status: resp.data.status,
+                            idTable: resp.data.id,
+                          };
+                          const url = "http://localhost:3000/api/accounts";
+                          axios.post(url, account_teacher);
+                          if(this.selectedFile != null){
+                            axios.post('http://localhost:3000/api/Photos/teacher/upload?filename=' + fileName, fd)
+                              .then(res => {
+                                console.log(res);
+                              })
+                              .catch(err => console.log(err));
+                          }
+                        });
                       setTimeout(() => {
                         this.$router.push("/teachers");
                         location.reload();
@@ -555,7 +595,7 @@ const AddTeacher = {
           </div>
           <div class="col-lg-4">
             <label class="text-size-15px font-weight-bold col-form-label" for="image">Hình Ảnh</label>
-            <input type="file" id="image" v-model="image" name="image" :title="titlePicture"
+            <input type="file" id="image" @change="onFileSelected" :title="titlePicture"
               class="form-control rounded text-size-13px" style="margin-top: -5px;" />
           </div>
         </div>
@@ -604,6 +644,7 @@ const EditTeacher = {
       email: null,
       emailEdit: null,
       image: null,
+      imageEdit: null,
       subject: 0,
       titlePicture: "Chọn hình ảnh",
       titleBirthday: "Nhập thông tin ngày sinh",
@@ -624,6 +665,7 @@ const EditTeacher = {
       subjects: [],
       teachers: [],
       teacher: {},
+      selectedFile: null,
     };
   },
   mounted() {
@@ -640,14 +682,15 @@ const EditTeacher = {
       )
       .then((response) => {
         this.teacherId = response.data.teacher.teacherId;
-        this.gender = response.data.teacher.gender;
         this.fullName = response.data.teacher.fullName;
+        this.gender = response.data.teacher.gender;
         this.birthday = crypt.formatDate(response.data.teacher.birthday);
-        this.subject = response.data.teacher.subject;
         this.phone = response.data.teacher.phone;
         this.phoneEdit = response.data.teacher.phone;
         this.email = response.data.teacher.email;
         this.emailEdit = response.data.teacher.email;
+        this.imageEdit = response.data.teacher.image;
+        this.subject = response.data.teacher.subject;
         this.status = response.data.teacher.status;
       });
   },
@@ -719,6 +762,9 @@ const EditTeacher = {
     },
   },
   methods: {
+    onFileSelected(event) {
+      this.selectedFile = event.target.files[0];
+    },
     submitEditTeacherForm() {
       if (this.editTeacherFormIsValid) {
         if (this.emailEdit == this.email && this.phoneEdit == this.phone) {
@@ -739,20 +785,77 @@ const EditTeacher = {
               }
             );
           } else {
-            const teacher = {
-              teacherId: this.teacherId,
-              gender: this.gender,
-              fullName: this.fullName,
-              birthday: this.birthday,
-              subject: this.subject,
-              phone: this.phone,
-              email: this.email,
-              status: this.status,
-              id: this.$route.params.id,
-            };
-            const url =
-              "http://localhost:3000/api/teachers/" + teacher.id + "/replace";
-            axios.post(url, teacher);
+            if(this.selectedFile != null) {
+              const fd = new FormData();
+              fd.append('image', this.selectedFile, this.selectedFile.name);
+              var start = this.selectedFile.name.lastIndexOf('.');
+              var end = this.selectedFile.length;
+              var fileName = this.teacherId + this.selectedFile.name.slice(start, end);
+              if (this.imageEdit != null) {
+                const teacher = {
+                  teacherId: this.teacherId,
+                  fullName: this.fullName,
+                  gender: this.gender,
+                  birthday: this.birthday,
+                  phone: this.phone,
+                  email: this.email,
+                  image: fileName,
+                  subject: this.subject,
+                  status: this.status,
+                  id: this.$route.params.id,
+                };
+                const url =
+                  "http://localhost:3000/api/teachers/" + teacher.id + "/replace";
+                axios.post(url, teacher);
+                axios.delete("http://localhost:3000/api/Photos/teacher/files/" + this.imageEdit)
+                  .then(resp => {
+                    console.log(resp);
+                  })
+                  .catch(err => console.log(err));
+                axios.post('http://localhost:3000/api/Photos/teacher/upload?filename=' + fileName, fd)
+                  .then(res => {
+                    console.log(res);
+                  })
+                  .catch(err => console.log(err));
+              } else {
+                const teacher = {
+                  teacherId: this.teacherId,
+                  fullName: this.fullName,
+                  gender: this.gender,
+                  birthday: this.birthday,
+                  phone: this.phone,
+                  email: this.email,
+                  image: fileName,
+                  subject: this.subject,
+                  status: this.status,
+                  id: this.$route.params.id,
+                };
+                const url =
+                  "http://localhost:3000/api/teachers/" + teacher.id + "/replace";
+                axios.post(url, teacher);
+                axios.post('http://localhost:3000/api/Photos/teacher/upload?filename=' + fileName, fd)
+                  .then(res => {
+                    console.log(res);
+                  })
+                  .catch(err => console.log(err));
+              }
+            } else {
+              const teacher = {
+                teacherId: this.teacherId,
+                fullName: this.fullName,
+                gender: this.gender,
+                birthday: this.birthday,
+                phone: this.phone,
+                email: this.email,
+                image: this.imageEdit,
+                subject: this.subject,
+                status: this.status,
+                id: this.$route.params.id,
+              };
+              const url =
+                "http://localhost:3000/api/teachers/" + teacher.id + "/replace";
+              axios.post(url, teacher);
+            }
             setTimeout(() => {
               this.$router.push("/teachers");
               location.reload();
@@ -791,20 +894,77 @@ const EditTeacher = {
                     }
                   );
                 } else {
-                  const teacher = {
-                    teacherId: this.teacherId,
-                    gender: this.gender,
-                    fullName: this.fullName,
-                    birthday: this.birthday,
-                    subject: this.subject,
-                    phone: this.phone,
-                    email: this.email,
-                    status: this.status,
-                    id: this.$route.params.id,
-                  };
-                  const url =
-                    "http://localhost:3000/api/teachers/" + teacher.id + "/replace";
-                  axios.post(url, teacher);
+                  if(this.selectedFile != null) {
+                    const fd = new FormData();
+                    fd.append('image', this.selectedFile, this.selectedFile.name);
+                    var start = this.selectedFile.name.lastIndexOf('.');
+                    var end = this.selectedFile.length;
+                    var fileName = this.teacherId + this.selectedFile.name.slice(start, end);
+                    if (this.imageEdit != null) {
+                      const teacher = {
+                        teacherId: this.teacherId,
+                        fullName: this.fullName,
+                        gender: this.gender,
+                        birthday: this.birthday,
+                        phone: this.phone,
+                        email: this.email,
+                        image: fileName,
+                        subject: this.subject,
+                        status: this.status,
+                        id: this.$route.params.id,
+                      };
+                      const url =
+                        "http://localhost:3000/api/teachers/" + teacher.id + "/replace";
+                      axios.post(url, teacher);
+                      axios.delete("http://localhost:3000/api/Photos/teacher/files/" + this.imageEdit)
+                        .then(resp => {
+                          console.log(resp);
+                        })
+                        .catch(err => console.log(err));
+                      axios.post('http://localhost:3000/api/Photos/teacher/upload?filename=' + fileName, fd)
+                        .then(res => {
+                          console.log(res);
+                        })
+                        .catch(err => console.log(err));
+                    } else {
+                      const teacher = {
+                        teacherId: this.teacherId,
+                        fullName: this.fullName,
+                        gender: this.gender,
+                        birthday: this.birthday,
+                        phone: this.phone,
+                        email: this.email,
+                        image: fileName,
+                        subject: this.subject,
+                        status: this.status,
+                        id: this.$route.params.id,
+                      };
+                      const url =
+                        "http://localhost:3000/api/teachers/" + teacher.id + "/replace";
+                      axios.post(url, teacher);
+                      axios.post('http://localhost:3000/api/Photos/teacher/upload?filename=' + fileName, fd)
+                        .then(res => {
+                          console.log(res);
+                        })
+                        .catch(err => console.log(err));
+                    }
+                  } else {
+                    const teacher = {
+                      teacherId: this.teacherId,
+                      fullName: this.fullName,
+                      gender: this.gender,
+                      birthday: this.birthday,
+                      phone: this.phone,
+                      email: this.email,
+                      image: this.imageEdit,
+                      subject: this.subject,
+                      status: this.status,
+                      id: this.$route.params.id,
+                    };
+                    const url =
+                      "http://localhost:3000/api/teachers/" + teacher.id + "/replace";
+                    axios.post(url, teacher);
+                  }
                   setTimeout(() => {
                     this.$router.push("/teachers");
                     location.reload();
@@ -849,20 +1009,77 @@ const EditTeacher = {
                     }
                   );
                 } else {
-                  const teacher = {
-                    teacherId: this.teacherId,
-                    gender: this.gender,
-                    fullName: this.fullName,
-                    birthday: this.birthday,
-                    subject: this.subject,
-                    phone: this.phone,
-                    email: this.email,
-                    status: this.status,
-                    id: this.$route.params.id,
-                  };
-                  const url =
-                    "http://localhost:3000/api/teachers/" + teacher.id + "/replace";
-                  axios.post(url, teacher);
+                  if(this.selectedFile != null) {
+                    const fd = new FormData();
+                    fd.append('image', this.selectedFile, this.selectedFile.name);
+                    var start = this.selectedFile.name.lastIndexOf('.');
+                    var end = this.selectedFile.length;
+                    var fileName = this.teacherId + this.selectedFile.name.slice(start, end);
+                    if (this.imageEdit != null) {
+                      const teacher = {
+                        teacherId: this.teacherId,
+                        fullName: this.fullName,
+                        gender: this.gender,
+                        birthday: this.birthday,
+                        phone: this.phone,
+                        email: this.email,
+                        image: fileName,
+                        subject: this.subject,
+                        status: this.status,
+                        id: this.$route.params.id,
+                      };
+                      const url =
+                        "http://localhost:3000/api/teachers/" + teacher.id + "/replace";
+                      axios.post(url, teacher);
+                      axios.delete("http://localhost:3000/api/Photos/teacher/files/" + this.imageEdit)
+                        .then(resp => {
+                          console.log(resp);
+                        })
+                        .catch(err => console.log(err));
+                      axios.post('http://localhost:3000/api/Photos/teacher/upload?filename=' + fileName, fd)
+                        .then(res => {
+                          console.log(res);
+                        })
+                        .catch(err => console.log(err));
+                    } else {
+                      const teacher = {
+                        teacherId: this.teacherId,
+                        fullName: this.fullName,
+                        gender: this.gender,
+                        birthday: this.birthday,
+                        phone: this.phone,
+                        email: this.email,
+                        image: fileName,
+                        subject: this.subject,
+                        status: this.status,
+                        id: this.$route.params.id,
+                      };
+                      const url =
+                        "http://localhost:3000/api/teachers/" + teacher.id + "/replace";
+                      axios.post(url, teacher);
+                      axios.post('http://localhost:3000/api/Photos/teacher/upload?filename=' + fileName, fd)
+                        .then(res => {
+                          console.log(res);
+                        })
+                        .catch(err => console.log(err));
+                    }
+                  } else {
+                    const teacher = {
+                      teacherId: this.teacherId,
+                      fullName: this.fullName,
+                      gender: this.gender,
+                      birthday: this.birthday,
+                      phone: this.phone,
+                      email: this.email,
+                      image: this.imageEdit,
+                      subject: this.subject,
+                      status: this.status,
+                      id: this.$route.params.id,
+                    };
+                    const url =
+                      "http://localhost:3000/api/teachers/" + teacher.id + "/replace";
+                    axios.post(url, teacher);
+                  }
                   setTimeout(() => {
                     this.$router.push("/teachers");
                     location.reload();
@@ -915,20 +1132,77 @@ const EditTeacher = {
                           }
                         );
                       } else {
-                        const teacher = {
-                          teacherId: this.teacherId,
-                          gender: this.gender,
-                          fullName: this.fullName,
-                          birthday: this.birthday,
-                          subject: this.subject,
-                          phone: this.phone,
-                          email: this.email,
-                          status: this.status,
-                          id: this.$route.params.id,
-                        };
-                        const url =
-                          "http://localhost:3000/api/teachers/" + teacher.id + "/replace";
-                        axios.post(url, teacher);
+                        if(this.selectedFile != null) {
+                          const fd = new FormData();
+                          fd.append('image', this.selectedFile, this.selectedFile.name);
+                          var start = this.selectedFile.name.lastIndexOf('.');
+                          var end = this.selectedFile.length;
+                          var fileName = this.teacherId + this.selectedFile.name.slice(start, end);
+                          if (this.imageEdit != null) {
+                            const teacher = {
+                              teacherId: this.teacherId,
+                              fullName: this.fullName,
+                              gender: this.gender,
+                              birthday: this.birthday,
+                              phone: this.phone,
+                              email: this.email,
+                              image: fileName,
+                              subject: this.subject,
+                              status: this.status,
+                              id: this.$route.params.id,
+                            };
+                            const url =
+                              "http://localhost:3000/api/teachers/" + teacher.id + "/replace";
+                            axios.post(url, teacher);
+                            axios.delete("http://localhost:3000/api/Photos/teacher/files/" + this.imageEdit)
+                              .then(resp => {
+                                console.log(resp);
+                              })
+                              .catch(err => console.log(err));
+                            axios.post('http://localhost:3000/api/Photos/teacher/upload?filename=' + fileName, fd)
+                              .then(res => {
+                                console.log(res);
+                              })
+                              .catch(err => console.log(err));
+                          } else {
+                            const teacher = {
+                              teacherId: this.teacherId,
+                              fullName: this.fullName,
+                              gender: this.gender,
+                              birthday: this.birthday,
+                              phone: this.phone,
+                              email: this.email,
+                              image: fileName,
+                              subject: this.subject,
+                              status: this.status,
+                              id: this.$route.params.id,
+                            };
+                            const url =
+                              "http://localhost:3000/api/teachers/" + teacher.id + "/replace";
+                            axios.post(url, teacher);
+                            axios.post('http://localhost:3000/api/Photos/teacher/upload?filename=' + fileName, fd)
+                              .then(res => {
+                                console.log(res);
+                              })
+                              .catch(err => console.log(err));
+                          }
+                        } else {
+                          const teacher = {
+                            teacherId: this.teacherId,
+                            fullName: this.fullName,
+                            gender: this.gender,
+                            birthday: this.birthday,
+                            phone: this.phone,
+                            email: this.email,
+                            image: this.imageEdit,
+                            subject: this.subject,
+                            status: this.status,
+                            id: this.$route.params.id,
+                          };
+                          const url =
+                            "http://localhost:3000/api/teachers/" + teacher.id + "/replace";
+                          axios.post(url, teacher);
+                        }
                         setTimeout(() => {
                           this.$router.push("/teachers");
                           location.reload();
@@ -1063,7 +1337,7 @@ const EditTeacher = {
           </div>
           <div class="col-lg-4">
             <label class="text-size-15px font-weight-bold col-form-label" for="image">Hình Ảnh</label>
-            <input type="file" id="image" v-model="image" name="image" :title="titlePicture"
+            <input type="file" id="image" @change="onFileSelected" :title="titlePicture"
               class="form-control rounded text-size-13px" style="margin-top: -5px;" />
           </div>
         </div>

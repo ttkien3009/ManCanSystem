@@ -47,10 +47,13 @@ const ListManager = {
     },
     getDetailManager(manager) {
       this.manager = manager;
-      this.image = `
-      <img class="img-fluid img-thumbnail rounded-circle" src="../api/Photos/manager/download/` + this.manager.image + `" width="100px"
+      this.image =
+        `
+      <img class="img-fluid img-thumbnail rounded-circle" src="../api/Photos/manager/download/` +
+        this.manager.image +
+        `" width="100px"
       height="100px" alt="manager-image"/>
-      `
+      `;
       this.birthdayFormat = this.formatDate(this.manager.birthday);
     },
 
@@ -203,8 +206,8 @@ const ListManager = {
                 <p class="font-weight-bold" style="padding-top: 5px;">{{ manager.managerId }}</p>
               </div>
               <div class="col-sm-4 text-center" v-if="manager.image == null">
-                <img class="img-fluid img-thumbnail rounded-circle" src="../images/default_image.png" width="100px"
-                  height="100px" alt="manager-image"/>
+              <img class="img-fluid img-thumbnail rounded-circle" src="../images/default_image.png" width="100px"
+              height="100px" alt="manager-image"/>
                 <p class="font-weight-bold" style="padding-top: 5px;">{{ manager.managerId }}</p>
               </div>
               <div class="col-sm-8 mt-3">
@@ -358,16 +361,15 @@ const AddManager = {
     },
   },
   methods: {
-    onFileSelected(event){
+    onFileSelected(event) {
       this.selectedFile = event.target.files[0];
     },
     submitAddManagerForm() {
       if (this.addManagerFormIsValid) {
         let lengthManagers = this.managers.length;
-        if ( lengthManagers == 0) {
-          this.managerId == 'MN001';
-        }
-        else {
+        if (lengthManagers == 0) {
+          this.managerId == "MN001";
+        } else {
           let currentId = this.managers[lengthManagers - 1].id;
           if (currentId > -1 && currentId < 9) {
             this.managerId = "MN00" + (currentId + 1);
@@ -422,11 +424,17 @@ const AddManager = {
                   } else {
                     var fileName = null;
                     const fd = new FormData();
-                    if(this.selectedFile != null) {
-                      fd.append("image", this.selectedFile, this.selectedFile.name);
-                      var start = this.selectedFile.name.lastIndexOf('.');
+                    if (this.selectedFile != null) {
+                      fd.append(
+                        "image",
+                        this.selectedFile,
+                        this.selectedFile.name
+                      );
+                      var start = this.selectedFile.name.lastIndexOf(".");
                       var end = this.selectedFile.length;
-                      fileName = this.managerId + this.selectedFile.name.slice(start, end);
+                      fileName =
+                        this.managerId +
+                        this.selectedFile.name.slice(start, end);
                     }
                     const manager = {
                       managerId: this.managerId,
@@ -470,6 +478,7 @@ const AddManager = {
                         }
                         const url_1 = "http://localhost:3000/api/managers";
                         axios.post(url_1, manager);
+
                         axios
                           .get(
                             "http://localhost:3000/api/managers/findOne?filter[where][email]=" +
@@ -486,12 +495,17 @@ const AddManager = {
                             };
                             const url = "http://localhost:3000/api/accounts";
                             axios.post(url, account_manager);
-                            if(this.selectedFile != null){
-                              axios.post('http://localhost:3000/api/Photos/manager/upload?filename=' + fileName, fd)
-                                .then(res => {
+                            if (this.selectedFile != null) {
+                              axios
+                                .post(
+                                  "http://localhost:3000/api/Photos/manager/upload?filename=" +
+                                    fileName,
+                                  fd
+                                )
+                                .then((res) => {
                                   console.log(res);
                                 })
-                                .catch(err => console.log(err));
+                                .catch((err) => console.log(err));
                             }
                           });
                       });
@@ -830,10 +844,11 @@ const EditManager = {
           } else {
             if (this.selectedFile != null) {
               const fd = new FormData();
-              fd.append('image', this.selectedFile, this.selectedFile.name);
-              var start = this.selectedFile.name.lastIndexOf('.');
+              fd.append("image", this.selectedFile, this.selectedFile.name);
+              var start = this.selectedFile.name.lastIndexOf(".");
               var end = this.selectedFile.length;
-              var fileName = this.managerId + this.selectedFile.name.slice(start, end);
+              var fileName =
+                this.managerId + this.selectedFile.name.slice(start, end);
               if (this.imageEdit != null) {
                 const manager = {
                   managerId: this.managerId,
@@ -849,18 +864,29 @@ const EditManager = {
                   id: this.$route.params.id,
                 };
                 const url =
-                  "http://localhost:3000/api/managers/" + manager.id + "/replace";
+                  "http://localhost:3000/api/managers/" +
+                  manager.id +
+                  "/replace";
                 axios.post(url, manager);
-                axios.delete("http://localhost:3000/api/Photos/manager/files/" + this.imageEdit)
-                  .then(resp => {
+                axios
+                  .delete(
+                    "http://localhost:3000/api/Photos/manager/files/" +
+                      this.imageEdit
+                  )
+                  .then((resp) => {
                     console.log(resp);
                   })
-                  .catch(err => console.log(err));
-                axios.post('http://localhost:3000/api/Photos/manager/upload?filename=' + fileName, fd)
-                  .then(res => {
+                  .catch((err) => console.log(err));
+                axios
+                  .post(
+                    "http://localhost:3000/api/Photos/manager/upload?filename=" +
+                      fileName,
+                    fd
+                  )
+                  .then((res) => {
                     console.log(res);
                   })
-                  .catch(err => console.log(err));
+                  .catch((err) => console.log(err));
               } else {
                 const manager = {
                   managerId: this.managerId,
@@ -876,13 +902,20 @@ const EditManager = {
                   id: this.$route.params.id,
                 };
                 const url =
-                  "http://localhost:3000/api/managers/" + manager.id + "/replace";
+                  "http://localhost:3000/api/managers/" +
+                  manager.id +
+                  "/replace";
                 axios.post(url, manager);
-                axios.post("http://localhost:3000/api/Photos/manager/upload?filename=" + fileName, fd)
-                  .then(res => {
+                axios
+                  .post(
+                    "http://localhost:3000/api/Photos/manager/upload?filename=" +
+                      fileName,
+                    fd
+                  )
+                  .then((res) => {
                     console.log(res);
                   })
-                  .catch(err => console.log(err));
+                  .catch((err) => console.log(err));
               }
             } else {
               const manager = {
@@ -939,10 +972,11 @@ const EditManager = {
               } else {
                 if (this.selectedFile != null) {
                   const fd = new FormData();
-                  fd.append('image', this.selectedFile, this.selectedFile.name);
-                  var start = this.selectedFile.name.lastIndexOf('.');
+                  fd.append("image", this.selectedFile, this.selectedFile.name);
+                  var start = this.selectedFile.name.lastIndexOf(".");
                   var end = this.selectedFile.length;
-                  var fileName = this.managerId + this.selectedFile.name.slice(start, end);
+                  var fileName =
+                    this.managerId + this.selectedFile.name.slice(start, end);
                   if (this.imageEdit != null) {
                     const manager = {
                       managerId: this.managerId,
@@ -958,18 +992,29 @@ const EditManager = {
                       id: this.$route.params.id,
                     };
                     const url =
-                      "http://localhost:3000/api/managers/" + manager.id + "/replace";
+                      "http://localhost:3000/api/managers/" +
+                      manager.id +
+                      "/replace";
                     axios.post(url, manager);
-                    axios.delete("http://localhost:3000/api/Photos/manager/files/" + this.imageEdit)
-                      .then(resp => {
+                    axios
+                      .delete(
+                        "http://localhost:3000/api/Photos/manager/files/" +
+                          this.imageEdit
+                      )
+                      .then((resp) => {
                         console.log(resp);
                       })
-                      .catch(err => console.log(err));
-                    axios.post('http://localhost:3000/api/Photos/manager/upload?filename=' + fileName, fd)
-                      .then(res => {
+                      .catch((err) => console.log(err));
+                    axios
+                      .post(
+                        "http://localhost:3000/api/Photos/manager/upload?filename=" +
+                          fileName,
+                        fd
+                      )
+                      .then((res) => {
                         console.log(res);
                       })
-                      .catch(err => console.log(err));
+                      .catch((err) => console.log(err));
                   } else {
                     const manager = {
                       managerId: this.managerId,
@@ -985,13 +1030,20 @@ const EditManager = {
                       id: this.$route.params.id,
                     };
                     const url =
-                      "http://localhost:3000/api/managers/" + manager.id + "/replace";
+                      "http://localhost:3000/api/managers/" +
+                      manager.id +
+                      "/replace";
                     axios.post(url, manager);
-                    axios.post("http://localhost:3000/api/Photos/manager/upload?filename=" + fileName, fd)
-                      .then(res => {
+                    axios
+                      .post(
+                        "http://localhost:3000/api/Photos/manager/upload?filename=" +
+                          fileName,
+                        fd
+                      )
+                      .then((res) => {
                         console.log(res);
                       })
-                      .catch(err => console.log(err));
+                      .catch((err) => console.log(err));
                   }
                 } else {
                   const manager = {
@@ -1008,7 +1060,9 @@ const EditManager = {
                     id: this.$route.params.id,
                   };
                   const url =
-                    "http://localhost:3000/api/managers/" + manager.id + "/replace";
+                    "http://localhost:3000/api/managers/" +
+                    manager.id +
+                    "/replace";
                   axios.post(url, manager);
                 }
                 this.$router.push("/managers");
@@ -1053,10 +1107,11 @@ const EditManager = {
               } else {
                 if (this.selectedFile != null) {
                   const fd = new FormData();
-                  fd.append('image', this.selectedFile, this.selectedFile.name);
-                  var start = this.selectedFile.name.lastIndexOf('.');
+                  fd.append("image", this.selectedFile, this.selectedFile.name);
+                  var start = this.selectedFile.name.lastIndexOf(".");
                   var end = this.selectedFile.length;
-                  var fileName = this.managerId + this.selectedFile.name.slice(start, end);
+                  var fileName =
+                    this.managerId + this.selectedFile.name.slice(start, end);
                   if (this.imageEdit != null) {
                     const manager = {
                       managerId: this.managerId,
@@ -1072,18 +1127,29 @@ const EditManager = {
                       id: this.$route.params.id,
                     };
                     const url =
-                      "http://localhost:3000/api/managers/" + manager.id + "/replace";
+                      "http://localhost:3000/api/managers/" +
+                      manager.id +
+                      "/replace";
                     axios.post(url, manager);
-                    axios.delete("http://localhost:3000/api/Photos/manager/files/" + this.imageEdit)
-                      .then(resp => {
+                    axios
+                      .delete(
+                        "http://localhost:3000/api/Photos/manager/files/" +
+                          this.imageEdit
+                      )
+                      .then((resp) => {
                         console.log(resp);
                       })
-                      .catch(err => console.log(err));
-                    axios.post('http://localhost:3000/api/Photos/manager/upload?filename=' + fileName, fd)
-                      .then(res => {
+                      .catch((err) => console.log(err));
+                    axios
+                      .post(
+                        "http://localhost:3000/api/Photos/manager/upload?filename=" +
+                          fileName,
+                        fd
+                      )
+                      .then((res) => {
                         console.log(res);
                       })
-                      .catch(err => console.log(err));
+                      .catch((err) => console.log(err));
                   } else {
                     const manager = {
                       managerId: this.managerId,
@@ -1099,13 +1165,20 @@ const EditManager = {
                       id: this.$route.params.id,
                     };
                     const url =
-                      "http://localhost:3000/api/managers/" + manager.id + "/replace";
+                      "http://localhost:3000/api/managers/" +
+                      manager.id +
+                      "/replace";
                     axios.post(url, manager);
-                    axios.post("http://localhost:3000/api/Photos/manager/upload?filename=" + fileName, fd)
-                      .then(res => {
+                    axios
+                      .post(
+                        "http://localhost:3000/api/Photos/manager/upload?filename=" +
+                          fileName,
+                        fd
+                      )
+                      .then((res) => {
                         console.log(res);
                       })
-                      .catch(err => console.log(err));
+                      .catch((err) => console.log(err));
                   }
                 } else {
                   const manager = {
@@ -1122,7 +1195,9 @@ const EditManager = {
                     id: this.$route.params.id,
                   };
                   const url =
-                    "http://localhost:3000/api/managers/" + manager.id + "/replace";
+                    "http://localhost:3000/api/managers/" +
+                    manager.id +
+                    "/replace";
                   axios.post(url, manager);
                 }
                 this.$router.push("/managers");
@@ -1175,10 +1250,16 @@ const EditManager = {
                     } else {
                       if (this.selectedFile != null) {
                         const fd = new FormData();
-                        fd.append('image', this.selectedFile, this.selectedFile.name);
-                        var start = this.selectedFile.name.lastIndexOf('.');
+                        fd.append(
+                          "image",
+                          this.selectedFile,
+                          this.selectedFile.name
+                        );
+                        var start = this.selectedFile.name.lastIndexOf(".");
                         var end = this.selectedFile.length;
-                        var fileName = this.managerId + this.selectedFile.name.slice(start, end);
+                        var fileName =
+                          this.managerId +
+                          this.selectedFile.name.slice(start, end);
                         if (this.imageEdit != null) {
                           const manager = {
                             managerId: this.managerId,
@@ -1194,18 +1275,29 @@ const EditManager = {
                             id: this.$route.params.id,
                           };
                           const url =
-                            "http://localhost:3000/api/managers/" + manager.id + "/replace";
+                            "http://localhost:3000/api/managers/" +
+                            manager.id +
+                            "/replace";
                           axios.post(url, manager);
-                          axios.delete("http://localhost:3000/api/Photos/manager/files/" + this.imageEdit)
-                            .then(resp => {
+                          axios
+                            .delete(
+                              "http://localhost:3000/api/Photos/manager/files/" +
+                                this.imageEdit
+                            )
+                            .then((resp) => {
                               console.log(resp);
                             })
-                            .catch(err => console.log(err));
-                          axios.post('http://localhost:3000/api/Photos/manager/upload?filename=' + fileName, fd)
-                            .then(res => {
+                            .catch((err) => console.log(err));
+                          axios
+                            .post(
+                              "http://localhost:3000/api/Photos/manager/upload?filename=" +
+                                fileName,
+                              fd
+                            )
+                            .then((res) => {
                               console.log(res);
                             })
-                            .catch(err => console.log(err));
+                            .catch((err) => console.log(err));
                         } else {
                           const manager = {
                             managerId: this.managerId,
@@ -1221,13 +1313,20 @@ const EditManager = {
                             id: this.$route.params.id,
                           };
                           const url =
-                            "http://localhost:3000/api/managers/" + manager.id + "/replace";
+                            "http://localhost:3000/api/managers/" +
+                            manager.id +
+                            "/replace";
                           axios.post(url, manager);
-                          axios.post("http://localhost:3000/api/Photos/manager/upload?filename=" + fileName, fd)
-                            .then(res => {
+                          axios
+                            .post(
+                              "http://localhost:3000/api/Photos/manager/upload?filename=" +
+                                fileName,
+                              fd
+                            )
+                            .then((res) => {
                               console.log(res);
                             })
-                            .catch(err => console.log(err));
+                            .catch((err) => console.log(err));
                         }
                       } else {
                         const manager = {
@@ -1244,7 +1343,9 @@ const EditManager = {
                           id: this.$route.params.id,
                         };
                         const url =
-                          "http://localhost:3000/api/managers/" + manager.id + "/replace";
+                          "http://localhost:3000/api/managers/" +
+                          manager.id +
+                          "/replace";
                         axios.post(url, manager);
                       }
                       this.$router.push("/managers");
