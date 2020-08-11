@@ -22,6 +22,7 @@ const ListCandidate = {
       positions: [],
       birthdayFormat: null,
       communities: [],
+      image: null,
     };
   },
   mounted() {
@@ -48,8 +49,16 @@ const ListCandidate = {
 
       return [day, month, year].join("-");
     },
+
     getDetailCandidate(candidate) {
       this.candidate = candidate;
+      this.image =
+        `
+      <img class="img-fluid img-thumbnail rounded-circle" src="../api/Photos/candidate/download/` +
+        this.candidate.image +
+        `" width="100px"
+      height="100px" alt="candidate-image"/>
+      `;
       this.birthdayFormat = this.formatDate(this.candidate.birthday);
     },
 
@@ -149,7 +158,7 @@ const ListCandidate = {
                   <div class="col-lg-4">
                     <button :title="titleButtonEdit" @click="getDataCandidateUpdate(candidate)"
                       class="btn btn-warning btn-sm h-28px w-28px rounded" type="submit"
-                      style="margin-left: -6px;">
+                      style="margin-left: -6.5px;">
                       <i class="fas fa-edit fa-md ml--2px"></i>
                     </button>
                   </div>
@@ -203,9 +212,13 @@ const ListCandidate = {
           </div>
           <div class="modal-body">
             <div class="row">
-              <div class="col-sm-4 text-center">
-                <img class="img-fluid img-thumbnail rounded-circle" src="../images/user_03.jpg" width="100px"
-                  height="100px" />
+              <div class="col-sm-4 text-center" v-if="candidate.image != null">
+                <div v-html="image"></div>
+                <p class="font-weight-bold" style="padding-top: 5px;">{{ candidate.candidateId }}</p>
+              </div>
+              <div class="col-sm-4 text-center" v-if="candidate.image == null">
+                <img class="img-fluid img-thumbnail rounded-circle" src="../images/default_image.png" width="100px"
+                height="100px" alt="candidate-image"/>
                 <p class="font-weight-bold" style="padding-top: 5px;">{{ candidate.candidateId }}</p>
               </div>
               <div class="col-sm-8 mt-3">
@@ -283,6 +296,7 @@ const AddCandidate = {
       patron: null,
       address: null,
       amount: 0,
+      selectedFile: null,
     };
   },
   mounted() {
@@ -376,18 +390,25 @@ const AddCandidate = {
     },
   },
   methods: {
+    onFileSelected(event) {
+      this.selectedFile = event.target.files[0];
+    },
     submitAddCandidateForm() {
       if (this.addCandidateFormIsValid) {
-        let lengthCandidates = 0;
-        lengthCandidates = this.candidates.length;
-        if (lengthCandidates > -1 && lengthCandidates < 9) {
-          this.candidateId = "US00" + (lengthCandidates + 1);
-        }
-        if (lengthCandidates > 8 && lengthCandidates < 99) {
-          this.candidateId = "US0" + (lengthCandidates + 1);
-        }
-        if (lengthCandidates > 98 && lengthCandidates < 999) {
-          this.candidateId = "US" + (lengthCandidates + 1);
+        let lengthCandidates = this.candidates.length;
+        if (lengthCandidates == 0) {
+          this.candidateId == "US001";
+        } else {
+          let currentId = this.candidates[lengthCandidates - 1].id;
+          if (currentId > -1 && currentId < 9) {
+            this.candidateId = "US00" + (currentId + 1);
+          }
+          if (currentId > 8 && currentId < 99) {
+            this.candidateId = "US0" + (currentId + 1);
+          }
+          if (currentId > 98 && currentId < 999) {
+            this.candidateId = "US" + (currentId + 1);
+          }
         }
         axios
           .get(
@@ -414,7 +435,7 @@ const AddCandidate = {
                         alertify.success("Ok");
                       }
                     );
-                  } else if(crypt.getAge(this.birthday) < 18){
+                  } else if (crypt.getAge(this.birthday) < 18) {
                     alertify.alert(
                       "Thông báo",
                       "Tuổi của ứng sinh nhỏ hơn 18!",
@@ -422,7 +443,7 @@ const AddCandidate = {
                         alertify.success("Ok");
                       }
                     );
-                  } else if(crypt.getAge(this.birthday) > 30){
+                  } else if (crypt.getAge(this.birthday) > 30) {
                     alertify.alert(
                       "Thông báo",
                       "Tuổi của ứng sinh lớn hơn 30!",
@@ -431,6 +452,20 @@ const AddCandidate = {
                       }
                     );
                   } else {
+                    var fileName = null;
+                    const fd = new FormData();
+                    if (this.selectedFile != null) {
+                      fd.append(
+                        "image",
+                        this.selectedFile,
+                        this.selectedFile.name
+                      );
+                      var start = this.selectedFile.name.lastIndexOf(".");
+                      var end = this.selectedFile.length;
+                      fileName =
+                        this.candidateId +
+                        this.selectedFile.name.slice(start, end);
+                    }
                     const candidate = {
                       candidateId: this.candidateId,
                       christianName: this.christianName,
@@ -438,7 +473,7 @@ const AddCandidate = {
                       birthday: this.birthday,
                       phone: this.phone,
                       email: this.email,
-                      image: this.image,
+                      image: fileName,
                       position: this.position,
                       community: this.community,
                       homeland: this.homeland,
@@ -473,15 +508,37 @@ const AddCandidate = {
                           amount: amount,
                           id: this.community,
                         };
-                        const url_2 =
-                          "http://localhost:3000/api/communities/" +
-                          community.id +
-                          "/replace";
-                        axios.post(url_2, community);
-                        const url = `http://localhost:3000/api/accounts`;
-                        axios.post(url, account);
                         const url_1 = `http://localhost:3000/api/candidates`;
                         axios.post(url_1, candidate);
+                        axios
+                          .get(
+                            "http://localhost:3000/api/candidates/findOne?filter[where][email]=" +
+                              this.email
+                          )
+                          .then((resp) => {
+                            const account = {
+                              userId: resp.data.candidateId,
+                              username: resp.data.email,
+                              password: crypt.encrypt(resp.data.phone),
+                              role: 5,
+                              status: resp.data.status,
+                              idTable: resp.data.id,
+                            };
+                            const url_2 =
+                              "http://localhost:3000/api/communities/" +
+                              community.id +
+                              "/replace";
+                            axios.post(url_2, community);
+                            const url = "http://localhost:3000/api/accounts";
+                            axios.post(url, account);
+                            if(this.selectedFile != null){
+                              axios.post('http://localhost:3000/api/Photos/candidate/upload?filename=' + fileName, fd)
+                                .then(res => {
+                                  console.log(res);
+                                })
+                                .catch(err => console.log(err));
+                            }
+                          });
                       });
                     setTimeout(() => {
                       this.$router.push("/candidates");
@@ -635,7 +692,7 @@ const AddCandidate = {
           </div>
           <div class="col-lg-4">
             <label class="text-size-15px font-weight-bold col-form-label" for="image">Hình Ảnh</label>
-            <input type="file" id="image" v-model="image" name="image" :title="titlePicture"
+            <input type="file" id="image" @change="onFileSelected" :title="titlePicture"
               class="form-control rounded text-size-13px" style="margin-top: -5px;" />
           </div>
         </div>
@@ -684,6 +741,7 @@ const EditCandidate = {
       email: null,
       emailEdit: null,
       image: null,
+      imageEdit: null,
       community: 0,
       communityEdit: 0,
       position: 0,
@@ -705,6 +763,7 @@ const EditCandidate = {
       positions: [],
       communities: [],
       candidate: {},
+      selectedFile: null,
     };
   },
   mounted() {
@@ -724,15 +783,16 @@ const EditCandidate = {
         this.christianName = response.data.candidate.christianName;
         this.fullName = response.data.candidate.fullName;
         this.birthday = crypt.formatDate(response.data.candidate.birthday);
-        this.position = response.data.candidate.position;
-        this.homeland = response.data.candidate.homeland;
         this.phone = response.data.candidate.phone;
         this.phoneEdit = response.data.candidate.phone;
         this.email = response.data.candidate.email;
         this.emailEdit = response.data.candidate.email;
-        this.status = response.data.candidate.status;
+        this.imageEdit = response.data.candidate.image;
+        this.position = response.data.candidate.position;
         this.community = response.data.candidate.community;
         this.communityEdit = response.data.candidate.community;
+        this.homeland = response.data.candidate.homeland;
+        this.status = response.data.candidate.status;
       });
   },
   computed: {
@@ -815,10 +875,13 @@ const EditCandidate = {
     },
   },
   methods: {
+    onFileSelected(event) {
+      this.selectedFile = event.target.files[0];
+    },
     submitEditCandidateForm() {
       if (this.editCandidateFormIsValid) {
         if (this.emailEdit == this.email && this.phoneEdit == this.phone) {
-          if(crypt.getAge(this.birthday) < 18){
+          if (crypt.getAge(this.birthday) < 18) {
             alertify.alert(
               "Thông báo",
               "Tuổi của ứng sinh nhỏ hơn 18!",
@@ -826,7 +889,7 @@ const EditCandidate = {
                 alertify.success("Ok");
               }
             );
-          } else if(crypt.getAge(this.birthday) > 30){
+          } else if (crypt.getAge(this.birthday) > 30) {
             alertify.alert(
               "Thông báo",
               "Tuổi của ứng sinh lớn hơn 30!",
@@ -835,22 +898,104 @@ const EditCandidate = {
               }
             );
           } else {
-            const candidate = {
-              candidateId: this.candidateId,
-              christianName: this.christianName,
-              fullName: this.fullName,
-              birthday: this.birthday,
-              position: this.position,
-              homeland: this.homeland,
-              phone: this.phone,
-              email: this.email,
-              status: this.status,
-              community: this.community,
-              id: this.$route.params.id,
-            };
-            const url =
-              "http://localhost:3000/api/candidates/" + candidate.id + "/replace";
-            axios.post(url, candidate);
+            if (this.selectedFile != null) {
+              const fd = new FormData();
+              fd.append("image", this.selectedFile, this.selectedFile.name);
+              var start = this.selectedFile.name.lastIndexOf(".");
+              var end = this.selectedFile.length;
+              var fileName =
+                this.candidateId + this.selectedFile.name.slice(start, end);
+              if (this.imageEdit != null) {
+                const candidate = {
+                  candidateId: this.candidateId,
+                  christianName: this.christianName,
+                  fullName: this.fullName,
+                  birthday: this.birthday,
+                  phone: this.phone,
+                  email: this.email,
+                  image: fileName,
+                  position: this.position,
+                  community: this.community,
+                  homeland: this.homeland,
+                  status: this.status,
+                  id: this.$route.params.id,
+                };
+                const url =
+                  "http://localhost:3000/api/candidates/" +
+                  candidate.id +
+                  "/replace";
+                axios.post(url, candidate);
+                axios
+                  .delete(
+                    "http://localhost:3000/api/Photos/candidate/files/" +
+                      this.imageEdit
+                  )
+                  .then((resp) => {
+                    console.log(resp);
+                  })
+                  .catch((err) => console.log(err));
+                axios
+                  .post(
+                    "http://localhost:3000/api/Photos/candidate/upload?filename=" +
+                      fileName,
+                    fd
+                  )
+                  .then((res) => {
+                    console.log(res);
+                  })
+                  .catch((err) => console.log(err));
+              } else {
+                const candidate = {
+                  candidateId: this.candidateId,
+                  christianName: this.christianName,
+                  fullName: this.fullName,
+                  birthday: this.birthday,
+                  phone: this.phone,
+                  email: this.email,
+                  image: fileName,
+                  position: this.position,
+                  community: this.community,
+                  homeland: this.homeland,
+                  status: this.status,
+                  id: this.$route.params.id,
+                };
+                const url =
+                  "http://localhost:3000/api/candidates/" +
+                  candidate.id +
+                  "/replace";
+                axios.post(url, candidate);
+                axios
+                  .post(
+                    "http://localhost:3000/api/Photos/candidate/upload?filename=" +
+                      fileName,
+                    fd
+                  )
+                  .then((res) => {
+                    console.log(res);
+                  })
+                  .catch((err) => console.log(err));
+              }
+            } else {
+              const candidate = {
+                candidateId: this.candidateId,
+                christianName: this.christianName,
+                fullName: this.fullName,
+                birthday: this.birthday,
+                phone: this.phone,
+                email: this.email,
+                image: this.imageEdit,
+                position: this.position,
+                community: this.community,
+                homeland: this.homeland,
+                status: this.status,
+                id: this.$route.params.id,
+              };
+              const url =
+                "http://localhost:3000/api/candidates/" +
+                candidate.id +
+                "/replace";
+              axios.post(url, candidate);
+            }
             if (this.community != this.communityEdit) {
               axios
                 .get(
@@ -884,7 +1029,8 @@ const EditCandidate = {
                         this.community
                     )
                     .then((response) => {
-                      this.communityName = response.data.community.communityName;
+                      this.communityName =
+                        response.data.community.communityName;
                       this.patron = response.data.community.patron;
                       this.address = response.data.community.address;
                       this.amount = response.data.community.amount;
@@ -927,7 +1073,7 @@ const EditCandidate = {
                 alertify.alert("Thông báo", "Email đã tồn tại!", function () {
                   alertify.success("Ok");
                 });
-              } else if(crypt.getAge(this.birthday) < 18){
+              } else if (crypt.getAge(this.birthday) < 18) {
                 alertify.alert(
                   "Thông báo",
                   "Tuổi của ứng sinh nhỏ hơn 18!",
@@ -935,7 +1081,7 @@ const EditCandidate = {
                     alertify.success("Ok");
                   }
                 );
-              } else if(crypt.getAge(this.birthday) > 30){
+              } else if (crypt.getAge(this.birthday) > 30) {
                 alertify.alert(
                   "Thông báo",
                   "Tuổi của ứng sinh lớn hơn 30!",
@@ -945,18 +1091,102 @@ const EditCandidate = {
                 );
               } else {
                 const candidate = {
-                  candidateId: this.candidateId,
-                  christianName: this.christianName,
-                  fullName: this.fullName,
-                  birthday: this.birthday,
-                  position: this.position,
-                  homeland: this.homeland,
-                  phone: this.phone,
-                  email: this.email,
-                  status: this.status,
-                  community: this.community,
-                  id: this.$route.params.id,
+                  candidateId: null,
+                  christianName: null,
+                  fullName: null,
+                  birthday: null,
+                  phone: null,
+                  email: null,
+                  image: null,
+                  position: null,
+                  community: null,
+                  homeland: null,
+                  status: null,
+                  id: null,
                 };
+                if (this.selectedFile != null) {
+                  const fd = new FormData();
+                  fd.append("image", this.selectedFile, this.selectedFile.name);
+                  var start = this.selectedFile.name.lastIndexOf(".");
+                  var end = this.selectedFile.length;
+                  var fileName =
+                    this.candidateId + this.selectedFile.name.slice(start, end);
+                  if (this.imageEdit != null) {
+                    candidate = {
+                      candidateId: this.candidateId,
+                      christianName: this.christianName,
+                      fullName: this.fullName,
+                      birthday: this.birthday,
+                      phone: this.phone,
+                      email: this.email,
+                      image: fileName,
+                      position: this.position,
+                      community: this.community,
+                      homeland: this.homeland,
+                      status: this.status,
+                      id: this.$route.params.id,
+                    };
+                    axios
+                      .delete(
+                        "http://localhost:3000/api/Photos/candidate/files/" +
+                          this.imageEdit
+                      )
+                      .then((resp) => {
+                        console.log(resp);
+                      })
+                      .catch((err) => console.log(err));
+                    axios
+                      .post(
+                        "http://localhost:3000/api/Photos/candidate/upload?filename=" +
+                          fileName,
+                        fd
+                      )
+                      .then((res) => {
+                        console.log(res);
+                      })
+                      .catch((err) => console.log(err));
+                  } else {
+                    candidate = {
+                      candidateId: this.candidateId,
+                      christianName: this.christianName,
+                      fullName: this.fullName,
+                      birthday: this.birthday,
+                      phone: this.phone,
+                      email: this.email,
+                      image: fileName,
+                      position: this.position,
+                      community: this.community,
+                      homeland: this.homeland,
+                      status: this.status,
+                      id: this.$route.params.id,
+                    };
+                    axios
+                      .post(
+                        "http://localhost:3000/api/Photos/candidate/upload?filename=" +
+                          fileName,
+                        fd
+                      )
+                      .then((res) => {
+                        console.log(res);
+                      })
+                      .catch((err) => console.log(err));
+                  }
+                } else {
+                  candidate = {
+                    candidateId: this.candidateId,
+                    christianName: this.christianName,
+                    fullName: this.fullName,
+                    birthday: this.birthday,
+                    phone: this.phone,
+                    email: this.email,
+                    image: this.imageEdit,
+                    position: this.position,
+                    community: this.community,
+                    homeland: this.homeland,
+                    status: this.status,
+                    id: this.$route.params.id,
+                  };
+                }
                 if (this.community != this.communityEdit) {
                   axios
                     .get(
@@ -1043,7 +1273,7 @@ const EditCandidate = {
                     alertify.success("Ok");
                   }
                 );
-              } else if(crypt.getAge(this.birthday) < 18){
+              } else if (crypt.getAge(this.birthday) < 18) {
                 alertify.alert(
                   "Thông báo",
                   "Tuổi của ứng sinh nhỏ hơn 18!",
@@ -1051,7 +1281,7 @@ const EditCandidate = {
                     alertify.success("Ok");
                   }
                 );
-              } else if(crypt.getAge(this.birthday) > 30){
+              } else if (crypt.getAge(this.birthday) > 30) {
                 alertify.alert(
                   "Thông báo",
                   "Tuổi của ứng sinh lớn hơn 30!",
@@ -1061,18 +1291,102 @@ const EditCandidate = {
                 );
               } else {
                 const candidate = {
-                  candidateId: this.candidateId,
-                  christianName: this.christianName,
-                  fullName: this.fullName,
-                  birthday: this.birthday,
-                  position: this.position,
-                  homeland: this.homeland,
-                  phone: this.phone,
-                  email: this.email,
-                  status: this.status,
-                  community: this.community,
-                  id: this.$route.params.id,
+                  candidateId: null,
+                  christianName: null,
+                  fullName: null,
+                  birthday: null,
+                  phone: null,
+                  email: null,
+                  image: null,
+                  position: null,
+                  community: null,
+                  homeland: null,
+                  status: null,
+                  id: null,
                 };
+                if (this.selectedFile != null) {
+                  const fd = new FormData();
+                  fd.append("image", this.selectedFile, this.selectedFile.name);
+                  var start = this.selectedFile.name.lastIndexOf(".");
+                  var end = this.selectedFile.length;
+                  var fileName =
+                    this.candidateId + this.selectedFile.name.slice(start, end);
+                  if (this.imageEdit != null) {
+                    candidate = {
+                      candidateId: this.candidateId,
+                      christianName: this.christianName,
+                      fullName: this.fullName,
+                      birthday: this.birthday,
+                      phone: this.phone,
+                      email: this.email,
+                      image: fileName,
+                      position: this.position,
+                      community: this.community,
+                      homeland: this.homeland,
+                      status: this.status,
+                      id: this.$route.params.id,
+                    };
+                    axios
+                      .delete(
+                        "http://localhost:3000/api/Photos/candidate/files/" +
+                          this.imageEdit
+                      )
+                      .then((resp) => {
+                        console.log(resp);
+                      })
+                      .catch((err) => console.log(err));
+                    axios
+                      .post(
+                        "http://localhost:3000/api/Photos/candidate/upload?filename=" +
+                          fileName,
+                        fd
+                      )
+                      .then((res) => {
+                        console.log(res);
+                      })
+                      .catch((err) => console.log(err));
+                  } else {
+                    candidate = {
+                      candidateId: this.candidateId,
+                      christianName: this.christianName,
+                      fullName: this.fullName,
+                      birthday: this.birthday,
+                      phone: this.phone,
+                      email: this.email,
+                      image: fileName,
+                      position: this.position,
+                      community: this.community,
+                      homeland: this.homeland,
+                      status: this.status,
+                      id: this.$route.params.id,
+                    };
+                    axios
+                      .post(
+                        "http://localhost:3000/api/Photos/candidate/upload?filename=" +
+                          fileName,
+                        fd
+                      )
+                      .then((res) => {
+                        console.log(res);
+                      })
+                      .catch((err) => console.log(err));
+                  }
+                } else {
+                  candidate = {
+                    candidateId: this.candidateId,
+                    christianName: this.christianName,
+                    fullName: this.fullName,
+                    birthday: this.birthday,
+                    phone: this.phone,
+                    email: this.email,
+                    image: this.imageEdit,
+                    position: this.position,
+                    community: this.community,
+                    homeland: this.homeland,
+                    status: this.status,
+                    id: this.$route.params.id,
+                  };
+                }
                 if (this.community != this.communityEdit) {
                   axios
                     .get(
@@ -1167,7 +1481,7 @@ const EditCandidate = {
                           alertify.success("Ok");
                         }
                       );
-                    } else if(crypt.getAge(this.birthday) < 18){
+                    } else if (crypt.getAge(this.birthday) < 18) {
                       alertify.alert(
                         "Thông báo",
                         "Tuổi của ứng sinh nhỏ hơn 18!",
@@ -1175,7 +1489,7 @@ const EditCandidate = {
                           alertify.success("Ok");
                         }
                       );
-                    } else if(crypt.getAge(this.birthday) > 30){
+                    } else if (crypt.getAge(this.birthday) > 30) {
                       alertify.alert(
                         "Thông báo",
                         "Tuổi của ứng sinh lớn hơn 30!",
@@ -1185,18 +1499,107 @@ const EditCandidate = {
                       );
                     } else {
                       const candidate = {
-                        candidateId: this.candidateId,
-                        christianName: this.christianName,
-                        fullName: this.fullName,
-                        birthday: this.birthday,
-                        position: this.position,
-                        homeland: this.homeland,
-                        phone: this.phone,
-                        email: this.email,
-                        status: this.status,
-                        community: this.community,
-                        id: this.$route.params.id,
+                        candidateId: null,
+                        christianName: null,
+                        fullName: null,
+                        birthday: null,
+                        phone: null,
+                        email: null,
+                        image: null,
+                        position: null,
+                        community: null,
+                        homeland: null,
+                        status: null,
+                        id: null,
                       };
+                      if (this.selectedFile != null) {
+                        const fd = new FormData();
+                        fd.append(
+                          "image",
+                          this.selectedFile,
+                          this.selectedFile.name
+                        );
+                        var start = this.selectedFile.name.lastIndexOf(".");
+                        var end = this.selectedFile.length;
+                        var fileName =
+                          this.candidateId +
+                          this.selectedFile.name.slice(start, end);
+                        if (this.imageEdit != null) {
+                          candidate = {
+                            candidateId: this.candidateId,
+                            christianName: this.christianName,
+                            fullName: this.fullName,
+                            birthday: this.birthday,
+                            phone: this.phone,
+                            email: this.email,
+                            image: fileName,
+                            position: this.position,
+                            community: this.community,
+                            homeland: this.homeland,
+                            status: this.status,
+                            id: this.$route.params.id,
+                          };
+                          axios
+                            .delete(
+                              "http://localhost:3000/api/Photos/candidate/files/" +
+                                this.imageEdit
+                            )
+                            .then((resp) => {
+                              console.log(resp);
+                            })
+                            .catch((err) => console.log(err));
+                          axios
+                            .post(
+                              "http://localhost:3000/api/Photos/candidate/upload?filename=" +
+                                fileName,
+                              fd
+                            )
+                            .then((res) => {
+                              console.log(res);
+                            })
+                            .catch((err) => console.log(err));
+                        } else {
+                          candidate = {
+                            candidateId: this.candidateId,
+                            christianName: this.christianName,
+                            fullName: this.fullName,
+                            birthday: this.birthday,
+                            phone: this.phone,
+                            email: this.email,
+                            image: fileName,
+                            position: this.position,
+                            community: this.community,
+                            homeland: this.homeland,
+                            status: this.status,
+                            id: this.$route.params.id,
+                          };
+                          axios
+                            .post(
+                              "http://localhost:3000/api/Photos/candidate/upload?filename=" +
+                                fileName,
+                              fd
+                            )
+                            .then((res) => {
+                              console.log(res);
+                            })
+                            .catch((err) => console.log(err));
+                        }
+                      } else {
+                        candidate = {
+                          candidateId: this.candidateId,
+                          christianName: this.christianName,
+                          fullName: this.fullName,
+                          birthday: this.birthday,
+                          phone: this.phone,
+                          email: this.email,
+                          image: this.imageEdit,
+                          position: this.position,
+                          community: this.community,
+                          homeland: this.homeland,
+                          status: this.status,
+                          id: this.$route.params.id,
+                        };
+                      }
                       if (this.community != this.communityEdit) {
                         axios
                           .get(
@@ -1419,7 +1822,7 @@ const EditCandidate = {
           </div>
           <div class="col-lg-4">
             <label class="text-size-15px font-weight-bold col-form-label" for="image">Hình Ảnh</label>
-            <input type="file" id="image" v-model="image" name="image" :title="titlePicture"
+            <input type="file" id="image" @change="onFileSelected" :title="titlePicture"
               class="form-control rounded text-size-13px" style="margin-top: -5px;" />
           </div>
         </div>

@@ -8,12 +8,12 @@ module.exports = function(Companion) {
         christianName: instance.christianName,
         fullName: instance.fullName,
         birthday: instance.birthday,
-        position: instance.position,
-        homeland: instance.homeland,
         phone: instance.phone,
         email: instance.email,
+        groupCommunity: instance.groupCommunity,
+        position: instance.position,
+        image: instance.image,
         status: instance.status,
-        groupCommunity: instance.groupCommunity
       };
       cb(null, companion);
     });

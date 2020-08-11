@@ -8,12 +8,13 @@ module.exports = function(Candidate) {
         christianName: instance.christianName,
         fullName: instance.fullName,
         birthday: instance.birthday,
-        position: instance.position,
-        homeland: instance.homeland,
         phone: instance.phone,
         email: instance.email,
+        image: instance.image,
+        position: instance.position,
+        community: instance.community,
+        homeland: instance.homeland,
         status: instance.status,
-        community: instance.community
       };
       cb(null, candidate);
     });

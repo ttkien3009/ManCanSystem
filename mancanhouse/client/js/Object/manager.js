@@ -21,6 +21,7 @@ const ListManager = {
       manager: {},
       positions: [],
       birthdayFormat: null,
+      image: null,
     };
   },
   mounted() {
@@ -46,6 +47,10 @@ const ListManager = {
     },
     getDetailManager(manager) {
       this.manager = manager;
+      this.image = `
+      <img class="img-fluid img-thumbnail rounded-circle" src="../api/Photos/manager/download/` + this.manager.image + `" width="100px"
+      height="100px" alt="manager-image"/>
+      `
       this.birthdayFormat = this.formatDate(this.manager.birthday);
     },
 
@@ -193,9 +198,13 @@ const ListManager = {
           </div>
           <div class="modal-body">
             <div class="row">
-              <div class="col-sm-4 text-center">
-                <img class="img-fluid img-thumbnail rounded-circle" src="../images/user_03.jpg" width="100px"
-                  height="100px" />
+              <div class="col-sm-4 text-center" v-if="manager.image != null">
+                <div v-html="image"></div>
+                <p class="font-weight-bold" style="padding-top: 5px;">{{ manager.managerId }}</p>
+              </div>
+              <div class="col-sm-4 text-center" v-if="manager.image == null">
+                <img class="img-fluid img-thumbnail rounded-circle" src="../images/default_image.png" width="100px"
+                  height="100px" alt="manager-image"/>
                 <p class="font-weight-bold" style="padding-top: 5px;">{{ manager.managerId }}</p>
               </div>
               <div class="col-sm-8 mt-3">
@@ -461,7 +470,6 @@ const AddManager = {
                         }
                         const url_1 = "http://localhost:3000/api/managers";
                         axios.post(url_1, manager);
-                        
                         axios
                           .get(
                             "http://localhost:3000/api/managers/findOne?filter[where][email]=" +

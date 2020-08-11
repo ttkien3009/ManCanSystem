@@ -1,13 +1,13 @@
 {
   "ids": {
-    "account": 70,
+    "account": 78,
     "role": 21,
     "department": 15,
     "manager": 40,
-    "candidate": 12,
+    "candidate": 18,
     "community": 10,
     "groupCommunity": 4,
-    "companion": 6,
+    "companion": 10,
     "spiritualGuide": 5,
     "subject": 10,
     "teacher": 5,
@@ -56,7 +56,14 @@
       "66": "{\"userId\":\"MN021\",\"username\":\"manhcuong123562423@gmail.com\",\"password\":\"U2FsdGVkX19oEP4S8hYARuwKTJYEMSNdRFY0gLIJp0k=\",\"role\":3,\"status\":1,\"idTable\":34,\"id\":66}",
       "67": "{\"userId\":\"MN037\",\"username\":\"gd04@gmail.com\",\"password\":\"U2FsdGVkX1+USHGxunS0/1mdm/jBaPrpN6LZwQrykA8=\",\"role\":3,\"status\":1,\"idTable\":37,\"id\":67}",
       "68": "{\"userId\":\"MN038\",\"username\":\"gd02@gmail.com\",\"password\":\"U2FsdGVkX1/vtAXLTO/A/LKrLQam4kVUC2z6J+tfwQs=\",\"role\":4,\"status\":1,\"idTable\":38,\"id\":68}",
-      "69": "{\"userId\":\"MN039\",\"username\":\"manhcuonggh@gmail.com\",\"password\":\"U2FsdGVkX195GNgBuSRB8TzSvvlK/pIoW1VILRGoZSg=\",\"role\":4,\"status\":1,\"idTable\":39,\"id\":69}"
+      "69": "{\"userId\":\"MN039\",\"username\":\"manhcuonggh@gmail.com\",\"password\":\"U2FsdGVkX195GNgBuSRB8TzSvvlK/pIoW1VILRGoZSg=\",\"role\":4,\"status\":1,\"idTable\":39,\"id\":69}",
+      "70": "{\"userId\":\"MN012\",\"username\":\"conghau@gmail.com\",\"password\":\"U2FsdGVkX1+i65UPhkHYn5GBxpgeAF1uJDEnjrojDVY=\",\"role\":5,\"status\":1,\"id\":70}",
+      "71": "{\"userId\":\"US012\",\"username\":\"conghau@gmail.com\",\"password\":\"U2FsdGVkX1/MCJDULDQQEtIh1BhWnpiy2gMyaHFs8dw=\",\"role\":5,\"status\":1,\"id\":71}",
+      "72": "{\"userId\":\"US012\",\"username\":\"conghau@gmail.com\",\"password\":\"U2FsdGVkX1/12wIvGa+r90Ia4MPgyHyKyed+aD4jE8U=\",\"role\":5,\"status\":1,\"id\":72}",
+      "73": "{\"userId\":\"DH006\",\"username\":\"quockinh@gmail.com\",\"password\":\"U2FsdGVkX1+WaTEpxvhVSfl3mlIePmqAGWlFH7UdeDI=\",\"role\":8,\"status\":1,\"id\":73}",
+      "75": "{\"userId\":\"US015\",\"username\":\"vantung@gmail.com\",\"password\":\"U2FsdGVkX1/ATrgZA1zm1/5+X3rsrnWhdceDdjZvHJw=\",\"role\":5,\"status\":1,\"idTable\":17,\"id\":75}",
+      "76": "{\"userId\":\"DH007\",\"username\":\"ankhang@gmail.com\",\"password\":\"U2FsdGVkX19/bVjLpwfOPgVnXiC1fuC6IreAghGG3JY=\",\"role\":9,\"status\":2,\"idTable\":8,\"id\":76}",
+      "77": "{\"userId\":\"DH007\",\"username\":\"ankhang@gmail.com\",\"password\":\"U2FsdGVkX19nTR4fsnx/YKkm+Y6xknHoJKjzIfq8Rts=\",\"role\":9,\"status\":1,\"idTable\":9,\"id\":77}"
     },
     "department": {
       "1": "{\"name\":\"Headquarter\",\"positionType\":\"Giám đốc\",\"id\":1}",
@@ -100,16 +107,18 @@
       "39": "{\"id\":39,\"managerId\":\"MN039\",\"christianName\":\"JB\",\"fullName\":\"Trần Mạnh Cường\",\"birthday\":\"1987-10-04T00:00:00.000Z\",\"phone\":\"0978123698\",\"email\":\"manhcuonggh@gmail.com\",\"image\":\"MN039.png\",\"position\":5,\"homeland\":\"Long Xuyên\",\"status\":1}"
     },
     "candidate": {
-      "1": "{\"id\":1,\"candidateId\":\"US001\",\"christianName\":\"John Bosco\",\"fullName\":\"Lê Hoàng Quốc Anh\",\"birthday\":\"2020-06-10T00:00:00.000Z\",\"phone\":\"0987654321\",\"email\":\"quocanh@gmail.com\",\"position\":11,\"community\":1,\"homeland\":\"Ban Mê Thuật\",\"status\":1}",
-      "8": "{\"id\":8,\"candidateId\":\"US002\",\"christianName\":\"Peter\",\"fullName\":\"Hà Quốc Bảo\",\"birthday\":\"2020-07-10T00:00:00.000Z\",\"phone\":\"0978654123\",\"email\":\"quocbao@gmail.com\",\"position\":13,\"community\":5,\"homeland\":\"Ban Mê Thuật\",\"status\":1}",
-      "11": "{\"candidateId\":\"US005\",\"christianName\":\"Peter\",\"fullName\":\"Hà Quốc Bảo\",\"birthday\":\"2020-07-09T00:00:00.000Z\",\"phone\":\"0978654127\",\"email\":\"quocbaosjc@gmail.com\",\"image\":null,\"position\":13,\"community\":5,\"homeland\":\"Ban Mê Thuật\",\"status\":2,\"id\":11}"
+      "1": "{\"id\":1,\"candidateId\":\"US001\",\"christianName\":\"John Bosco\",\"fullName\":\"Lê Hoàng Quốc Anh\",\"birthday\":\"1998-06-10T00:00:00.000Z\",\"phone\":\"0987654321\",\"email\":\"quocanh@gmail.com\",\"image\":\"US001.jpg\",\"position\":14,\"community\":1,\"homeland\":\"Ban Mê Thuật\",\"status\":1}",
+      "8": "{\"id\":8,\"candidateId\":\"US002\",\"christianName\":\"Peter\",\"fullName\":\"Hà Quốc Bảo\",\"birthday\":\"1997-07-10T00:00:00.000Z\",\"phone\":\"0978654123\",\"email\":\"quocbao@gmail.com\",\"image\":\"US002.jpg\",\"position\":13,\"community\":5,\"homeland\":\"Ban Mê Thuật\",\"status\":1}",
+      "11": "{\"id\":11,\"candidateId\":\"US005\",\"christianName\":\"Peter\",\"fullName\":\"Hà Quốc Bảo\",\"birthday\":\"1997-07-09T00:00:00.000Z\",\"phone\":\"0978654127\",\"email\":\"quocbaosjc@gmail.com\",\"image\":\"US005.jpg\",\"position\":13,\"community\":1,\"homeland\":\"Ban Mê Thuật\",\"status\":2}",
+      "14": "{\"candidateId\":\"US012\",\"christianName\":\"Peter\",\"fullName\":\"Nguyễn Công Hậu\",\"birthday\":\"1998-01-01T00:00:00.000Z\",\"phone\":\"0978124321\",\"email\":\"conghau@gmail.com\",\"image\":\"US012.jpg\",\"position\":11,\"community\":3,\"homeland\":\"Long Xuyên\",\"status\":1,\"id\":14}",
+      "17": "{\"candidateId\":\"US015\",\"christianName\":\"JB\",\"fullName\":\"Nguyễn Văn Tùng\",\"birthday\":\"1998-01-01T00:00:00.000Z\",\"phone\":\"0978654142\",\"email\":\"vantung@gmail.com\",\"image\":\"US015.jpg\",\"position\":14,\"community\":2,\"homeland\":\"Thanh Hóa\",\"status\":1,\"id\":17}"
     },
     "community": {
-      "1": "{\"id\":1,\"communityName\":\"Andrew Phú Yên\",\"patron\":\"2020-07-22T00:00:00.000Z\",\"address\":\"142 Nguyễn Văn Trỗi, F.8. Q.PN, TP.HCM\",\"amount\":1}",
-      "2": "{\"id\":2,\"communityName\":\"Peter Canisius\",\"patron\":\"2020-07-03T00:00:00.000Z\",\"address\":\"86/7 Bùi Thị Xuân, F.1, Q.TB, TP.HCM\",\"amount\":0}",
-      "3": "{\"communityName\":\"Francis Borgia\",\"patron\":\"2020-10-03T00:00:00.000Z\",\"address\":\"Unknows\",\"amount\":0,\"id\":3}",
+      "1": "{\"id\":1,\"communityName\":\"Andrew Phú Yên\",\"patron\":\"2020-07-22T00:00:00.000Z\",\"address\":\"142 Nguyễn Văn Trỗi, F.8. Q.PN, TP.HCM\",\"amount\":2}",
+      "2": "{\"id\":2,\"communityName\":\"Peter Canisius\",\"patron\":\"2020-07-03T00:00:00.000Z\",\"address\":\"86/7 Bùi Thị Xuân, F.1, Q.TB, TP.HCM\",\"amount\":2}",
+      "3": "{\"id\":3,\"communityName\":\"Francis Borgia\",\"patron\":\"2020-10-03T00:00:00.000Z\",\"address\":\"Unknows\",\"amount\":1}",
       "4": "{\"communityName\":\"Alphonso Rodriguez\",\"patron\":\"2020-10-31T00:00:00.000Z\",\"address\":\"142 Nguyễn Văn Trỗi, F.8, Q.PN, TP.HCM\",\"amount\":0,\"id\":4}",
-      "5": "{\"id\":5,\"communityName\":\"Rupert Mayer\",\"patron\":\"2020-11-03T00:00:00.000Z\",\"address\":\"142 Nguyễn Văn Trỗi, F.8, Q.PN, TP.HCM\",\"amount\":2}",
+      "5": "{\"id\":5,\"communityName\":\"Rupert Mayer\",\"patron\":\"2020-11-03T00:00:00.000Z\",\"address\":\"142 Nguyễn Văn Trỗi, F.8, Q.PN, TP.HCM\",\"amount\":1}",
       "6": "{\"communityName\":\"Michael Pro\",\"patron\":\"2020-11-23T00:00:00.000Z\",\"address\":\"143 Phùng Khoang, F.8, Q.Cầu Giấy, TP.HN\",\"amount\":0,\"id\":6}",
       "7": "{\"communityName\":\"Andrew Bobola\",\"patron\":\"2020-05-16T00:00:00.000Z\",\"address\":\"142 Kha Vạn Cân, F.8, Q.Thủ Đức, TP.HCM\",\"amount\":0,\"id\":7}",
       "8": "{\"communityName\":\"John the Baptist\",\"patron\":\"2020-06-24T00:00:00.000Z\",\"address\":\"142 Nguyễn Văn Trỗi, F.8, Q.2, TP.HCM\",\"amount\":0,\"id\":8}",
@@ -120,17 +129,16 @@
       "3": "{\"name\":\"Thủ Đức\",\"firstCom\":5,\"secondCom\":0,\"thirdCom\":8,\"fourthCom\":6,\"fifthCom\":0,\"id\":3}"
     },
     "companion": {
-      "1": "{\"companionId\":\"DH001\",\"christianName\":\"Dominic\",\"fullName\":\"Nguyễn Quốc Kính\",\"birthday\":\"2020-07-02T00:00:00.000Z\",\"phone\":\"0986754123\",\"email\":\"quockinh@gmail.com\",\"groupCommunity\":1,\"position\":6,\"image\":null,\"status\":1,\"homeland\":\"Xuân Lộc\",\"id\":1}",
-      "2": "{\"id\":2,\"companionId\":\"DH002\",\"christianName\":\"Peter\",\"fullName\":\"Hà Quốc Bảo\",\"birthday\":\"2020-07-14T00:00:00.000Z\",\"phone\":\"0978654123\",\"email\":\"quocbao343@gmail.com\",\"groupCommunity\":1,\"position\":6,\"status\":1,\"homeland\":\"Ban Mê Thuật\"}",
-      "3": "{\"companionId\":\"DH003\",\"christianName\":\"asdsa\",\"fullName\":\"Hà Quốc Bảo\",\"birthday\":\"2020-07-29T00:00:00.000Z\",\"phone\":\"0978654123\",\"email\":\"quocbao@gmail.com\",\"groupCommunity\":1,\"position\":7,\"image\":null,\"status\":1,\"homeland\":\"dadasd\",\"id\":3}",
-      "4": "{\"companionId\":\"DH004\",\"christianName\":\"asdde\",\"fullName\":\"Nguyễn Ngọc Triêm\",\"birthday\":\"2020-07-21T00:00:00.000Z\",\"phone\":\"0987654432\",\"email\":\"kientran3009@gmail.com\",\"groupCommunity\":1,\"position\":7,\"image\":null,\"status\":1,\"homeland\":\"ads\",\"id\":4}",
-      "5": "{\"id\":5,\"companionId\":\"DH005\",\"christianName\":\"Peter\",\"fullName\":\"Hà Quốc Bảo\",\"birthday\":\"2020-07-02T00:00:00.000Z\",\"phone\":\"0978654123\",\"email\":\"quockinhsjc@gmail.com\",\"groupCommunity\":1,\"position\":6,\"status\":2,\"homeland\":\"Ban Mê Thuật\"}"
+      "3": "{\"id\":3,\"companionId\":\"DH003\",\"christianName\":\"Peter\",\"fullName\":\"Hà Quốc Bảo\",\"birthday\":\"1982-07-29T00:00:00.000Z\",\"phone\":\"0978654123\",\"email\":\"quocbao@gmail.com\",\"groupCommunity\":1,\"position\":7,\"image\":\"DH003.jpg\",\"status\":1}",
+      "4": "{\"id\":4,\"companionId\":\"DH004\",\"christianName\":\"JB\",\"fullName\":\"Nguyễn Ngọc Triêm\",\"birthday\":\"1978-07-21T00:00:00.000Z\",\"phone\":\"0987654432\",\"email\":\"kientran3009@gmail.com\",\"groupCommunity\":1,\"position\":7,\"image\":\"DH004.jpg\",\"status\":1}",
+      "6": "{\"companionId\":\"DH006\",\"christianName\":\"Dom\",\"fullName\":\"Nguyễn Quốc Kính\",\"birthday\":\"1976-01-12T00:00:00.000Z\",\"phone\":\"0986754123\",\"email\":\"quockinh@gmail.com\",\"groupCommunity\":3,\"position\":6,\"image\":\"DH006.jpg\",\"status\":1,\"id\":6}",
+      "9": "{\"companionId\":\"DH007\",\"christianName\":\"JOS\",\"fullName\":\"Nguyễn An Khang\",\"birthday\":\"1981-12-12T00:00:00.000Z\",\"phone\":\"0978643124\",\"email\":\"ankhang@gmail.com\",\"groupCommunity\":3,\"position\":7,\"image\":\"DH007.jpg\",\"status\":1,\"id\":9}"
     },
     "spiritualGuide": {
-      "1": "{\"spiritualGuideId\":\"LH001\",\"christianName\":\"Joseph\",\"fullName\":\"Hoàng Văn Nghị\",\"birthday\":\"2020-07-09T00:00:00.000Z\",\"phone\":\"0986712343\",\"email\":\"vannghi@gmail.com\",\"groupCommunity\":1,\"position\":8,\"image\":null,\"status\":1,\"homeland\":\"Sài Gòn\",\"id\":1}",
-      "2": "{\"spiritualGuideId\":\"LH002\",\"christianName\":\"adad\",\"fullName\":\"Hà Quốc Bảo\",\"birthday\":\"2020-07-01T00:00:00.000Z\",\"phone\":\"0978654123\",\"email\":\"quocbao@gmail.com\",\"groupCommunity\":1,\"position\":8,\"image\":null,\"status\":1,\"homeland\":\"sadasd\",\"id\":2}",
-      "3": "{\"spiritualGuideId\":\"LH003\",\"christianName\":\"asdfsd\",\"fullName\":\"Hà Quốc Bảo\",\"birthday\":\"2020-07-02T00:00:00.000Z\",\"phone\":\"0978654123\",\"email\":\"quocbao34325435@gmail.com\",\"groupCommunity\":1,\"position\":8,\"image\":null,\"status\":1,\"homeland\":\"afsf\",\"id\":3}",
-      "4": "{\"id\":4,\"spiritualGuideId\":\"LH004\",\"christianName\":\"JB\",\"fullName\":\"Nguyễn Ngọc Triêm\",\"birthday\":\"2020-07-02T00:00:00.000Z\",\"phone\":\"0987654432\",\"email\":\"quocbaosjc@gmail.com\",\"groupCommunity\":1,\"position\":9,\"status\":2,\"homeland\":\"Nghệ An\"}"
+      "1": "{\"spiritualGuideId\":\"LH001\",\"christianName\":\"Joseph\",\"fullName\":\"Hoàng Văn Nghị\",\"birthday\":\"2020-07-09T00:00:00.000Z\",\"phone\":\"0986712343\",\"email\":\"vannghi@gmail.com\",\"groupCommunity\":1,\"position\":8,\"image\":null,\"status\":1,\"id\":1}",
+      "2": "{\"spiritualGuideId\":\"LH002\",\"christianName\":\"adad\",\"fullName\":\"Hà Quốc Bảo\",\"birthday\":\"2020-07-01T00:00:00.000Z\",\"phone\":\"0978654123\",\"email\":\"quocbao@gmail.com\",\"groupCommunity\":1,\"position\":8,\"image\":null,\"status\":1,\"id\":2}",
+      "3": "{\"spiritualGuideId\":\"LH003\",\"christianName\":\"asdfsd\",\"fullName\":\"Hà Quốc Bảo\",\"birthday\":\"2020-07-02T00:00:00.000Z\",\"phone\":\"0978654123\",\"email\":\"quocbao34325435@gmail.com\",\"groupCommunity\":1,\"position\":8,\"image\":null,\"status\":1,\"id\":3}",
+      "4": "{\"id\":4,\"spiritualGuideId\":\"LH004\",\"christianName\":\"JB\",\"fullName\":\"Nguyễn Ngọc Triêm\",\"birthday\":\"2020-07-02T00:00:00.000Z\",\"phone\":\"0987654432\",\"email\":\"quocbaosjc@gmail.com\",\"groupCommunity\":1,\"image\":null,\"position\":9,\"status\":2}"
     },
     "subject": {
       "1": "{\"name\":\"Tín lý\",\"id\":1}",
