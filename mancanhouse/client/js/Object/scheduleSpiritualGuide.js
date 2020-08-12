@@ -312,21 +312,21 @@ const RegisteringScheduleSpiritualGuide = {
   },
   template: `
   <div class="card shadow mb-4" style="margin-top: -5px;">
-    <div class="card-header py-3">
+    <div class="card-header py-3" style="margin-bottom:-40px">
       <div class="row">
         <div class="col-md-4">
-          <h5 class="m-0 font-weight-bold text-primary">Đăng ký Lịch linh hướng</h5>
+          <h6 class="m-0 font-weight-bold text-dark">Đăng ký Lịch linh hướng</h6>
         </div>
         <div class="col-md-4"></div>
         <div class="col-md-2" style="padding-left:110px;">
-          <button class="btn text-size-15px rounded btn-danger" data-toggle="modal" data-target="#deleteScheduleSpiritualGuideModal">
+          <button class="btn rounded btn-danger" style="font-size:14px;" data-toggle="modal" data-target="#deleteScheduleSpiritualGuideModal">
             <i class="fas fa-trash-alt"></i>
             &nbsp;Xóa lịch
           </button>
         </div>
         <div class="col-md-2" style="padding-left:50px;">
-          <button class="btn text-size-15px rounded btn-hover-blue"
-            style="background-color: #056299;color: white;" @click="CreateScheduleSpiritualGuide">
+          <button class="btn rounded btn-hover-blue"
+            style="background-color: #056299;color: white;font-size:14px;" @click="CreateScheduleSpiritualGuide">
             <i class="fas fa-plus"></i>
             &nbsp;Tạo lịch
           </button>
@@ -334,7 +334,8 @@ const RegisteringScheduleSpiritualGuide = {
       </div>
     </div>
     <div class="card-body">
-      <div class="table-responsive">
+      <hr style="height:1px;color:lightgray;background-color:lightgray">
+      <div class="table-responsive" style="margin-top:-8px">
         <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
           <thead>
             <tr>

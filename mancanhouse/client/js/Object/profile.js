@@ -47,6 +47,7 @@ const DetailProfile = {
       idTable: 0,
       selectedFile: null,
       htmlImage: null,
+      fullNameShow: null,
     };
   },
   mounted() {
@@ -79,6 +80,7 @@ const DetailProfile = {
               this.managerId = response.data.manager.managerId;
               this.christianName = response.data.manager.christianName;
               this.fullName = response.data.manager.fullName;
+              this.fullNameShow = response.data.manager.fullName;
               this.birthday = crypt.formatDate(response.data.manager.birthday);
               this.phone = response.data.manager.phone;
               this.phoneEdit = response.data.manager.phone;
@@ -91,7 +93,7 @@ const DetailProfile = {
               this.htmlImage =
                 `
               <img class="profile-user-img img-fluid rounded-circle img-thumbnail" id="image"
-              src="../api/Photos/teacher/download/` +
+              src="../api/Photos/manager/download/` +
                 this.imageEdit +
                 `" alt="User Image">
               `;
@@ -107,6 +109,7 @@ const DetailProfile = {
               this.candidateId = response.data.candidate.candidateId;
               this.christianName = response.data.candidate.christianName;
               this.fullName = response.data.candidate.fullName;
+              this.fullNameShow = response.data.candidate.fullName;
               this.birthday = crypt.formatDate(
                 response.data.candidate.birthday
               );
@@ -123,7 +126,7 @@ const DetailProfile = {
               this.htmlImage =
                 `
               <img class="profile-user-img img-fluid rounded-circle img-thumbnail" id="image"
-              src="../api/Photos/teacher/download/` +
+              src="../api/Photos/candidate/download/` +
                 this.imageEdit +
                 `" alt="User Image">
               `;
@@ -140,6 +143,7 @@ const DetailProfile = {
                 response.data.spiritualGuide.spiritualGuideId;
               this.christianName = response.data.spiritualGuide.christianName;
               this.fullName = response.data.spiritualGuide.fullName;
+              this.fullNameShow = response.data.spiritualGuide.fullName;
               this.birthday = crypt.formatDate(
                 response.data.spiritualGuide.birthday
               );
@@ -154,7 +158,7 @@ const DetailProfile = {
               this.htmlImage =
                 `
               <img class="profile-user-img img-fluid rounded-circle img-thumbnail" id="image"
-              src="../api/Photos/teacher/download/` +
+              src="../api/Photos/spiritualGuide/download/` +
                 this.imageEdit +
                 `" alt="User Image">
               `;
@@ -170,6 +174,7 @@ const DetailProfile = {
               this.companionId = response.data.companion.companionId;
               this.christianName = response.data.companion.christianName;
               this.fullName = response.data.companion.fullName;
+              this.fullNameShow = response.data.companion.fullName;
               this.birthday = crypt.formatDate(
                 response.data.companion.birthday
               );
@@ -184,7 +189,7 @@ const DetailProfile = {
               this.htmlImage =
                 `
               <img class="profile-user-img img-fluid rounded-circle img-thumbnail" id="image"
-              src="../api/Photos/teacher/download/` +
+              src="../api/Photos/companion/download/` +
                 this.imageEdit +
                 `" alt="User Image">
               `;
@@ -198,6 +203,7 @@ const DetailProfile = {
             .then((response) => {
               this.teacherId = response.data.teacher.teacherId;
               this.fullName = response.data.teacher.fullName;
+              this.fullNameShow = response.data.teacher.fullName;
               this.gender = response.data.teacher.gender;
               this.birthday = crypt.formatDate(response.data.teacher.birthday);
               this.phone = response.data.teacher.phone;
@@ -352,7 +358,7 @@ const DetailProfile = {
                     position: this.position,
                     homeland: this.homeland,
                     status: this.status,
-                    id: this.$route.params.id,
+                    id: this.idTable,
                   };
                   const url =
                     "http://localhost:3000/api/managers/" +
@@ -390,7 +396,7 @@ const DetailProfile = {
                     position: this.position,
                     homeland: this.homeland,
                     status: this.status,
-                    id: this.$route.params.id,
+                    id: this.idTable,
                   };
                   const url =
                     "http://localhost:3000/api/managers/" +
@@ -420,7 +426,7 @@ const DetailProfile = {
                   position: this.position,
                   homeland: this.homeland,
                   status: this.status,
-                  id: this.$route.params.id,
+                  id: this.idTable,
                 };
                 const url =
                   "http://localhost:3000/api/managers/" +
@@ -486,7 +492,7 @@ const DetailProfile = {
                         position: this.position,
                         homeland: this.homeland,
                         status: this.status,
-                        id: this.$route.params.id,
+                        id: this.idTable,
                       };
                       const url =
                         "http://localhost:3000/api/managers/" +
@@ -524,7 +530,7 @@ const DetailProfile = {
                         position: this.position,
                         homeland: this.homeland,
                         status: this.status,
-                        id: this.$route.params.id,
+                        id: this.idTable,
                       };
                       const url =
                         "http://localhost:3000/api/managers/" +
@@ -554,7 +560,7 @@ const DetailProfile = {
                       position: this.position,
                       homeland: this.homeland,
                       status: this.status,
-                      id: this.$route.params.id,
+                      id: this.idTable,
                     };
                     const url =
                       "http://localhost:3000/api/managers/" +
@@ -625,7 +631,7 @@ const DetailProfile = {
                         position: this.position,
                         homeland: this.homeland,
                         status: this.status,
-                        id: this.$route.params.id,
+                        id: this.idTable,
                       };
                       const url =
                         "http://localhost:3000/api/managers/" +
@@ -663,7 +669,7 @@ const DetailProfile = {
                         position: this.position,
                         homeland: this.homeland,
                         status: this.status,
-                        id: this.$route.params.id,
+                        id: this.idTable,
                       };
                       const url =
                         "http://localhost:3000/api/managers/" +
@@ -693,7 +699,7 @@ const DetailProfile = {
                       position: this.position,
                       homeland: this.homeland,
                       status: this.status,
-                      id: this.$route.params.id,
+                      id: this.idTable,
                     };
                     const url =
                       "http://localhost:3000/api/managers/" +
@@ -773,7 +779,7 @@ const DetailProfile = {
                               position: this.position,
                               homeland: this.homeland,
                               status: this.status,
-                              id: this.$route.params.id,
+                              id: this.idTable,
                             };
                             const url =
                               "http://localhost:3000/api/managers/" +
@@ -811,7 +817,7 @@ const DetailProfile = {
                               position: this.position,
                               homeland: this.homeland,
                               status: this.status,
-                              id: this.$route.params.id,
+                              id: this.idTable,
                             };
                             const url =
                               "http://localhost:3000/api/managers/" +
@@ -841,7 +847,7 @@ const DetailProfile = {
                             position: this.position,
                             homeland: this.homeland,
                             status: this.status,
-                            id: this.$route.params.id,
+                            id: this.idTable,
                           };
                           const url =
                             "http://localhost:3000/api/managers/" +
@@ -907,7 +913,7 @@ const DetailProfile = {
                     community: this.community,
                     homeland: this.homeland,
                     status: this.status,
-                    id: this.$route.params.id,
+                    id: this.idTable,
                   };
                   const url =
                     "http://localhost:3000/api/candidates/" +
@@ -946,7 +952,7 @@ const DetailProfile = {
                     community: this.community,
                     homeland: this.homeland,
                     status: this.status,
-                    id: this.$route.params.id,
+                    id: this.idTable,
                   };
                   const url =
                     "http://localhost:3000/api/candidates/" +
@@ -977,7 +983,7 @@ const DetailProfile = {
                   community: this.community,
                   homeland: this.homeland,
                   status: this.status,
-                  id: this.$route.params.id,
+                  id: this.idTable,
                 };
                 const url =
                   "http://localhost:3000/api/candidates/" +
@@ -1061,7 +1067,7 @@ const DetailProfile = {
                         community: this.community,
                         homeland: this.homeland,
                         status: this.status,
-                        id: this.$route.params.id,
+                        id: this.idTable,
                       };
                       axios
                         .delete(
@@ -1095,7 +1101,7 @@ const DetailProfile = {
                         community: this.community,
                         homeland: this.homeland,
                         status: this.status,
-                        id: this.$route.params.id,
+                        id: this.idTable,
                       };
                       axios
                         .post(
@@ -1121,7 +1127,7 @@ const DetailProfile = {
                       community: this.community,
                       homeland: this.homeland,
                       status: this.status,
-                      id: this.$route.params.id,
+                      id: this.idTable,
                     };
                     const url =
                       "http://localhost:3000/api/candidates/" +
@@ -1210,7 +1216,7 @@ const DetailProfile = {
                         community: this.community,
                         homeland: this.homeland,
                         status: this.status,
-                        id: this.$route.params.id,
+                        id: this.idTable,
                       };
                       axios
                         .delete(
@@ -1244,7 +1250,7 @@ const DetailProfile = {
                         community: this.community,
                         homeland: this.homeland,
                         status: this.status,
-                        id: this.$route.params.id,
+                        id: this.idTable,
                       };
                       axios
                         .post(
@@ -1270,7 +1276,7 @@ const DetailProfile = {
                       community: this.community,
                       homeland: this.homeland,
                       status: this.status,
-                      id: this.$route.params.id,
+                      id: this.idTable,
                     };
                     const url =
                       "http://localhost:3000/api/candidates/" +
@@ -1367,7 +1373,7 @@ const DetailProfile = {
                               community: this.community,
                               homeland: this.homeland,
                               status: this.status,
-                              id: this.$route.params.id,
+                              id: this.idTable,
                             };
                             axios
                               .delete(
@@ -1401,7 +1407,7 @@ const DetailProfile = {
                               community: this.community,
                               homeland: this.homeland,
                               status: this.status,
-                              id: this.$route.params.id,
+                              id: this.idTable,
                             };
                             axios
                               .post(
@@ -1427,7 +1433,7 @@ const DetailProfile = {
                             community: this.community,
                             homeland: this.homeland,
                             status: this.status,
-                            id: this.$route.params.id,
+                            id: this.idTable,
                           };
                           const url =
                             "http://localhost:3000/api/candidates/" +
@@ -1491,7 +1497,7 @@ const DetailProfile = {
                     position: this.position,
                     image: fileName,
                     status: this.status,
-                    id: this.$route.params.id,
+                    id: this.idTable,
                   };
                   const url =
                     "http://localhost:3000/api/spiritualGuides/" +
@@ -1529,7 +1535,7 @@ const DetailProfile = {
                     position: this.position,
                     image: fileName,
                     status: this.status,
-                    id: this.$route.params.id,
+                    id: this.idTable,
                   };
                   const url =
                     "http://localhost:3000/api/spiritualGuides/" +
@@ -1559,7 +1565,7 @@ const DetailProfile = {
                   position: this.position,
                   image: this.imageEdit,
                   status: this.status,
-                  id: this.$route.params.id,
+                  id: this.idTable,
                 };
                 const url =
                   "http://localhost:3000/api/spiritualGuides/" +
@@ -1628,7 +1634,7 @@ const DetailProfile = {
                         position: this.position,
                         image: fileName,
                         status: this.status,
-                        id: this.$route.params.id,
+                        id: this.idTable,
                       };
                       const url =
                         "http://localhost:3000/api/spiritualGuides/" +
@@ -1666,7 +1672,7 @@ const DetailProfile = {
                         position: this.position,
                         image: fileName,
                         status: this.status,
-                        id: this.$route.params.id,
+                        id: this.idTable,
                       };
                       const url =
                         "http://localhost:3000/api/spiritualGuides/" +
@@ -1696,7 +1702,7 @@ const DetailProfile = {
                       position: this.position,
                       image: this.imageEdit,
                       status: this.status,
-                      id: this.$route.params.id,
+                      id: this.idTable,
                     };
                     const url =
                       "http://localhost:3000/api/spiritualGuides/" +
@@ -1770,7 +1776,7 @@ const DetailProfile = {
                         position: this.position,
                         image: fileName,
                         status: this.status,
-                        id: this.$route.params.id,
+                        id: this.idTable,
                       };
                       const url =
                         "http://localhost:3000/api/spiritualGuides/" +
@@ -1808,7 +1814,7 @@ const DetailProfile = {
                         position: this.position,
                         image: fileName,
                         status: this.status,
-                        id: this.$route.params.id,
+                        id: this.idTable,
                       };
                       const url =
                         "http://localhost:3000/api/spiritualGuides/" +
@@ -1838,7 +1844,7 @@ const DetailProfile = {
                       position: this.position,
                       image: this.imageEdit,
                       status: this.status,
-                      id: this.$route.params.id,
+                      id: this.idTable,
                     };
                     const url =
                       "http://localhost:3000/api/spiritualGuides/" +
@@ -1920,7 +1926,7 @@ const DetailProfile = {
                               position: this.position,
                               image: fileName,
                               status: this.status,
-                              id: this.$route.params.id,
+                              id: this.idTable,
                             };
                             const url =
                               "http://localhost:3000/api/spiritualGuides/" +
@@ -1958,7 +1964,7 @@ const DetailProfile = {
                               position: this.position,
                               image: fileName,
                               status: this.status,
-                              id: this.$route.params.id,
+                              id: this.idTable,
                             };
                             const url =
                               "http://localhost:3000/api/spiritualGuides/" +
@@ -1988,7 +1994,7 @@ const DetailProfile = {
                             position: this.position,
                             image: this.imageEdit,
                             status: this.status,
-                            id: this.$route.params.id,
+                            id: this.idTable,
                           };
                           const url =
                             "http://localhost:3000/api/spiritualGuides/" +
@@ -2055,7 +2061,7 @@ const DetailProfile = {
                     position: this.position,
                     image: fileName,
                     status: this.status,
-                    id: this.$route.params.id,
+                    id: this.idTable,
                   };
                   const url =
                     "http://localhost:3000/api/companions/" +
@@ -2093,7 +2099,7 @@ const DetailProfile = {
                     position: this.position,
                     image: fileName,
                     status: this.status,
-                    id: this.$route.params.id,
+                    id: this.idTable,
                   };
                   const url =
                     "http://localhost:3000/api/companions/" +
@@ -2123,7 +2129,7 @@ const DetailProfile = {
                   position: this.position,
                   image: this.imageEdit,
                   status: this.status,
-                  id: this.$route.params.id,
+                  id: this.idTable,
                 };
                 const url =
                   "http://localhost:3000/api/companions/" +
@@ -2192,7 +2198,7 @@ const DetailProfile = {
                         position: this.position,
                         image: fileName,
                         status: this.status,
-                        id: this.$route.params.id,
+                        id: this.idTable,
                       };
                       const url =
                         "http://localhost:3000/api/companions/" +
@@ -2230,7 +2236,7 @@ const DetailProfile = {
                         position: this.position,
                         image: fileName,
                         status: this.status,
-                        id: this.$route.params.id,
+                        id: this.idTable,
                       };
                       const url =
                         "http://localhost:3000/api/companions/" +
@@ -2260,7 +2266,7 @@ const DetailProfile = {
                       position: this.position,
                       image: this.imageEdit,
                       status: this.status,
-                      id: this.$route.params.id,
+                      id: this.idTable,
                     };
                     const url =
                       "http://localhost:3000/api/companions/" +
@@ -2334,7 +2340,7 @@ const DetailProfile = {
                         position: this.position,
                         image: fileName,
                         status: this.status,
-                        id: this.$route.params.id,
+                        id: this.idTable,
                       };
                       const url =
                         "http://localhost:3000/api/companions/" +
@@ -2372,7 +2378,7 @@ const DetailProfile = {
                         position: this.position,
                         image: fileName,
                         status: this.status,
-                        id: this.$route.params.id,
+                        id: this.idTable,
                       };
                       const url =
                         "http://localhost:3000/api/companions/" +
@@ -2402,7 +2408,7 @@ const DetailProfile = {
                       position: this.position,
                       image: this.imageEdit,
                       status: this.status,
-                      id: this.$route.params.id,
+                      id: this.idTable,
                     };
                     const url =
                       "http://localhost:3000/api/companions/" +
@@ -2484,7 +2490,7 @@ const DetailProfile = {
                               position: this.position,
                               image: fileName,
                               status: this.status,
-                              id: this.$route.params.id,
+                              id: this.idTable,
                             };
                             const url =
                               "http://localhost:3000/api/companions/" +
@@ -2522,7 +2528,7 @@ const DetailProfile = {
                               position: this.position,
                               image: fileName,
                               status: this.status,
-                              id: this.$route.params.id,
+                              id: this.idTable,
                             };
                             const url =
                               "http://localhost:3000/api/companions/" +
@@ -2552,7 +2558,7 @@ const DetailProfile = {
                             position: this.position,
                             image: this.imageEdit,
                             status: this.status,
-                            id: this.$route.params.id,
+                            id: this.idTable,
                           };
                           const url =
                             "http://localhost:3000/api/companions/" +
@@ -2618,7 +2624,7 @@ const DetailProfile = {
                     image: fileName,
                     subject: this.subject,
                     status: this.status,
-                    id: this.$route.params.id,
+                    id: this.idTable,
                   };
                   const url =
                     "http://localhost:3000/api/teachers/" +
@@ -2655,7 +2661,7 @@ const DetailProfile = {
                     image: fileName,
                     subject: this.subject,
                     status: this.status,
-                    id: this.$route.params.id,
+                    id: this.idTable,
                   };
                   const url =
                     "http://localhost:3000/api/teachers/" +
@@ -2684,7 +2690,7 @@ const DetailProfile = {
                   image: this.imageEdit,
                   subject: this.subject,
                   status: this.status,
-                  id: this.$route.params.id,
+                  id: this.idTable,
                 };
                 const url =
                   "http://localhost:3000/api/teachers/" +
@@ -2753,7 +2759,7 @@ const DetailProfile = {
                           image: fileName,
                           subject: this.subject,
                           status: this.status,
-                          id: this.$route.params.id,
+                          id: this.idTable,
                         };
                         const url =
                           "http://localhost:3000/api/teachers/" +
@@ -2790,7 +2796,7 @@ const DetailProfile = {
                           image: fileName,
                           subject: this.subject,
                           status: this.status,
-                          id: this.$route.params.id,
+                          id: this.idTable,
                         };
                         const url =
                           "http://localhost:3000/api/teachers/" +
@@ -2819,7 +2825,7 @@ const DetailProfile = {
                         image: this.imageEdit,
                         subject: this.subject,
                         status: this.status,
-                        id: this.$route.params.id,
+                        id: this.idTable,
                       };
                       const url =
                         "http://localhost:3000/api/teachers/" +
@@ -2894,7 +2900,7 @@ const DetailProfile = {
                           image: fileName,
                           subject: this.subject,
                           status: this.status,
-                          id: this.$route.params.id,
+                          id: this.idTable,
                         };
                         const url =
                           "http://localhost:3000/api/teachers/" +
@@ -2931,7 +2937,7 @@ const DetailProfile = {
                           image: fileName,
                           subject: this.subject,
                           status: this.status,
-                          id: this.$route.params.id,
+                          id: this.idTable,
                         };
                         const url =
                           "http://localhost:3000/api/teachers/" +
@@ -2960,7 +2966,7 @@ const DetailProfile = {
                         image: this.imageEdit,
                         subject: this.subject,
                         status: this.status,
-                        id: this.$route.params.id,
+                        id: this.idTable,
                       };
                       const url =
                         "http://localhost:3000/api/teachers/" +
@@ -3043,7 +3049,7 @@ const DetailProfile = {
                                 image: fileName,
                                 subject: this.subject,
                                 status: this.status,
-                                id: this.$route.params.id,
+                                id: this.idTable,
                               };
                               const url =
                                 "http://localhost:3000/api/teachers/" +
@@ -3080,7 +3086,7 @@ const DetailProfile = {
                                 image: fileName,
                                 subject: this.subject,
                                 status: this.status,
-                                id: this.$route.params.id,
+                                id: this.idTable,
                               };
                               const url =
                                 "http://localhost:3000/api/teachers/" +
@@ -3109,7 +3115,7 @@ const DetailProfile = {
                               image: this.imageEdit,
                               subject: this.subject,
                               status: this.status,
-                              id: this.$route.params.id,
+                              id: this.idTable,
                             };
                             const url =
                               "http://localhost:3000/api/teachers/" +
@@ -3198,7 +3204,7 @@ const DetailProfile = {
   template: `
   <div class="card shadow mb-4" style="margin-top: -5px;">
   <div class="card-header py-3">
-    <h5 class="m-0 font-weight-bold text-primary">Thông Tin Cá Nhân</h5>
+    <h6 class="m-0 font-weight-bold text-dark">Thông Tin Cá Nhân</h6>
   </div>
   <div class="card-body">
     <form @submit.prevent="submitEditProfileForm" action="POST" method="" autocomplete="off">
@@ -3215,7 +3221,7 @@ const DetailProfile = {
               </div>
               <div class="row">
                 <div class="col-sm-12 text-center mt-2">
-                  <span class="font-weight-bold" style="font-size: large;">{{ fullName }}</span>
+                  <span class="font-weight-bold" style="font-size: large;">{{ fullNameShow }}</span>
                 </div>
               </div>
               <div class="row">
@@ -3231,14 +3237,14 @@ const DetailProfile = {
             <div class="col-sm-9">
               <div class="row" v-show="role == 1 || role == 2 || role == 3 || role == 4 || role == 5 || role == 6 || role == 7 || role == 8 || role == 9">
                 <div class="col-lg-6">
-                  <label class="text-size-15px font-weight-bold col-form-label" for="fullName">Họ và Tên</label>
+                  <label class=" font-weight-bold col-form-label" for="fullName">Họ và Tên</label>
                   <label class="text-danger">*</label>
                   <input type="text" id="fullName" name="fullName" v-model="fullName" :title="titleFullName"
                   :value="fullName" v-on:keyup="fullName = $event.target.value"
                   class="form-control text-size-13px " placeholder="Nhập Họ và Tên..." style=" margin-top: -5px;">
                 </div>
                 <div class="col-lg-6">
-                  <label class="text-size-15px font-weight-bold col-form-label" for="christianName">Tên Thánh</label>
+                  <label class=" font-weight-bold col-form-label" for="christianName">Tên Thánh</label>
                   <label class="text-danger">*</label>
                   <input type="text" :title="titleChristianName" name="christianName" id="christianName"
                     v-model="christianName" :value="christianName" v-on:keyup="christianName = $event.target.value" 
@@ -3248,14 +3254,14 @@ const DetailProfile = {
               </div>
               <div class="row" v-show="role == 10">
                 <div class="col-lg-6">
-                  <label class="text-size-15px font-weight-bold col-form-label" for="fullName">Họ và Tên</label>
+                  <label class=" font-weight-bold col-form-label" for="fullName">Họ và Tên</label>
                   <label class="text-danger">*</label>
                   <input type="text" id="fullName" name="fullName" v-model="fullName" :title="titleFullName"
                   :value="fullName" v-on:keyup="fullName = $event.target.value"
                   class="form-control text-size-13px " placeholder="Nhập Họ và Tên..." style=" margin-top: -5px;">
                 </div>
                 <div class="col-lg-6">
-                  <label class="text-size-15px font-weight-bold col-form-label" for="gender">Giới Tính</label>
+                  <label class=" font-weight-bold col-form-label" for="gender">Giới Tính</label>
                   <label class="text-danger">*</label>
                   <select class="custom-select  text-size-13px  h-32px" v-model="gender" name="gender"
                     id="gender" style="margin-top: -5px;">
@@ -3265,39 +3271,39 @@ const DetailProfile = {
                   </select>
                 </div>
               </div>
-              <div class="row mt-2" v-show="role == 1 || role == 2 || role == 3 || role == 4 || role == 5 || role == 6 || role == 7 || role == 8 || role == 9">
+              <div class="row mt-2" v-show="role == 1 || role == 2 || role == 3 || role == 4 || role == 5">
                 <div class="col-lg-6">
-                  <label class="text-size-15px font-weight-bold col-form-label" for="birthday">Ngày Sinh</label>
+                  <label class=" font-weight-bold col-form-label" for="birthday">Ngày Sinh</label>
                   <label class="text-danger">*</label>
                   <input v-model="birthday" name="birthday" id="birthday" type="date" :title="titleBirthday"
                   :value="birthday" v-on:keyup="birthday = $event.target.value"
                     class="form-control  text-size-13px " style="margin-top: -5px;">
                 </div>
                 <div class="col-lg-6">
-                  <label class="text-size-15px font-weight-bold col-form-label" for="homeland">Quê Quán</label>
+                  <label class=" font-weight-bold col-form-label" for="homeland">Quê Quán</label>
                   <label class="text-danger">*</label>
                   <input v-model="homeland" name="homeland" id="homeland" type="text" :title="titleHomeland"
                   :value="homeland" v-on:keyup="homeland = $event.target.value"
                     class="form-control  text-size-13px " placeholder="Nhập Quê quán..." style="margin-top: -5px;">
                 </div>
               </div>
-              <div class="row mt-2" v-show="role == 10">
+              <div class="row mt-2" v-show="role == 10 || role == 6 || role == 7 || role == 8 || role == 9">
                 <div class="col-lg-6">
-                  <label class="text-size-15px font-weight-bold col-form-label" for="birthday">Ngày Sinh</label>
+                  <label class=" font-weight-bold col-form-label" for="birthday">Ngày Sinh</label>
                   <label class="text-danger">*</label>
                   <input v-model="birthday" name="birthday" id="birthday" type="date" :title="titleBirthday"
                   :value="birthday" v-on:keyup="birthday = $event.target.value"
                     class="form-control  text-size-13px " style="margin-top: -5px;">
                 </div>
                 <div class="col-lg-6">
-                  <label class="text-size-15px font-weight-bold col-form-label" for="image">Hình Ảnh</label>
+                  <label class=" font-weight-bold col-form-label" for="image">Hình Ảnh</label>
                   <input type="file" id="image" :title="titlePicture"
                     class="form-control rounded text-size-13px" style="margin-top: -5px;" @input="onFileSelected(event)"/>
                 </div>
               </div>
               <div class="row mt-2">
                 <div class="col-lg-6">
-                  <label class="text-size-15px font-weight-bold col-form-label" for="phone">Số Điện Thoại</label>
+                  <label class=" font-weight-bold col-form-label" for="phone">Số Điện Thoại</label>
                   <label class="text-danger">*</label>
                   <input v-model="phone" name="phone" id="phone" type="text" :title="titlePhone"
                     v-model="phone" :value="phone" v-on:keyup="phone = $event.target.value"
@@ -3307,7 +3313,7 @@ const DetailProfile = {
                     định dạng</span>
                 </div>
                 <div class="col-lg-6">
-                  <label class="text-size-15px font-weight-bold col-form-label" for="email">Email</label>
+                  <label class=" font-weight-bold col-form-label" for="email">Email</label>
                   <label class="text-danger">*</label>
                   <input v-model="email" name="email" id="email" type="text" :title="titleEmail"
                   :value="email" v-on:keyup="email = $event.target.value"
@@ -3317,9 +3323,9 @@ const DetailProfile = {
                     lệ</span>
                 </div>
               </div>
-              <div class="row mt-2" v-show="role == 1 || role == 2 || role == 3 || role == 4 || role == 5 || role == 6 || role == 7 || role == 8 || role == 9">
+              <div class="row mt-2" v-show="role == 1 || role == 2 || role == 3 || role == 4 || role == 5">
                 <div class="col-lg-6">
-                  <label class="text-size-15px font-weight-bold col-form-label" for="image">Hình Ảnh</label>
+                  <label class=" font-weight-bold col-form-label" for="image">Hình Ảnh</label>
                   <input type="file" id="image" :title="titlePicture"
                     class="form-control rounded text-size-13px" style="margin-top: -5px;" @input="onFileSelected(event)"/>
                 </div>
@@ -3332,39 +3338,32 @@ const DetailProfile = {
         <div class="col-12">
           <div style="float:right" v-show="role == 1 || role == 2 || role == 3 || role == 4 || role == 5 || role == 6 || role == 7 || role == 8 || role == 9">
             <button :disabled="!editProfileFormIsValid" type="submit"
-              class="btn text-size-15px rounded btn-hover-blue"
-              style="background-color: #056299;color: white;">
+              class="btn  rounded btn-hover-blue"
+              style="background-color: #056299;color: white;font-size:13px;">
               <i class="far fa-save fa-lg"></i>
               &nbsp;Lưu
             </button>
           </div>
           <div style="float:right" v-show="role == 10">
             <button :disabled="!editProfileFormWithTeacherIsValid" type="submit"
-              class="btn text-size-15px rounded btn-hover-blue"
-              style="background-color: #056299;color: white;">
+              class="btn  rounded btn-hover-blue"
+              style="background-color: #056299;color: white;font-size:13px;">
               <i class="far fa-save fa-lg"></i>
               &nbsp;Lưu
             </button>
           </div>
-          <div style="float:right; margin-right: 10px;" v-show="role == 1 || role == 2 || role == 3 || role == 4 || role == 5 || role == 6 || role == 7 || role == 8 || role == 9">
+          <div style="float:right; margin-right: 10px;" v-show="role == 1 || role == 2 || role == 3 || role == 4 || role == 5">
             <button :disabled="!refreshFormEditProfile" @click="clearInputEditProfileForm"
-              class="btn btn-success text-size-15px rounded">
+              class="btn btn-success  rounded" style="font-size:13px;">
               <i class="fas fa-sync-alt"></i>
               &nbsp;Làm mới
             </button>
           </div>
-          <div style="float:right; margin-right: 10px;" v-show="role == 10">
+          <div style="float:right; margin-right: 10px;" v-show="role == 10 || role == 6 || role == 7 || role == 8 || role == 9">
             <button :disabled="!refreshFormEditProfilewithTeacher" @click="clearInputEditProfileFormWithTeacher"
-              class="btn btn-success text-size-15px rounded">
+              class="btn btn-success  rounded" style="font-size:13px;">
               <i class="fas fa-sync-alt"></i>
               &nbsp;Làm mới
-            </button>
-          </div>
-          <div style="float:right; margin-right: 335px;">
-            <button class="btn text-size-15px rounded btn-hover-blue"
-              style="background-color: #056299;color: white;" @click="toHome">
-              <i class="fas fa-fast-backward"></i>
-              &nbsp;Quay lại
             </button>
           </div>
         </div>

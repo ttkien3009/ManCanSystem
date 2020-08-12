@@ -51,15 +51,15 @@ const ListCommunity = {
   },
   template: `
   <div class="card shadow mb-4" style="margin-top: -5px;">
-    <div class="card-header py-3">
+    <div class="card-header py-3" style="margin-bottom:-40px">
       <div class="row">
         <div class="col-md-4">
-          <h5 class="m-0 font-weight-bold text-primary">Danh sách Cộng Đoàn</h5>
+          <h6 class="m-0 font-weight-bold text-dark">Danh sách Cộng Đoàn</h6>
         </div>
         <div class="col-md-6"></div>
         <div class="col-md-2" style="padding-left:68px;">
           <router-link :to="{ name: 'addCommunity' }">
-          <button :title="titleButtonAdd" class="btn text-size-15px rounded btn-hover-blue" style="background-color: #056299;color: white;">
+          <button :title="titleButtonAdd" class="btn  rounded btn-hover-blue" style="background-color: #056299;color: white;font-size:14px;">
             <i class="fas fa-plus"></i>
             &nbsp;Thêm
           </button>
@@ -68,7 +68,8 @@ const ListCommunity = {
       </div>
     </div>
     <div class="card-body">
-      <div class="table-responsive">
+      <hr style="height:1px;color:lightgray;background-color:lightgray">
+      <div class="table-responsive" style="margin-top:-8px">
         <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
           <thead>
             <tr>
@@ -105,7 +106,7 @@ const ListCommunity = {
                       <i class="fas fa-edit fa-md ml--2px"></i>
                     </button>
                   </div>
-                  <div class="col-4" style="margin-left:-5px;">
+                  <div class="col-4" style="margin-left:-7px;">
                     <button :title="titleButtonDelete" data-toggle="modal" @click="getDetailCommunity(community)"
                       data-target="#deleteCommunityModal" class="btn btn-danger btn-sm h-28px w-28px rounded">
                       <i class="far fa-trash-alt fa-md ml--1px"></i>
@@ -236,24 +237,24 @@ const AddCommunity = {
   template: `
   <div class="card shadow mb-4" style="margin-top: -5px;">
     <div class="card-header py-3">
-      <h5 class="m-0 font-weight-bold text-primary">Thêm Cộng Đoàn</h5>
+      <h6 class="m-0 font-weight-bold text-dark">Thêm Cộng Đoàn</h6>
     </div>
     <div class="card-body">
       <form @submit.prevent="submitAddCommunityForm" action="POST" method="" autocomplete="off">
         <div class="row mt-2">
           <div class="col-lg-4">
-            <label class="font-weight-bold">Thông Tin Cộng Đoàn:</label>
-            <p style="font-size: 15px;">Thông tin phục vụ cho việc quản lý nhiều Cộng đoàn</p>
+            <label class="font-weight-bold" style="font-size:15px;">Thông Tin Cộng Đoàn:</label>
+            <p style="font-size: 12px;">Thông tin phục vụ cho việc quản lý nhiều Cộng đoàn</p>
           </div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="communityName">Tên Cộng Đoàn</label>
+            <label class=" font-weight-bold col-form-label" for="communityName">Tên Cộng Đoàn</label>
             <label class="text-danger">*</label>
             <input type="text" v-bind:title="titleCommunityName" name="communityName" id="communityName" v-model="communityName"
               class="form-control text-size-13px " placeholder="Nhập Tên Cộng Đoàn..."
               style="margin-top: -5px;">
           </div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="patron">Ngày Bổn Mạng</label>
+            <label class=" font-weight-bold col-form-label" for="patron">Ngày Bổn Mạng</label>
             <label class="text-danger">*</label>
             <input v-bind:title="titlePatron" v-model="patron" id="patron" name="patron" type="date"
               class="form-control  text-size-13px " style="margin-top: -5px;">
@@ -262,14 +263,14 @@ const AddCommunity = {
         <div class="row mt-1">
           <div class="col-lg-4"></div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="address">Địa Chỉ</label>
+            <label class=" font-weight-bold col-form-label" for="address">Địa Chỉ</label>
             <label class="text-danger">*</label>
             <input type="text" v-bind:title="titleAddress" name="address" id="address" v-model="address"
             class="form-control text-size-13px " placeholder="Nhập Địa Chỉ..."
             style="margin-top: -5px;">
           </div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="amount">Số Người</label>
+            <label class=" font-weight-bold col-form-label" for="amount">Số Người</label>
             <label class="text-danger">*</label>
             <input type="number" v-bind:title="titleAmount" name="amount" id="amount" v-model="amount"
             class="form-control text-size-13px " placeholder="Nhập Sồ Lượng Người..."
@@ -279,22 +280,22 @@ const AddCommunity = {
         <div class="row" style="margin-top: 30px;">
           <div class="col-12">
             <div style="float:right">
-              <button :disabled="!addCommunityFormIsValid" type="submit" class="btn text-size-15px rounded btn-hover-blue"
-                style="background-color: #056299;color: white;">
+              <button :disabled="!addCommunityFormIsValid" type="submit" class="btn  rounded btn-hover-blue"
+                style="background-color: #056299;color: white;font-size:13px;">
                 <i class="far fa-save fa-lg"></i>
                 &nbsp;Lưu
               </button>
             </div>
             <div style="float:right; margin-right: 10px;">
               <button :disabled="!refreshCommunityForm" @click="clearInputCommunityForm"
-                class="btn btn-success text-size-15px rounded">
+                class="btn btn-success  rounded" style="font-size:13px;">
                 <i class="fas fa-sync-alt"></i>
                 &nbsp;Làm mới
               </button>
             </div>
-            <div style="float:right; margin-right: 335px;">
-              <button class="btn text-size-15px rounded btn-hover-blue"
-                style="background-color: #056299;color: white;"  @click="toListCommunity">
+            <div style="float:right; margin-right: 360px;">
+              <button class="btn  rounded btn-hover-blue"
+                style="background-color: #056299;color: white;font-size:13px;"  @click="toListCommunity">
                 <i class="fas fa-fast-backward"></i>
                 &nbsp;Quay lại
               </button>
@@ -413,17 +414,17 @@ const EditCommunity = {
   template: `
   <div class="card shadow mb-4" style="margin-top: -5px;">
   <div class="card-header py-3">
-    <h5 class="m-0 font-weight-bold text-primary">Chỉnh sửa Cộng Đoàn</h5>
+    <h6 class="m-0 font-weight-bold text-dark">Chỉnh sửa Cộng Đoàn</h6>
   </div>
   <div class="card-body">
     <form @submit.prevent="submitEditCommunityForm" action="POST" method="" autocomplete="off">
       <div class="row mt-2">
         <div class="col-lg-4">
-          <label class="font-weight-bold">Thông Tin Cộng Đoàn:</label>
+          <label class="font-weight-bold" stylr="font-size:15px;">Thông Tin Cộng Đoàn:</label>
           <p style="font-size: 15px;">Thông tin phục vụ cho việc quản lý nhiều Cộng Đoàn</p>
         </div>
         <div class="col-lg-4">
-          <label class="text-size-15px font-weight-bold col-form-label" for="communityName">Tên Cộng Đoàn</label>
+          <label class=" font-weight-bold col-form-label" for="communityName">Tên Cộng Đoàn</label>
           <label class="text-danger">*</label>
           <input type="text" v-bind:title="titleCommunityName" v-model="communityName" id="communityName"
             name="communityName" class="form-control text-size-13px " placeholder="Nhập Tên Cộng Đoàn..."
@@ -431,7 +432,7 @@ const EditCommunity = {
             style="margin-top: -5px;">
         </div>
         <div class="col-lg-4">
-          <label class="text-size-15px font-weight-bold col-form-label" for="patron">Ngày Bổn Mạng</label>
+          <label class=" font-weight-bold col-form-label" for="patron">Ngày Bổn Mạng</label>
           <label class="text-danger">*</label>
           <input v-bind:title="titlePatron" v-model="patron" id="patron" name="patron"
             type="date" class="form-control  text-size-13px " placeholder="Nhập Mật khẩu..."
@@ -441,7 +442,7 @@ const EditCommunity = {
       <div class="row mt-1">
         <div class="col-lg-4"></div>
         <div class="col-lg-4">
-          <label class="text-size-15px font-weight-bold col-form-label" for="address">Địa Chỉ</label>
+          <label class=" font-weight-bold col-form-label" for="address">Địa Chỉ</label>
           <label class="text-danger">*</label>
           <input type="text" v-bind:title="titleAddress" v-model="address" id="address"
             name="address" class="form-control text-size-13px " placeholder="Nhập Địa Chỉ..."
@@ -449,7 +450,7 @@ const EditCommunity = {
             style="margin-top: -5px;">
         </div>
         <div class="col-lg-4">
-          <label class="text-size-15px font-weight-bold col-form-label" for="amount">Số Lượng Người</label>
+          <label class=" font-weight-bold col-form-label" for="amount">Số Lượng Người</label>
           <label class="text-danger">*</label>
           <input type="number" v-bind:title="titleAmount" v-model="amount" id="amount"
             name="amount" class="form-control text-size-13px " placeholder="Nhập Địa Chỉ..."
@@ -461,22 +462,22 @@ const EditCommunity = {
         <div class="col-12">
           <div style="float:right">
             <button :disabled="!editCommunityFormIsValid" type="submit"
-              class="btn text-size-15px rounded btn-hover-blue"
-              style="background-color: #056299;color: white;">
+              class="btn  rounded btn-hover-blue"
+              style="background-color: #056299;color: white;font-size:13px;">
               <i class="far fa-save fa-lg"></i>
               &nbsp;Lưu
             </button>
           </div>
           <div style="float:right; margin-right: 10px;">
             <button :disabled="!refreshCommunityForm" @click="clearInputCommunityForm"
-              class="btn btn-success text-size-15px rounded">
+              class="btn btn-success  rounded" style="font-size:13px;">
               <i class="fas fa-sync-alt"></i>
               &nbsp;Làm mới
             </button>
           </div>
-          <div style="float:right; margin-right: 335px;">
-            <button class="btn text-size-15px rounded btn-hover-blue"
-              style="background-color: #056299;color: white;" @click="toListCommunity">
+          <div style="float:right; margin-right: 360px;">
+            <button class="btn  rounded btn-hover-blue"
+              style="background-color: #056299;color: white;font-size:13px;" @click="toListCommunity">
               <i class="fas fa-fast-backward"></i>
               &nbsp;Quay lại
             </button>

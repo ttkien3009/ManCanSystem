@@ -51,10 +51,13 @@ const ListCompanion = {
     },
     getDetailCompanion(companion) {
       this.companion = companion;
-      this.image = `
-      <img class="img-fluid img-thumbnail rounded-circle" src="../api/Photos/companion/download/` + this.companion.image + `" width="100px"
+      this.image =
+        `
+      <img class="img-fluid img-thumbnail rounded-circle" src="../api/Photos/companion/download/` +
+        this.companion.image +
+        `" width="100px"
       height="100px" alt="companion-image"/>
-      `
+      `;
       this.birthdayFormat = this.formatDate(this.companion.birthday);
     },
 
@@ -81,16 +84,16 @@ const ListCompanion = {
   },
   template: `
   <div class="card shadow mb-4" style="margin-top: -5px;">
-    <div class="card-header py-3">
+    <div class="card-header py-3" style="margin-bottom:-40px">
       <div class="row">
         <div class="col-md-4">
-          <h5 class="m-0 font-weight-bold text-primary">Danh sách Người Đồng Hành</h5>
+          <h6 class="m-0 font-weight-bold text-dark">Danh sách Người Đồng Hành</h6>
         </div>
         <div class="col-md-6"></div>
         <div class="col-md-2" style="padding-left:68px;">
           <router-link :to="{ name: 'addCompanion' }">
-            <button :title="titleButtonAdd" class="btn text-size-15px rounded btn-hover-blue"
-              style="background-color: #056299;color: white;">
+            <button :title="titleButtonAdd" class="btn rounded btn-hover-blue"
+              style="background-color: #056299;color: white;font-size:14px;">
               <i class="fas fa-plus"></i>
               &nbsp;Thêm
             </button>
@@ -99,7 +102,8 @@ const ListCompanion = {
       </div>
     </div>
     <div class="card-body">
-      <div class="table-responsive">
+      <hr style="height:1px;color:lightgray;background-color:lightgray">
+      <div class="table-responsive" style="margin-top:-8px">
         <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
           <thead>
             <tr>
@@ -107,7 +111,6 @@ const ListCompanion = {
               <th>Họ và Tên</th>
               <th>Số Điện Thoại</th>
               <th>Email</th>
-              <th>Chức Vụ</th>
               <th>Nhóm Cộng Đoàn</th>
               <th>Trạng Thái</th>
               <th>Action</th>
@@ -119,7 +122,6 @@ const ListCompanion = {
               <th>Họ và Tên</th>
               <th>Số Điện Thoại</th>
               <th>Email</th>
-              <th>Chức Vụ</th>
               <th>Nhóm Cộng Đoàn</th>
               <th>Trạng Thái</th>
               <th>Action</th>
@@ -131,7 +133,6 @@ const ListCompanion = {
               <td>{{ companion.fullName }}</td>
               <td>{{ companion.phone }}</td>
               <td>{{ companion.email }}</td>
-              <td v-for="department in positions" v-if="department.id == companion.position">{{ department.positionType }}-{{ department.name }}</td>
               <td v-for="grCom in groupCommunities" v-if="grCom.id == companion.groupCommunity">{{ grCom.name }}</td>
               <td v-if="companion.status == 1">
                 <i class="fas fa-toggle-on fa-lg text-success"></i>
@@ -151,14 +152,14 @@ const ListCompanion = {
                   <div class="col-lg-4">
                     <button :title="titleButtonEdit" @click="getDataCompanionUpdate(companion)"
                       class="btn btn-warning btn-sm h-28px w-28px rounded" type="submit"
-                      style="margin-left: -8px;">
+                      style="margin-left: -17px;">
                       <i class="fas fa-edit fa-md ml--2px"></i>
                     </button>
                   </div>
                   <div class="col-lg-4">
                     <button :title="titleButtonDelete" data-toggle="modal" @click="getDetailCompanion(companion)"
                       data-target="#deleteCompanionModal" class="btn btn-danger btn-sm h-28px w-28px rounded"
-                      style="margin-left: -16.5px;">
+                      style="margin-left: -34px;">
                       <i class="far fa-trash-alt fa-md ml--1px"></i>
                     </button>
                   </div>
@@ -369,16 +370,15 @@ const AddCompanion = {
     },
   },
   methods: {
-    onFileSelected(event){
+    onFileSelected(event) {
       this.selectedFile = event.target.files[0];
     },
     submitAddCompanionForm() {
       if (this.addCompanionFormIsValid) {
         let lengthCompanions = this.companions.length;
-        if ( lengthCompanions == 0) {
-          this.companionId == 'DH001';
-        }
-        else {
+        if (lengthCompanions == 0) {
+          this.companionId = "DH001";
+        } else {
           let currentId = this.companions[lengthCompanions - 1].id;
           if (currentId > -1 && currentId < 9) {
             this.companionId = "DH00" + (currentId + 1);
@@ -434,11 +434,17 @@ const AddCompanion = {
                   } else {
                     var fileName = null;
                     const fd = new FormData();
-                    if(this.selectedFile != null) {
-                      fd.append("image", this.selectedFile, this.selectedFile.name);
-                      var start = this.selectedFile.name.lastIndexOf('.');
+                    if (this.selectedFile != null) {
+                      fd.append(
+                        "image",
+                        this.selectedFile,
+                        this.selectedFile.name
+                      );
+                      var start = this.selectedFile.name.lastIndexOf(".");
                       var end = this.selectedFile.length;
-                      fileName = this.companionId + this.selectedFile.name.slice(start, end);
+                      fileName =
+                        this.companionId +
+                        this.selectedFile.name.slice(start, end);
                     }
                     const companion = {
                       companionId: this.companionId,
@@ -489,12 +495,17 @@ const AddCompanion = {
                             };
                             const url = "http://localhost:3000/api/accounts";
                             axios.post(url, account_companion);
-                            if(this.selectedFile != null){
-                              axios.post('http://localhost:3000/api/Photos/companion/upload?filename=' + fileName, fd)
-                                .then(res => {
+                            if (this.selectedFile != null) {
+                              axios
+                                .post(
+                                  "http://localhost:3000/api/Photos/companion/upload?filename=" +
+                                    fileName,
+                                  fd
+                                )
+                                .then((res) => {
                                   console.log(res);
                                 })
-                                .catch(err => console.log(err));
+                                .catch((err) => console.log(err));
                             }
                           });
                       });
@@ -549,23 +560,23 @@ const AddCompanion = {
   template: `
   <div class="card shadow mb-4" style="margin-top: -5px;">
     <div class="card-header py-3">
-      <h5 class="m-0 font-weight-bold text-primary">Thêm Người Đồng Hành</h5>
+      <h6 class="m-0 font-weight-bold text-dark">Thêm Người Đồng Hành</h6>
     </div>
     <div class="card-body">
       <form @submit.prevent="submitAddCompanionForm" action="POST" method="" autocomplete="off">
         <div class="row mt-2">
           <div class="col-lg-4">
-            <label class="font-weight-bold">Thông Tin Người Đồng Hành:</label>
+            <label class="font-weight-bold text-size-15px ">Thông Tin Người Đồng Hành:</label>
             <p style="font-size: 11px;">Thông tin phục vụ cho việc quản lý nhiều Người Đồng Hành</p>
           </div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="fullName">Họ và Tên</label>
+            <label class="font-weight-bold col-form-label" for="fullName">Họ và Tên</label>
             <label class="text-danger">*</label>
             <input type="text" id="fullName" name="fullName" v-model="fullName" :title="titleFullName"
               class="form-control text-size-13px " placeholder="Nhập Họ và Tên..." style=" margin-top: -5px;">
           </div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="christianName">Tên Thánh</label>
+            <label class="font-weight-bold col-form-label" for="christianName">Tên Thánh</label>
             <label class="text-danger">*</label>
             <input type="text" :title="titleChristianName" name="christianName" id="christianName"
               v-model="christianName" class="form-control  text-size-13px " placeholder="Nhập Tên Thánh..."
@@ -575,13 +586,13 @@ const AddCompanion = {
         <div class="row mt-1">
           <div class="col-lg-4"></div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="birthday">Ngày Sinh</label>
+            <label class="font-weight-bold col-form-label" for="birthday">Ngày Sinh</label>
             <label class="text-danger">*</label>
             <input v-model="birthday" name="birthday" id="birthday" type="date" :title="titleBirthday"
               class="form-control  text-size-13px " style="margin-top: -5px;">
           </div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="position">Chức Vụ</label>
+            <label class="font-weight-bold col-form-label" for="position">Chức Vụ</label>
             <label class="text-danger">*</label>
             <select class="custom-select  text-size-13px  h-32px" v-model="position" name="position"
               id="position" style="margin-top: -5px;">
@@ -595,7 +606,7 @@ const AddCompanion = {
         <div class="row mt-2">
           <div class="col-lg-4"></div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="phone">Số Điện Thoại</label>
+            <label class="font-weight-bold col-form-label" for="phone">Số Điện Thoại</label>
             <label class="text-danger">*</label>
             <input v-model="phone" name="phone" id="phone" type="text" :title="titlePhone"
               v-model="phone" class="form-control  text-size-13px " placeholder="Nhập Số điện thoại..."
@@ -604,7 +615,7 @@ const AddCompanion = {
               định dạng</span>
           </div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="email">Email</label>
+            <label class="font-weight-bold col-form-label" for="email">Email</label>
             <label class="text-danger">*</label>
             <input v-model="email" name="email" id="email" type="text" :title="titleEmail"
               class="form-control  text-size-13px " placeholder="Nhập Địa chỉ email..."
@@ -616,7 +627,7 @@ const AddCompanion = {
         <div class="row mt-2">
           <div class="col-lg-4"></div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="groupCommunity">Nhóm Cộng Đoàn</label>
+            <label class="font-weight-bold col-form-label" for="groupCommunity">Nhóm Cộng Đoàn</label>
             <label class="text-danger">*</label>
             <select class="custom-select  text-size-13px  h-32px" v-model="groupCommunity" name="groupCommunity" id="groupCommunity"
               style="margin-top: -5px;">
@@ -626,7 +637,7 @@ const AddCompanion = {
             </select>
           </div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="status">Trạng Thái</label>
+            <label class="font-weight-bold col-form-label" for="status">Trạng Thái</label>
             <label class="text-danger">*</label>
             <select class="custom-select  text-size-13px  h-32px" v-model="status" name="status" id="status"
               style="margin-top: -5px;">
@@ -639,7 +650,7 @@ const AddCompanion = {
         <div class="row mt-2">
           <div class="col-lg-4"></div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="image">Hình Ảnh</label>
+            <label class="font-weight-bold col-form-label" for="image">Hình Ảnh</label>
             <input type="file" id="image" @change="onFileSelected" :title="titlePicture"
               class="form-control rounded text-size-13px" style="margin-top: -5px;" />
           </div>
@@ -648,22 +659,22 @@ const AddCompanion = {
           <div class="col-12">
             <div style="float:right">
               <button :disabled="!addCompanionFormIsValid" type="submit"
-                class="btn text-size-15px rounded btn-hover-blue"
-                style="background-color: #056299;color: white;">
+                class="btn rounded btn-hover-blue"
+                style="background-color: #056299;color: white;font-size:13px;">
                 <i class="far fa-save fa-lg"></i>
                 &nbsp;Lưu
               </button>
             </div>
             <div style="float:right; margin-right: 10px;">
               <button :disabled="!refreshFormCompanion" @click="clearInputCompanionForm"
-                class="btn btn-success text-size-15px rounded">
+                class="btn btn-success rounded" style="font-size:13px;">
                 <i class="fas fa-sync-alt"></i>
                 &nbsp;Làm mới
               </button>
             </div>
-            <div style="float:right; margin-right: 335px;">
-              <button class="btn text-size-15px rounded btn-hover-blue"
-                style="background-color: #056299;color: white;" @click="toListCompanion">
+            <div style="float:right; margin-right: 360px;">
+              <button class="btn rounded btn-hover-blue"
+                style="background-color: #056299;color: white;font-size:13px;" @click="toListCompanion">
                 <i class="fas fa-fast-backward"></i>
                 &nbsp;Quay lại
               </button>
@@ -835,13 +846,14 @@ const EditCompanion = {
               }
             );
           } else {
-            if(this.selectedFile != null) {
+            if (this.selectedFile != null) {
               const fd = new FormData();
-              fd.append('image', this.selectedFile, this.selectedFile.name);
-              var start = this.selectedFile.name.lastIndexOf('.');
+              fd.append("image", this.selectedFile, this.selectedFile.name);
+              var start = this.selectedFile.name.lastIndexOf(".");
               var end = this.selectedFile.length;
-              var fileName = this.companionId + this.selectedFile.name.slice(start, end);
-              if(this.imageEdit != null) {
+              var fileName =
+                this.companionId + this.selectedFile.name.slice(start, end);
+              if (this.imageEdit != null) {
                 const companion = {
                   companionId: this.companionId,
                   christianName: this.christianName,
@@ -860,16 +872,25 @@ const EditCompanion = {
                   companion.id +
                   "/replace";
                 axios.post(url, companion);
-                axios.delete("http://localhost:3000/api/Photos/companion/files/" + this.imageEdit)
-                  .then(resp => {
+                axios
+                  .delete(
+                    "http://localhost:3000/api/Photos/companion/files/" +
+                      this.imageEdit
+                  )
+                  .then((resp) => {
                     console.log(resp);
                   })
-                  .catch(err => console.log(err));
-                axios.post('http://localhost:3000/api/Photos/companion/upload?filename=' + fileName, fd)
-                  .then(res => {
+                  .catch((err) => console.log(err));
+                axios
+                  .post(
+                    "http://localhost:3000/api/Photos/companion/upload?filename=" +
+                      fileName,
+                    fd
+                  )
+                  .then((res) => {
                     console.log(res);
                   })
-                  .catch(err => console.log(err));
+                  .catch((err) => console.log(err));
               } else {
                 const companion = {
                   companionId: this.companionId,
@@ -889,11 +910,16 @@ const EditCompanion = {
                   companion.id +
                   "/replace";
                 axios.post(url, companion);
-                axios.post("http://localhost:3000/api/Photos/companion/upload?filename=" + fileName, fd)
-                  .then(res => {
+                axios
+                  .post(
+                    "http://localhost:3000/api/Photos/companion/upload?filename=" +
+                      fileName,
+                    fd
+                  )
+                  .then((res) => {
                     console.log(res);
                   })
-                  .catch(err => console.log(err));
+                  .catch((err) => console.log(err));
               }
             } else {
               const companion = {
@@ -952,13 +978,14 @@ const EditCompanion = {
                   }
                 );
               } else {
-                if(this.selectedFile != null) {
+                if (this.selectedFile != null) {
                   const fd = new FormData();
-                  fd.append('image', this.selectedFile, this.selectedFile.name);
-                  var start = this.selectedFile.name.lastIndexOf('.');
+                  fd.append("image", this.selectedFile, this.selectedFile.name);
+                  var start = this.selectedFile.name.lastIndexOf(".");
                   var end = this.selectedFile.length;
-                  var fileName = this.companionId + this.selectedFile.name.slice(start, end);
-                  if(this.imageEdit != null) {
+                  var fileName =
+                    this.companionId + this.selectedFile.name.slice(start, end);
+                  if (this.imageEdit != null) {
                     const companion = {
                       companionId: this.companionId,
                       christianName: this.christianName,
@@ -977,16 +1004,25 @@ const EditCompanion = {
                       companion.id +
                       "/replace";
                     axios.post(url, companion);
-                    axios.delete("http://localhost:3000/api/Photos/companion/files/" + this.imageEdit)
-                      .then(resp => {
+                    axios
+                      .delete(
+                        "http://localhost:3000/api/Photos/companion/files/" +
+                          this.imageEdit
+                      )
+                      .then((resp) => {
                         console.log(resp);
                       })
-                      .catch(err => console.log(err));
-                    axios.post('http://localhost:3000/api/Photos/companion/upload?filename=' + fileName, fd)
-                      .then(res => {
+                      .catch((err) => console.log(err));
+                    axios
+                      .post(
+                        "http://localhost:3000/api/Photos/companion/upload?filename=" +
+                          fileName,
+                        fd
+                      )
+                      .then((res) => {
                         console.log(res);
                       })
-                      .catch(err => console.log(err));
+                      .catch((err) => console.log(err));
                   } else {
                     const companion = {
                       companionId: this.companionId,
@@ -1006,11 +1042,16 @@ const EditCompanion = {
                       companion.id +
                       "/replace";
                     axios.post(url, companion);
-                    axios.post("http://localhost:3000/api/Photos/companion/upload?filename=" + fileName, fd)
-                      .then(res => {
+                    axios
+                      .post(
+                        "http://localhost:3000/api/Photos/companion/upload?filename=" +
+                          fileName,
+                        fd
+                      )
+                      .then((res) => {
                         console.log(res);
                       })
-                      .catch(err => console.log(err));
+                      .catch((err) => console.log(err));
                   }
                 } else {
                   const companion = {
@@ -1074,13 +1115,14 @@ const EditCompanion = {
                   }
                 );
               } else {
-                if(this.selectedFile != null) {
+                if (this.selectedFile != null) {
                   const fd = new FormData();
-                  fd.append('image', this.selectedFile, this.selectedFile.name);
-                  var start = this.selectedFile.name.lastIndexOf('.');
+                  fd.append("image", this.selectedFile, this.selectedFile.name);
+                  var start = this.selectedFile.name.lastIndexOf(".");
                   var end = this.selectedFile.length;
-                  var fileName = this.companionId + this.selectedFile.name.slice(start, end);
-                  if(this.imageEdit != null) {
+                  var fileName =
+                    this.companionId + this.selectedFile.name.slice(start, end);
+                  if (this.imageEdit != null) {
                     const companion = {
                       companionId: this.companionId,
                       christianName: this.christianName,
@@ -1099,16 +1141,25 @@ const EditCompanion = {
                       companion.id +
                       "/replace";
                     axios.post(url, companion);
-                    axios.delete("http://localhost:3000/api/Photos/companion/files/" + this.imageEdit)
-                      .then(resp => {
+                    axios
+                      .delete(
+                        "http://localhost:3000/api/Photos/companion/files/" +
+                          this.imageEdit
+                      )
+                      .then((resp) => {
                         console.log(resp);
                       })
-                      .catch(err => console.log(err));
-                    axios.post('http://localhost:3000/api/Photos/companion/upload?filename=' + fileName, fd)
-                      .then(res => {
+                      .catch((err) => console.log(err));
+                    axios
+                      .post(
+                        "http://localhost:3000/api/Photos/companion/upload?filename=" +
+                          fileName,
+                        fd
+                      )
+                      .then((res) => {
                         console.log(res);
                       })
-                      .catch(err => console.log(err));
+                      .catch((err) => console.log(err));
                   } else {
                     const companion = {
                       companionId: this.companionId,
@@ -1128,11 +1179,16 @@ const EditCompanion = {
                       companion.id +
                       "/replace";
                     axios.post(url, companion);
-                    axios.post("http://localhost:3000/api/Photos/companion/upload?filename=" + fileName, fd)
-                      .then(res => {
+                    axios
+                      .post(
+                        "http://localhost:3000/api/Photos/companion/upload?filename=" +
+                          fileName,
+                        fd
+                      )
+                      .then((res) => {
                         console.log(res);
                       })
-                      .catch(err => console.log(err));
+                      .catch((err) => console.log(err));
                   }
                 } else {
                   const companion = {
@@ -1204,13 +1260,19 @@ const EditCompanion = {
                         }
                       );
                     } else {
-                      if(this.selectedFile != null) {
+                      if (this.selectedFile != null) {
                         const fd = new FormData();
-                        fd.append('image', this.selectedFile, this.selectedFile.name);
-                        var start = this.selectedFile.name.lastIndexOf('.');
+                        fd.append(
+                          "image",
+                          this.selectedFile,
+                          this.selectedFile.name
+                        );
+                        var start = this.selectedFile.name.lastIndexOf(".");
                         var end = this.selectedFile.length;
-                        var fileName = this.companionId + this.selectedFile.name.slice(start, end);
-                        if(this.imageEdit != null) {
+                        var fileName =
+                          this.companionId +
+                          this.selectedFile.name.slice(start, end);
+                        if (this.imageEdit != null) {
                           const companion = {
                             companionId: this.companionId,
                             christianName: this.christianName,
@@ -1229,16 +1291,25 @@ const EditCompanion = {
                             companion.id +
                             "/replace";
                           axios.post(url, companion);
-                          axios.delete("http://localhost:3000/api/Photos/companion/files/" + this.imageEdit)
-                            .then(resp => {
+                          axios
+                            .delete(
+                              "http://localhost:3000/api/Photos/companion/files/" +
+                                this.imageEdit
+                            )
+                            .then((resp) => {
                               console.log(resp);
                             })
-                            .catch(err => console.log(err));
-                          axios.post('http://localhost:3000/api/Photos/companion/upload?filename=' + fileName, fd)
-                            .then(res => {
+                            .catch((err) => console.log(err));
+                          axios
+                            .post(
+                              "http://localhost:3000/api/Photos/companion/upload?filename=" +
+                                fileName,
+                              fd
+                            )
+                            .then((res) => {
                               console.log(res);
                             })
-                            .catch(err => console.log(err));
+                            .catch((err) => console.log(err));
                         } else {
                           const companion = {
                             companionId: this.companionId,
@@ -1258,11 +1329,16 @@ const EditCompanion = {
                             companion.id +
                             "/replace";
                           axios.post(url, companion);
-                          axios.post("http://localhost:3000/api/Photos/companion/upload?filename=" + fileName, fd)
-                            .then(res => {
+                          axios
+                            .post(
+                              "http://localhost:3000/api/Photos/companion/upload?filename=" +
+                                fileName,
+                              fd
+                            )
+                            .then((res) => {
                               console.log(res);
                             })
-                            .catch(err => console.log(err));
+                            .catch((err) => console.log(err));
                         }
                       } else {
                         const companion = {
@@ -1339,24 +1415,24 @@ const EditCompanion = {
   template: `
   <div class="card shadow mb-4" style="margin-top: -5px;">
     <div class="card-header py-3">
-      <h5 class="m-0 font-weight-bold text-primary">Chỉnh sửa Người Đồng Hành</h5>
+      <h6 class="m-0 font-weight-bold text-dark">Chỉnh sửa Người Đồng Hành</h6>
     </div>
     <div class="card-body">
       <form @submit.prevent="submitEditCompanionForm" action="POST" method="" autocomplete="off">
         <div class="row mt-2">
           <div class="col-lg-4">
-            <label class="font-weight-bold">Thông Tin Người Đồng Hành:</label>
+            <label class="font-weight-bold text-size-15px">Thông Tin Người Đồng Hành:</label>
             <p style="font-size: 11px;">Thông tin phục vụ cho việc quản lý nhiều Người Đồng Hành</p>
           </div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="fullName">Họ và Tên</label>
+            <label class="font-weight-bold col-form-label" for="fullName">Họ và Tên</label>
             <label class="text-danger">*</label>
             <input type="text" id="fullName" name="fullName" v-model="fullName" :title="titleFullName"
             :value="fullName" v-on:keyup="fullName = $event.target.value"
             class="form-control text-size-13px " placeholder="Nhập Họ và Tên..." style=" margin-top: -5px;">
           </div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="christianName">Tên Thánh</label>
+            <label class="font-weight-bold col-form-label" for="christianName">Tên Thánh</label>
             <label class="text-danger">*</label>
             <input type="text" :title="titleChristianName" name="christianName" id="christianName"
               v-model="christianName" :value="christianName" v-on:keyup="christianName = $event.target.value" 
@@ -1367,14 +1443,14 @@ const EditCompanion = {
         <div class="row mt-1">
           <div class="col-lg-4"></div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="birthday">Ngày Sinh</label>
+            <label class="font-weight-bold col-form-label" for="birthday">Ngày Sinh</label>
             <label class="text-danger">*</label>
             <input v-model="birthday" name="birthday" id="birthday" type="date" :title="titleBirthday"
             :value="birthday" v-on:keyup="birthday = $event.target.value"
               class="form-control  text-size-13px " style="margin-top: -5px;">
           </div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="position">Chức Vụ</label>
+            <label class="font-weight-bold col-form-label" for="position">Chức Vụ</label>
             <label class="text-danger">*</label>
             <select class="custom-select  text-size-13px  h-32px" v-model="position" name="position"
               id="position" style="margin-top: -5px;">
@@ -1389,7 +1465,7 @@ const EditCompanion = {
         <div class="row mt-2">
           <div class="col-lg-4"></div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="phone">Số Điện Thoại</label>
+            <label class="font-weight-bold col-form-label" for="phone">Số Điện Thoại</label>
             <label class="text-danger">*</label>
             <input v-model="phone" name="phone" id="phone" type="text" :title="titlePhone"
               v-model="phone" :value="phone" v-on:keyup="phone = $event.target.value"
@@ -1399,7 +1475,7 @@ const EditCompanion = {
               định dạng</span>
           </div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="email">Email</label>
+            <label class="font-weight-bold col-form-label" for="email">Email</label>
             <label class="text-danger">*</label>
             <input v-model="email" name="email" id="email" type="text" :title="titleEmail"
             :value="email" v-on:keyup="email = $event.target.value"
@@ -1412,7 +1488,7 @@ const EditCompanion = {
         <div class="row mt-2">
           <div class="col-lg-4"></div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="groupCommunity">Nhóm Cộng Đoàn</label>
+            <label class="font-weight-bold col-form-label" for="groupCommunity">Nhóm Cộng Đoàn</label>
             <label class="text-danger">*</label>
             <select class="custom-select  text-size-13px  h-32px" v-model="groupCommunity" name="groupCommunity" id="groupCommunity"
               style="margin-top: -5px;">
@@ -1422,7 +1498,7 @@ const EditCompanion = {
             </select>
           </div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="status">Trạng Thái</label>
+            <label class="font-weight-bold col-form-label" for="status">Trạng Thái</label>
             <label class="text-danger">*</label>
             <select class="custom-select  text-size-13px  h-32px" v-model="status" name="status" id="status"
               style="margin-top: -5px;">
@@ -1435,7 +1511,7 @@ const EditCompanion = {
         <div class="row mt-2">
           <div class="col-lg-4"></div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="image">Hình Ảnh</label>
+            <label class="font-weight-bold col-form-label" for="image">Hình Ảnh</label>
             <input type="file" id="image" @change="onFileSelected" :title="titlePicture"
               class="form-control rounded text-size-13px" style="margin-top: -5px;" />
           </div>
@@ -1444,22 +1520,22 @@ const EditCompanion = {
           <div class="col-12">
             <div style="float:right">
               <button :disabled="!editCompanionFormIsValid" type="submit"
-                class="btn text-size-15px rounded btn-hover-blue"
-                style="background-color: #056299;color: white;">
+                class="btn rounded btn-hover-blue"
+                style="background-color: #056299;color: white;font-size:13px;">
                 <i class="far fa-save fa-lg"></i>
                 &nbsp;Lưu
               </button>
             </div>
             <div style="float:right; margin-right: 10px;">
               <button :disabled="!refreshFormCompanion" @click="clearInputCompanionForm"
-                class="btn btn-success text-size-15px rounded">
+                class="btn btn-success rounded" style="font-size:13px;">
                 <i class="fas fa-sync-alt"></i>
                 &nbsp;Làm mới
               </button>
             </div>
-            <div style="float:right; margin-right: 335px;">
-              <button class="btn text-size-15px rounded btn-hover-blue"
-                style="background-color: #056299;color: white;" @click="toListCompanion">
+            <div style="float:right; margin-right: 360px;">
+              <button class="btn rounded btn-hover-blue"
+                style="background-color: #056299;color: white;font-size:13px;" @click="toListCompanion">
                 <i class="fas fa-fast-backward"></i>
                 &nbsp;Quay lại
               </button>

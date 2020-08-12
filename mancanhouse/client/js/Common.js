@@ -125,14 +125,14 @@ const Login = {
             <!--'Submit' event won't reload page-->
             <div class="wrap-input100 validate-input mt-2 ml-3">
               <input type="text" v-bind:title="titleUsername" name="username" id="username" v-model="username"
-                class="form-control input100" placeholder="Nhập Tài khoản" autofocus>
+                class="form-control input100" placeholder="Tài khoản" autofocus>
               <span class="symbol-input100">
                 <i class="fas fa-user fa-lg"></i>
               </span>
             </div>
             <div class="wrap-input100 validate-input mt-4 ml-3">
               <input type="password" v-bind:title="titlePassword" name="password" id="password" v-model="password"
-                class="form-control input100" placeholder="Nhập Mật khẩu">
+                class="form-control input100" placeholder="Mật khẩu">
               <span class="symbol-input100">
                 <i class="fa fa-lock fa-lg"></i>
               </span>
@@ -151,6 +151,8 @@ Vue.component("page-header", {
   data() {
     return {
       id: 0,
+      imageEdit: null,
+      htmlImage: null,
     };
   },
   mounted() {
@@ -160,6 +162,105 @@ Vue.component("page-header", {
       )
       .then((resp) => {
         this.id = resp.data.id;
+      });
+    axios
+      .get(
+        "http://localhost:3000/api/logins/findOne?filter[where][token]=token"
+      )
+      .then((resp) => {
+        const userInfo = {
+          id: resp.data.id,
+          userId: resp.data.userId,
+          username: resp.data.username,
+          password: crypt.decrypt(resp.data.password),
+          role: resp.data.role,
+          idTable: resp.data.idTable,
+        };
+        this.role = resp.data.role;
+        this.idTable = resp.data.idTable;
+        if (
+          this.role == 1 ||
+          this.role == 2 ||
+          this.role == 3 ||
+          this.role == 4
+        ) {
+          axios
+            .get(
+              "http://localhost:3000/api/managers/getManager?id=" + this.idTable
+            )
+            .then((response) => {
+              this.imageEdit = response.data.manager.image;
+              this.htmlImage =
+                `
+                  <img class="user-avatar rounded-circle" src="../api/Photos/manager/download/` +
+                this.imageEdit +
+                `" alt="User Avatar">
+                `;
+            });
+        }
+        if (this.role == 5) {
+          axios
+            .get(
+              "http://localhost:3000/api/candidates/getCandidate?id=" +
+                this.idTable
+            )
+            .then((response) => {
+              this.imageEdit = response.data.candidate.image;
+              this.htmlImage =
+                `
+                  <img class="user-avatar rounded-circle" src="../api/Photos/candidate/download/` +
+                this.imageEdit +
+                `" alt="User Avatar">
+                `;
+            });
+        }
+        if (this.role == 6 || this.role == 7) {
+          axios
+            .get(
+              "http://localhost:3000/api/spiritualGuides/getSpiritualGuide?id=" +
+                this.idTable
+            )
+            .then((response) => {
+              this.imageEdit = response.data.spiritualGuide.image;
+              this.htmlImage =
+                `
+                  <img class="user-avatar rounded-circle" src="../api/Photos/spiritualGuide/download/` +
+                this.imageEdit +
+                `" alt="User Avatar">
+                `;
+            });
+        }
+        if (this.role == 8 || this.role == 9) {
+          axios
+            .get(
+              "http://localhost:3000/api/companions/getCompanion?id=" +
+                this.idTable
+            )
+            .then((response) => {
+              this.imageEdit = response.data.companion.image;
+              this.htmlImage =
+                `
+                  <img class="user-avatar rounded-circle" src="../api/Photos/companion/download/` +
+                this.imageEdit +
+                `" alt="User Avatar">
+                `;
+            });
+        }
+        if (this.role == 10) {
+          axios
+            .get(
+              "http://localhost:3000/api/teachers/getTeacher?id=" + this.idTable
+            )
+            .then((response) => {
+              this.imageEdit = response.data.teacher.image;
+              this.htmlImage =
+                `
+                <img class="user-avatar rounded-circle" src="../api/Photos/teacher/download/` +
+                this.imageEdit +
+                `" alt="User Avatar">
+                `;
+            });
+        }
       });
   },
   methods: {
@@ -189,7 +290,7 @@ Vue.component("page-header", {
     <div class="col-sm-5">
       <div class="user-area dropdown float-right">
         <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-          <img class="user-avatar rounded-circle" src="../images/user_02.png" alt="User Avatar">
+          <div v-html="htmlImage"></div>
         </a>
         <div class="user-menu dropdown-menu">
           <router-link style="text-decoration: none; color: inherit;" :to="{ name: 'detailProfile' }">
@@ -233,9 +334,9 @@ Vue.component("page-menu", {
         aria-controls="main-menu" aria-expanded="false" aria-label="Toggle navigation">
         <i class="fa fa-bars"></i>
       </button>
-      <a class="navbar-brand" href="./"><img src="../images/logoungsinh.png" alt="Logo" width="50px"
+      <a class="navbar-brand" href="#"><img src="../images/logoungsinh.png" alt="Logo" width="50px"
           height="50px"></a>
-      <a class="navbar-brand hidden" href="./"><img src="../images/logoungsinh.png" alt="Logo"></a>
+      <a class="navbar-brand hidden" href="#"><img src="../images/logoungsinh.png" alt="Logo"></a>
     </div>
 
     <div id="main-menu" class="main-menu collapse navbar-collapse">
@@ -418,6 +519,33 @@ const Menu = {
 };
 
 const Home = {
+  data() {
+    return {
+      candidate: 0,
+      community: 0,
+      candidateOut: 0,
+      candidateOuts: [],
+      candidateOut: 0,
+      account: 0,
+    };
+  },
+  mounted() {
+    axios.get("http://localhost:3000/api/candidates/count").then((resp) => {
+      this.candidate = resp.data.count;
+    });
+    axios.get("http://localhost:3000/api/communities/count").then((resp) => {
+      this.community = resp.data.count;
+    });
+    axios
+      .get("http://localhost:3000/api/candidates/?filter[where][status]=2")
+      .then((resp) => {
+        this.candidateOuts = resp.data;
+        this.candidateOut = this.candidateOuts.length;
+      });
+    axios.get("http://localhost:3000/api/accounts/count").then((resp) => {
+      this.account = resp.data.count;
+    });
+  },
   template: `
   <div>
     <div class="row">
@@ -425,17 +553,15 @@ const Home = {
         <div class="card card-stats">
           <div class="card-header card-header-warning card-header-icon">
             <div class="card-icon">
-              <i class="fas fa-bible"></i>
+              <i class="fas fa-users"></i>
             </div>
-            <p class="card-category">Used Space</p>
-            <h3 class="card-title">49/50
-              <small>GB</small>
-            </h3>
+            <p class="card-category">Ứng Sinh</p>
+            <h3 class="card-title">{{ candidate }}</h3>
           </div>
           <div class="card-footer">
             <div class="stats">
-              <i class="fas fa-exclamation-triangle text-danger mt-1"></i>
-              <a href="">&nbsp; Get More Space...</a>
+              <i class="fas fa-info-circle mt-1 text-info"></i>
+              <a href="">&nbsp;Thông tin chi tiết</a>
             </div>
           </div>
         </div>
@@ -444,15 +570,15 @@ const Home = {
         <div class="card card-stats">
           <div class="card-header card-header-success card-header-icon">
             <div class="card-icon">
-              <i class="fas fa-hotel"></i>
+              <i class="fas fa-church"></i>
             </div>
-            <p class="card-category">Revenue</p>
-            <h3 class="card-title">$34,245</h3>
+            <p class="card-category">Cộng Đoàn</p>
+            <h3 class="card-title">{{ community }}</h3>
           </div>
           <div class="card-footer">
             <div class="stats">
-              <i class="far fa-calendar-alt mt-1"></i>
-              &nbsp; Last 24 Hours
+              <i class="fas fa-info-circle mt-1 text-info"></i>
+              <a href="">&nbsp;Thông tin chi tiết</a>
             </div>
           </div>
         </div>
@@ -461,15 +587,15 @@ const Home = {
         <div class="card card-stats">
           <div class="card-header card-header-danger card-header-icon">
             <div class="card-icon">
-              <i class="fas fa-exclamation-circle"></i>
+              <i class="fas fa-users"></i>
             </div>
-            <p class="card-category">Fixed Issues</p>
-            <h3 class="card-title">75</h3>
+            <p class="card-category">Ứng Sinh Rời</p>
+            <h3 class="card-title">{{ candidateOut }}</h3>
           </div>
           <div class="card-footer">
             <div class="stats">
-              <i class="fas fa-tag mt-1"></i>
-              &nbsp; Tracked from Github
+              <i class="fas fa-exclamation-triangle mt-1 text-warning"></i>
+              &nbsp; Số lượng Ứng sinh xin ra
             </div>
           </div>
         </div>
@@ -478,68 +604,57 @@ const Home = {
         <div class="card card-stats">
           <div class="card-header card-header-info card-header-icon">
             <div class="card-icon">
-              <i class="fab fa-twitter"></i>
+              <i class="far fa-user"></i>
             </div>
-            <p class="card-category">Followers</p>
-            <h3 class="card-title">+245</h3>
+            <p class="card-category">Người Dùng</p>
+            <h3 class="card-title">{{ account }}</h3>
           </div>
           <div class="card-footer">
             <div class="stats">
-              <i class="fas fa-history mt-1"></i>
-              &nbsp; Just Updated
+              <i class="fas fa-info-circle mt-1 text-info"></i>
+              <a href="">&nbsp;Thông tin chi tiết</a>
             </div>
           </div>
         </div>
       </div>
     </div>
-    <div class="row">
+    <div class="row mt-4">
       <div class="col-md-4">
         <div class="card card-chart">
-          <div class="card-header card-header-success">
-            <div class="ct-chart" id="dailySalesChart"></div>
-          </div>
+          <img class="profile-user-img img-fluid rounded-circle img-thumbnail" id="image" src="../images/user_03.jpg" alt="User Image" style="margin-top: -70px;">
           <div class="card-body">
-            <h4 class="card-title">Daily Sales</h4>
-            <p class="card-category">
-              <span class="text-success"><i class="fa fa-long-arrow-up"></i> 55% </span> increase in today
-              sales.</p>
-          </div>
-          <div class="card-footer">
-            <div class="stats">
-              <i class="material-icons">access_time</i> updated 4 minutes ago
-            </div>
+            <h4 class="card-title text-center">Nguyễn Văn Khang</h4>
+            <h6 class="card-title text-center">(Giám Học)</h6>
+            <p class="card-category text-center">
+              <span class="align-middle"><i class="fas fa-mobile-alt text-dark"></i>&nbsp; 0978645123</span><br/>
+              <span class="align-middle"><i class="fas fa-envelope-open-text text-dark"></i></i>&nbsp; vankhan@gmail.com</span>
+            </p>
           </div>
         </div>
       </div>
       <div class="col-md-4">
         <div class="card card-chart">
-          <div class="card-header card-header-warning">
-            <div class="ct-chart" id="websiteViewsChart"></div>
-          </div>
+          <img class="profile-user-img img-fluid rounded-circle img-thumbnail" id="image" src="../images/user_04.jpg" alt="User Image" style="margin-top: -70px;">
           <div class="card-body">
-            <h4 class="card-title">Email Subscriptions</h4>
-            <p class="card-category">Last Campaign Performance</p>
-          </div>
-          <div class="card-footer">
-            <div class="stats">
-              <i class="material-icons">access_time</i> campaign sent 2 days ago
-            </div>
+            <h4 class="card-title text-center">Nguyễn Quốc Kính</h4>
+            <h6 class="card-title text-center">(Giám Đốc)</h6>
+            <p class="card-category text-center">
+              <span class="align-middle"><i class="fas fa-mobile-alt text-dark"></i>&nbsp; 0978645123</span><br/>
+              <span class="align-middle"><i class="fas fa-envelope-open-text text-dark"></i>&nbsp; quockinh@gmail.com</span>
+            </p>
           </div>
         </div>
       </div>
       <div class="col-md-4">
         <div class="card card-chart">
-          <div class="card-header card-header-danger">
-            <div class="ct-chart" id="completedTasksChart"></div>
-          </div>
+          <img class="profile-user-img img-fluid rounded-circle img-thumbnail" id="image" src="../images/user_08.jpg" alt="User Image" style="margin-top: -70px;">
           <div class="card-body">
-            <h4 class="card-title">Completed Tasks</h4>
-            <p class="card-category">Last Campaign Performance</p>
-          </div>
-          <div class="card-footer">
-            <div class="stats">
-              <i class="material-icons">access_time</i> campaign sent 2 days ago
-            </div>
+            <h4 class="card-title text-center">Nguyễn Ngọc Triêm</h4>
+            <h6 class="card-title text-center">(Quản Lý)</h6>
+            <p class="card-category text-center">
+              <span class="align-middle"><i class="fas fa-mobile-alt text-dark"></i>&nbsp; 0978645123</span><br/>
+              <span class="align-middle"><i class="fas fa-envelope-open-text text-dark"></i>&nbsp; ngoctriem@gmail.com</span>
+            </p>
           </div>
         </div>
       </div>
@@ -607,15 +722,15 @@ const ListAccount = {
   },
   template: `
   <div class="card shadow mb-4" style="margin-top: -5px;">
-    <div class="card-header py-3">
+    <div class="card-header py-3" style="margin-bottom:-40px">
       <div class="row">
         <div class="col-md-4">
-          <h5 class="m-0 font-weight-bold text-primary">Danh sách Tài Khoản</h5>
+          <h6 class="m-0 font-weight-bold text-dark">Danh sách Tài Khoản</h6>
         </div>
         <div class="col-md-6"></div>
         <div class="col-md-2" style="padding-left:68px;">
           <router-link :to="{ name: 'addAccount' }">
-          <button :title="titleButtonAdd" class="btn text-size-15px rounded btn-hover-blue" style="background-color: #056299;color: white;">
+          <button :title="titleButtonAdd" class="btn rounded btn-hover-blue" style="background-color: #056299;color: white;font-size:14px;">
             <i class="fas fa-plus"></i>
             &nbsp;Thêm
           </button>
@@ -624,11 +739,12 @@ const ListAccount = {
       </div>
     </div>
     <div class="card-body">
-      <div class="table-responsive">
+      <hr style="height:1px;color:lightgray;background-color:lightgray">
+      <div class="table-responsive" style="margin-top:-8px">
         <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
           <thead>
             <tr>
-              <th scope="col">ID</th>
+              <th scope="col">STT</th>
               <th scope="col">Mã TK</th>
               <th scope="col">Tài Khoản</th>
               <th scope="col">Phân Quyền</th>
@@ -638,7 +754,7 @@ const ListAccount = {
           </thead>
           <tfoot>
             <tr>
-              <th scope="col">ID</th>
+              <th scope="col">STT</th>
               <th scope="col">Mã TK</th>
               <th scope="col">Tài Khoản</th>
               <th scope="col">Phân Quyền</th>
@@ -666,7 +782,7 @@ const ListAccount = {
                       <i class="fas fa-edit fa-md ml--2px"></i>
                     </button>
                   </div>
-                  <div class="col-4" style="margin-left:-10px;">
+                  <div class="col-4" style="margin-left:-15px;">
                     <button :title="titleButtonDelete" data-toggle="modal" @click="getDetailAccount(account)"
                       data-target="#deleteAccountModal" class="btn btn-danger btn-sm h-28px w-28px rounded">
                       <i class="far fa-trash-alt fa-md ml--1px"></i>
@@ -893,24 +1009,24 @@ const AddAccount = {
   template: `
   <div class="card shadow mb-4" style="margin-top: -5px;">
     <div class="card-header py-3">
-      <h5 class="m-0 font-weight-bold text-primary">Thêm Tài Khoản</h5>
+      <h6 class="m-0 font-weight-bold text-dark">Thêm Tài Khoản</h6>
     </div>
     <div class="card-body">
       <form @submit.prevent="submitAddAccountForm" action="POST" method="" autocomplete="off">
         <div class="row mt-2">
           <div class="col-lg-4">
-            <label class="font-weight-bold">Thông Tin Tài Khoản:</label>
-            <p style="font-size: 15px;">Thông tin phục vụ cho việc quản lý nhiều Tài Khoản</p>
+            <label class="font-weight-bold text-size-15px ">Thông Tin Tài Khoản:</label>
+            <p style="font-size: 12px;">Thông tin phục vụ cho việc quản lý nhiều Tài Khoản</p>
           </div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="username">Tài Khoản</label>
+            <label class="font-weight-bold col-form-label" for="username">Tài Khoản</label>
             <label class="text-danger">*</label>
             <input type="text" v-bind:title="titleUsername" name="username" id="username" v-model="username"
               class="form-control text-size-13px " placeholder="Nhập Tài khoản..."
               style="margin-top: -5px;">
           </div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="password">Mật Khẩu</label>
+            <label class="font-weight-bold col-form-label" for="password">Mật Khẩu</label>
             <label class="text-danger">*</label>
             <input v-bind:title="titlePassword" v-model="password" id="password" name="password" type="password"
               class="form-control  text-size-13px " placeholder="Nhập Mật khẩu..."
@@ -925,7 +1041,7 @@ const AddAccount = {
         <div class="row mt-1">
           <div class="col-lg-4"></div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="role">Phân Quyền</label>
+            <label class="font-weight-bold col-form-label" for="role">Phân Quyền</label>
             <label class="text-danger">*</label>
             <select class="custom-select  text-size-13px  h-32px" v-model="role" id="role" name="role"
               style="margin-top: -5px;">
@@ -934,7 +1050,7 @@ const AddAccount = {
             </select>
           </div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="status">Tình Trạng</label>
+            <label class="font-weight-bold col-form-label" for="status">Tình Trạng</label>
             <label class="text-danger">*</label>
             <select class="custom-select  text-size-13px h-32px form-control" v-model="status"
               name="status" id="status" style="margin-top: -5px;">
@@ -946,22 +1062,22 @@ const AddAccount = {
         <div class="row" style="margin-top: 30px;">
           <div class="col-12">
             <div style="float:right">
-              <button :disabled="!addAccountFormIsValid" type="submit" class="btn text-size-15px rounded btn-hover-blue"
-                style="background-color: #056299;color: white;">
+              <button :disabled="!addAccountFormIsValid" type="submit" class="btn rounded btn-hover-blue"
+                style="background-color: #056299;color: white;font-size:13px;">
                 <i class="far fa-save fa-lg"></i>
                 &nbsp;Lưu
               </button>
             </div>
             <div style="float:right; margin-right: 10px;">
               <button :disabled="!refreshAccountForm" @click="clearInputAccountForm"
-                class="btn btn-success text-size-15px rounded">
+                class="btn btn-success rounded" style="font-size:13px;">
                 <i class="fas fa-sync-alt"></i>
                 &nbsp;Làm mới
               </button>
             </div>
-            <div style="float:right; margin-right: 335px;">
-              <button class="btn text-size-15px rounded btn-hover-blue"
-                style="background-color: #056299;color: white;" @click="toListAccount">
+            <div style="float:right; margin-right: 360px;">
+              <button class="btn rounded btn-hover-blue"
+                style="background-color: #056299;color: white;font-size:13px;" @click="toListAccount">
                 <i class="fas fa-fast-backward"></i>
                 &nbsp;Quay lại
               </button>
@@ -1148,17 +1264,17 @@ const EditAccount = {
   template: `
   <div class="card shadow mb-4" style="margin-top: -5px;">
   <div class="card-header py-3">
-    <h5 class="m-0 font-weight-bold text-primary">Chỉnh sửa Tài Khoản</h5>
+    <h6 class="m-0 font-weight-bold text-dark">Chỉnh sửa Tài Khoản</h6>
   </div>
   <div class="card-body">
     <form @submit.prevent="submitEditAccountForm" action="POST" method="" autocomplete="off">
       <div class="row mt-2">
         <div class="col-lg-4">
-          <label class="font-weight-bold">Thông Tin Tài Khoản:</label>
+          <label class="font-weight-bold text-size-15px">Thông Tin Tài Khoản:</label>
           <p style="font-size: 15px;">Thông tin phục vụ cho việc quản lý nhiều Tài Khoản</p>
         </div>
         <div class="col-lg-4">
-          <label class="text-size-15px font-weight-bold col-form-label" for="usernameEdit">Tài Khoản</label>
+          <label class="font-weight-bold col-form-label" for="usernameEdit">Tài Khoản</label>
           <label class="text-danger">*</label>
           <input type="text" v-bind:title="titleUsername" v-model="usernameEdit" id="usernameEdit"
             name="usernameEdit" class="form-control text-size-13px " placeholder="Nhập Tài khoản..."
@@ -1166,7 +1282,7 @@ const EditAccount = {
             style="margin-top: -5px;">
         </div>
         <div class="col-lg-4">
-          <label class="text-size-15px font-weight-bold col-form-label" for="passwordEdit">Mật Khẩu</label>
+          <label class="font-weight-bold col-form-label" for="passwordEdit">Mật Khẩu</label>
           <label class="text-danger">*</label>
           <input v-bind:title="titlePassword" v-model="passwordEdit" id="passwordEdit" name="passwordEdit"
             type="password" class="form-control  text-size-13px " placeholder="Nhập Mật khẩu..."
@@ -1181,7 +1297,7 @@ const EditAccount = {
       <div class="row mt-1">
         <div class="col-lg-4"></div>
         <div class="col-lg-4">
-          <label class="text-size-15px font-weight-bold col-form-label" for="roleEdit">Phân Quyền</label>
+          <label class="font-weight-bold col-form-label" for="roleEdit">Phân Quyền</label>
           <label class="text-danger">*</label>
           <select class="custom-select  text-size-13px  h-32px" v-model="roleEdit" id="roleEdit" name="roleEdit"
             style="margin-top: -5px;">
@@ -1190,7 +1306,7 @@ const EditAccount = {
           </select>
         </div>
         <div class="col-lg-4">
-          <label class="text-size-15px font-weight-bold col-form-label" for="statusEdit">Tình Trạng</label>
+          <label class="font-weight-bold col-form-label" for="statusEdit">Tình Trạng</label>
           <label class="text-danger">*</label>
           <select class="custom-select  text-size-13px h-32px form-control" v-model="statusEdit" name="statusEdit"
             id="statusEdit" style="margin-top: -5px;">
@@ -1203,22 +1319,22 @@ const EditAccount = {
         <div class="col-12">
           <div style="float:right">
             <button :disabled="!editAccountFormIsValid" type="submit"
-              class="btn text-size-15px rounded btn-hover-blue"
-              style="background-color: #056299;color: white;">
+              class="btn rounded btn-hover-blue"
+              style="background-color: #056299;color: white;font-size:13px;">
               <i class="far fa-save fa-lg"></i>
               &nbsp;Lưu
             </button>
           </div>
           <div style="float:right; margin-right: 10px;">
             <button :disabled="!refreshForm" @click="clearInput"
-              class="btn btn-success text-size-15px rounded">
+              class="btn btn-success rounded" style="font-size:13px;">
               <i class="fas fa-sync-alt"></i>
               &nbsp;Làm mới
             </button>
           </div>
-          <div style="float:right; margin-right: 335px;">
-            <button class="btn text-size-15px rounded btn-hover-blue"
-              style="background-color: #056299;color: white;" @click="toListAccount">
+          <div style="float:right; margin-right: 360px;">
+            <button class="btn rounded btn-hover-blue"
+              style="background-color: #056299;color: white;font-size:13px;" @click="toListAccount">
               <i class="fas fa-fast-backward"></i>
               &nbsp;Quay lại
             </button>
@@ -1311,17 +1427,17 @@ const ListManager = {
   },
   template: `
   <div class="card shadow mb-4" style="margin-top: -5px;">
-    <div class="card-header py-3">
+    <div class="card-header py-3" style="margin-bottom:-40px">
       <div class="row">
         <div class="col-md-4">
-          <h5 class="m-0 font-weight-bold text-primary">Danh sách Quản Lý</h5>
+          <h6 class="m-0 font-weight-bold text-dark">Danh Sách Quản Lý</h6>
         </div>
         <div class="col-md-6"></div>
         <div class="col-md-2" style="padding-left:68px;">
           <router-link :to="{ name: 'addManager' }">
-            <button :title="titleButtonAdd" class="btn text-size-15px rounded btn-hover-blue"
-              style="background-color: #056299;color: white;">
-              <i class="fas fa-plus"></i>
+            <button :title="titleButtonAdd" class="btn rounded btn-hover-blue"
+              style="background-color: #056299;color: white;font-size:14px;">
+              <i class="fas fa-plus fa-sm"></i>
               &nbsp;Thêm
             </button>
           </router-link>
@@ -1329,7 +1445,8 @@ const ListManager = {
       </div>
     </div>
     <div class="card-body">
-      <div class="table-responsive">
+      <hr style="height:1px;color:lightgray;background-color:lightgray">
+      <div class="table-responsive" style="margin-top:-8px">
         <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
           <thead>
             <tr>
@@ -1361,7 +1478,7 @@ const ListManager = {
               <td>{{ manager.fullName }}</td>
               <td>{{ manager.phone }}</td>
               <td>{{ manager.email }}</td>
-              <td v-for="department in positions" v-if="department.id == manager.position">{{ department.positionType }}-{{ department.name }}</td>
+              <td v-for="department in positions" v-if="department.id == manager.position">{{ department.positionType }}</td>
               <td>{{ manager.homeland }}</td>
               <td v-if="manager.status == 1">
                 <i class="fas fa-toggle-on fa-lg text-success"></i>
@@ -1370,7 +1487,7 @@ const ListManager = {
                 <i class="fas fa-toggle-off fa-lg text-danger"></i>
               </td>
               <td>
-                <div class="row" style="margin-left:-18px;">
+                <div class="row" style="margin-left:-13px;">
                   <div class="col-lg-4">
                     <button :title="titleButtonDisplay" data-toggle="modal" @click="getDetailManager(manager)"
                       data-target="#detailManagerModal"
@@ -1381,14 +1498,14 @@ const ListManager = {
                   <div class="col-lg-4">
                     <button :title="titleButtonEdit" @click="getDataManagerUpdate(manager)"
                       class="btn btn-warning btn-sm h-28px w-28px rounded" type="submit"
-                      style="margin-left: -8px;">
+                      style="margin-left: -14px;">
                       <i class="fas fa-edit fa-md ml--2px"></i>
                     </button>
                   </div>
                   <div class="col-lg-4">
                     <button :title="titleButtonDelete" data-toggle="modal" @click="getDetailManager(manager)"
                       data-target="#deleteManagerModal" class="btn btn-danger btn-sm h-28px w-28px rounded"
-                      style="margin-left: -16px;">
+                      style="margin-left: -28px;">
                       <i class="far fa-trash-alt fa-md ml--1px"></i>
                     </button>
                   </div>
@@ -1712,7 +1829,6 @@ const AddManager = {
                         }
                         const url_1 = "http://localhost:3000/api/managers";
                         axios.post(url_1, manager);
-
                         axios
                           .get(
                             "http://localhost:3000/api/managers/findOne?filter[where][email]=" +
@@ -1794,23 +1910,23 @@ const AddManager = {
   template: `
   <div class="card shadow mb-4" style="margin-top: -5px;">
     <div class="card-header py-3">
-      <h5 class="m-0 font-weight-bold text-primary">Thêm Quản Lý</h5>
+      <h6 class="m-0 font-weight-bold text-dark">Thêm Quản Lý</h6>
     </div>
     <div class="card-body">
       <form @submit.prevent="submitAddManagerForm" action="POST" method="" autocomplete="off">
         <div class="row mt-2">
           <div class="col-lg-4">
-            <label class="font-weight-bold">Thông Tin Quản Lý:</label>
+            <label class="font-weight-bold" style="font-size:15px;">Thông Tin Quản Lý:</label>
             <p style="font-size: 12px;">Thông tin phục vụ cho việc quản lý nhiều người Quản Lý</p>
           </div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="fullName">Họ và Tên</label>
+            <label class="font-weight-bold col-form-label" for="fullName">Họ và Tên</label>
             <label class="text-danger">*</label>
             <input type="text" id="fullName" name="fullName" v-model="fullName" :title="titleFullName"
               class="form-control text-size-13px " placeholder="Nhập Họ và Tên..." style=" margin-top: -5px;">
           </div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="christianName">Tên Thánh</label>
+            <label class="font-weight-bold col-form-label" for="christianName">Tên Thánh</label>
             <label class="text-danger">*</label>
             <input type="text" :title="titleChristianName" name="christianName" id="christianName"
               v-model="christianName" class="form-control  text-size-13px " placeholder="Nhập Tên Thánh..."
@@ -1820,13 +1936,13 @@ const AddManager = {
         <div class="row">
           <div class="col-lg-4"></div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="birthday">Ngày Sinh</label>
+            <label class="font-weight-bold col-form-label" for="birthday">Ngày Sinh</label>
             <label class="text-danger">*</label>
             <input v-model="birthday" name="birthday" id="birthday" type="date" :title="titleBirthday"
               class="form-control  text-size-13px " style="margin-top: -5px;">
           </div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="position">Chức Vụ</label>
+            <label class="font-weight-bold col-form-label" for="position">Chức Vụ</label>
             <label class="text-danger">*</label>
             <select class="custom-select  text-size-13px  h-32px" v-model="position" name="position"
               id="position" style="margin-top: -5px;">
@@ -1840,7 +1956,7 @@ const AddManager = {
         <div class="row mt-1">
           <div class="col-lg-4"></div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="phone">Số Điện Thoại</label>
+            <label class="font-weight-bold col-form-label" for="phone">Số Điện Thoại</label>
             <label class="text-danger">*</label>
             <input v-model="phone" name="phone" id="phone" type="text" :title="titlePhone"
               v-model="phone" class="form-control  text-size-13px " placeholder="Nhập Số điện thoại..."
@@ -1849,7 +1965,7 @@ const AddManager = {
               định dạng</span>
           </div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="email">Email</label>
+            <label class="font-weight-bold col-form-label" for="email">Email</label>
             <label class="text-danger">*</label>
             <input v-model="email" name="email" id="email" type="text" :title="titleEmail"
               class="form-control  text-size-13px " placeholder="Nhập Địa chỉ email..."
@@ -1861,13 +1977,13 @@ const AddManager = {
         <div class="row mt-1">
           <div class="col-lg-4"></div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="homeland">Quê Quán</label>
+            <label class="font-weight-bold col-form-label" for="homeland">Quê Quán</label>
             <label class="text-danger">*</label>
             <input v-model="homeland" name="homeland" id="homeland" type="text" :title="titleHomeland"
               class="form-control  text-size-13px " placeholder="Nhập Quê quán..." style="margin-top: -5px;">
           </div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="status">Trạng Thái</label>
+            <label class="font-weight-bold col-form-label" for="status">Trạng Thái</label>
             <label class="text-danger">*</label>
             <select class="custom-select  text-size-13px  h-32px" v-model="status" name="status" id="status"
               style="margin-top: -5px;">
@@ -1880,7 +1996,7 @@ const AddManager = {
         <div class="row mt-1">
           <div class="col-lg-4"></div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="image">Hình Ảnh</label>
+            <label class="font-weight-bold col-form-label" for="image">Hình Ảnh</label>
             <input type="file" id="image" @change="onFileSelected" :title="titlePicture" class="form-control rounded text-size-13px" style="margin-top: -5px;"/>
           </div>
         </div>
@@ -1888,22 +2004,22 @@ const AddManager = {
           <div class="col-12">
             <div style="float:right">
               <button :disabled="!addManagerFormIsValid" type="submit"
-                class="btn text-size-15px rounded btn-hover-blue"
-                style="background-color: #056299;color: white;">
+                class="btn  rounded btn-hover-blue"
+                style="background-color: #056299;color: white;font-size:13px;">
                 <i class="far fa-save fa-lg"></i>
                 &nbsp;Lưu
               </button>
             </div>
             <div style="float:right; margin-right: 10px;">
               <button :disabled="!refreshFormManager" @click="clearInputManagerForm"
-                class="btn btn-success text-size-15px rounded">
+                class="btn btn-success  rounded" style="font-size:13px;">
                 <i class="fas fa-sync-alt"></i>
                 &nbsp;Làm mới
               </button>
             </div>
-            <div style="float:right; margin-right: 335px;">
-              <button class="btn text-size-15px rounded btn-hover-blue"
-                style="background-color: #056299;color: white;" @click="toListManager">
+            <div style="float:right; margin-right: 360px;">
+              <button class="btn  rounded btn-hover-blue"
+                style="background-color: #056299;color: white;font-size:13px;" @click="toListManager">
                 <i class="fas fa-fast-backward"></i>
                 &nbsp;Quay lại
               </button>
@@ -2632,24 +2748,24 @@ const EditManager = {
   template: `
   <div class="card shadow mb-4" style="margin-top: -5px;">
     <div class="card-header py-3">
-      <h5 class="m-0 font-weight-bold text-primary">Chỉnh sửa Quản Lý</h5>
+      <h6 class="m-0 font-weight-bold text-dark">Chỉnh sửa Quản Lý</h6>
     </div>
     <div class="card-body">
       <form @submit.prevent="submitEditManagerForm" action="POST" method="" autocomplete="off">
         <div class="row mt-2">
           <div class="col-lg-4">
-            <label class="font-weight-bold">Thông Tin Quản Lý:</label>
+            <label class="font-weight-bold" style="font-size:15px;">Thông Tin Quản Lý:</label>
             <p style="font-size: 12px;">Thông tin phục vụ cho việc quản lý nhiều người Quản Lý</p>
           </div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="fullName">Họ và Tên</label>
+            <label class=" font-weight-bold col-form-label" for="fullName">Họ và Tên</label>
             <label class="text-danger">*</label>
             <input type="text" id="fullName" name="fullName" v-model="fullName" :title="titleFullName"
             :value="fullName" v-on:keyup="fullName = $event.target.value"
             class="form-control text-size-13px " placeholder="Nhập Họ và Tên..." style=" margin-top: -5px;">
           </div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="christianName">Tên Thánh</label>
+            <label class=" font-weight-bold col-form-label" for="christianName">Tên Thánh</label>
             <label class="text-danger">*</label>
             <input type="text" :title="titleChristianName" name="christianName" id="christianName"
               v-model="christianName" :value="christianName" v-on:keyup="christianName = $event.target.value" 
@@ -2660,14 +2776,14 @@ const EditManager = {
         <div class="row">
           <div class="col-lg-4"></div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="birthday">Ngày Sinh</label>
+            <label class=" font-weight-bold col-form-label" for="birthday">Ngày Sinh</label>
             <label class="text-danger">*</label>
             <input v-model="birthday" name="birthday" id="birthday" type="date" :title="titleBirthday"
             :value="birthday" v-on:keyup="birthday = $event.target.value"
               class="form-control  text-size-13px " style="margin-top: -5px;">
           </div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="position">Chức Vụ</label>
+            <label class=" font-weight-bold col-form-label" for="position">Chức Vụ</label>
             <label class="text-danger">*</label>
             <select class="custom-select  text-size-13px  h-32px" v-model="position" name="position"
               id="position" style="margin-top: -5px;">
@@ -2681,7 +2797,7 @@ const EditManager = {
         <div class="row mt-1">
           <div class="col-lg-4"></div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="phone">Số Điện Thoại</label>
+            <label class=" font-weight-bold col-form-label" for="phone">Số Điện Thoại</label>
             <label class="text-danger">*</label>
             <input v-model="phone" name="phone" id="phone" type="text" :title="titlePhone"
               v-model="phone" :value="phone" v-on:keyup="phone = $event.target.value"
@@ -2691,7 +2807,7 @@ const EditManager = {
               định dạng</span>
           </div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="email">Email</label>
+            <label class=" font-weight-bold col-form-label" for="email">Email</label>
             <label class="text-danger">*</label>
             <input v-model="email" name="email" id="email" type="text" :title="titleEmail"
             :value="email" v-on:keyup="email = $event.target.value"
@@ -2704,14 +2820,14 @@ const EditManager = {
         <div class="row mt-1">
           <div class="col-lg-4"></div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="homeland">Quê Quán</label>
+            <label class=" font-weight-bold col-form-label" for="homeland">Quê Quán</label>
             <label class="text-danger">*</label>
             <input v-model="homeland" name="homeland" id="homeland" type="text" :title="titleHomeland"
             :value="homeland" v-on:keyup="homeland = $event.target.value"
               class="form-control  text-size-13px " placeholder="Nhập Quê quán..." style="margin-top: -5px;">
           </div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="status">Trạng Thái</label>
+            <label class=" font-weight-bold col-form-label" for="status">Trạng Thái</label>
             <label class="text-danger">*</label>
             <select class="custom-select  text-size-13px  h-32px" v-model="status" name="status" id="status"
               style="margin-top: -5px;">
@@ -2724,7 +2840,7 @@ const EditManager = {
         <div class="row mt-1">
           <div class="col-lg-4"></div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="image">Hình Ảnh</label>
+            <label class=" font-weight-bold col-form-label" for="image">Hình Ảnh</label>
             <input type="file" id="image" @change="onFileSelected" :title="titlePicture"
               class="form-control rounded text-size-13px" style="margin-top: -5px;" />
           </div>
@@ -2733,22 +2849,22 @@ const EditManager = {
           <div class="col-12">
             <div style="float:right">
               <button :disabled="!editManagerFormIsValid" type="submit"
-                class="btn text-size-15px rounded btn-hover-blue"
-                style="background-color: #056299;color: white;">
+                class="btn  rounded btn-hover-blue"
+                style="background-color: #056299;color: white;font-size:13px;">
                 <i class="far fa-save fa-lg"></i>
                 &nbsp;Lưu
               </button>
             </div>
             <div style="float:right; margin-right: 10px;">
               <button :disabled="!refreshFormManager" @click="clearInputManagerForm"
-                class="btn btn-success text-size-15px rounded">
+                class="btn btn-success  rounded" style="font-size:13px;">
                 <i class="fas fa-sync-alt"></i>
                 &nbsp;Làm mới
               </button>
             </div>
-            <div style="float:right; margin-right: 335px;">
-              <button class="btn text-size-15px rounded btn-hover-blue"
-                style="background-color: #056299;color: white;" @click="toListManager">
+            <div style="float:right; margin-right: 360px;">
+              <button class="btn  rounded btn-hover-blue"
+                style="background-color: #056299;color: white;font-size:13px;" @click="toListManager">
                 <i class="fas fa-fast-backward"></i>
                 &nbsp;Quay lại
               </button>
@@ -2817,7 +2933,7 @@ const ListDepartment = {
     <div class="card-header py-3">
       <div class="row">
         <div class="col-md-4">
-          <h5 class="m-0 font-weight-bold text-primary">Danh sách Phòng Ban</h5>
+          <h6 class="m-0 font-weight-bold text-dark">Danh sách Phòng Ban</h6>
         </div>
         <div class="col-md-6"></div>
         <div class="col-md-2" style="padding-left:68px;">
@@ -2962,7 +3078,7 @@ const AddDepartment = {
   template: `
   <div class="card shadow mb-4" style="margin-top: -5px;">
     <div class="card-header py-3">
-      <h5 class="m-0 font-weight-bold text-primary">Thêm Phòng Ban</h5>
+      <h6 class="m-0 font-weight-bold text-dark">Thêm Phòng Ban</h6>
     </div>
     <div class="card-body">
       <form @submit.prevent="submitAddDepaertmentForm" action="POST" method="" autocomplete="off">
@@ -3095,7 +3211,7 @@ const EditDepartment = {
   template: `
   <div class="card shadow mb-4" style="margin-top: -5px;">
   <div class="card-header py-3">
-    <h5 class="m-0 font-weight-bold text-primary">Chỉnh sửa Phòng Ban</h5>
+    <h6 class="m-0 font-weight-bold text-dark">Chỉnh sửa Phòng Ban</h6>
   </div>
   <div class="card-body">
     <form @submit.prevent="submitEditDepartmentForm" action="POST" method="" autocomplete="off">
@@ -3239,16 +3355,16 @@ const ListCandidate = {
   },
   template: `
   <div class="card shadow mb-4" style="margin-top: -5px;">
-    <div class="card-header py-3">
+    <div class="card-header py-3" style="margin-bottom:-40px">
       <div class="row">
         <div class="col-md-4">
-          <h5 class="m-0 font-weight-bold text-primary">Danh sách Ứng Sinh</h5>
+          <h6 class="m-0 font-weight-bold text-dark">Danh sách Ứng Sinh</h6>
         </div>
         <div class="col-md-6"></div>
         <div class="col-md-2" style="padding-left:68px;">
           <router-link :to="{ name: 'addCandidate' }">
-            <button :title="titleButtonAdd" class="btn text-size-15px rounded btn-hover-blue"
-              style="background-color: #056299;color: white;">
+            <button :title="titleButtonAdd" class="btn  rounded btn-hover-blue"
+              style="background-color: #056299;color: white;font-size:14px;">
               <i class="fas fa-plus"></i>
               &nbsp;Thêm
             </button>
@@ -3257,7 +3373,8 @@ const ListCandidate = {
       </div>
     </div>
     <div class="card-body">
-      <div class="table-responsive">
+      <hr style="height:1px;color:lightgray;background-color:lightgray">
+      <div class="table-responsive" style="margin-top:-8px">
         <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
           <thead>
             <tr>
@@ -3265,7 +3382,6 @@ const ListCandidate = {
               <th>Họ và Tên</th>
               <th>Số Điện Thoại</th>
               <th>Email</th>
-              <th>Chức Vụ</th>
               <th>Cộng Đoàn</th>
               <th>Quê Quán</th>
               <th>Trạng Thái</th>
@@ -3278,7 +3394,6 @@ const ListCandidate = {
               <th>Họ và Tên</th>
               <th>Số Điện Thoại</th>
               <th>Email</th>
-              <th>Chức Vụ</th>
               <th>Cộng Đoàn</th>
               <th>Quê Quán</th>
               <th>Trạng Thái</th>
@@ -3291,7 +3406,6 @@ const ListCandidate = {
               <td>{{ candidate.fullName }}</td>
               <td>{{ candidate.phone }}</td>
               <td>{{ candidate.email }}</td>
-              <td v-for="department in positions" v-if="department.id == candidate.position">{{ department.positionType }}-{{ department.name }}</td>
               <td v-for="community in communities" v-if="community.id == candidate.community">{{ community.communityName }}</td>
               <td>{{ candidate.homeland }}</td>
               <td v-if="candidate.status == 1">
@@ -3301,7 +3415,7 @@ const ListCandidate = {
                 <i class="fas fa-toggle-off fa-lg text-danger"></i>
               </td>
               <td>
-                <div class="row" style="margin-left:-23px;">
+                <div class="row" style="margin-left:-15px;">
                   <div class="col-lg-4">
                     <button :title="titleButtonDisplay" data-toggle="modal" @click="getDetailCandidate(candidate)"
                       data-target="#detailCandidateModal"
@@ -3312,14 +3426,14 @@ const ListCandidate = {
                   <div class="col-lg-4">
                     <button :title="titleButtonEdit" @click="getDataCandidateUpdate(candidate)"
                       class="btn btn-warning btn-sm h-28px w-28px rounded" type="submit"
-                      style="margin-left: -6.5px;">
+                      style="margin-left: -12.5px;">
                       <i class="fas fa-edit fa-md ml--2px"></i>
                     </button>
                   </div>
                   <div class="col-lg-4">
                     <button :title="titleButtonDelete" data-toggle="modal" @click="getDetailCandidate(candidate)"
                       data-target="#deleteCandidateModal" class="btn btn-danger btn-sm h-28px w-28px rounded"
-                      style="margin-left: -13px;">
+                      style="margin-left: -25.5px;">
                       <i class="far fa-trash-alt fa-md ml--1px"></i>
                     </button>
                   </div>
@@ -3551,7 +3665,7 @@ const AddCandidate = {
       if (this.addCandidateFormIsValid) {
         let lengthCandidates = this.candidates.length;
         if (lengthCandidates == 0) {
-          this.candidateId == "US001";
+          this.candidateId = "US001";
         } else {
           let currentId = this.candidates[lengthCandidates - 1].id;
           if (currentId > -1 && currentId < 9) {
@@ -3753,23 +3867,23 @@ const AddCandidate = {
   template: `
   <div class="card shadow mb-4" style="margin-top: -5px;">
     <div class="card-header py-3">
-      <h5 class="m-0 font-weight-bold text-primary">Thêm Ứng Sinh</h5>
+      <h6 class="m-0 font-weight-bold text-dark">Thêm Ứng Sinh</h6>
     </div>
     <div class="card-body">
       <form @submit.prevent="submitAddCandidateForm" action="POST" method="" autocomplete="off">
         <div class="row mt-2">
           <div class="col-lg-4">
-            <label class="font-weight-bold">Thông Tin Ứng Sinh:</label>
+            <label class="font-weight-bold" style="font-size:15px;">Thông Tin Ứng Sinh:</label>
             <p style="font-size: 12px;">Thông tin phục vụ cho việc quản lý nhiều Ứng Sinh</p>
           </div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="fullName">Họ và Tên</label>
+            <label class=" font-weight-bold col-form-label" for="fullName">Họ và Tên</label>
             <label class="text-danger">*</label>
             <input type="text" id="fullName" name="fullName" v-model="fullName" :title="titleFullName"
               class="form-control text-size-13px " placeholder="Nhập Họ và Tên..." style=" margin-top: -5px;">
           </div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="christianName">Tên Thánh</label>
+            <label class=" font-weight-bold col-form-label" for="christianName">Tên Thánh</label>
             <label class="text-danger">*</label>
             <input type="text" :title="titleChristianName" name="christianName" id="christianName"
               v-model="christianName" class="form-control  text-size-13px " placeholder="Nhập Tên Thánh..."
@@ -3779,13 +3893,13 @@ const AddCandidate = {
         <div class="row">
           <div class="col-lg-4"></div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="birthday">Ngày Sinh</label>
+            <label class=" font-weight-bold col-form-label" for="birthday">Ngày Sinh</label>
             <label class="text-danger">*</label>
             <input v-model="birthday" name="birthday" id="birthday" type="date" :title="titleBirthday"
               class="form-control  text-size-13px " style="margin-top: -5px;">
           </div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="position">Chức Vụ</label>
+            <label class=" font-weight-bold col-form-label" for="position">Chức Vụ</label>
             <label class="text-danger">*</label>
             <select class="custom-select  text-size-13px  h-32px" v-model="position" name="position"
               id="position" style="margin-top: -5px;">
@@ -3800,7 +3914,7 @@ const AddCandidate = {
         <div class="row mt-1">
           <div class="col-lg-4"></div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="phone">Số Điện Thoại</label>
+            <label class=" font-weight-bold col-form-label" for="phone">Số Điện Thoại</label>
             <label class="text-danger">*</label>
             <input v-model="phone" name="phone" id="phone" type="text" :title="titlePhone"
               v-model="phone" class="form-control  text-size-13px " placeholder="Nhập Số điện thoại..."
@@ -3809,7 +3923,7 @@ const AddCandidate = {
               định dạng</span>
           </div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="email">Email</label>
+            <label class=" font-weight-bold col-form-label" for="email">Email</label>
             <label class="text-danger">*</label>
             <input v-model="email" name="email" id="email" type="text" :title="titleEmail"
               class="form-control  text-size-13px " placeholder="Nhập Địa chỉ email..."
@@ -3821,7 +3935,7 @@ const AddCandidate = {
         <div class="row mt-1">
           <div class="col-lg-4"></div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="community">Cộng Đoàn</label>
+            <label class=" font-weight-bold col-form-label" for="community">Cộng Đoàn</label>
             <label class="text-danger">*</label>
             <select class="custom-select  text-size-13px  h-32px" v-model="community" name="community" id="community"
               style="margin-top: -5px;">
@@ -3831,7 +3945,7 @@ const AddCandidate = {
             </select>
           </div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="homeland">Quê Quán</label>
+            <label class=" font-weight-bold col-form-label" for="homeland">Quê Quán</label>
             <label class="text-danger">*</label>
             <input v-model="homeland" name="homeland" id="homeland" type="text" :title="titleHomeland"
               class="form-control  text-size-13px " placeholder="Nhập Quê quán..." style="margin-top: -5px;">
@@ -3840,7 +3954,7 @@ const AddCandidate = {
         <div class="row mt-1">
           <div class="col-lg-4"></div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="status">Trạng Thái</label>
+            <label class=" font-weight-bold col-form-label" for="status">Trạng Thái</label>
             <label class="text-danger">*</label>
             <select class="custom-select  text-size-13px  h-32px" v-model="status" name="status" id="status"
               style="margin-top: -5px;">
@@ -3850,7 +3964,7 @@ const AddCandidate = {
             </select>
           </div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="image">Hình Ảnh</label>
+            <label class=" font-weight-bold col-form-label" for="image">Hình Ảnh</label>
             <input type="file" id="image" @change="onFileSelected" :title="titlePicture"
               class="form-control rounded text-size-13px" style="margin-top: -5px;" />
           </div>
@@ -3859,22 +3973,22 @@ const AddCandidate = {
           <div class="col-12">
             <div style="float:right">
               <button :disabled="!addCandidateFormIsValid" type="submit"
-                class="btn text-size-15px rounded btn-hover-blue"
-                style="background-color: #056299;color: white;">
+                class="btn  rounded btn-hover-blue"
+                style="background-color: #056299;color: white;font-size:13px;">
                 <i class="far fa-save fa-lg"></i>
                 &nbsp;Lưu
               </button>
             </div>
             <div style="float:right; margin-right: 10px;">
               <button :disabled="!refreshFormCandidate" @click="clearInputCandidateForm"
-                class="btn btn-success text-size-15px rounded">
+                class="btn btn-success  rounded" style="font-size:13px;">
                 <i class="fas fa-sync-alt"></i>
                 &nbsp;Làm mới
               </button>
             </div>
-            <div style="float:right; margin-right: 335px;">
-              <button class="btn text-size-15px rounded btn-hover-blue"
-                style="background-color: #056299;color: white;" @click="toListCandidate">
+            <div style="float:right; margin-right: 360px;">
+              <button class="btn  rounded btn-hover-blue"
+                style="background-color: #056299;color: white;font-size:13px;" @click="toListCandidate">
                 <i class="fas fa-fast-backward"></i>
                 &nbsp;Quay lại
               </button>
@@ -4875,24 +4989,24 @@ const EditCandidate = {
   template: `
   <div class="card shadow mb-4" style="margin-top: -5px;">
     <div class="card-header py-3">
-      <h5 class="m-0 font-weight-bold text-primary">Chỉnh sửa Ứng Sinh</h5>
+      <h6 class="m-0 font-weight-bold text-dark">Chỉnh sửa Ứng Sinh</h6>
     </div>
     <div class="card-body">
       <form @submit.prevent="submitEditCandidateForm" action="POST" method="" autocomplete="off">
         <div class="row mt-2">
           <div class="col-lg-4">
-            <label class="font-weight-bold">Thông Tin Ứng Sinh:</label>
+            <label class="font-weight-bold" style="font-size:15px;">Thông Tin Ứng Sinh:</label>
             <p style="font-size: 12px;">Thông tin phục vụ cho việc quản lý nhiều Ứng Sinh</p>
           </div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="fullName">Họ và Tên</label>
+            <label class=" font-weight-bold col-form-label" for="fullName">Họ và Tên</label>
             <label class="text-danger">*</label>
             <input type="text" id="fullName" name="fullName" v-model="fullName" :title="titleFullName"
             :value="fullName" v-on:keyup="fullName = $event.target.value"
             class="form-control text-size-13px " placeholder="Nhập Họ và Tên..." style=" margin-top: -5px;">
           </div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="christianName">Tên Thánh</label>
+            <label class=" font-weight-bold col-form-label" for="christianName">Tên Thánh</label>
             <label class="text-danger">*</label>
             <input type="text" :title="titleChristianName" name="christianName" id="christianName"
               v-model="christianName" :value="christianName" v-on:keyup="christianName = $event.target.value" 
@@ -4903,14 +5017,14 @@ const EditCandidate = {
         <div class="row">
           <div class="col-lg-4"></div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="birthday">Ngày Sinh</label>
+            <label class=" font-weight-bold col-form-label" for="birthday">Ngày Sinh</label>
             <label class="text-danger">*</label>
             <input v-model="birthday" name="birthday" id="birthday" type="date" :title="titleBirthday"
             :value="birthday" v-on:keyup="birthday = $event.target.value"
               class="form-control  text-size-13px " style="margin-top: -5px;">
           </div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="position">Chức Vụ</label>
+            <label class=" font-weight-bold col-form-label" for="position">Chức Vụ</label>
             <label class="text-danger">*</label>
             <select class="custom-select  text-size-13px  h-32px" v-model="position" name="position"
               id="position" style="margin-top: -5px;">
@@ -4927,7 +5041,7 @@ const EditCandidate = {
         <div class="row mt-1">
           <div class="col-lg-4"></div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="phone">Số Điện Thoại</label>
+            <label class=" font-weight-bold col-form-label" for="phone">Số Điện Thoại</label>
             <label class="text-danger">*</label>
             <input v-model="phone" name="phone" id="phone" type="text" :title="titlePhone"
               v-model="phone" :value="phone" v-on:keyup="phone = $event.target.value"
@@ -4937,7 +5051,7 @@ const EditCandidate = {
               định dạng</span>
           </div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="email">Email</label>
+            <label class=" font-weight-bold col-form-label" for="email">Email</label>
             <label class="text-danger">*</label>
             <input v-model="email" name="email" id="email" type="text" :title="titleEmail"
             :value="email" v-on:keyup="email = $event.target.value"
@@ -4950,7 +5064,7 @@ const EditCandidate = {
         <div class="row mt-1">
           <div class="col-lg-4"></div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="community">Cộng Đoàn</label>
+            <label class=" font-weight-bold col-form-label" for="community">Cộng Đoàn</label>
             <label class="text-danger">*</label>
             <select class="custom-select  text-size-13px  h-32px" v-model="community" name="community" id="community"
               style="margin-top: -5px;">
@@ -4960,7 +5074,7 @@ const EditCandidate = {
             </select>
           </div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="homeland">Quê Quán</label>
+            <label class=" font-weight-bold col-form-label" for="homeland">Quê Quán</label>
             <label class="text-danger">*</label>
             <input v-model="homeland" name="homeland" id="homeland" type="text" :title="titleHomeland"
             :value="homeland" v-on:keyup="homeland = $event.target.value"
@@ -4970,7 +5084,7 @@ const EditCandidate = {
         <div class="row mt-1">
           <div class="col-lg-4"></div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="status">Trạng Thái</label>
+            <label class=" font-weight-bold col-form-label" for="status">Trạng Thái</label>
             <label class="text-danger">*</label>
             <select class="custom-select  text-size-13px  h-32px" v-model="status" name="status" id="status"
               style="margin-top: -5px;">
@@ -4980,7 +5094,7 @@ const EditCandidate = {
             </select>
           </div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="image">Hình Ảnh</label>
+            <label class=" font-weight-bold col-form-label" for="image">Hình Ảnh</label>
             <input type="file" id="image" @change="onFileSelected" :title="titlePicture"
               class="form-control rounded text-size-13px" style="margin-top: -5px;" />
           </div>
@@ -4989,22 +5103,22 @@ const EditCandidate = {
           <div class="col-12">
             <div style="float:right">
               <button :disabled="!editCandidateFormIsValid" type="submit"
-                class="btn text-size-15px rounded btn-hover-blue"
-                style="background-color: #056299;color: white;">
+                class="btn  rounded btn-hover-blue"
+                style="background-color: #056299;color: white;font-size:13px;">
                 <i class="far fa-save fa-lg"></i>
                 &nbsp;Lưu
               </button>
             </div>
             <div style="float:right; margin-right: 10px;">
               <button :disabled="!refreshFormCandidate" @click="clearInputCandidateForm"
-                class="btn btn-success text-size-15px rounded">
+                class="btn btn-success  rounded" style="font-size:13px;">
                 <i class="fas fa-sync-alt"></i>
                 &nbsp;Làm mới
               </button>
             </div>
-            <div style="float:right; margin-right: 335px;">
-              <button class="btn text-size-15px rounded btn-hover-blue"
-                style="background-color: #056299;color: white;" @click="toListCandidate">
+            <div style="float:right; margin-right: 360px;">
+              <button class="btn  rounded btn-hover-blue"
+                style="background-color: #056299;color: white;font-size:13px;" @click="toListCandidate">
                 <i class="fas fa-fast-backward"></i>
                 &nbsp;Quay lại
               </button>
@@ -5070,15 +5184,15 @@ const ListCommunity = {
   },
   template: `
   <div class="card shadow mb-4" style="margin-top: -5px;">
-    <div class="card-header py-3">
+    <div class="card-header py-3" style="margin-bottom:-40px">
       <div class="row">
         <div class="col-md-4">
-          <h5 class="m-0 font-weight-bold text-primary">Danh sách Cộng Đoàn</h5>
+          <h6 class="m-0 font-weight-bold text-dark">Danh sách Cộng Đoàn</h6>
         </div>
         <div class="col-md-6"></div>
         <div class="col-md-2" style="padding-left:68px;">
           <router-link :to="{ name: 'addCommunity' }">
-          <button :title="titleButtonAdd" class="btn text-size-15px rounded btn-hover-blue" style="background-color: #056299;color: white;">
+          <button :title="titleButtonAdd" class="btn  rounded btn-hover-blue" style="background-color: #056299;color: white;font-size:14px;">
             <i class="fas fa-plus"></i>
             &nbsp;Thêm
           </button>
@@ -5087,7 +5201,8 @@ const ListCommunity = {
       </div>
     </div>
     <div class="card-body">
-      <div class="table-responsive">
+      <hr style="height:1px;color:lightgray;background-color:lightgray">
+      <div class="table-responsive" style="margin-top:-8px">
         <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
           <thead>
             <tr>
@@ -5124,7 +5239,7 @@ const ListCommunity = {
                       <i class="fas fa-edit fa-md ml--2px"></i>
                     </button>
                   </div>
-                  <div class="col-4" style="margin-left:-5px;">
+                  <div class="col-4" style="margin-left:-7px;">
                     <button :title="titleButtonDelete" data-toggle="modal" @click="getDetailCommunity(community)"
                       data-target="#deleteCommunityModal" class="btn btn-danger btn-sm h-28px w-28px rounded">
                       <i class="far fa-trash-alt fa-md ml--1px"></i>
@@ -5255,24 +5370,24 @@ const AddCommunity = {
   template: `
   <div class="card shadow mb-4" style="margin-top: -5px;">
     <div class="card-header py-3">
-      <h5 class="m-0 font-weight-bold text-primary">Thêm Cộng Đoàn</h5>
+      <h6 class="m-0 font-weight-bold text-dark">Thêm Cộng Đoàn</h6>
     </div>
     <div class="card-body">
       <form @submit.prevent="submitAddCommunityForm" action="POST" method="" autocomplete="off">
         <div class="row mt-2">
           <div class="col-lg-4">
-            <label class="font-weight-bold">Thông Tin Cộng Đoàn:</label>
-            <p style="font-size: 15px;">Thông tin phục vụ cho việc quản lý nhiều Cộng đoàn</p>
+            <label class="font-weight-bold" style="font-size:15px;">Thông Tin Cộng Đoàn:</label>
+            <p style="font-size: 12px;">Thông tin phục vụ cho việc quản lý nhiều Cộng đoàn</p>
           </div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="communityName">Tên Cộng Đoàn</label>
+            <label class=" font-weight-bold col-form-label" for="communityName">Tên Cộng Đoàn</label>
             <label class="text-danger">*</label>
             <input type="text" v-bind:title="titleCommunityName" name="communityName" id="communityName" v-model="communityName"
               class="form-control text-size-13px " placeholder="Nhập Tên Cộng Đoàn..."
               style="margin-top: -5px;">
           </div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="patron">Ngày Bổn Mạng</label>
+            <label class=" font-weight-bold col-form-label" for="patron">Ngày Bổn Mạng</label>
             <label class="text-danger">*</label>
             <input v-bind:title="titlePatron" v-model="patron" id="patron" name="patron" type="date"
               class="form-control  text-size-13px " style="margin-top: -5px;">
@@ -5281,14 +5396,14 @@ const AddCommunity = {
         <div class="row mt-1">
           <div class="col-lg-4"></div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="address">Địa Chỉ</label>
+            <label class=" font-weight-bold col-form-label" for="address">Địa Chỉ</label>
             <label class="text-danger">*</label>
             <input type="text" v-bind:title="titleAddress" name="address" id="address" v-model="address"
             class="form-control text-size-13px " placeholder="Nhập Địa Chỉ..."
             style="margin-top: -5px;">
           </div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="amount">Số Người</label>
+            <label class=" font-weight-bold col-form-label" for="amount">Số Người</label>
             <label class="text-danger">*</label>
             <input type="number" v-bind:title="titleAmount" name="amount" id="amount" v-model="amount"
             class="form-control text-size-13px " placeholder="Nhập Sồ Lượng Người..."
@@ -5298,22 +5413,22 @@ const AddCommunity = {
         <div class="row" style="margin-top: 30px;">
           <div class="col-12">
             <div style="float:right">
-              <button :disabled="!addCommunityFormIsValid" type="submit" class="btn text-size-15px rounded btn-hover-blue"
-                style="background-color: #056299;color: white;">
+              <button :disabled="!addCommunityFormIsValid" type="submit" class="btn  rounded btn-hover-blue"
+                style="background-color: #056299;color: white;font-size:13px;">
                 <i class="far fa-save fa-lg"></i>
                 &nbsp;Lưu
               </button>
             </div>
             <div style="float:right; margin-right: 10px;">
               <button :disabled="!refreshCommunityForm" @click="clearInputCommunityForm"
-                class="btn btn-success text-size-15px rounded">
+                class="btn btn-success  rounded" style="font-size:13px;">
                 <i class="fas fa-sync-alt"></i>
                 &nbsp;Làm mới
               </button>
             </div>
-            <div style="float:right; margin-right: 335px;">
-              <button class="btn text-size-15px rounded btn-hover-blue"
-                style="background-color: #056299;color: white;"  @click="toListCommunity">
+            <div style="float:right; margin-right: 360px;">
+              <button class="btn  rounded btn-hover-blue"
+                style="background-color: #056299;color: white;font-size:13px;"  @click="toListCommunity">
                 <i class="fas fa-fast-backward"></i>
                 &nbsp;Quay lại
               </button>
@@ -5432,17 +5547,17 @@ const EditCommunity = {
   template: `
   <div class="card shadow mb-4" style="margin-top: -5px;">
   <div class="card-header py-3">
-    <h5 class="m-0 font-weight-bold text-primary">Chỉnh sửa Cộng Đoàn</h5>
+    <h6 class="m-0 font-weight-bold text-dark">Chỉnh sửa Cộng Đoàn</h6>
   </div>
   <div class="card-body">
     <form @submit.prevent="submitEditCommunityForm" action="POST" method="" autocomplete="off">
       <div class="row mt-2">
         <div class="col-lg-4">
-          <label class="font-weight-bold">Thông Tin Cộng Đoàn:</label>
+          <label class="font-weight-bold" stylr="font-size:15px;">Thông Tin Cộng Đoàn:</label>
           <p style="font-size: 15px;">Thông tin phục vụ cho việc quản lý nhiều Cộng Đoàn</p>
         </div>
         <div class="col-lg-4">
-          <label class="text-size-15px font-weight-bold col-form-label" for="communityName">Tên Cộng Đoàn</label>
+          <label class=" font-weight-bold col-form-label" for="communityName">Tên Cộng Đoàn</label>
           <label class="text-danger">*</label>
           <input type="text" v-bind:title="titleCommunityName" v-model="communityName" id="communityName"
             name="communityName" class="form-control text-size-13px " placeholder="Nhập Tên Cộng Đoàn..."
@@ -5450,7 +5565,7 @@ const EditCommunity = {
             style="margin-top: -5px;">
         </div>
         <div class="col-lg-4">
-          <label class="text-size-15px font-weight-bold col-form-label" for="patron">Ngày Bổn Mạng</label>
+          <label class=" font-weight-bold col-form-label" for="patron">Ngày Bổn Mạng</label>
           <label class="text-danger">*</label>
           <input v-bind:title="titlePatron" v-model="patron" id="patron" name="patron"
             type="date" class="form-control  text-size-13px " placeholder="Nhập Mật khẩu..."
@@ -5460,7 +5575,7 @@ const EditCommunity = {
       <div class="row mt-1">
         <div class="col-lg-4"></div>
         <div class="col-lg-4">
-          <label class="text-size-15px font-weight-bold col-form-label" for="address">Địa Chỉ</label>
+          <label class=" font-weight-bold col-form-label" for="address">Địa Chỉ</label>
           <label class="text-danger">*</label>
           <input type="text" v-bind:title="titleAddress" v-model="address" id="address"
             name="address" class="form-control text-size-13px " placeholder="Nhập Địa Chỉ..."
@@ -5468,7 +5583,7 @@ const EditCommunity = {
             style="margin-top: -5px;">
         </div>
         <div class="col-lg-4">
-          <label class="text-size-15px font-weight-bold col-form-label" for="amount">Số Lượng Người</label>
+          <label class=" font-weight-bold col-form-label" for="amount">Số Lượng Người</label>
           <label class="text-danger">*</label>
           <input type="number" v-bind:title="titleAmount" v-model="amount" id="amount"
             name="amount" class="form-control text-size-13px " placeholder="Nhập Địa Chỉ..."
@@ -5480,22 +5595,22 @@ const EditCommunity = {
         <div class="col-12">
           <div style="float:right">
             <button :disabled="!editCommunityFormIsValid" type="submit"
-              class="btn text-size-15px rounded btn-hover-blue"
-              style="background-color: #056299;color: white;">
+              class="btn  rounded btn-hover-blue"
+              style="background-color: #056299;color: white;font-size:13px;">
               <i class="far fa-save fa-lg"></i>
               &nbsp;Lưu
             </button>
           </div>
           <div style="float:right; margin-right: 10px;">
             <button :disabled="!refreshCommunityForm" @click="clearInputCommunityForm"
-              class="btn btn-success text-size-15px rounded">
+              class="btn btn-success  rounded" style="font-size:13px;">
               <i class="fas fa-sync-alt"></i>
               &nbsp;Làm mới
             </button>
           </div>
-          <div style="float:right; margin-right: 335px;">
-            <button class="btn text-size-15px rounded btn-hover-blue"
-              style="background-color: #056299;color: white;" @click="toListCommunity">
+          <div style="float:right; margin-right: 360px;">
+            <button class="btn  rounded btn-hover-blue"
+              style="background-color: #056299;color: white;font-size:13px;" @click="toListCommunity">
               <i class="fas fa-fast-backward"></i>
               &nbsp;Quay lại
             </button>
@@ -5594,16 +5709,16 @@ const ListCompanion = {
   },
   template: `
   <div class="card shadow mb-4" style="margin-top: -5px;">
-    <div class="card-header py-3">
+    <div class="card-header py-3" style="margin-bottom:-40px">
       <div class="row">
         <div class="col-md-4">
-          <h5 class="m-0 font-weight-bold text-primary">Danh sách Người Đồng Hành</h5>
+          <h6 class="m-0 font-weight-bold text-dark">Danh sách Người Đồng Hành</h6>
         </div>
         <div class="col-md-6"></div>
         <div class="col-md-2" style="padding-left:68px;">
           <router-link :to="{ name: 'addCompanion' }">
-            <button :title="titleButtonAdd" class="btn text-size-15px rounded btn-hover-blue"
-              style="background-color: #056299;color: white;">
+            <button :title="titleButtonAdd" class="btn rounded btn-hover-blue"
+              style="background-color: #056299;color: white;font-size:14px;">
               <i class="fas fa-plus"></i>
               &nbsp;Thêm
             </button>
@@ -5612,7 +5727,8 @@ const ListCompanion = {
       </div>
     </div>
     <div class="card-body">
-      <div class="table-responsive">
+      <hr style="height:1px;color:lightgray;background-color:lightgray">
+      <div class="table-responsive" style="margin-top:-8px">
         <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
           <thead>
             <tr>
@@ -5620,7 +5736,6 @@ const ListCompanion = {
               <th>Họ và Tên</th>
               <th>Số Điện Thoại</th>
               <th>Email</th>
-              <th>Chức Vụ</th>
               <th>Nhóm Cộng Đoàn</th>
               <th>Trạng Thái</th>
               <th>Action</th>
@@ -5632,7 +5747,6 @@ const ListCompanion = {
               <th>Họ và Tên</th>
               <th>Số Điện Thoại</th>
               <th>Email</th>
-              <th>Chức Vụ</th>
               <th>Nhóm Cộng Đoàn</th>
               <th>Trạng Thái</th>
               <th>Action</th>
@@ -5644,7 +5758,6 @@ const ListCompanion = {
               <td>{{ companion.fullName }}</td>
               <td>{{ companion.phone }}</td>
               <td>{{ companion.email }}</td>
-              <td v-for="department in positions" v-if="department.id == companion.position">{{ department.positionType }}-{{ department.name }}</td>
               <td v-for="grCom in groupCommunities" v-if="grCom.id == companion.groupCommunity">{{ grCom.name }}</td>
               <td v-if="companion.status == 1">
                 <i class="fas fa-toggle-on fa-lg text-success"></i>
@@ -5664,14 +5777,14 @@ const ListCompanion = {
                   <div class="col-lg-4">
                     <button :title="titleButtonEdit" @click="getDataCompanionUpdate(companion)"
                       class="btn btn-warning btn-sm h-28px w-28px rounded" type="submit"
-                      style="margin-left: -8px;">
+                      style="margin-left: -17px;">
                       <i class="fas fa-edit fa-md ml--2px"></i>
                     </button>
                   </div>
                   <div class="col-lg-4">
                     <button :title="titleButtonDelete" data-toggle="modal" @click="getDetailCompanion(companion)"
                       data-target="#deleteCompanionModal" class="btn btn-danger btn-sm h-28px w-28px rounded"
-                      style="margin-left: -16.5px;">
+                      style="margin-left: -34px;">
                       <i class="far fa-trash-alt fa-md ml--1px"></i>
                     </button>
                   </div>
@@ -5889,7 +6002,7 @@ const AddCompanion = {
       if (this.addCompanionFormIsValid) {
         let lengthCompanions = this.companions.length;
         if (lengthCompanions == 0) {
-          this.companionId == "DH001";
+          this.companionId = "DH001";
         } else {
           let currentId = this.companions[lengthCompanions - 1].id;
           if (currentId > -1 && currentId < 9) {
@@ -6072,23 +6185,23 @@ const AddCompanion = {
   template: `
   <div class="card shadow mb-4" style="margin-top: -5px;">
     <div class="card-header py-3">
-      <h5 class="m-0 font-weight-bold text-primary">Thêm Người Đồng Hành</h5>
+      <h6 class="m-0 font-weight-bold text-dark">Thêm Người Đồng Hành</h6>
     </div>
     <div class="card-body">
       <form @submit.prevent="submitAddCompanionForm" action="POST" method="" autocomplete="off">
         <div class="row mt-2">
           <div class="col-lg-4">
-            <label class="font-weight-bold">Thông Tin Người Đồng Hành:</label>
+            <label class="font-weight-bold text-size-15px ">Thông Tin Người Đồng Hành:</label>
             <p style="font-size: 11px;">Thông tin phục vụ cho việc quản lý nhiều Người Đồng Hành</p>
           </div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="fullName">Họ và Tên</label>
+            <label class="font-weight-bold col-form-label" for="fullName">Họ và Tên</label>
             <label class="text-danger">*</label>
             <input type="text" id="fullName" name="fullName" v-model="fullName" :title="titleFullName"
               class="form-control text-size-13px " placeholder="Nhập Họ và Tên..." style=" margin-top: -5px;">
           </div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="christianName">Tên Thánh</label>
+            <label class="font-weight-bold col-form-label" for="christianName">Tên Thánh</label>
             <label class="text-danger">*</label>
             <input type="text" :title="titleChristianName" name="christianName" id="christianName"
               v-model="christianName" class="form-control  text-size-13px " placeholder="Nhập Tên Thánh..."
@@ -6098,13 +6211,13 @@ const AddCompanion = {
         <div class="row mt-1">
           <div class="col-lg-4"></div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="birthday">Ngày Sinh</label>
+            <label class="font-weight-bold col-form-label" for="birthday">Ngày Sinh</label>
             <label class="text-danger">*</label>
             <input v-model="birthday" name="birthday" id="birthday" type="date" :title="titleBirthday"
               class="form-control  text-size-13px " style="margin-top: -5px;">
           </div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="position">Chức Vụ</label>
+            <label class="font-weight-bold col-form-label" for="position">Chức Vụ</label>
             <label class="text-danger">*</label>
             <select class="custom-select  text-size-13px  h-32px" v-model="position" name="position"
               id="position" style="margin-top: -5px;">
@@ -6118,7 +6231,7 @@ const AddCompanion = {
         <div class="row mt-2">
           <div class="col-lg-4"></div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="phone">Số Điện Thoại</label>
+            <label class="font-weight-bold col-form-label" for="phone">Số Điện Thoại</label>
             <label class="text-danger">*</label>
             <input v-model="phone" name="phone" id="phone" type="text" :title="titlePhone"
               v-model="phone" class="form-control  text-size-13px " placeholder="Nhập Số điện thoại..."
@@ -6127,7 +6240,7 @@ const AddCompanion = {
               định dạng</span>
           </div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="email">Email</label>
+            <label class="font-weight-bold col-form-label" for="email">Email</label>
             <label class="text-danger">*</label>
             <input v-model="email" name="email" id="email" type="text" :title="titleEmail"
               class="form-control  text-size-13px " placeholder="Nhập Địa chỉ email..."
@@ -6139,7 +6252,7 @@ const AddCompanion = {
         <div class="row mt-2">
           <div class="col-lg-4"></div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="groupCommunity">Nhóm Cộng Đoàn</label>
+            <label class="font-weight-bold col-form-label" for="groupCommunity">Nhóm Cộng Đoàn</label>
             <label class="text-danger">*</label>
             <select class="custom-select  text-size-13px  h-32px" v-model="groupCommunity" name="groupCommunity" id="groupCommunity"
               style="margin-top: -5px;">
@@ -6149,7 +6262,7 @@ const AddCompanion = {
             </select>
           </div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="status">Trạng Thái</label>
+            <label class="font-weight-bold col-form-label" for="status">Trạng Thái</label>
             <label class="text-danger">*</label>
             <select class="custom-select  text-size-13px  h-32px" v-model="status" name="status" id="status"
               style="margin-top: -5px;">
@@ -6162,7 +6275,7 @@ const AddCompanion = {
         <div class="row mt-2">
           <div class="col-lg-4"></div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="image">Hình Ảnh</label>
+            <label class="font-weight-bold col-form-label" for="image">Hình Ảnh</label>
             <input type="file" id="image" @change="onFileSelected" :title="titlePicture"
               class="form-control rounded text-size-13px" style="margin-top: -5px;" />
           </div>
@@ -6171,22 +6284,22 @@ const AddCompanion = {
           <div class="col-12">
             <div style="float:right">
               <button :disabled="!addCompanionFormIsValid" type="submit"
-                class="btn text-size-15px rounded btn-hover-blue"
-                style="background-color: #056299;color: white;">
+                class="btn rounded btn-hover-blue"
+                style="background-color: #056299;color: white;font-size:13px;">
                 <i class="far fa-save fa-lg"></i>
                 &nbsp;Lưu
               </button>
             </div>
             <div style="float:right; margin-right: 10px;">
               <button :disabled="!refreshFormCompanion" @click="clearInputCompanionForm"
-                class="btn btn-success text-size-15px rounded">
+                class="btn btn-success rounded" style="font-size:13px;">
                 <i class="fas fa-sync-alt"></i>
                 &nbsp;Làm mới
               </button>
             </div>
-            <div style="float:right; margin-right: 335px;">
-              <button class="btn text-size-15px rounded btn-hover-blue"
-                style="background-color: #056299;color: white;" @click="toListCompanion">
+            <div style="float:right; margin-right: 360px;">
+              <button class="btn rounded btn-hover-blue"
+                style="background-color: #056299;color: white;font-size:13px;" @click="toListCompanion">
                 <i class="fas fa-fast-backward"></i>
                 &nbsp;Quay lại
               </button>
@@ -6927,24 +7040,24 @@ const EditCompanion = {
   template: `
   <div class="card shadow mb-4" style="margin-top: -5px;">
     <div class="card-header py-3">
-      <h5 class="m-0 font-weight-bold text-primary">Chỉnh sửa Người Đồng Hành</h5>
+      <h6 class="m-0 font-weight-bold text-dark">Chỉnh sửa Người Đồng Hành</h6>
     </div>
     <div class="card-body">
       <form @submit.prevent="submitEditCompanionForm" action="POST" method="" autocomplete="off">
         <div class="row mt-2">
           <div class="col-lg-4">
-            <label class="font-weight-bold">Thông Tin Người Đồng Hành:</label>
+            <label class="font-weight-bold text-size-15px">Thông Tin Người Đồng Hành:</label>
             <p style="font-size: 11px;">Thông tin phục vụ cho việc quản lý nhiều Người Đồng Hành</p>
           </div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="fullName">Họ và Tên</label>
+            <label class="font-weight-bold col-form-label" for="fullName">Họ và Tên</label>
             <label class="text-danger">*</label>
             <input type="text" id="fullName" name="fullName" v-model="fullName" :title="titleFullName"
             :value="fullName" v-on:keyup="fullName = $event.target.value"
             class="form-control text-size-13px " placeholder="Nhập Họ và Tên..." style=" margin-top: -5px;">
           </div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="christianName">Tên Thánh</label>
+            <label class="font-weight-bold col-form-label" for="christianName">Tên Thánh</label>
             <label class="text-danger">*</label>
             <input type="text" :title="titleChristianName" name="christianName" id="christianName"
               v-model="christianName" :value="christianName" v-on:keyup="christianName = $event.target.value" 
@@ -6955,14 +7068,14 @@ const EditCompanion = {
         <div class="row mt-1">
           <div class="col-lg-4"></div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="birthday">Ngày Sinh</label>
+            <label class="font-weight-bold col-form-label" for="birthday">Ngày Sinh</label>
             <label class="text-danger">*</label>
             <input v-model="birthday" name="birthday" id="birthday" type="date" :title="titleBirthday"
             :value="birthday" v-on:keyup="birthday = $event.target.value"
               class="form-control  text-size-13px " style="margin-top: -5px;">
           </div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="position">Chức Vụ</label>
+            <label class="font-weight-bold col-form-label" for="position">Chức Vụ</label>
             <label class="text-danger">*</label>
             <select class="custom-select  text-size-13px  h-32px" v-model="position" name="position"
               id="position" style="margin-top: -5px;">
@@ -6977,7 +7090,7 @@ const EditCompanion = {
         <div class="row mt-2">
           <div class="col-lg-4"></div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="phone">Số Điện Thoại</label>
+            <label class="font-weight-bold col-form-label" for="phone">Số Điện Thoại</label>
             <label class="text-danger">*</label>
             <input v-model="phone" name="phone" id="phone" type="text" :title="titlePhone"
               v-model="phone" :value="phone" v-on:keyup="phone = $event.target.value"
@@ -6987,7 +7100,7 @@ const EditCompanion = {
               định dạng</span>
           </div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="email">Email</label>
+            <label class="font-weight-bold col-form-label" for="email">Email</label>
             <label class="text-danger">*</label>
             <input v-model="email" name="email" id="email" type="text" :title="titleEmail"
             :value="email" v-on:keyup="email = $event.target.value"
@@ -7000,7 +7113,7 @@ const EditCompanion = {
         <div class="row mt-2">
           <div class="col-lg-4"></div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="groupCommunity">Nhóm Cộng Đoàn</label>
+            <label class="font-weight-bold col-form-label" for="groupCommunity">Nhóm Cộng Đoàn</label>
             <label class="text-danger">*</label>
             <select class="custom-select  text-size-13px  h-32px" v-model="groupCommunity" name="groupCommunity" id="groupCommunity"
               style="margin-top: -5px;">
@@ -7010,7 +7123,7 @@ const EditCompanion = {
             </select>
           </div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="status">Trạng Thái</label>
+            <label class="font-weight-bold col-form-label" for="status">Trạng Thái</label>
             <label class="text-danger">*</label>
             <select class="custom-select  text-size-13px  h-32px" v-model="status" name="status" id="status"
               style="margin-top: -5px;">
@@ -7023,7 +7136,7 @@ const EditCompanion = {
         <div class="row mt-2">
           <div class="col-lg-4"></div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="image">Hình Ảnh</label>
+            <label class="font-weight-bold col-form-label" for="image">Hình Ảnh</label>
             <input type="file" id="image" @change="onFileSelected" :title="titlePicture"
               class="form-control rounded text-size-13px" style="margin-top: -5px;" />
           </div>
@@ -7032,22 +7145,22 @@ const EditCompanion = {
           <div class="col-12">
             <div style="float:right">
               <button :disabled="!editCompanionFormIsValid" type="submit"
-                class="btn text-size-15px rounded btn-hover-blue"
-                style="background-color: #056299;color: white;">
+                class="btn rounded btn-hover-blue"
+                style="background-color: #056299;color: white;font-size:13px;">
                 <i class="far fa-save fa-lg"></i>
                 &nbsp;Lưu
               </button>
             </div>
             <div style="float:right; margin-right: 10px;">
               <button :disabled="!refreshFormCompanion" @click="clearInputCompanionForm"
-                class="btn btn-success text-size-15px rounded">
+                class="btn btn-success rounded" style="font-size:13px;">
                 <i class="fas fa-sync-alt"></i>
                 &nbsp;Làm mới
               </button>
             </div>
-            <div style="float:right; margin-right: 335px;">
-              <button class="btn text-size-15px rounded btn-hover-blue"
-                style="background-color: #056299;color: white;" @click="toListCompanion">
+            <div style="float:right; margin-right: 360px;">
+              <button class="btn rounded btn-hover-blue"
+                style="background-color: #056299;color: white;font-size:13px;" @click="toListCompanion">
                 <i class="fas fa-fast-backward"></i>
                 &nbsp;Quay lại
               </button>
@@ -7146,16 +7259,16 @@ const ListSpiritualGuide = {
   },
   template: `
   <div class="card shadow mb-4" style="margin-top: -5px;">
-    <div class="card-header py-3">
+    <div class="card-header py-3" style="margin-bottom:-40px">
       <div class="row">
         <div class="col-md-4">
-          <h5 class="m-0 font-weight-bold text-primary">Danh sách Người Linh Hướng</h5>
+          <h6 class="m-0 font-weight-bold text-dark">Danh sách Người Linh Hướng</h6>
         </div>
         <div class="col-md-6"></div>
         <div class="col-md-2" style="padding-left:68px;">
           <router-link :to="{ name: 'addSpiritualGuide' }">
-            <button :title="titleButtonAdd" class="btn text-size-15px rounded btn-hover-blue"
-              style="background-color: #056299;color: white;">
+            <button :title="titleButtonAdd" class="btn rounded btn-hover-blue"
+              style="background-color: #056299;color: white;font-size:14px;">
               <i class="fas fa-plus"></i>
               &nbsp;Thêm
             </button>
@@ -7164,7 +7277,8 @@ const ListSpiritualGuide = {
       </div>
     </div>
     <div class="card-body">
-      <div class="table-responsive">
+      <hr style="height:1px;color:lightgray;background-color:lightgray">
+      <div class="table-responsive" style="margin-top:-8px">
         <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
           <thead>
             <tr>
@@ -7172,7 +7286,6 @@ const ListSpiritualGuide = {
               <th>Họ và Tên</th>
               <th>Số Điện Thoại</th>
               <th>Email</th>
-              <th>Chức Vụ</th>
               <th>Nhóm Cộng Đoàn</th>
               <th>Trạng Thái</th>
               <th>Action</th>
@@ -7184,7 +7297,6 @@ const ListSpiritualGuide = {
               <th>Họ và Tên</th>
               <th>Số Điện Thoại</th>
               <th>Email</th>
-              <th>Chức Vụ</th>
               <th>Nhóm Cộng Đoàn</th>
               <th>Trạng Thái</th>
               <th>Action</th>
@@ -7196,7 +7308,6 @@ const ListSpiritualGuide = {
               <td>{{ spiritualGuide.fullName }}</td>
               <td>{{ spiritualGuide.phone }}</td>
               <td>{{ spiritualGuide.email }}</td>
-              <td v-for="department in positions" v-if="department.id == spiritualGuide.position">{{ department.positionType }}-{{ department.name }}</td>
               <td v-for="grCom in groupCommunities" v-if="grCom.id == spiritualGuide.groupCommunity">{{ grCom.name }}</td>
               <td v-if="spiritualGuide.status == 1">
                 <i class="fas fa-toggle-on fa-lg text-success"></i>
@@ -7216,14 +7327,14 @@ const ListSpiritualGuide = {
                   <div class="col-lg-4">
                     <button :title="titleButtonEdit" @click="getDataSpiritualGuideUpdate(spiritualGuide)"
                       class="btn btn-warning btn-sm h-28px w-28px rounded" type="submit"
-                      style="margin-left: -8px;">
+                      style="margin-left: -17px;">
                       <i class="fas fa-edit fa-md ml--2px"></i>
                     </button>
                   </div>
                   <div class="col-lg-4">
                     <button :title="titleButtonDelete" data-toggle="modal" @click="getDetailSpiritualGuide(spiritualGuide)"
                       data-target="#deleteSpiritualGuideModal" class="btn btn-danger btn-sm h-28px w-28px rounded"
-                      style="margin-left: -16px;">
+                      style="margin-left: -33px;">
                       <i class="far fa-trash-alt fa-md ml--1px"></i>
                     </button>
                   </div>
@@ -7441,7 +7552,7 @@ const AddSpiritualGuide = {
       if (this.addSpiritualGuideFormIsValid) {
         let lengthSpiritualGuides = this.spiritualGuides.length;
         if (lengthSpiritualGuides == 0) {
-          this.spiritualGuideId == "LH001";
+          this.spiritualGuideId = "LH001";
         } else {
           let currentId = this.spiritualGuides[lengthSpiritualGuides - 1].id;
           if (currentId > -1 && currentId < 9) {
@@ -7624,23 +7735,23 @@ const AddSpiritualGuide = {
   template: `
   <div class="card shadow mb-4" style="margin-top: -5px;">
     <div class="card-header py-3">
-      <h5 class="m-0 font-weight-bold text-primary">Thêm Người Linh Hướng</h5>
+      <h6 class="m-0 font-weight-bold text-dark">Thêm Người Linh Hướng</h6>
     </div>
     <div class="card-body">
       <form @submit.prevent="submitAddSpiritualGuideForm" action="POST" method="" autocomplete="off">
         <div class="row mt-2">
           <div class="col-lg-4">
-            <label class="font-weight-bold">Thông Tin Người Linh Hướng:</label>
+            <label class="font-weight-bold text-size-15px ">Thông Tin Người Linh Hướng:</label>
             <p style="font-size: 11px;">Thông tin phục vụ cho việc quản lý nhiều Người Linh Hướng</p>
           </div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="fullName">Họ và Tên</label>
+            <label class="font-weight-bold col-form-label" for="fullName">Họ và Tên</label>
             <label class="text-danger">*</label>
             <input type="text" id="fullName" name="fullName" v-model="fullName" :title="titleFullName"
               class="form-control text-size-13px " placeholder="Nhập Họ và Tên..." style=" margin-top: -5px;">
           </div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="christianName">Tên Thánh</label>
+            <label class="font-weight-bold col-form-label" for="christianName">Tên Thánh</label>
             <label class="text-danger">*</label>
             <input type="text" :title="titleChristianName" name="christianName" id="christianName"
               v-model="christianName" class="form-control  text-size-13px " placeholder="Nhập Tên Thánh..."
@@ -7650,13 +7761,13 @@ const AddSpiritualGuide = {
         <div class="row">
           <div class="col-lg-4"></div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="birthday">Ngày Sinh</label>
+            <label class="font-weight-bold col-form-label" for="birthday">Ngày Sinh</label>
             <label class="text-danger">*</label>
             <input v-model="birthday" name="birthday" id="birthday" type="date" :title="titleBirthday"
               class="form-control  text-size-13px " style="margin-top: -5px;">
           </div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="position">Chức Vụ</label>
+            <label class="font-weight-bold col-form-label" for="position">Chức Vụ</label>
             <label class="text-danger">*</label>
             <select class="custom-select  text-size-13px  h-32px" v-model="position" name="position"
               id="position" style="margin-top: -5px;">
@@ -7671,7 +7782,7 @@ const AddSpiritualGuide = {
         <div class="row mt-1">
           <div class="col-lg-4"></div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="phone">Số Điện Thoại</label>
+            <label class="font-weight-bold col-form-label" for="phone">Số Điện Thoại</label>
             <label class="text-danger">*</label>
             <input v-model="phone" name="phone" id="phone" type="text" :title="titlePhone"
               v-model="phone" class="form-control  text-size-13px " placeholder="Nhập Số điện thoại..."
@@ -7680,7 +7791,7 @@ const AddSpiritualGuide = {
               định dạng</span>
           </div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="email">Email</label>
+            <label class="font-weight-bold col-form-label" for="email">Email</label>
             <label class="text-danger">*</label>
             <input v-model="email" name="email" id="email" type="text" :title="titleEmail"
               class="form-control  text-size-13px " placeholder="Nhập Địa chỉ email..."
@@ -7692,7 +7803,7 @@ const AddSpiritualGuide = {
         <div class="row mt-1">
           <div class="col-lg-4"></div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="groupCommunity">Nhóm Cộng Đoàn</label>
+            <label class="font-weight-bold col-form-label" for="groupCommunity">Nhóm Cộng Đoàn</label>
             <label class="text-danger">*</label>
             <select class="custom-select  text-size-13px  h-32px" v-model="groupCommunity" name="groupCommunity" id="groupCommunity"
               style="margin-top: -5px;">
@@ -7702,7 +7813,7 @@ const AddSpiritualGuide = {
             </select>
           </div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="status">Trạng Thái</label>
+            <label class="font-weight-bold col-form-label" for="status">Trạng Thái</label>
             <label class="text-danger">*</label>
             <select class="custom-select  text-size-13px  h-32px" v-model="status" name="status" id="status"
               style="margin-top: -5px;">
@@ -7715,7 +7826,7 @@ const AddSpiritualGuide = {
         <div class="row mt-1">
           <div class="col-lg-4"></div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="image">Hình Ảnh</label>
+            <label class="font-weight-bold col-form-label" for="image">Hình Ảnh</label>
             <input type="file" id="image" @change="onFileSelected" :title="titlePicture"
               class="form-control rounded text-size-13px" style="margin-top: -5px;" />
           </div>
@@ -7724,22 +7835,22 @@ const AddSpiritualGuide = {
           <div class="col-12">
             <div style="float:right">
               <button :disabled="!addSpiritualGuideFormIsValid" type="submit"
-                class="btn text-size-15px rounded btn-hover-blue"
-                style="background-color: #056299;color: white;">
+                class="btn rounded btn-hover-blue"
+                style="background-color: #056299;color: white;font-size:13px;">
                 <i class="far fa-save fa-lg"></i>
                 &nbsp;Lưu
               </button>
             </div>
             <div style="float:right; margin-right: 10px;">
               <button :disabled="!refreshFormSpiritualGuide" @click="clearInputSpiritualGuideForm"
-                class="btn btn-success text-size-15px rounded">
+                class="btn btn-success rounded" style="font-size:13px;">
                 <i class="fas fa-sync-alt"></i>
                 &nbsp;Làm mới
               </button>
             </div>
-            <div style="float:right; margin-right: 335px;">
-              <button class="btn text-size-15px rounded btn-hover-blue"
-                style="background-color: #056299;color: white;" @click="toListSpiritualGuide">
+            <div style="float:right; margin-right: 360px;">
+              <button class="btn rounded btn-hover-blue"
+                style="background-color: #056299;color: white;font-size:13px;" @click="toListSpiritualGuide">
                 <i class="fas fa-fast-backward"></i>
                 &nbsp;Quay lại
               </button>
@@ -8480,24 +8591,24 @@ const EditSpiritualGuide = {
   template: `
   <div class="card shadow mb-4" style="margin-top: -5px;">
     <div class="card-header py-3">
-      <h5 class="m-0 font-weight-bold text-primary">Chỉnh sửa Người Linh Hướng</h5>
+      <h6 class="m-0 font-weight-bold text-dark">Chỉnh sửa Người Linh Hướng</h6>
     </div>
     <div class="card-body">
       <form @submit.prevent="submitEditSpiritualGuideForm" action="POST" method="" autocomplete="off">
         <div class="row mt-2">
           <div class="col-lg-4">
-            <label class="font-weight-bold">Thông Tin Người Linh Hướng:</label>
+            <label class="font-weight-bold text-size-15px ">Thông Tin Người Linh Hướng:</label>
             <p style="font-size: 11px;">Thông tin phục vụ cho việc quản lý nhiều Người Linh Hướng</p>
           </div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="fullName">Họ và Tên</label>
+            <label class="font-weight-bold col-form-label" for="fullName">Họ và Tên</label>
             <label class="text-danger">*</label>
             <input type="text" id="fullName" name="fullName" v-model="fullName" :title="titleFullName"
             :value="fullName" v-on:keyup="fullName = $event.target.value"
             class="form-control text-size-13px " placeholder="Nhập Họ và Tên..." style=" margin-top: -5px;">
           </div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="christianName">Tên Thánh</label>
+            <label class="font-weight-bold col-form-label" for="christianName">Tên Thánh</label>
             <label class="text-danger">*</label>
             <input type="text" :title="titleChristianName" name="christianName" id="christianName"
               v-model="christianName" :value="christianName" v-on:keyup="christianName = $event.target.value" 
@@ -8508,14 +8619,14 @@ const EditSpiritualGuide = {
         <div class="row">
           <div class="col-lg-4"></div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="birthday">Ngày Sinh</label>
+            <label class="font-weight-bold col-form-label" for="birthday">Ngày Sinh</label>
             <label class="text-danger">*</label>
             <input v-model="birthday" name="birthday" id="birthday" type="date" :title="titleBirthday"
             :value="birthday" v-on:keyup="birthday = $event.target.value"
               class="form-control  text-size-13px " style="margin-top: -5px;">
           </div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="position">Chức Vụ</label>
+            <label class="font-weight-bold col-form-label" for="position">Chức Vụ</label>
             <label class="text-danger">*</label>
             <select class="custom-select  text-size-13px  h-32px" v-model="position" name="position"
               id="position" style="margin-top: -5px;">
@@ -8531,7 +8642,7 @@ const EditSpiritualGuide = {
         <div class="row mt-1">
           <div class="col-lg-4"></div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="phone">Số Điện Thoại</label>
+            <label class="font-weight-bold col-form-label" for="phone">Số Điện Thoại</label>
             <label class="text-danger">*</label>
             <input v-model="phone" name="phone" id="phone" type="text" :title="titlePhone"
               v-model="phone" :value="phone" v-on:keyup="phone = $event.target.value"
@@ -8541,7 +8652,7 @@ const EditSpiritualGuide = {
               định dạng</span>
           </div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="email">Email</label>
+            <label class="font-weight-bold col-form-label" for="email">Email</label>
             <label class="text-danger">*</label>
             <input v-model="email" name="email" id="email" type="text" :title="titleEmail"
             :value="email" v-on:keyup="email = $event.target.value"
@@ -8554,7 +8665,7 @@ const EditSpiritualGuide = {
         <div class="row mt-1">
           <div class="col-lg-4"></div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="groupCommunity">Nhóm Cộng Đoàn</label>
+            <label class="font-weight-bold col-form-label" for="groupCommunity">Nhóm Cộng Đoàn</label>
             <label class="text-danger">*</label>
             <select class="custom-select  text-size-13px  h-32px" v-model="groupCommunity" name="groupCommunity" id="groupCommunity"
               style="margin-top: -5px;">
@@ -8564,7 +8675,7 @@ const EditSpiritualGuide = {
             </select>
           </div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="status">Trạng Thái</label>
+            <label class="font-weight-bold col-form-label" for="status">Trạng Thái</label>
             <label class="text-danger">*</label>
             <select class="custom-select  text-size-13px  h-32px" v-model="status" name="status" id="status"
               style="margin-top: -5px;">
@@ -8577,7 +8688,7 @@ const EditSpiritualGuide = {
         <div class="row mt-1">
           <div class="col-lg-4"></div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="image">Hình Ảnh</label>
+            <label class="font-weight-bold col-form-label" for="image">Hình Ảnh</label>
             <input type="file" id="image" @change="onFileSelected" :title="titlePicture"
               class="form-control rounded text-size-13px" style="margin-top: -5px;" />
           </div>
@@ -8586,22 +8697,22 @@ const EditSpiritualGuide = {
           <div class="col-12">
             <div style="float:right">
               <button :disabled="!editSpiritualGuideFormIsValid" type="submit"
-                class="btn text-size-15px rounded btn-hover-blue"
-                style="background-color: #056299;color: white;">
+                class="btn rounded btn-hover-blue"
+                style="background-color: #056299;color: white;font-size:13px;">
                 <i class="far fa-save fa-lg"></i>
                 &nbsp;Lưu
               </button>
             </div>
             <div style="float:right; margin-right: 10px;">
               <button :disabled="!refreshFormSpiritualGuide" @click="clearInputSpiritualGuideForm"
-                class="btn btn-success text-size-15px rounded">
+                class="btn btn-success rounded" style="font-size:13px;">
                 <i class="fas fa-sync-alt"></i>
                 &nbsp;Làm mới
               </button>
             </div>
-            <div style="float:right; margin-right: 335px;">
-              <button class="btn text-size-15px rounded btn-hover-blue"
-                style="background-color: #056299;color: white;" @click="toListSpiritualGuide">
+            <div style="float:right; margin-right: 360px;">
+              <button class="btn rounded btn-hover-blue"
+                style="background-color: #056299;color: white;font-size:13px;" @click="toListSpiritualGuide">
                 <i class="fas fa-fast-backward"></i>
                 &nbsp;Quay lại
               </button>
@@ -8671,16 +8782,16 @@ const ListGroupCommunity = {
   },
   template: `
   <div class="card shadow mb-4" style="margin-top: -5px;">
-    <div class="card-header py-3">
+    <div class="card-header py-3" style="margin-bottom:-40px">
       <div class="row">
         <div class="col-md-4">
-          <h5 class="m-0 font-weight-bold text-primary">Danh sách Nhóm Cộng Đoàn</h5>
+          <h6 class="m-0 font-weight-bold text-dark">Danh sách Nhóm Cộng Đoàn</h6>
         </div>
         <div class="col-md-6"></div>
         <div class="col-md-2" style="padding-left:68px;">
           <router-link :to="{ name: 'addGroupCommunity' }">
-            <button :title="titleButtonAdd" class="btn text-size-15px rounded btn-hover-blue"
-              style="background-color: #056299;color: white;">
+            <button :title="titleButtonAdd" class="btn rounded btn-hover-blue"
+              style="background-color: #056299;color: white;font-size:14px;">
               <i class="fas fa-plus"></i>
               &nbsp;Thêm
             </button>
@@ -8689,7 +8800,8 @@ const ListGroupCommunity = {
       </div>
     </div>
     <div class="card-body">
-      <div class="table-responsive">
+      <hr style="height:1px;color:lightgray;background-color:lightgray">
+      <div class="table-responsive" style="margin-top:-8px">
         <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
           <thead>
             <tr>
@@ -8898,23 +9010,23 @@ const AddGroupCommunity = {
   template: `
   <div class="card shadow mb-4" style="margin-top: -5px;">
     <div class="card-header py-3">
-      <h5 class="m-0 font-weight-bold text-primary">Thêm Nhóm Cộng Đoàn</h5>
+      <h6 class="m-0 font-weight-bold text-dark">Thêm Nhóm Cộng Đoàn</h6>
     </div>
     <div class="card-body">
       <form @submit.prevent="submitAddGroupCommunityForm" action="POST" method="" autocomplete="off">
         <div class="row mt-2">
           <div class="col-lg-4">
-            <label class="font-weight-bold">Thông Tin Nhóm Cộng Đoàn:</label>
+            <label class="font-weight-bold text-size-15px ">Thông Tin Nhóm Cộng Đoàn:</label>
             <p style="font-size: 11px;">Thông tin phục vụ cho việc quản lý nhiều Nhóm Cộng Đoàn</p>
           </div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="name">Tên Nhóm Cộng Đoàn</label>
+            <label class="font-weight-bold col-form-label" for="name">Tên Nhóm Cộng Đoàn</label>
             <label class="text-danger">*</label>
             <input type="text" id="name" name="name" v-model="name" :title="titleName"
               class="form-control text-size-13px " placeholder="Nhập Tên Nhóm Cộng Đoàn..." style=" margin-top: -5px;">
           </div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="firstCom">Cộng Đoàn 1</label>
+            <label class="font-weight-bold col-form-label" for="firstCom">Cộng Đoàn 1</label>
             <select class="custom-select  text-size-13px  h-32px" v-model="firstCom" name="firstCom"
               id="firstCom" style="margin-top: -5px;">
               <option value="0" disabled selected>--- Chọn Cộng Đoàn 1 ---</option>
@@ -8925,7 +9037,7 @@ const AddGroupCommunity = {
         <div class="row" mt-2>
           <div class="col-lg-4"></div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="secondCom">Cộng Đoàn 2</label>
+            <label class="font-weight-bold col-form-label" for="secondCom">Cộng Đoàn 2</label>
             <select class="custom-select  text-size-13px  h-32px" v-model="secondCom" name="secondCom"
               id="secondCom" style="margin-top: -5px;">
               <option value="0" disabled selected>--- Chọn Cộng Đoàn 2 ---</option>
@@ -8933,7 +9045,7 @@ const AddGroupCommunity = {
             </select>
           </div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="thirdCom">Cộng Đoàn 3</label>
+            <label class="font-weight-bold col-form-label" for="thirdCom">Cộng Đoàn 3</label>
             <select class="custom-select  text-size-13px  h-32px" v-model="thirdCom" name="thirdCom"
               id="thirdCom" style="margin-top: -5px;">
               <option value="0" disabled selected>--- Chọn Cộng Đoàn 3 ---</option>
@@ -8944,7 +9056,7 @@ const AddGroupCommunity = {
         <div class="row mt-2">
           <div class="col-lg-4"></div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="fourthCom">Cộng Đoàn 4</label>
+            <label class="font-weight-bold col-form-label" for="fourthCom">Cộng Đoàn 4</label>
             <select class="custom-select  text-size-13px  h-32px" v-model="fourthCom" name="fourthCom"
               id="fourthCom" style="margin-top: -5px;">
               <option value="0" disabled selected>--- Chọn Cộng Đoàn 4 ---</option>
@@ -8952,7 +9064,7 @@ const AddGroupCommunity = {
             </select>
           </div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="fifthCom">Cộng Đoàn 5</label>
+            <label class="font-weight-bold col-form-label" for="fifthCom">Cộng Đoàn 5</label>
             <select class="custom-select  text-size-13px  h-32px" v-model="fifthCom" name="fifthCom"
               id="fifthCom" style="margin-top: -5px;">
               <option value="0" disabled selected>--- Chọn Cộng Đoàn 5 ---</option>
@@ -8964,22 +9076,22 @@ const AddGroupCommunity = {
           <div class="col-12">
             <div style="float:right">
               <button :disabled="!addGroupCommunityFormIsValid" type="submit"
-                class="btn text-size-15px rounded btn-hover-blue"
-                style="background-color: #056299;color: white;">
+                class="btn rounded btn-hover-blue"
+                style="background-color: #056299;color: white;font-size:13px;">
                 <i class="far fa-save fa-lg"></i>
                 &nbsp;Lưu
               </button>
             </div>
             <div style="float:right; margin-right: 10px;">
               <button :disabled="!refreshFormGroupCommunity" @click="clearInputGroupCommunityForm"
-                class="btn btn-success text-size-15px rounded">
+                class="btn btn-success rounded" style="font-size:13px;">
                 <i class="fas fa-sync-alt"></i>
                 &nbsp;Làm mới
               </button>
             </div>
-            <div style="float:right; margin-right: 335px;">
-              <button class="btn text-size-15px rounded btn-hover-blue"
-                style="background-color: #056299;color: white;" @click="toListGroupCommunity">
+            <div style="float:right; margin-right: 360px;">
+              <button class="btn rounded btn-hover-blue"
+                style="background-color: #056299;color: white;font-size:13px;" @click="toListGroupCommunity">
                 <i class="fas fa-fast-backward"></i>
                 &nbsp;Quay lại
               </button>
@@ -9035,7 +9147,7 @@ const EditGroupCommunity = {
     },
 
     firstComIsValid() {
-      return !!this.fifthCom;
+      return !!this.firstCom;
     },
 
     secondComIsValid() {
@@ -9123,24 +9235,24 @@ const EditGroupCommunity = {
   template: `
   <div class="card shadow mb-4" style="margin-top: -5px;">
     <div class="card-header py-3">
-      <h5 class="m-0 font-weight-bold text-primary">Chỉnh sửa Nhóm Cộng Đoàn</h5>
+      <h6 class="m-0 font-weight-bold text-dark">Chỉnh sửa Nhóm Cộng Đoàn</h6>
     </div>
     <div class="card-body">
       <form @submit.prevent="submitEditGroupCommunityForm" action="POST" method="" autocomplete="off">
         <div class="row mt-2">
           <div class="col-lg-4">
-            <label class="font-weight-bold">Thông Tin Nhóm Cộng Đoàn:</label>
+            <label class="font-weight-bold text-size-15px ">Thông Tin Nhóm Cộng Đoàn:</label>
             <p style="font-size: 11px;">Thông tin phục vụ cho việc quản lý nhiều Nhóm Cộng Đoàn</p>
           </div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="name">Tên Nhóm Cộng Đoàn</label>
+            <label class="font-weight-bold col-form-label" for="name">Tên Nhóm Cộng Đoàn</label>
             <label class="text-danger">*</label>
             <input type="text" id="name" name="name" v-model="name" :title="titleName"
             :value="name" v-on:keyup="name = $event.target.value"
               class="form-control text-size-13px " placeholder="Nhập Tên Nhóm Cộng Đoàn..." style=" margin-top: -5px;">
           </div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="firstCom">Cộng Đoàn 1</label>
+            <label class="font-weight-bold col-form-label" for="firstCom">Cộng Đoàn 1</label>
             <select class="custom-select  text-size-13px  h-32px" v-model="firstCom" name="firstCom"
               id="firstCom" style="margin-top: -5px;">
               <option value="0" disabled>--- Chọn Cộng Đoàn 1 ---</option>
@@ -9152,7 +9264,7 @@ const EditGroupCommunity = {
         <div class="row mt-1">
           <div class="col-lg-4"></div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="secondCom">Cộng Đoàn 2</label>
+            <label class="font-weight-bold col-form-label" for="secondCom">Cộng Đoàn 2</label>
             <select class="custom-select  text-size-13px  h-32px" v-model="secondCom" name="secondCom"
               id="secondCom" style="margin-top: -5px;">
               <option value="0" disabled>--- Chọn Cộng Đoàn 2 ---</option>
@@ -9161,7 +9273,7 @@ const EditGroupCommunity = {
             </select>
           </div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="thirdCom">Cộng Đoàn 3</label>
+            <label class="font-weight-bold col-form-label" for="thirdCom">Cộng Đoàn 3</label>
             <select class="custom-select  text-size-13px  h-32px" v-model="thirdCom" name="thirdCom"
               id="thirdCom" style="margin-top: -5px;">
               <option value="0" disabled>--- Chọn Cộng Đoàn 3 ---</option>
@@ -9173,7 +9285,7 @@ const EditGroupCommunity = {
         <div class="row mt-2">
           <div class="col-lg-4"></div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="fourthCom">Cộng Đoàn 4</label>
+            <label class="font-weight-bold col-form-label" for="fourthCom">Cộng Đoàn 4</label>
             <select class="custom-select  text-size-13px  h-32px" v-model="fourthCom" name="fourthCom"
               id="fourthCom" style="margin-top: -5px;">
               <option value="0" disabled>--- Chọn Cộng Đoàn 4 ---</option>
@@ -9182,7 +9294,7 @@ const EditGroupCommunity = {
             </select>
           </div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="fifthCom">Cộng Đoàn 5</label>
+            <label class="font-weight-bold col-form-label" for="fifthCom">Cộng Đoàn 5</label>
             <select class="custom-select  text-size-13px  h-32px" v-model="fifthCom" name="fifthCom"
               id="fifthCom" style="margin-top: -5px;">
               <option value="0" disabled>--- Chọn Cộng Đoàn 5 ---</option>
@@ -9195,22 +9307,22 @@ const EditGroupCommunity = {
           <div class="col-12">
             <div style="float:right">
               <button :disabled="!editGroupCommunityFormIsValid" type="submit"
-                class="btn text-size-15px rounded btn-hover-blue"
-                style="background-color: #056299;color: white;">
+                class="btn rounded btn-hover-blue"
+                style="background-color: #056299;color: white;font-size:13px;">
                 <i class="far fa-save fa-lg"></i>
                 &nbsp;Lưu
               </button>
             </div>
             <div style="float:right; margin-right: 10px;">
               <button :disabled="!refreshFormGroupCommunity" @click="clearInputGroupCommunityForm"
-                class="btn btn-success text-size-15px rounded">
+                class="btn btn-success rounded" style="font-size:13px;">
                 <i class="fas fa-sync-alt"></i>
                 &nbsp;Làm mới
               </button>
             </div>
-            <div style="float:right; margin-right: 335px;">
-              <button class="btn text-size-15px rounded btn-hover-blue"
-                style="background-color: #056299;color: white;" @click="toListGroupCommunity">
+            <div style="float:right; margin-right: 360px;">
+              <button class="btn rounded btn-hover-blue"
+                style="background-color: #056299;color: white;font-size:13px;" @click="toListGroupCommunity">
                 <i class="fas fa-fast-backward"></i>
                 &nbsp;Quay lại
               </button>
@@ -9306,16 +9418,16 @@ const ListTeacher = {
   },
   template: `
   <div class="card shadow mb-4" style="margin-top: -5px;">
-    <div class="card-header py-3">
+    <div class="card-header py-3" style="margin-bottom:-40px">
       <div class="row">
         <div class="col-md-4">
-          <h5 class="m-0 font-weight-bold text-primary">Danh sách Giảng Viên</h5>
+          <h6 class="m-0 font-weight-bold text-dark">Danh sách Giảng Viên</h6>
         </div>
         <div class="col-md-6"></div>
         <div class="col-md-2" style="padding-left:68px;">
           <router-link :to="{ name: 'addTeacher' }">
-            <button :title="titleButtonAdd" class="btn text-size-15px rounded btn-hover-blue"
-              style="background-color: #056299;color: white;">
+            <button :title="titleButtonAdd" class="btn rounded btn-hover-blue"
+              style="background-color: #056299;color: white;font-size:14px;">
               <i class="fas fa-plus"></i>
               &nbsp;Thêm
             </button>
@@ -9324,7 +9436,8 @@ const ListTeacher = {
       </div>
     </div>
     <div class="card-body">
-      <div class="table-responsive">
+      <hr style="height:1px;color:lightgray;background-color:lightgray">
+      <div class="table-responsive" style="margin-top:-8px">
         <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
           <thead>
             <tr>
@@ -9376,14 +9489,14 @@ const ListTeacher = {
                   <div class="col-lg-4">
                     <button :title="titleButtonEdit" @click="getDataTeacherUpdate(teacher)"
                       class="btn btn-warning btn-sm h-28px w-28px rounded" type="submit"
-                      style="margin-left: -10px;">
+                      style="margin-left: -15.5px;">
                       <i class="fas fa-edit fa-md ml--2px"></i>
                     </button>
                   </div>
                   <div class="col-lg-4">
                     <button :title="titleButtonDelete" data-toggle="modal" @click="getDetailTeacher(teacher)"
                       data-target="#deleteTeacherModal" class="btn btn-danger btn-sm h-28px w-28px rounded"
-                      style="margin-left: -20px;">
+                      style="margin-left: -30px;">
                       <i class="far fa-trash-alt fa-md ml--1px"></i>
                     </button>
                   </div>
@@ -9593,7 +9706,7 @@ const AddTeacher = {
       if (this.addTeacherFormIsValid) {
         let lengthTeachers = this.teachers.length;
         if (lengthTeachers == 0) {
-          this.teacherId == "GV001";
+          this.teacherId = "GV001";
         } else {
           let currentId = this.teachers[lengthTeachers - 1].id;
           if (currentId > -1 && currentId < 9) {
@@ -9753,23 +9866,23 @@ const AddTeacher = {
   template: `
   <div class="card shadow mb-4" style="margin-top: -5px;">
     <div class="card-header py-3">
-      <h5 class="m-0 font-weight-bold text-primary">Thêm Giảng Viên</h5>
+      <h6 class="m-0 font-weight-bold text-dark">Thêm Giảng Viên</h6>
     </div>
     <div class="card-body">
       <form @submit.prevent="submitAddTeacherForm" action="POST" method="" autocomplete="off">
         <div class="row mt-2">
           <div class="col-lg-4">
-            <label class="font-weight-bold">Thông Tin Giảng Viên:</label>
+            <label class="font-weight-bold text-size-15px ">Thông Tin Giảng Viên:</label>
             <p style="font-size: 11px;">Thông tin phục vụ cho việc quản lý nhiều người Giảng Viên</p>
           </div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="fullName">Họ và Tên</label>
+            <label class="font-weight-bold col-form-label" for="fullName">Họ và Tên</label>
             <label class="text-danger">*</label>
             <input type="text" id="fullName" name="fullName" v-model="fullName" :title="titleFullName"
               class="form-control text-size-13px " placeholder="Nhập Họ và Tên..." style=" margin-top: -5px;">
           </div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="gender">Giới Tính</label>
+            <label class="font-weight-bold col-form-label" for="gender">Giới Tính</label>
             <label class="text-danger">*</label>
             <select class="custom-select  text-size-13px  h-32px" v-model="gender" name="gender"
               id="gender" style="margin-top: -5px;">
@@ -9782,13 +9895,13 @@ const AddTeacher = {
         <div class="row mt-1">
           <div class="col-lg-4"></div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="birthday">Ngày Sinh</label>
+            <label class="font-weight-bold col-form-label" for="birthday">Ngày Sinh</label>
             <label class="text-danger">*</label>
             <input v-model="birthday" name="birthday" id="birthday" type="date" :title="titleBirthday"
               class="form-control  text-size-13px " style="margin-top: -5px;">
           </div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="subject">Bộ Môn</label>
+            <label class="font-weight-bold col-form-label" for="subject">Bộ Môn</label>
             <label class="text-danger">*</label>
             <select class="custom-select  text-size-13px  h-32px" v-model="subject" name="subject"
               id="subject" style="margin-top: -5px;">
@@ -9801,7 +9914,7 @@ const AddTeacher = {
         <div class="row mt-2">
           <div class="col-lg-4"></div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="phone">Số Điện Thoại</label>
+            <label class="font-weight-bold col-form-label" for="phone">Số Điện Thoại</label>
             <label class="text-danger">*</label>
             <input v-model="phone" name="phone" id="phone" type="text" :title="titlePhone"
               v-model="phone" class="form-control  text-size-13px " placeholder="Nhập Số điện thoại..."
@@ -9810,7 +9923,7 @@ const AddTeacher = {
               định dạng</span>
           </div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="email">Email</label>
+            <label class="font-weight-bold col-form-label" for="email">Email</label>
             <label class="text-danger">*</label>
             <input v-model="email" name="email" id="email" type="text" :title="titleEmail"
               class="form-control  text-size-13px " placeholder="Nhập Địa chỉ email..."
@@ -9822,7 +9935,7 @@ const AddTeacher = {
         <div class="row mt-2">
           <div class="col-lg-4"></div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="status">Trạng Thái</label>
+            <label class="font-weight-bold col-form-label" for="status">Trạng Thái</label>
             <label class="text-danger">*</label>
             <select class="custom-select  text-size-13px  h-32px" v-model="status" name="status" id="status"
               style="margin-top: -5px;">
@@ -9832,7 +9945,7 @@ const AddTeacher = {
             </select>
           </div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="image">Hình Ảnh</label>
+            <label class="font-weight-bold col-form-label" for="image">Hình Ảnh</label>
             <input type="file" id="image" @change="onFileSelected" :title="titlePicture"
               class="form-control rounded text-size-13px" style="margin-top: -5px;" />
           </div>
@@ -9841,22 +9954,22 @@ const AddTeacher = {
           <div class="col-12">
             <div style="float:right">
               <button :disabled="!addTeacherFormIsValid" type="submit"
-                class="btn text-size-15px rounded btn-hover-blue"
-                style="background-color: #056299;color: white;">
+                class="btn rounded btn-hover-blue"
+                style="background-color: #056299;color: white;font-size:13px;">
                 <i class="far fa-save fa-lg"></i>
                 &nbsp;Lưu
               </button>
             </div>
             <div style="float:right; margin-right: 10px;">
               <button :disabled="!refreshFormTeacher" @click="clearInputTeacherForm"
-                class="btn btn-success text-size-15px rounded">
+                class="btn btn-success rounded" style="font-size:13px;">
                 <i class="fas fa-sync-alt"></i>
                 &nbsp;Làm mới
               </button>
             </div>
-            <div style="float:right; margin-right: 335px;">
-              <button class="btn text-size-15px rounded btn-hover-blue"
-                style="background-color: #056299;color: white;" @click="toListTeacher">
+            <div style="float:right; margin-right: 360px;">
+              <button class="btn rounded btn-hover-blue"
+                style="background-color: #056299;color: white;font-size:13px;" @click="toListTeacher">
                 <i class="fas fa-fast-backward"></i>
                 &nbsp;Quay lại
               </button>
@@ -10586,24 +10699,24 @@ const EditTeacher = {
   template: `
   <div class="card shadow mb-4" style="margin-top: -5px;">
     <div class="card-header py-3">
-      <h5 class="m-0 font-weight-bold text-primary">Chỉnh sửa Giảng Viên</h5>
+      <h6 class="m-0 font-weight-bold text-dark">Chỉnh sửa Giảng Viên</h6>
     </div>
     <div class="card-body">
       <form @submit.prevent="submitEditTeacherForm" action="POST" method="" autocomplete="off">
         <div class="row mt-2">
           <div class="col-lg-4">
-            <label class="font-weight-bold">Thông Tin Giảng Viên:</label>
+            <label class="font-weight-bold text-size-15px ">Thông Tin Giảng Viên:</label>
             <p style="font-size: 11px;">Thông tin phục vụ cho việc quản lý nhiều người Giảng Viên</p>
           </div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="fullName">Họ và Tên</label>
+            <label class="font-weight-bold col-form-label" for="fullName">Họ và Tên</label>
             <label class="text-danger">*</label>
             <input type="text" id="fullName" name="fullName" v-model="fullName" :title="titleFullName"
             :value="fullName" v-on:keyup="fullName = $event.target.value"
             class="form-control text-size-13px " placeholder="Nhập Họ và Tên..." style=" margin-top: -5px;">
           </div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="gender">Giới Tính</label>
+            <label class="font-weight-bold col-form-label" for="gender">Giới Tính</label>
             <label class="text-danger">*</label>
             <select class="custom-select  text-size-13px  h-32px" v-model="gender" name="gender"
               id="gender" style="margin-top: -5px;">
@@ -10616,14 +10729,14 @@ const EditTeacher = {
         <div class="row mt-1">
           <div class="col-lg-4"></div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="birthday">Ngày Sinh</label>
+            <label class="font-weight-bold col-form-label" for="birthday">Ngày Sinh</label>
             <label class="text-danger">*</label>
             <input v-model="birthday" name="birthday" id="birthday" type="date" :title="titleBirthday"
             :value="birthday" v-on:keyup="birthday = $event.target.value"
               class="form-control  text-size-13px " style="margin-top: -5px;">
           </div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="subject">Bộ Môn</label>
+            <label class="font-weight-bold col-form-label" for="subject">Bộ Môn</label>
             <label class="text-danger">*</label>
             <select class="custom-select  text-size-13px  h-32px" v-model="subject" name="subject"
               id="subject" style="margin-top: -5px;">
@@ -10636,7 +10749,7 @@ const EditTeacher = {
         <div class="row mt-2">
           <div class="col-lg-4"></div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="phone">Số Điện Thoại</label>
+            <label class="font-weight-bold col-form-label" for="phone">Số Điện Thoại</label>
             <label class="text-danger">*</label>
             <input v-model="phone" name="phone" id="phone" type="text" :title="titlePhone"
               v-model="phone" :value="phone" v-on:keyup="phone = $event.target.value"
@@ -10646,7 +10759,7 @@ const EditTeacher = {
               định dạng</span>
           </div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="email">Email</label>
+            <label class="font-weight-bold col-form-label" for="email">Email</label>
             <label class="text-danger">*</label>
             <input v-model="email" name="email" id="email" type="text" :title="titleEmail"
             :value="email" v-on:keyup="email = $event.target.value"
@@ -10659,7 +10772,7 @@ const EditTeacher = {
         <div class="row mt-1">
           <div class="col-lg-4"></div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="status">Trạng Thái</label>
+            <label class="font-weight-bold col-form-label" for="status">Trạng Thái</label>
             <label class="text-danger">*</label>
             <select class="custom-select  text-size-13px  h-32px" v-model="status" name="status" id="status"
               style="margin-top: -5px;">
@@ -10669,7 +10782,7 @@ const EditTeacher = {
             </select>
           </div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="image">Hình Ảnh</label>
+            <label class="font-weight-bold col-form-label" for="image">Hình Ảnh</label>
             <input type="file" id="image" @change="onFileSelected" :title="titlePicture"
               class="form-control rounded text-size-13px" style="margin-top: -5px;" />
           </div>
@@ -10678,22 +10791,22 @@ const EditTeacher = {
           <div class="col-12">
             <div style="float:right">
               <button :disabled="!editTeacherFormIsValid" type="submit"
-                class="btn text-size-15px rounded btn-hover-blue"
-                style="background-color: #056299;color: white;">
+                class="btn rounded btn-hover-blue"
+                style="background-color: #056299;color: white;font-size:13px;">
                 <i class="far fa-save fa-lg"></i>
                 &nbsp;Lưu
               </button>
             </div>
             <div style="float:right; margin-right: 10px;">
               <button :disabled="!refreshFormTeacher" @click="clearInputTeacherForm"
-                class="btn btn-success text-size-15px rounded">
+                class="btn btn-success rounded" style="font-size:13px;">
                 <i class="fas fa-sync-alt"></i>
                 &nbsp;Làm mới
               </button>
             </div>
-            <div style="float:right; margin-right: 335px;">
-              <button class="btn text-size-15px rounded btn-hover-blue"
-                style="background-color: #056299;color: white;" @click="toListTeacher">
+            <div style="float:right; margin-right: 360px;">
+              <button class="btn rounded btn-hover-blue"
+                style="background-color: #056299;color: white;font-size:13px;" @click="toListTeacher">
                 <i class="fas fa-fast-backward"></i>
                 &nbsp;Quay lại
               </button>
@@ -10783,16 +10896,16 @@ const ListSchedule = {
   },
   template: `
   <div class="card shadow mb-4" style="margin-top: -5px;">
-    <div class="card-header py-3">
+    <div class="card-header py-3" style="margin-bottom:-40px">
       <div class="row">
         <div class="col-md-4">
-          <h5 class="m-0 font-weight-bold text-primary">Danh sách Lịch Học</h5>
+          <h6 class="m-0 font-weight-bold text-dark">Danh sách Lịch Học</h6>
         </div>
         <div class="col-md-6"></div>
         <div class="col-md-2" style="padding-left:68px;">
           <router-link :to="{ name: 'addSchedule' }">
-            <button :title="titleButtonAdd" class="btn text-size-15px rounded btn-hover-blue"
-              style="background-color: #056299;color: white;">
+            <button :title="titleButtonAdd" class="btn rounded btn-hover-blue"
+              style="background-color: #056299;color: white;font-size:14px;">
               <i class="fas fa-plus"></i>
               &nbsp;Thêm
             </button>
@@ -10801,7 +10914,8 @@ const ListSchedule = {
       </div>
     </div>
     <div class="card-body">
-      <div class="table-responsive">
+      <hr style="height:1px;color:lightgray;background-color:lightgray">
+      <div class="table-responsive" style="margin-top:-8px">
         <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
           <thead>
             <tr>
@@ -11040,17 +11154,17 @@ const AddSchedule = {
   template: `
   <div class="card shadow mb-4" style="margin-top: -5px;">
     <div class="card-header py-3">
-      <h5 class="m-0 font-weight-bold text-primary">Thêm Lịch Học</h5>
+      <h6 class="m-0 font-weight-bold text-dark">Thêm Lịch Học</h6>
     </div>
     <div class="card-body">
       <form @submit.prevent="submitAddScheduleForm" action="POST" method="" autocomplete="off">
         <div class="row mt-2">
           <div class="col-lg-4">
-            <label class="font-weight-bold">Thông Tin Lịch Học:</label>
+            <label class="font-weight-bold text-size-15px">Thông Tin Lịch Học:</label>
             <p style="font-size: 11px;">Thông tin phục vụ cho việc quản lý nhiều Lịch Học</p>
           </div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="subject">Môn Học</label>
+            <label class="font-weight-bold col-form-label" for="subject">Môn Học</label>
             <label class="text-danger">*</label>
             <select class="custom-select  text-size-13px  h-32px" v-model="subject" name="subject"
               id="subject" style="margin-top: -5px;">
@@ -11060,7 +11174,7 @@ const AddSchedule = {
             </select>
           </div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="teacher">Giảng Viên</label>
+            <label class="font-weight-bold col-form-label" for="teacher">Giảng Viên</label>
             <label class="text-danger">*</label>
             <select class="custom-select  text-size-13px  h-32px" v-model="teacher" name="teacher"
               id="teacher" style="margin-top: -5px;">
@@ -11073,13 +11187,13 @@ const AddSchedule = {
         <div class="row mt-1">
           <div class="col-lg-4"></div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="dateStart">Ngày Bắt Đầu Môn Học</label>
+            <label class="font-weight-bold col-form-label" for="dateStart">Ngày Bắt Đầu Môn Học</label>
             <label class="text-danger">*</label>
             <input v-model="dateStart" name="dateStart" id="dateStart" type="date" :title="titleDateStart"
               class="form-control  text-size-13px " style="margin-top: -5px;">
           </div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="dateEnd">Ngày Kết Thúc Môn Học</label>
+            <label class="font-weight-bold col-form-label" for="dateEnd">Ngày Kết Thúc Môn Học</label>
             <label class="text-danger">*</label>
             <input v-model="dateEnd" name="dateEnd" id="dateEnd" type="date" :title="titleDateEnd"
               class="form-control  text-size-13px " style="margin-top: -5px;">
@@ -11088,7 +11202,7 @@ const AddSchedule = {
         <div class="row mt-2">
           <div class="col-lg-4"></div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="dayOfWeek">Ngày Học Trong Tuần</label>
+            <label class="font-weight-bold col-form-label" for="dayOfWeek">Ngày Học Trong Tuần</label>
             <label class="text-danger">*</label>
             <select class="custom-select  text-size-13px  h-32px" v-model="dayOfWeek" name="dayOfWeek" id="dayOfWeek"
               style="margin-top: -5px;">
@@ -11102,22 +11216,22 @@ const AddSchedule = {
           <div class="col-12">
             <div style="float:right">
               <button :disabled="!addScheduleFormIsValid" type="submit"
-                class="btn text-size-15px rounded btn-hover-blue"
-                style="background-color: #056299;color: white;">
+                class="btn rounded btn-hover-blue"
+                style="background-color: #056299;color: white;font-size:13px;">
                 <i class="far fa-save fa-lg"></i>
                 &nbsp;Lưu
               </button>
             </div>
             <div style="float:right; margin-right: 10px;">
               <button :disabled="!refreshFormSchedule" @click="clearInputScheduleForm"
-                class="btn btn-success text-size-15px rounded">
+                class="btn btn-success rounded" style="font-size:13px;">
                 <i class="fas fa-sync-alt"></i>
                 &nbsp;Làm mới
               </button>
             </div>
-            <div style="float:right; margin-right: 335px;">
-              <button class="btn text-size-15px rounded btn-hover-blue"
-                style="background-color: #056299;color: white;" @click="toListSchedule">
+            <div style="float:right; margin-right: 360px;">
+              <button class="btn rounded btn-hover-blue"
+                style="background-color: #056299;color: white;font-size:13px;" @click="toListSchedule">
                 <i class="fas fa-fast-backward"></i>
                 &nbsp;Quay lại
               </button>
@@ -11291,17 +11405,17 @@ const EditSchedule = {
   template: `
   <div class="card shadow mb-4" style="margin-top: -5px;">
     <div class="card-header py-3">
-      <h5 class="m-0 font-weight-bold text-primary">Chỉnh sửa Lịch Học</h5>
+      <h6 class="m-0 font-weight-bold text-dark">Chỉnh sửa Lịch Học</h6>
     </div>
     <div class="card-body">
       <form @submit.prevent="submitEditScheduleForm" action="POST" method="" autocomplete="off">
         <div class="row mt-2">
           <div class="col-lg-4">
-            <label class="font-weight-bold">Thông Tin Lịch Học:</label>
+            <label class="font-weight-bold text-size-15px">Thông Tin Lịch Học:</label>
             <p style="font-size: 11px;">Thông tin phục vụ cho việc quản lý nhiều Lịch Học</p>
           </div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="subject">Môn Học</label>
+            <label class="font-weight-bold col-form-label" for="subject">Môn Học</label>
             <label class="text-danger">*</label>
             <select class="custom-select  text-size-13px  h-32px" v-model="subject" name="subject"
               id="subject" style="margin-top: -5px;">
@@ -11311,7 +11425,7 @@ const EditSchedule = {
             </select>
           </div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="teacher">Giảng Viên</label>
+            <label class="font-weight-bold col-form-label" for="teacher">Giảng Viên</label>
             <label class="text-danger">*</label>
             <select class="custom-select  text-size-13px  h-32px" v-model="teacher" name="teacher"
               id="teacher" style="margin-top: -5px;">
@@ -11324,13 +11438,13 @@ const EditSchedule = {
         <div class="row mt-1">
           <div class="col-lg-4"></div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="dateStart">Ngày Bắt Đầu Môn Học</label>
+            <label class="font-weight-bold col-form-label" for="dateStart">Ngày Bắt Đầu Môn Học</label>
             <label class="text-danger">*</label>
             <input v-model="dateStart" name="dateStart" id="dateStart" type="date" :title="titleDateStart"
             :value="dateStart" v-on:keyup="dateStart = $event.target.value" class="form-control  text-size-13px " style="margin-top: -5px;">
           </div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="dateEnd">Ngày Kết Thúc Môn Học</label>
+            <label class="font-weight-bold col-form-label" for="dateEnd">Ngày Kết Thúc Môn Học</label>
             <label class="text-danger">*</label>
             <input v-model="dateEnd" name="dateEnd" id="dateEnd" type="date" :title="titleDateEnd"
             :value="dateEnd" v-on:keyup="dateEnd = $event.target.value" class="form-control  text-size-13px " style="margin-top: -5px;">
@@ -11339,7 +11453,7 @@ const EditSchedule = {
         <div class="row mt-2">
           <div class="col-lg-4"></div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="dayOfWeek">Ngày Học Trong Tuần</label>
+            <label class="font-weight-bold col-form-label" for="dayOfWeek">Ngày Học Trong Tuần</label>
             <label class="text-danger">*</label>
             <select class="custom-select  text-size-13px  h-32px" v-model="dayOfWeek" name="dayOfWeek" id="dayOfWeek"
               style="margin-top: -5px;">
@@ -11353,22 +11467,22 @@ const EditSchedule = {
           <div class="col-12">
             <div style="float:right">
               <button :disabled="!editScheduleFormIsValid" type="submit"
-                class="btn text-size-15px rounded btn-hover-blue"
-                style="background-color: #056299;color: white;">
+                class="btn rounded btn-hover-blue"
+                style="background-color: #056299;color: white;font-size:13px;">
                 <i class="far fa-save fa-lg"></i>
                 &nbsp;Lưu
               </button>
             </div>
             <div style="float:right; margin-right: 10px;">
               <button :disabled="!refreshFormSchedule" @click="clearInputScheduleForm"
-                class="btn btn-success text-size-15px rounded">
+                class="btn btn-success rounded" style="font-size:13px;">
                 <i class="fas fa-sync-alt"></i>
                 &nbsp;Làm mới
               </button>
             </div>
-            <div style="float:right; margin-right: 335px;">
-              <button class="btn text-size-15px rounded btn-hover-blue"
-                style="background-color: #056299;color: white;" @click="toListSchedule">
+            <div style="float:right; margin-right: 360px;">
+              <button class="btn rounded btn-hover-blue"
+                style="background-color: #056299;color: white;font-size:13px;" @click="toListSchedule">
                 <i class="fas fa-fast-backward"></i>
                 &nbsp;Quay lại
               </button>
@@ -11428,16 +11542,16 @@ const ListRole = {
   },
   template: `
   <div class="card shadow mb-4" style="margin-top: -5px;">
-    <div class="card-header py-3">
+    <div class="card-header py-3" style="margin-bottom:-40px">
       <div class="row">
         <div class="col-md-4">
-          <h5 class="m-0 font-weight-bold text-primary">Danh sách Phân Quyền</h5>
+          <h6 class="m-0 font-weight-bold text-dark">Danh sách Phân Quyền</h6>
         </div>
         <div class="col-md-6"></div>
         <div class="col-md-2" style="padding-left:68px;">
           <router-link :to="{ name: 'addRole' }">
-            <button :title="titleButtonAdd" class="btn text-size-15px rounded btn-hover-blue"
-              style="background-color: #056299;color: white;">
+            <button :title="titleButtonAdd" class="btn rounded btn-hover-blue"
+              style="background-color: #056299;color: white;font-size:14px;">
               <i class="fas fa-plus"></i>
               &nbsp;Thêm
             </button>
@@ -11446,7 +11560,8 @@ const ListRole = {
       </div>
     </div>
     <div class="card-body">
-      <div class="table-responsive">
+      <hr style="height:1px;color:lightgray;background-color:lightgray">
+      <div class="table-responsive" style="margin-top:-8px">
         <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
           <thead>
             <tr>
@@ -11572,17 +11687,17 @@ const AddRole = {
   template: `
   <div class="card shadow mb-4" style="margin-top: -5px;">
     <div class="card-header py-3">
-      <h5 class="m-0 font-weight-bold text-primary">Thêm Phân Quyền</h5>
+      <h6 class="m-0 font-weight-bold text-dark">Thêm Phân Quyền</h6>
     </div>
     <div class="card-body">
       <form @submit.prevent="submitAddRoleForm" action="POST" method="" autocomplete="off">
         <div class="row mt-2">
           <div class="col-lg-4">
-            <label class="font-weight-bold">Thông Tin Phân Quyền:</label>
+            <label class="font-weight-bold text-size-15px">Thông Tin Phân Quyền:</label>
             <p style="font-size: 11px;">Thông tin phục vụ cho việc quản lý nhiều Phần Quyền</p>
           </div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="roleName">Tên Phân Quyền</label>
+            <label class="font-weight-bold col-form-label" for="roleName">Tên Phân Quyền</label>
             <label class="text-danger">*</label>
             <input v-model="roleName" name="roleName" id="roleName" type="text" :title="titleRole"
             class="form-control  text-size-13px " style="margin-top: -5px;" placeholder="Nhập Tên Phân Quyền...">
@@ -11592,22 +11707,22 @@ const AddRole = {
           <div class="col-12">
             <div style="float:right">
               <button :disabled="!addRoleFormIsValid" type="submit"
-                class="btn text-size-15px rounded btn-hover-blue"
-                style="background-color: #056299;color: white;">
+                class="btn rounded btn-hover-blue"
+                style="background-color: #056299;color: white;font-size:13px;">
                 <i class="far fa-save fa-lg"></i>
                 &nbsp;Lưu
               </button>
             </div>
             <div style="float:right; margin-right: 10px;">
               <button :disabled="!refreshFormRole" @click="clearInputRoleForm"
-                class="btn btn-success text-size-15px rounded">
+                class="btn btn-success rounded" style="font-size:13px;">
                 <i class="fas fa-sync-alt"></i>
                 &nbsp;Làm mới
               </button>
             </div>
-            <div style="float:right; margin-right: 335px;">
-              <button class="btn text-size-15px rounded btn-hover-blue"
-                style="background-color: #056299;color: white;" @click="toListRole">
+            <div style="float:right; margin-right: 360px;">
+              <button class="btn rounded btn-hover-blue"
+                style="background-color: #056299;color: white;font-size:13px;" @click="toListRole">
                 <i class="fas fa-fast-backward"></i>
                 &nbsp;Quay lại
               </button>
@@ -11690,17 +11805,17 @@ const EditRole = {
   template: `
   <div class="card shadow mb-4" style="margin-top: -5px;">
     <div class="card-header py-3">
-      <h5 class="m-0 font-weight-bold text-primary">Chỉnh sửa Phân Quyền</h5>
+      <h6 class="m-0 font-weight-bold text-dark">Chỉnh sửa Phân Quyền</h6>
     </div>
     <div class="card-body">
       <form @submit.prevent="submitEditRoleForm" action="POST" method="" autocomplete="off">
         <div class="row mt-2">
           <div class="col-lg-4">
-            <label class="font-weight-bold">Thông Tin Phân Quyền:</label>
+            <label class="font-weight-bold text-size-15px">Thông Tin Phân Quyền:</label>
             <p style="font-size: 11px;">Thông tin phục vụ cho việc quản lý nhiều Phân Quyền</p>
           </div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="roleName">Tên Phân Quyền</label>
+            <label class="font-weight-bold col-form-label" for="roleName">Tên Phân Quyền</label>
             <label class="text-danger">*</label>
             <input v-model="roleName" name="roleName" id="roleName" type="text" :title="titleRole"
             :value="roleName" v-on:keyup="roleName = $event.target.value" class="form-control  text-size-13px " style="margin-top: -5px;">
@@ -11710,22 +11825,22 @@ const EditRole = {
           <div class="col-12">
             <div style="float:right">
               <button :disabled="!editRoleFormIsValid" type="submit"
-                class="btn text-size-15px rounded btn-hover-blue"
-                style="background-color: #056299;color: white;">
+                class="btn rounded btn-hover-blue"
+                style="background-color: #056299;color: white;font-size:13px;">
                 <i class="far fa-save fa-lg"></i>
                 &nbsp;Lưu
               </button>
             </div>
             <div style="float:right; margin-right: 10px;">
               <button :disabled="!refreshFormRole" @click="clearInputRoleForm"
-                class="btn btn-success text-size-15px rounded">
+                class="btn btn-success rounded" style="font-size:13px;">
                 <i class="fas fa-sync-alt"></i>
                 &nbsp;Làm mới
               </button>
             </div>
-            <div style="float:right; margin-right: 335px;">
-              <button class="btn text-size-15px rounded btn-hover-blue"
-                style="background-color: #056299;color: white;" @click="toListRole">
+            <div style="float:right; margin-right: 360px;">
+              <button class="btn rounded btn-hover-blue"
+                style="background-color: #056299;color: white;font-size:13px;" @click="toListRole">
                 <i class="fas fa-fast-backward"></i>
                 &nbsp;Quay lại
               </button>
@@ -12104,21 +12219,21 @@ const RegisteringScheduleCompanion = {
   },
   template: `
   <div class="card shadow mb-4" style="margin-top: -5px;">
-    <div class="card-header py-3">
+    <div class="card-header py-3" style="margin-bottom:-40px">
       <div class="row">
         <div class="col-md-4">
-          <h5 class="m-0 font-weight-bold text-primary">Đăng ký Lịch đồng hành</h5>
+          <h6 class="m-0 font-weight-bold text-dark">Đăng ký Lịch đồng hành</h6>
         </div>
         <div class="col-md-4"></div>
         <div class="col-md-2" style="padding-left:110px;">
-          <button class="btn text-size-15px rounded btn-danger" data-toggle="modal" data-target="#deleteScheduleCompanionModal">
+          <button class="btn rounded btn-danger" style="font-size:14px;" data-toggle="modal" data-target="#deleteScheduleCompanionModal">
             <i class="fas fa-trash-alt"></i>
             &nbsp;Xóa lịch
           </button>
         </div>
         <div class="col-md-2" style="padding-left:50px;">
-          <button class="btn text-size-15px rounded btn-hover-blue"
-            style="background-color: #056299;color: white;" @click="CreateScheduleCompanion">
+          <button class="btn rounded btn-hover-blue"
+            style="background-color: #056299;color: white;font-size:14px;" @click="CreateScheduleCompanion">
             <i class="fas fa-plus"></i>
             &nbsp;Tạo lịch
           </button>
@@ -12126,7 +12241,8 @@ const RegisteringScheduleCompanion = {
       </div>
     </div>
     <div class="card-body">
-      <div class="table-responsive">
+      <hr style="height:1px;color:lightgray;background-color:lightgray">
+      <div class="table-responsive" style="margin-top:-8px">
         <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
           <thead>
             <tr>
@@ -12951,21 +13067,21 @@ const RegisteringScheduleSpiritualGuide = {
   },
   template: `
   <div class="card shadow mb-4" style="margin-top: -5px;">
-    <div class="card-header py-3">
+    <div class="card-header py-3" style="margin-bottom:-40px">
       <div class="row">
         <div class="col-md-4">
-          <h5 class="m-0 font-weight-bold text-primary">Đăng ký Lịch linh hướng</h5>
+          <h6 class="m-0 font-weight-bold text-dark">Đăng ký Lịch linh hướng</h6>
         </div>
         <div class="col-md-4"></div>
         <div class="col-md-2" style="padding-left:110px;">
-          <button class="btn text-size-15px rounded btn-danger" data-toggle="modal" data-target="#deleteScheduleSpiritualGuideModal">
+          <button class="btn rounded btn-danger" style="font-size:14px;" data-toggle="modal" data-target="#deleteScheduleSpiritualGuideModal">
             <i class="fas fa-trash-alt"></i>
             &nbsp;Xóa lịch
           </button>
         </div>
         <div class="col-md-2" style="padding-left:50px;">
-          <button class="btn text-size-15px rounded btn-hover-blue"
-            style="background-color: #056299;color: white;" @click="CreateScheduleSpiritualGuide">
+          <button class="btn rounded btn-hover-blue"
+            style="background-color: #056299;color: white;font-size:14px;" @click="CreateScheduleSpiritualGuide">
             <i class="fas fa-plus"></i>
             &nbsp;Tạo lịch
           </button>
@@ -12973,7 +13089,8 @@ const RegisteringScheduleSpiritualGuide = {
       </div>
     </div>
     <div class="card-body">
-      <div class="table-responsive">
+      <hr style="height:1px;color:lightgray;background-color:lightgray">
+      <div class="table-responsive" style="margin-top:-8px">
         <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
           <thead>
             <tr>
@@ -13534,6 +13651,7 @@ const DetailProfile = {
       idTable: 0,
       selectedFile: null,
       htmlImage: null,
+      fullNameShow: null,
     };
   },
   mounted() {
@@ -13566,6 +13684,7 @@ const DetailProfile = {
               this.managerId = response.data.manager.managerId;
               this.christianName = response.data.manager.christianName;
               this.fullName = response.data.manager.fullName;
+              this.fullNameShow = response.data.manager.fullName;
               this.birthday = crypt.formatDate(response.data.manager.birthday);
               this.phone = response.data.manager.phone;
               this.phoneEdit = response.data.manager.phone;
@@ -13594,6 +13713,7 @@ const DetailProfile = {
               this.candidateId = response.data.candidate.candidateId;
               this.christianName = response.data.candidate.christianName;
               this.fullName = response.data.candidate.fullName;
+              this.fullNameShow = response.data.candidate.fullName;
               this.birthday = crypt.formatDate(
                 response.data.candidate.birthday
               );
@@ -13627,6 +13747,7 @@ const DetailProfile = {
                 response.data.spiritualGuide.spiritualGuideId;
               this.christianName = response.data.spiritualGuide.christianName;
               this.fullName = response.data.spiritualGuide.fullName;
+              this.fullNameShow = response.data.spiritualGuide.fullName;
               this.birthday = crypt.formatDate(
                 response.data.spiritualGuide.birthday
               );
@@ -13657,6 +13778,7 @@ const DetailProfile = {
               this.companionId = response.data.companion.companionId;
               this.christianName = response.data.companion.christianName;
               this.fullName = response.data.companion.fullName;
+              this.fullNameShow = response.data.companion.fullName;
               this.birthday = crypt.formatDate(
                 response.data.companion.birthday
               );
@@ -13685,6 +13807,7 @@ const DetailProfile = {
             .then((response) => {
               this.teacherId = response.data.teacher.teacherId;
               this.fullName = response.data.teacher.fullName;
+              this.fullNameShow = response.data.teacher.fullName;
               this.gender = response.data.teacher.gender;
               this.birthday = crypt.formatDate(response.data.teacher.birthday);
               this.phone = response.data.teacher.phone;
@@ -13839,7 +13962,7 @@ const DetailProfile = {
                     position: this.position,
                     homeland: this.homeland,
                     status: this.status,
-                    id: this.$route.params.id,
+                    id: this.idTable,
                   };
                   const url =
                     "http://localhost:3000/api/managers/" +
@@ -13877,7 +14000,7 @@ const DetailProfile = {
                     position: this.position,
                     homeland: this.homeland,
                     status: this.status,
-                    id: this.$route.params.id,
+                    id: this.idTable,
                   };
                   const url =
                     "http://localhost:3000/api/managers/" +
@@ -13907,7 +14030,7 @@ const DetailProfile = {
                   position: this.position,
                   homeland: this.homeland,
                   status: this.status,
-                  id: this.$route.params.id,
+                  id: this.idTable,
                 };
                 const url =
                   "http://localhost:3000/api/managers/" +
@@ -13973,7 +14096,7 @@ const DetailProfile = {
                         position: this.position,
                         homeland: this.homeland,
                         status: this.status,
-                        id: this.$route.params.id,
+                        id: this.idTable,
                       };
                       const url =
                         "http://localhost:3000/api/managers/" +
@@ -14011,7 +14134,7 @@ const DetailProfile = {
                         position: this.position,
                         homeland: this.homeland,
                         status: this.status,
-                        id: this.$route.params.id,
+                        id: this.idTable,
                       };
                       const url =
                         "http://localhost:3000/api/managers/" +
@@ -14041,7 +14164,7 @@ const DetailProfile = {
                       position: this.position,
                       homeland: this.homeland,
                       status: this.status,
-                      id: this.$route.params.id,
+                      id: this.idTable,
                     };
                     const url =
                       "http://localhost:3000/api/managers/" +
@@ -14112,7 +14235,7 @@ const DetailProfile = {
                         position: this.position,
                         homeland: this.homeland,
                         status: this.status,
-                        id: this.$route.params.id,
+                        id: this.idTable,
                       };
                       const url =
                         "http://localhost:3000/api/managers/" +
@@ -14150,7 +14273,7 @@ const DetailProfile = {
                         position: this.position,
                         homeland: this.homeland,
                         status: this.status,
-                        id: this.$route.params.id,
+                        id: this.idTable,
                       };
                       const url =
                         "http://localhost:3000/api/managers/" +
@@ -14180,7 +14303,7 @@ const DetailProfile = {
                       position: this.position,
                       homeland: this.homeland,
                       status: this.status,
-                      id: this.$route.params.id,
+                      id: this.idTable,
                     };
                     const url =
                       "http://localhost:3000/api/managers/" +
@@ -14260,7 +14383,7 @@ const DetailProfile = {
                               position: this.position,
                               homeland: this.homeland,
                               status: this.status,
-                              id: this.$route.params.id,
+                              id: this.idTable,
                             };
                             const url =
                               "http://localhost:3000/api/managers/" +
@@ -14298,7 +14421,7 @@ const DetailProfile = {
                               position: this.position,
                               homeland: this.homeland,
                               status: this.status,
-                              id: this.$route.params.id,
+                              id: this.idTable,
                             };
                             const url =
                               "http://localhost:3000/api/managers/" +
@@ -14328,7 +14451,7 @@ const DetailProfile = {
                             position: this.position,
                             homeland: this.homeland,
                             status: this.status,
-                            id: this.$route.params.id,
+                            id: this.idTable,
                           };
                           const url =
                             "http://localhost:3000/api/managers/" +
@@ -14394,7 +14517,7 @@ const DetailProfile = {
                     community: this.community,
                     homeland: this.homeland,
                     status: this.status,
-                    id: this.$route.params.id,
+                    id: this.idTable,
                   };
                   const url =
                     "http://localhost:3000/api/candidates/" +
@@ -14433,7 +14556,7 @@ const DetailProfile = {
                     community: this.community,
                     homeland: this.homeland,
                     status: this.status,
-                    id: this.$route.params.id,
+                    id: this.idTable,
                   };
                   const url =
                     "http://localhost:3000/api/candidates/" +
@@ -14464,7 +14587,7 @@ const DetailProfile = {
                   community: this.community,
                   homeland: this.homeland,
                   status: this.status,
-                  id: this.$route.params.id,
+                  id: this.idTable,
                 };
                 const url =
                   "http://localhost:3000/api/candidates/" +
@@ -14548,7 +14671,7 @@ const DetailProfile = {
                         community: this.community,
                         homeland: this.homeland,
                         status: this.status,
-                        id: this.$route.params.id,
+                        id: this.idTable,
                       };
                       axios
                         .delete(
@@ -14582,7 +14705,7 @@ const DetailProfile = {
                         community: this.community,
                         homeland: this.homeland,
                         status: this.status,
-                        id: this.$route.params.id,
+                        id: this.idTable,
                       };
                       axios
                         .post(
@@ -14608,7 +14731,7 @@ const DetailProfile = {
                       community: this.community,
                       homeland: this.homeland,
                       status: this.status,
-                      id: this.$route.params.id,
+                      id: this.idTable,
                     };
                     const url =
                       "http://localhost:3000/api/candidates/" +
@@ -14697,7 +14820,7 @@ const DetailProfile = {
                         community: this.community,
                         homeland: this.homeland,
                         status: this.status,
-                        id: this.$route.params.id,
+                        id: this.idTable,
                       };
                       axios
                         .delete(
@@ -14731,7 +14854,7 @@ const DetailProfile = {
                         community: this.community,
                         homeland: this.homeland,
                         status: this.status,
-                        id: this.$route.params.id,
+                        id: this.idTable,
                       };
                       axios
                         .post(
@@ -14757,7 +14880,7 @@ const DetailProfile = {
                       community: this.community,
                       homeland: this.homeland,
                       status: this.status,
-                      id: this.$route.params.id,
+                      id: this.idTable,
                     };
                     const url =
                       "http://localhost:3000/api/candidates/" +
@@ -14854,7 +14977,7 @@ const DetailProfile = {
                               community: this.community,
                               homeland: this.homeland,
                               status: this.status,
-                              id: this.$route.params.id,
+                              id: this.idTable,
                             };
                             axios
                               .delete(
@@ -14888,7 +15011,7 @@ const DetailProfile = {
                               community: this.community,
                               homeland: this.homeland,
                               status: this.status,
-                              id: this.$route.params.id,
+                              id: this.idTable,
                             };
                             axios
                               .post(
@@ -14914,7 +15037,7 @@ const DetailProfile = {
                             community: this.community,
                             homeland: this.homeland,
                             status: this.status,
-                            id: this.$route.params.id,
+                            id: this.idTable,
                           };
                           const url =
                             "http://localhost:3000/api/candidates/" +
@@ -14978,7 +15101,7 @@ const DetailProfile = {
                     position: this.position,
                     image: fileName,
                     status: this.status,
-                    id: this.$route.params.id,
+                    id: this.idTable,
                   };
                   const url =
                     "http://localhost:3000/api/spiritualGuides/" +
@@ -15016,7 +15139,7 @@ const DetailProfile = {
                     position: this.position,
                     image: fileName,
                     status: this.status,
-                    id: this.$route.params.id,
+                    id: this.idTable,
                   };
                   const url =
                     "http://localhost:3000/api/spiritualGuides/" +
@@ -15046,7 +15169,7 @@ const DetailProfile = {
                   position: this.position,
                   image: this.imageEdit,
                   status: this.status,
-                  id: this.$route.params.id,
+                  id: this.idTable,
                 };
                 const url =
                   "http://localhost:3000/api/spiritualGuides/" +
@@ -15115,7 +15238,7 @@ const DetailProfile = {
                         position: this.position,
                         image: fileName,
                         status: this.status,
-                        id: this.$route.params.id,
+                        id: this.idTable,
                       };
                       const url =
                         "http://localhost:3000/api/spiritualGuides/" +
@@ -15153,7 +15276,7 @@ const DetailProfile = {
                         position: this.position,
                         image: fileName,
                         status: this.status,
-                        id: this.$route.params.id,
+                        id: this.idTable,
                       };
                       const url =
                         "http://localhost:3000/api/spiritualGuides/" +
@@ -15183,7 +15306,7 @@ const DetailProfile = {
                       position: this.position,
                       image: this.imageEdit,
                       status: this.status,
-                      id: this.$route.params.id,
+                      id: this.idTable,
                     };
                     const url =
                       "http://localhost:3000/api/spiritualGuides/" +
@@ -15257,7 +15380,7 @@ const DetailProfile = {
                         position: this.position,
                         image: fileName,
                         status: this.status,
-                        id: this.$route.params.id,
+                        id: this.idTable,
                       };
                       const url =
                         "http://localhost:3000/api/spiritualGuides/" +
@@ -15295,7 +15418,7 @@ const DetailProfile = {
                         position: this.position,
                         image: fileName,
                         status: this.status,
-                        id: this.$route.params.id,
+                        id: this.idTable,
                       };
                       const url =
                         "http://localhost:3000/api/spiritualGuides/" +
@@ -15325,7 +15448,7 @@ const DetailProfile = {
                       position: this.position,
                       image: this.imageEdit,
                       status: this.status,
-                      id: this.$route.params.id,
+                      id: this.idTable,
                     };
                     const url =
                       "http://localhost:3000/api/spiritualGuides/" +
@@ -15407,7 +15530,7 @@ const DetailProfile = {
                               position: this.position,
                               image: fileName,
                               status: this.status,
-                              id: this.$route.params.id,
+                              id: this.idTable,
                             };
                             const url =
                               "http://localhost:3000/api/spiritualGuides/" +
@@ -15445,7 +15568,7 @@ const DetailProfile = {
                               position: this.position,
                               image: fileName,
                               status: this.status,
-                              id: this.$route.params.id,
+                              id: this.idTable,
                             };
                             const url =
                               "http://localhost:3000/api/spiritualGuides/" +
@@ -15475,7 +15598,7 @@ const DetailProfile = {
                             position: this.position,
                             image: this.imageEdit,
                             status: this.status,
-                            id: this.$route.params.id,
+                            id: this.idTable,
                           };
                           const url =
                             "http://localhost:3000/api/spiritualGuides/" +
@@ -15542,7 +15665,7 @@ const DetailProfile = {
                     position: this.position,
                     image: fileName,
                     status: this.status,
-                    id: this.$route.params.id,
+                    id: this.idTable,
                   };
                   const url =
                     "http://localhost:3000/api/companions/" +
@@ -15580,7 +15703,7 @@ const DetailProfile = {
                     position: this.position,
                     image: fileName,
                     status: this.status,
-                    id: this.$route.params.id,
+                    id: this.idTable,
                   };
                   const url =
                     "http://localhost:3000/api/companions/" +
@@ -15610,7 +15733,7 @@ const DetailProfile = {
                   position: this.position,
                   image: this.imageEdit,
                   status: this.status,
-                  id: this.$route.params.id,
+                  id: this.idTable,
                 };
                 const url =
                   "http://localhost:3000/api/companions/" +
@@ -15679,7 +15802,7 @@ const DetailProfile = {
                         position: this.position,
                         image: fileName,
                         status: this.status,
-                        id: this.$route.params.id,
+                        id: this.idTable,
                       };
                       const url =
                         "http://localhost:3000/api/companions/" +
@@ -15717,7 +15840,7 @@ const DetailProfile = {
                         position: this.position,
                         image: fileName,
                         status: this.status,
-                        id: this.$route.params.id,
+                        id: this.idTable,
                       };
                       const url =
                         "http://localhost:3000/api/companions/" +
@@ -15747,7 +15870,7 @@ const DetailProfile = {
                       position: this.position,
                       image: this.imageEdit,
                       status: this.status,
-                      id: this.$route.params.id,
+                      id: this.idTable,
                     };
                     const url =
                       "http://localhost:3000/api/companions/" +
@@ -15821,7 +15944,7 @@ const DetailProfile = {
                         position: this.position,
                         image: fileName,
                         status: this.status,
-                        id: this.$route.params.id,
+                        id: this.idTable,
                       };
                       const url =
                         "http://localhost:3000/api/companions/" +
@@ -15859,7 +15982,7 @@ const DetailProfile = {
                         position: this.position,
                         image: fileName,
                         status: this.status,
-                        id: this.$route.params.id,
+                        id: this.idTable,
                       };
                       const url =
                         "http://localhost:3000/api/companions/" +
@@ -15889,7 +16012,7 @@ const DetailProfile = {
                       position: this.position,
                       image: this.imageEdit,
                       status: this.status,
-                      id: this.$route.params.id,
+                      id: this.idTable,
                     };
                     const url =
                       "http://localhost:3000/api/companions/" +
@@ -15971,7 +16094,7 @@ const DetailProfile = {
                               position: this.position,
                               image: fileName,
                               status: this.status,
-                              id: this.$route.params.id,
+                              id: this.idTable,
                             };
                             const url =
                               "http://localhost:3000/api/companions/" +
@@ -16009,7 +16132,7 @@ const DetailProfile = {
                               position: this.position,
                               image: fileName,
                               status: this.status,
-                              id: this.$route.params.id,
+                              id: this.idTable,
                             };
                             const url =
                               "http://localhost:3000/api/companions/" +
@@ -16039,7 +16162,7 @@ const DetailProfile = {
                             position: this.position,
                             image: this.imageEdit,
                             status: this.status,
-                            id: this.$route.params.id,
+                            id: this.idTable,
                           };
                           const url =
                             "http://localhost:3000/api/companions/" +
@@ -16105,7 +16228,7 @@ const DetailProfile = {
                     image: fileName,
                     subject: this.subject,
                     status: this.status,
-                    id: this.$route.params.id,
+                    id: this.idTable,
                   };
                   const url =
                     "http://localhost:3000/api/teachers/" +
@@ -16142,7 +16265,7 @@ const DetailProfile = {
                     image: fileName,
                     subject: this.subject,
                     status: this.status,
-                    id: this.$route.params.id,
+                    id: this.idTable,
                   };
                   const url =
                     "http://localhost:3000/api/teachers/" +
@@ -16171,7 +16294,7 @@ const DetailProfile = {
                   image: this.imageEdit,
                   subject: this.subject,
                   status: this.status,
-                  id: this.$route.params.id,
+                  id: this.idTable,
                 };
                 const url =
                   "http://localhost:3000/api/teachers/" +
@@ -16240,7 +16363,7 @@ const DetailProfile = {
                           image: fileName,
                           subject: this.subject,
                           status: this.status,
-                          id: this.$route.params.id,
+                          id: this.idTable,
                         };
                         const url =
                           "http://localhost:3000/api/teachers/" +
@@ -16277,7 +16400,7 @@ const DetailProfile = {
                           image: fileName,
                           subject: this.subject,
                           status: this.status,
-                          id: this.$route.params.id,
+                          id: this.idTable,
                         };
                         const url =
                           "http://localhost:3000/api/teachers/" +
@@ -16306,7 +16429,7 @@ const DetailProfile = {
                         image: this.imageEdit,
                         subject: this.subject,
                         status: this.status,
-                        id: this.$route.params.id,
+                        id: this.idTable,
                       };
                       const url =
                         "http://localhost:3000/api/teachers/" +
@@ -16381,7 +16504,7 @@ const DetailProfile = {
                           image: fileName,
                           subject: this.subject,
                           status: this.status,
-                          id: this.$route.params.id,
+                          id: this.idTable,
                         };
                         const url =
                           "http://localhost:3000/api/teachers/" +
@@ -16418,7 +16541,7 @@ const DetailProfile = {
                           image: fileName,
                           subject: this.subject,
                           status: this.status,
-                          id: this.$route.params.id,
+                          id: this.idTable,
                         };
                         const url =
                           "http://localhost:3000/api/teachers/" +
@@ -16447,7 +16570,7 @@ const DetailProfile = {
                         image: this.imageEdit,
                         subject: this.subject,
                         status: this.status,
-                        id: this.$route.params.id,
+                        id: this.idTable,
                       };
                       const url =
                         "http://localhost:3000/api/teachers/" +
@@ -16530,7 +16653,7 @@ const DetailProfile = {
                                 image: fileName,
                                 subject: this.subject,
                                 status: this.status,
-                                id: this.$route.params.id,
+                                id: this.idTable,
                               };
                               const url =
                                 "http://localhost:3000/api/teachers/" +
@@ -16567,7 +16690,7 @@ const DetailProfile = {
                                 image: fileName,
                                 subject: this.subject,
                                 status: this.status,
-                                id: this.$route.params.id,
+                                id: this.idTable,
                               };
                               const url =
                                 "http://localhost:3000/api/teachers/" +
@@ -16596,7 +16719,7 @@ const DetailProfile = {
                               image: this.imageEdit,
                               subject: this.subject,
                               status: this.status,
-                              id: this.$route.params.id,
+                              id: this.idTable,
                             };
                             const url =
                               "http://localhost:3000/api/teachers/" +
@@ -16685,7 +16808,7 @@ const DetailProfile = {
   template: `
   <div class="card shadow mb-4" style="margin-top: -5px;">
   <div class="card-header py-3">
-    <h5 class="m-0 font-weight-bold text-primary">Thông Tin Cá Nhân</h5>
+    <h6 class="m-0 font-weight-bold text-dark">Thông Tin Cá Nhân</h6>
   </div>
   <div class="card-body">
     <form @submit.prevent="submitEditProfileForm" action="POST" method="" autocomplete="off">
@@ -16702,7 +16825,7 @@ const DetailProfile = {
               </div>
               <div class="row">
                 <div class="col-sm-12 text-center mt-2">
-                  <span class="font-weight-bold" style="font-size: large;">{{ fullName }}</span>
+                  <span class="font-weight-bold" style="font-size: large;">{{ fullNameShow }}</span>
                 </div>
               </div>
               <div class="row">
@@ -16718,14 +16841,14 @@ const DetailProfile = {
             <div class="col-sm-9">
               <div class="row" v-show="role == 1 || role == 2 || role == 3 || role == 4 || role == 5 || role == 6 || role == 7 || role == 8 || role == 9">
                 <div class="col-lg-6">
-                  <label class="text-size-15px font-weight-bold col-form-label" for="fullName">Họ và Tên</label>
+                  <label class=" font-weight-bold col-form-label" for="fullName">Họ và Tên</label>
                   <label class="text-danger">*</label>
                   <input type="text" id="fullName" name="fullName" v-model="fullName" :title="titleFullName"
                   :value="fullName" v-on:keyup="fullName = $event.target.value"
                   class="form-control text-size-13px " placeholder="Nhập Họ và Tên..." style=" margin-top: -5px;">
                 </div>
                 <div class="col-lg-6">
-                  <label class="text-size-15px font-weight-bold col-form-label" for="christianName">Tên Thánh</label>
+                  <label class=" font-weight-bold col-form-label" for="christianName">Tên Thánh</label>
                   <label class="text-danger">*</label>
                   <input type="text" :title="titleChristianName" name="christianName" id="christianName"
                     v-model="christianName" :value="christianName" v-on:keyup="christianName = $event.target.value" 
@@ -16735,14 +16858,14 @@ const DetailProfile = {
               </div>
               <div class="row" v-show="role == 10">
                 <div class="col-lg-6">
-                  <label class="text-size-15px font-weight-bold col-form-label" for="fullName">Họ và Tên</label>
+                  <label class=" font-weight-bold col-form-label" for="fullName">Họ và Tên</label>
                   <label class="text-danger">*</label>
                   <input type="text" id="fullName" name="fullName" v-model="fullName" :title="titleFullName"
                   :value="fullName" v-on:keyup="fullName = $event.target.value"
                   class="form-control text-size-13px " placeholder="Nhập Họ và Tên..." style=" margin-top: -5px;">
                 </div>
                 <div class="col-lg-6">
-                  <label class="text-size-15px font-weight-bold col-form-label" for="gender">Giới Tính</label>
+                  <label class=" font-weight-bold col-form-label" for="gender">Giới Tính</label>
                   <label class="text-danger">*</label>
                   <select class="custom-select  text-size-13px  h-32px" v-model="gender" name="gender"
                     id="gender" style="margin-top: -5px;">
@@ -16752,39 +16875,39 @@ const DetailProfile = {
                   </select>
                 </div>
               </div>
-              <div class="row mt-2" v-show="role == 1 || role == 2 || role == 3 || role == 4 || role == 5 || role == 6 || role == 7 || role == 8 || role == 9">
+              <div class="row mt-2" v-show="role == 1 || role == 2 || role == 3 || role == 4 || role == 5">
                 <div class="col-lg-6">
-                  <label class="text-size-15px font-weight-bold col-form-label" for="birthday">Ngày Sinh</label>
+                  <label class=" font-weight-bold col-form-label" for="birthday">Ngày Sinh</label>
                   <label class="text-danger">*</label>
                   <input v-model="birthday" name="birthday" id="birthday" type="date" :title="titleBirthday"
                   :value="birthday" v-on:keyup="birthday = $event.target.value"
                     class="form-control  text-size-13px " style="margin-top: -5px;">
                 </div>
                 <div class="col-lg-6">
-                  <label class="text-size-15px font-weight-bold col-form-label" for="homeland">Quê Quán</label>
+                  <label class=" font-weight-bold col-form-label" for="homeland">Quê Quán</label>
                   <label class="text-danger">*</label>
                   <input v-model="homeland" name="homeland" id="homeland" type="text" :title="titleHomeland"
                   :value="homeland" v-on:keyup="homeland = $event.target.value"
                     class="form-control  text-size-13px " placeholder="Nhập Quê quán..." style="margin-top: -5px;">
                 </div>
               </div>
-              <div class="row mt-2" v-show="role == 10">
+              <div class="row mt-2" v-show="role == 10 || role == 6 || role == 7 || role == 8 || role == 9">
                 <div class="col-lg-6">
-                  <label class="text-size-15px font-weight-bold col-form-label" for="birthday">Ngày Sinh</label>
+                  <label class=" font-weight-bold col-form-label" for="birthday">Ngày Sinh</label>
                   <label class="text-danger">*</label>
                   <input v-model="birthday" name="birthday" id="birthday" type="date" :title="titleBirthday"
                   :value="birthday" v-on:keyup="birthday = $event.target.value"
                     class="form-control  text-size-13px " style="margin-top: -5px;">
                 </div>
                 <div class="col-lg-6">
-                  <label class="text-size-15px font-weight-bold col-form-label" for="image">Hình Ảnh</label>
+                  <label class=" font-weight-bold col-form-label" for="image">Hình Ảnh</label>
                   <input type="file" id="image" :title="titlePicture"
                     class="form-control rounded text-size-13px" style="margin-top: -5px;" @input="onFileSelected(event)"/>
                 </div>
               </div>
               <div class="row mt-2">
                 <div class="col-lg-6">
-                  <label class="text-size-15px font-weight-bold col-form-label" for="phone">Số Điện Thoại</label>
+                  <label class=" font-weight-bold col-form-label" for="phone">Số Điện Thoại</label>
                   <label class="text-danger">*</label>
                   <input v-model="phone" name="phone" id="phone" type="text" :title="titlePhone"
                     v-model="phone" :value="phone" v-on:keyup="phone = $event.target.value"
@@ -16794,7 +16917,7 @@ const DetailProfile = {
                     định dạng</span>
                 </div>
                 <div class="col-lg-6">
-                  <label class="text-size-15px font-weight-bold col-form-label" for="email">Email</label>
+                  <label class=" font-weight-bold col-form-label" for="email">Email</label>
                   <label class="text-danger">*</label>
                   <input v-model="email" name="email" id="email" type="text" :title="titleEmail"
                   :value="email" v-on:keyup="email = $event.target.value"
@@ -16804,9 +16927,9 @@ const DetailProfile = {
                     lệ</span>
                 </div>
               </div>
-              <div class="row mt-2" v-show="role == 1 || role == 2 || role == 3 || role == 4 || role == 5 || role == 6 || role == 7 || role == 8 || role == 9">
+              <div class="row mt-2" v-show="role == 1 || role == 2 || role == 3 || role == 4 || role == 5">
                 <div class="col-lg-6">
-                  <label class="text-size-15px font-weight-bold col-form-label" for="image">Hình Ảnh</label>
+                  <label class=" font-weight-bold col-form-label" for="image">Hình Ảnh</label>
                   <input type="file" id="image" :title="titlePicture"
                     class="form-control rounded text-size-13px" style="margin-top: -5px;" @input="onFileSelected(event)"/>
                 </div>
@@ -16819,39 +16942,32 @@ const DetailProfile = {
         <div class="col-12">
           <div style="float:right" v-show="role == 1 || role == 2 || role == 3 || role == 4 || role == 5 || role == 6 || role == 7 || role == 8 || role == 9">
             <button :disabled="!editProfileFormIsValid" type="submit"
-              class="btn text-size-15px rounded btn-hover-blue"
-              style="background-color: #056299;color: white;">
+              class="btn  rounded btn-hover-blue"
+              style="background-color: #056299;color: white;font-size:13px;">
               <i class="far fa-save fa-lg"></i>
               &nbsp;Lưu
             </button>
           </div>
           <div style="float:right" v-show="role == 10">
             <button :disabled="!editProfileFormWithTeacherIsValid" type="submit"
-              class="btn text-size-15px rounded btn-hover-blue"
-              style="background-color: #056299;color: white;">
+              class="btn  rounded btn-hover-blue"
+              style="background-color: #056299;color: white;font-size:13px;">
               <i class="far fa-save fa-lg"></i>
               &nbsp;Lưu
             </button>
           </div>
-          <div style="float:right; margin-right: 10px;" v-show="role == 1 || role == 2 || role == 3 || role == 4 || role == 5 || role == 6 || role == 7 || role == 8 || role == 9">
+          <div style="float:right; margin-right: 10px;" v-show="role == 1 || role == 2 || role == 3 || role == 4 || role == 5">
             <button :disabled="!refreshFormEditProfile" @click="clearInputEditProfileForm"
-              class="btn btn-success text-size-15px rounded">
+              class="btn btn-success  rounded" style="font-size:13px;">
               <i class="fas fa-sync-alt"></i>
               &nbsp;Làm mới
             </button>
           </div>
-          <div style="float:right; margin-right: 10px;" v-show="role == 10">
+          <div style="float:right; margin-right: 10px;" v-show="role == 10 || role == 6 || role == 7 || role == 8 || role == 9">
             <button :disabled="!refreshFormEditProfilewithTeacher" @click="clearInputEditProfileFormWithTeacher"
-              class="btn btn-success text-size-15px rounded">
+              class="btn btn-success  rounded" style="font-size:13px;">
               <i class="fas fa-sync-alt"></i>
               &nbsp;Làm mới
-            </button>
-          </div>
-          <div style="float:right; margin-right: 335px;">
-            <button class="btn text-size-15px rounded btn-hover-blue"
-              style="background-color: #056299;color: white;" @click="toHome">
-              <i class="fas fa-fast-backward"></i>
-              &nbsp;Quay lại
             </button>
           </div>
         </div>
@@ -17045,14 +17161,14 @@ const ChangePassword = {
   template: `
   <div class="card shadow mb-4" style="margin-top: -5px;">
     <div class="card-header py-3">
-      <h5 class="m-0 font-weight-bold text-primary">Thay Đổi Mật Khẩu</h5>
+      <h6 class="m-0 font-weight-bold text-dark">Thay Đổi Mật Khẩu</h6>
     </div>
     <div class="card-body">
       <form @submit.prevent="submitChangePasswordForm" action="POST" method="" autocomplete="off">
         <div class="row mt-2">
           <div class="col-lg-4"></div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="oldPassword">Mật Khẩu Hiện Tại</label>
+            <label class="font-weight-bold col-form-label" for="oldPassword">Mật Khẩu Hiện Tại</label>
             <label class="text-danger">*</label>
             <input type="password" v-bind:title="titleOldPassword" v-model="oldPassword" id="oldPassword"
               name="oldPassword" class="form-control text-size-13px " placeholder="Nhập Tài khoản..."
@@ -17064,7 +17180,7 @@ const ChangePassword = {
         <div class="row mt-1">
           <div class="col-lg-4"></div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="newPassword">Mật Khẩu Mới</label>
+            <label class="font-weight-bold col-form-label" for="newPassword">Mật Khẩu Mới</label>
             <label class="text-danger">*</label>
             <input v-bind:title="titleNewPassword" v-model="newPassword" id="newPassword" name="newPassword"
               type="password" class="form-control  text-size-13px " placeholder="Nhập Mật khẩu Mới..." style="margin-top: -5px;">
@@ -17078,7 +17194,7 @@ const ChangePassword = {
         <div class="row mt-1">
           <div class="col-lg-4"></div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="renewPassword">Nhập Lại Mật Khẩu Mới</label>
+            <label class="font-weight-bold col-form-label" for="renewPassword">Nhập Lại Mật Khẩu Mới</label>
             <label class="text-danger">*</label>
             <input v-bind:title="titleRenewPassword" v-model="renewPassword" id="renewPassword" name="renewPassword"
               type="password" class="form-control  text-size-13px " placeholder="Nhập Lại Mật khẩu Mới..." style="margin-top: -5px;">
@@ -17091,15 +17207,15 @@ const ChangePassword = {
           <div class="col-12">
             <div style="float:right">
               <button :disabled="!changePasswordFormIsValid" type="submit"
-                class="btn text-size-15px rounded btn-hover-blue"
-                style="background-color: #056299;color: white;">
+                class="btn rounded btn-hover-blue"
+                style="background-color: #056299;color: white;font-size:13px;">
                 <i class="far fa-save fa-lg"></i>
                 &nbsp;Lưu
               </button>
             </div>
             <div style="float:right; margin-right: 10px;">
               <button :disabled="!refreshFormChangePassword" @click="clearInputChangePasswordForm"
-                class="btn btn-success text-size-15px rounded">
+                class="btn btn-success rounded" style="font-size:13px;">
                 <i class="fas fa-sync-alt"></i>
                 &nbsp;Làm mới
               </button>

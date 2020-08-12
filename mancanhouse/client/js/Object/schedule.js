@@ -74,16 +74,16 @@ const ListSchedule = {
   },
   template: `
   <div class="card shadow mb-4" style="margin-top: -5px;">
-    <div class="card-header py-3">
+    <div class="card-header py-3" style="margin-bottom:-40px">
       <div class="row">
         <div class="col-md-4">
-          <h5 class="m-0 font-weight-bold text-primary">Danh sách Lịch Học</h5>
+          <h6 class="m-0 font-weight-bold text-dark">Danh sách Lịch Học</h6>
         </div>
         <div class="col-md-6"></div>
         <div class="col-md-2" style="padding-left:68px;">
           <router-link :to="{ name: 'addSchedule' }">
-            <button :title="titleButtonAdd" class="btn text-size-15px rounded btn-hover-blue"
-              style="background-color: #056299;color: white;">
+            <button :title="titleButtonAdd" class="btn rounded btn-hover-blue"
+              style="background-color: #056299;color: white;font-size:14px;">
               <i class="fas fa-plus"></i>
               &nbsp;Thêm
             </button>
@@ -92,7 +92,8 @@ const ListSchedule = {
       </div>
     </div>
     <div class="card-body">
-      <div class="table-responsive">
+      <hr style="height:1px;color:lightgray;background-color:lightgray">
+      <div class="table-responsive" style="margin-top:-8px">
         <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
           <thead>
             <tr>
@@ -331,17 +332,17 @@ const AddSchedule = {
   template: `
   <div class="card shadow mb-4" style="margin-top: -5px;">
     <div class="card-header py-3">
-      <h5 class="m-0 font-weight-bold text-primary">Thêm Lịch Học</h5>
+      <h6 class="m-0 font-weight-bold text-dark">Thêm Lịch Học</h6>
     </div>
     <div class="card-body">
       <form @submit.prevent="submitAddScheduleForm" action="POST" method="" autocomplete="off">
         <div class="row mt-2">
           <div class="col-lg-4">
-            <label class="font-weight-bold">Thông Tin Lịch Học:</label>
+            <label class="font-weight-bold text-size-15px">Thông Tin Lịch Học:</label>
             <p style="font-size: 11px;">Thông tin phục vụ cho việc quản lý nhiều Lịch Học</p>
           </div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="subject">Môn Học</label>
+            <label class="font-weight-bold col-form-label" for="subject">Môn Học</label>
             <label class="text-danger">*</label>
             <select class="custom-select  text-size-13px  h-32px" v-model="subject" name="subject"
               id="subject" style="margin-top: -5px;">
@@ -351,7 +352,7 @@ const AddSchedule = {
             </select>
           </div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="teacher">Giảng Viên</label>
+            <label class="font-weight-bold col-form-label" for="teacher">Giảng Viên</label>
             <label class="text-danger">*</label>
             <select class="custom-select  text-size-13px  h-32px" v-model="teacher" name="teacher"
               id="teacher" style="margin-top: -5px;">
@@ -364,13 +365,13 @@ const AddSchedule = {
         <div class="row mt-1">
           <div class="col-lg-4"></div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="dateStart">Ngày Bắt Đầu Môn Học</label>
+            <label class="font-weight-bold col-form-label" for="dateStart">Ngày Bắt Đầu Môn Học</label>
             <label class="text-danger">*</label>
             <input v-model="dateStart" name="dateStart" id="dateStart" type="date" :title="titleDateStart"
               class="form-control  text-size-13px " style="margin-top: -5px;">
           </div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="dateEnd">Ngày Kết Thúc Môn Học</label>
+            <label class="font-weight-bold col-form-label" for="dateEnd">Ngày Kết Thúc Môn Học</label>
             <label class="text-danger">*</label>
             <input v-model="dateEnd" name="dateEnd" id="dateEnd" type="date" :title="titleDateEnd"
               class="form-control  text-size-13px " style="margin-top: -5px;">
@@ -379,7 +380,7 @@ const AddSchedule = {
         <div class="row mt-2">
           <div class="col-lg-4"></div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="dayOfWeek">Ngày Học Trong Tuần</label>
+            <label class="font-weight-bold col-form-label" for="dayOfWeek">Ngày Học Trong Tuần</label>
             <label class="text-danger">*</label>
             <select class="custom-select  text-size-13px  h-32px" v-model="dayOfWeek" name="dayOfWeek" id="dayOfWeek"
               style="margin-top: -5px;">
@@ -393,22 +394,22 @@ const AddSchedule = {
           <div class="col-12">
             <div style="float:right">
               <button :disabled="!addScheduleFormIsValid" type="submit"
-                class="btn text-size-15px rounded btn-hover-blue"
-                style="background-color: #056299;color: white;">
+                class="btn rounded btn-hover-blue"
+                style="background-color: #056299;color: white;font-size:13px;">
                 <i class="far fa-save fa-lg"></i>
                 &nbsp;Lưu
               </button>
             </div>
             <div style="float:right; margin-right: 10px;">
               <button :disabled="!refreshFormSchedule" @click="clearInputScheduleForm"
-                class="btn btn-success text-size-15px rounded">
+                class="btn btn-success rounded" style="font-size:13px;">
                 <i class="fas fa-sync-alt"></i>
                 &nbsp;Làm mới
               </button>
             </div>
-            <div style="float:right; margin-right: 335px;">
-              <button class="btn text-size-15px rounded btn-hover-blue"
-                style="background-color: #056299;color: white;" @click="toListSchedule">
+            <div style="float:right; margin-right: 360px;">
+              <button class="btn rounded btn-hover-blue"
+                style="background-color: #056299;color: white;font-size:13px;" @click="toListSchedule">
                 <i class="fas fa-fast-backward"></i>
                 &nbsp;Quay lại
               </button>
@@ -582,17 +583,17 @@ const EditSchedule = {
   template: `
   <div class="card shadow mb-4" style="margin-top: -5px;">
     <div class="card-header py-3">
-      <h5 class="m-0 font-weight-bold text-primary">Chỉnh sửa Lịch Học</h5>
+      <h6 class="m-0 font-weight-bold text-dark">Chỉnh sửa Lịch Học</h6>
     </div>
     <div class="card-body">
       <form @submit.prevent="submitEditScheduleForm" action="POST" method="" autocomplete="off">
         <div class="row mt-2">
           <div class="col-lg-4">
-            <label class="font-weight-bold">Thông Tin Lịch Học:</label>
+            <label class="font-weight-bold text-size-15px">Thông Tin Lịch Học:</label>
             <p style="font-size: 11px;">Thông tin phục vụ cho việc quản lý nhiều Lịch Học</p>
           </div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="subject">Môn Học</label>
+            <label class="font-weight-bold col-form-label" for="subject">Môn Học</label>
             <label class="text-danger">*</label>
             <select class="custom-select  text-size-13px  h-32px" v-model="subject" name="subject"
               id="subject" style="margin-top: -5px;">
@@ -602,7 +603,7 @@ const EditSchedule = {
             </select>
           </div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="teacher">Giảng Viên</label>
+            <label class="font-weight-bold col-form-label" for="teacher">Giảng Viên</label>
             <label class="text-danger">*</label>
             <select class="custom-select  text-size-13px  h-32px" v-model="teacher" name="teacher"
               id="teacher" style="margin-top: -5px;">
@@ -615,13 +616,13 @@ const EditSchedule = {
         <div class="row mt-1">
           <div class="col-lg-4"></div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="dateStart">Ngày Bắt Đầu Môn Học</label>
+            <label class="font-weight-bold col-form-label" for="dateStart">Ngày Bắt Đầu Môn Học</label>
             <label class="text-danger">*</label>
             <input v-model="dateStart" name="dateStart" id="dateStart" type="date" :title="titleDateStart"
             :value="dateStart" v-on:keyup="dateStart = $event.target.value" class="form-control  text-size-13px " style="margin-top: -5px;">
           </div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="dateEnd">Ngày Kết Thúc Môn Học</label>
+            <label class="font-weight-bold col-form-label" for="dateEnd">Ngày Kết Thúc Môn Học</label>
             <label class="text-danger">*</label>
             <input v-model="dateEnd" name="dateEnd" id="dateEnd" type="date" :title="titleDateEnd"
             :value="dateEnd" v-on:keyup="dateEnd = $event.target.value" class="form-control  text-size-13px " style="margin-top: -5px;">
@@ -630,7 +631,7 @@ const EditSchedule = {
         <div class="row mt-2">
           <div class="col-lg-4"></div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="dayOfWeek">Ngày Học Trong Tuần</label>
+            <label class="font-weight-bold col-form-label" for="dayOfWeek">Ngày Học Trong Tuần</label>
             <label class="text-danger">*</label>
             <select class="custom-select  text-size-13px  h-32px" v-model="dayOfWeek" name="dayOfWeek" id="dayOfWeek"
               style="margin-top: -5px;">
@@ -644,22 +645,22 @@ const EditSchedule = {
           <div class="col-12">
             <div style="float:right">
               <button :disabled="!editScheduleFormIsValid" type="submit"
-                class="btn text-size-15px rounded btn-hover-blue"
-                style="background-color: #056299;color: white;">
+                class="btn rounded btn-hover-blue"
+                style="background-color: #056299;color: white;font-size:13px;">
                 <i class="far fa-save fa-lg"></i>
                 &nbsp;Lưu
               </button>
             </div>
             <div style="float:right; margin-right: 10px;">
               <button :disabled="!refreshFormSchedule" @click="clearInputScheduleForm"
-                class="btn btn-success text-size-15px rounded">
+                class="btn btn-success rounded" style="font-size:13px;">
                 <i class="fas fa-sync-alt"></i>
                 &nbsp;Làm mới
               </button>
             </div>
-            <div style="float:right; margin-right: 335px;">
-              <button class="btn text-size-15px rounded btn-hover-blue"
-                style="background-color: #056299;color: white;" @click="toListSchedule">
+            <div style="float:right; margin-right: 360px;">
+              <button class="btn rounded btn-hover-blue"
+                style="background-color: #056299;color: white;font-size:13px;" @click="toListSchedule">
                 <i class="fas fa-fast-backward"></i>
                 &nbsp;Quay lại
               </button>

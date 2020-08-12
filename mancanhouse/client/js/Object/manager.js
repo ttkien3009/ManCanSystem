@@ -77,17 +77,17 @@ const ListManager = {
   },
   template: `
   <div class="card shadow mb-4" style="margin-top: -5px;">
-    <div class="card-header py-3">
+    <div class="card-header py-3" style="margin-bottom:-40px">
       <div class="row">
         <div class="col-md-4">
-          <h5 class="m-0 font-weight-bold text-primary">Danh sách Quản Lý</h5>
+          <h6 class="m-0 font-weight-bold text-dark">Danh Sách Quản Lý</h6>
         </div>
         <div class="col-md-6"></div>
         <div class="col-md-2" style="padding-left:68px;">
           <router-link :to="{ name: 'addManager' }">
-            <button :title="titleButtonAdd" class="btn text-size-15px rounded btn-hover-blue"
-              style="background-color: #056299;color: white;">
-              <i class="fas fa-plus"></i>
+            <button :title="titleButtonAdd" class="btn rounded btn-hover-blue"
+              style="background-color: #056299;color: white;font-size:14px;">
+              <i class="fas fa-plus fa-sm"></i>
               &nbsp;Thêm
             </button>
           </router-link>
@@ -95,7 +95,8 @@ const ListManager = {
       </div>
     </div>
     <div class="card-body">
-      <div class="table-responsive">
+      <hr style="height:1px;color:lightgray;background-color:lightgray">
+      <div class="table-responsive" style="margin-top:-8px">
         <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
           <thead>
             <tr>
@@ -127,7 +128,7 @@ const ListManager = {
               <td>{{ manager.fullName }}</td>
               <td>{{ manager.phone }}</td>
               <td>{{ manager.email }}</td>
-              <td v-for="department in positions" v-if="department.id == manager.position">{{ department.positionType }}-{{ department.name }}</td>
+              <td v-for="department in positions" v-if="department.id == manager.position">{{ department.positionType }}</td>
               <td>{{ manager.homeland }}</td>
               <td v-if="manager.status == 1">
                 <i class="fas fa-toggle-on fa-lg text-success"></i>
@@ -136,7 +137,7 @@ const ListManager = {
                 <i class="fas fa-toggle-off fa-lg text-danger"></i>
               </td>
               <td>
-                <div class="row" style="margin-left:-18px;">
+                <div class="row" style="margin-left:-13px;">
                   <div class="col-lg-4">
                     <button :title="titleButtonDisplay" data-toggle="modal" @click="getDetailManager(manager)"
                       data-target="#detailManagerModal"
@@ -147,14 +148,14 @@ const ListManager = {
                   <div class="col-lg-4">
                     <button :title="titleButtonEdit" @click="getDataManagerUpdate(manager)"
                       class="btn btn-warning btn-sm h-28px w-28px rounded" type="submit"
-                      style="margin-left: -8px;">
+                      style="margin-left: -14px;">
                       <i class="fas fa-edit fa-md ml--2px"></i>
                     </button>
                   </div>
                   <div class="col-lg-4">
                     <button :title="titleButtonDelete" data-toggle="modal" @click="getDetailManager(manager)"
                       data-target="#deleteManagerModal" class="btn btn-danger btn-sm h-28px w-28px rounded"
-                      style="margin-left: -16px;">
+                      style="margin-left: -28px;">
                       <i class="far fa-trash-alt fa-md ml--1px"></i>
                     </button>
                   </div>
@@ -560,23 +561,23 @@ const AddManager = {
   template: `
   <div class="card shadow mb-4" style="margin-top: -5px;">
     <div class="card-header py-3">
-      <h5 class="m-0 font-weight-bold text-primary">Thêm Quản Lý</h5>
+      <h6 class="m-0 font-weight-bold text-dark">Thêm Quản Lý</h6>
     </div>
     <div class="card-body">
       <form @submit.prevent="submitAddManagerForm" action="POST" method="" autocomplete="off">
         <div class="row mt-2">
           <div class="col-lg-4">
-            <label class="font-weight-bold">Thông Tin Quản Lý:</label>
+            <label class="font-weight-bold" style="font-size:15px;">Thông Tin Quản Lý:</label>
             <p style="font-size: 12px;">Thông tin phục vụ cho việc quản lý nhiều người Quản Lý</p>
           </div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="fullName">Họ và Tên</label>
+            <label class="font-weight-bold col-form-label" for="fullName">Họ và Tên</label>
             <label class="text-danger">*</label>
             <input type="text" id="fullName" name="fullName" v-model="fullName" :title="titleFullName"
               class="form-control text-size-13px " placeholder="Nhập Họ và Tên..." style=" margin-top: -5px;">
           </div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="christianName">Tên Thánh</label>
+            <label class="font-weight-bold col-form-label" for="christianName">Tên Thánh</label>
             <label class="text-danger">*</label>
             <input type="text" :title="titleChristianName" name="christianName" id="christianName"
               v-model="christianName" class="form-control  text-size-13px " placeholder="Nhập Tên Thánh..."
@@ -586,13 +587,13 @@ const AddManager = {
         <div class="row">
           <div class="col-lg-4"></div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="birthday">Ngày Sinh</label>
+            <label class="font-weight-bold col-form-label" for="birthday">Ngày Sinh</label>
             <label class="text-danger">*</label>
             <input v-model="birthday" name="birthday" id="birthday" type="date" :title="titleBirthday"
               class="form-control  text-size-13px " style="margin-top: -5px;">
           </div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="position">Chức Vụ</label>
+            <label class="font-weight-bold col-form-label" for="position">Chức Vụ</label>
             <label class="text-danger">*</label>
             <select class="custom-select  text-size-13px  h-32px" v-model="position" name="position"
               id="position" style="margin-top: -5px;">
@@ -606,7 +607,7 @@ const AddManager = {
         <div class="row mt-1">
           <div class="col-lg-4"></div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="phone">Số Điện Thoại</label>
+            <label class="font-weight-bold col-form-label" for="phone">Số Điện Thoại</label>
             <label class="text-danger">*</label>
             <input v-model="phone" name="phone" id="phone" type="text" :title="titlePhone"
               v-model="phone" class="form-control  text-size-13px " placeholder="Nhập Số điện thoại..."
@@ -615,7 +616,7 @@ const AddManager = {
               định dạng</span>
           </div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="email">Email</label>
+            <label class="font-weight-bold col-form-label" for="email">Email</label>
             <label class="text-danger">*</label>
             <input v-model="email" name="email" id="email" type="text" :title="titleEmail"
               class="form-control  text-size-13px " placeholder="Nhập Địa chỉ email..."
@@ -627,13 +628,13 @@ const AddManager = {
         <div class="row mt-1">
           <div class="col-lg-4"></div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="homeland">Quê Quán</label>
+            <label class="font-weight-bold col-form-label" for="homeland">Quê Quán</label>
             <label class="text-danger">*</label>
             <input v-model="homeland" name="homeland" id="homeland" type="text" :title="titleHomeland"
               class="form-control  text-size-13px " placeholder="Nhập Quê quán..." style="margin-top: -5px;">
           </div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="status">Trạng Thái</label>
+            <label class="font-weight-bold col-form-label" for="status">Trạng Thái</label>
             <label class="text-danger">*</label>
             <select class="custom-select  text-size-13px  h-32px" v-model="status" name="status" id="status"
               style="margin-top: -5px;">
@@ -646,7 +647,7 @@ const AddManager = {
         <div class="row mt-1">
           <div class="col-lg-4"></div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="image">Hình Ảnh</label>
+            <label class="font-weight-bold col-form-label" for="image">Hình Ảnh</label>
             <input type="file" id="image" @change="onFileSelected" :title="titlePicture" class="form-control rounded text-size-13px" style="margin-top: -5px;"/>
           </div>
         </div>
@@ -654,22 +655,22 @@ const AddManager = {
           <div class="col-12">
             <div style="float:right">
               <button :disabled="!addManagerFormIsValid" type="submit"
-                class="btn text-size-15px rounded btn-hover-blue"
-                style="background-color: #056299;color: white;">
+                class="btn  rounded btn-hover-blue"
+                style="background-color: #056299;color: white;font-size:13px;">
                 <i class="far fa-save fa-lg"></i>
                 &nbsp;Lưu
               </button>
             </div>
             <div style="float:right; margin-right: 10px;">
               <button :disabled="!refreshFormManager" @click="clearInputManagerForm"
-                class="btn btn-success text-size-15px rounded">
+                class="btn btn-success  rounded" style="font-size:13px;">
                 <i class="fas fa-sync-alt"></i>
                 &nbsp;Làm mới
               </button>
             </div>
-            <div style="float:right; margin-right: 335px;">
-              <button class="btn text-size-15px rounded btn-hover-blue"
-                style="background-color: #056299;color: white;" @click="toListManager">
+            <div style="float:right; margin-right: 360px;">
+              <button class="btn  rounded btn-hover-blue"
+                style="background-color: #056299;color: white;font-size:13px;" @click="toListManager">
                 <i class="fas fa-fast-backward"></i>
                 &nbsp;Quay lại
               </button>
@@ -1398,24 +1399,24 @@ const EditManager = {
   template: `
   <div class="card shadow mb-4" style="margin-top: -5px;">
     <div class="card-header py-3">
-      <h5 class="m-0 font-weight-bold text-primary">Chỉnh sửa Quản Lý</h5>
+      <h6 class="m-0 font-weight-bold text-dark">Chỉnh sửa Quản Lý</h6>
     </div>
     <div class="card-body">
       <form @submit.prevent="submitEditManagerForm" action="POST" method="" autocomplete="off">
         <div class="row mt-2">
           <div class="col-lg-4">
-            <label class="font-weight-bold">Thông Tin Quản Lý:</label>
+            <label class="font-weight-bold" style="font-size:15px;">Thông Tin Quản Lý:</label>
             <p style="font-size: 12px;">Thông tin phục vụ cho việc quản lý nhiều người Quản Lý</p>
           </div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="fullName">Họ và Tên</label>
+            <label class=" font-weight-bold col-form-label" for="fullName">Họ và Tên</label>
             <label class="text-danger">*</label>
             <input type="text" id="fullName" name="fullName" v-model="fullName" :title="titleFullName"
             :value="fullName" v-on:keyup="fullName = $event.target.value"
             class="form-control text-size-13px " placeholder="Nhập Họ và Tên..." style=" margin-top: -5px;">
           </div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="christianName">Tên Thánh</label>
+            <label class=" font-weight-bold col-form-label" for="christianName">Tên Thánh</label>
             <label class="text-danger">*</label>
             <input type="text" :title="titleChristianName" name="christianName" id="christianName"
               v-model="christianName" :value="christianName" v-on:keyup="christianName = $event.target.value" 
@@ -1426,14 +1427,14 @@ const EditManager = {
         <div class="row">
           <div class="col-lg-4"></div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="birthday">Ngày Sinh</label>
+            <label class=" font-weight-bold col-form-label" for="birthday">Ngày Sinh</label>
             <label class="text-danger">*</label>
             <input v-model="birthday" name="birthday" id="birthday" type="date" :title="titleBirthday"
             :value="birthday" v-on:keyup="birthday = $event.target.value"
               class="form-control  text-size-13px " style="margin-top: -5px;">
           </div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="position">Chức Vụ</label>
+            <label class=" font-weight-bold col-form-label" for="position">Chức Vụ</label>
             <label class="text-danger">*</label>
             <select class="custom-select  text-size-13px  h-32px" v-model="position" name="position"
               id="position" style="margin-top: -5px;">
@@ -1447,7 +1448,7 @@ const EditManager = {
         <div class="row mt-1">
           <div class="col-lg-4"></div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="phone">Số Điện Thoại</label>
+            <label class=" font-weight-bold col-form-label" for="phone">Số Điện Thoại</label>
             <label class="text-danger">*</label>
             <input v-model="phone" name="phone" id="phone" type="text" :title="titlePhone"
               v-model="phone" :value="phone" v-on:keyup="phone = $event.target.value"
@@ -1457,7 +1458,7 @@ const EditManager = {
               định dạng</span>
           </div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="email">Email</label>
+            <label class=" font-weight-bold col-form-label" for="email">Email</label>
             <label class="text-danger">*</label>
             <input v-model="email" name="email" id="email" type="text" :title="titleEmail"
             :value="email" v-on:keyup="email = $event.target.value"
@@ -1470,14 +1471,14 @@ const EditManager = {
         <div class="row mt-1">
           <div class="col-lg-4"></div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="homeland">Quê Quán</label>
+            <label class=" font-weight-bold col-form-label" for="homeland">Quê Quán</label>
             <label class="text-danger">*</label>
             <input v-model="homeland" name="homeland" id="homeland" type="text" :title="titleHomeland"
             :value="homeland" v-on:keyup="homeland = $event.target.value"
               class="form-control  text-size-13px " placeholder="Nhập Quê quán..." style="margin-top: -5px;">
           </div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="status">Trạng Thái</label>
+            <label class=" font-weight-bold col-form-label" for="status">Trạng Thái</label>
             <label class="text-danger">*</label>
             <select class="custom-select  text-size-13px  h-32px" v-model="status" name="status" id="status"
               style="margin-top: -5px;">
@@ -1490,7 +1491,7 @@ const EditManager = {
         <div class="row mt-1">
           <div class="col-lg-4"></div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="image">Hình Ảnh</label>
+            <label class=" font-weight-bold col-form-label" for="image">Hình Ảnh</label>
             <input type="file" id="image" @change="onFileSelected" :title="titlePicture"
               class="form-control rounded text-size-13px" style="margin-top: -5px;" />
           </div>
@@ -1499,22 +1500,22 @@ const EditManager = {
           <div class="col-12">
             <div style="float:right">
               <button :disabled="!editManagerFormIsValid" type="submit"
-                class="btn text-size-15px rounded btn-hover-blue"
-                style="background-color: #056299;color: white;">
+                class="btn  rounded btn-hover-blue"
+                style="background-color: #056299;color: white;font-size:13px;">
                 <i class="far fa-save fa-lg"></i>
                 &nbsp;Lưu
               </button>
             </div>
             <div style="float:right; margin-right: 10px;">
               <button :disabled="!refreshFormManager" @click="clearInputManagerForm"
-                class="btn btn-success text-size-15px rounded">
+                class="btn btn-success  rounded" style="font-size:13px;">
                 <i class="fas fa-sync-alt"></i>
                 &nbsp;Làm mới
               </button>
             </div>
-            <div style="float:right; margin-right: 335px;">
-              <button class="btn text-size-15px rounded btn-hover-blue"
-                style="background-color: #056299;color: white;" @click="toListManager">
+            <div style="float:right; margin-right: 360px;">
+              <button class="btn  rounded btn-hover-blue"
+                style="background-color: #056299;color: white;font-size:13px;" @click="toListManager">
                 <i class="fas fa-fast-backward"></i>
                 &nbsp;Quay lại
               </button>

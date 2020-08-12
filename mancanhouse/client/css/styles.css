@@ -283,3 +283,11 @@ legend.scheduler-border {
   background-color: #114c70 !important;
 }
 
+.card-body {
+  font-size: 13.5px !important;
+}
+
+nav {
+  font-size: 14px !important;
+}
+

@@ -180,14 +180,14 @@ const ChangePassword = {
   template: `
   <div class="card shadow mb-4" style="margin-top: -5px;">
     <div class="card-header py-3">
-      <h5 class="m-0 font-weight-bold text-primary">Thay Đổi Mật Khẩu</h5>
+      <h6 class="m-0 font-weight-bold text-dark">Thay Đổi Mật Khẩu</h6>
     </div>
     <div class="card-body">
       <form @submit.prevent="submitChangePasswordForm" action="POST" method="" autocomplete="off">
         <div class="row mt-2">
           <div class="col-lg-4"></div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="oldPassword">Mật Khẩu Hiện Tại</label>
+            <label class="font-weight-bold col-form-label" for="oldPassword">Mật Khẩu Hiện Tại</label>
             <label class="text-danger">*</label>
             <input type="password" v-bind:title="titleOldPassword" v-model="oldPassword" id="oldPassword"
               name="oldPassword" class="form-control text-size-13px " placeholder="Nhập Tài khoản..."
@@ -199,7 +199,7 @@ const ChangePassword = {
         <div class="row mt-1">
           <div class="col-lg-4"></div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="newPassword">Mật Khẩu Mới</label>
+            <label class="font-weight-bold col-form-label" for="newPassword">Mật Khẩu Mới</label>
             <label class="text-danger">*</label>
             <input v-bind:title="titleNewPassword" v-model="newPassword" id="newPassword" name="newPassword"
               type="password" class="form-control  text-size-13px " placeholder="Nhập Mật khẩu Mới..." style="margin-top: -5px;">
@@ -213,7 +213,7 @@ const ChangePassword = {
         <div class="row mt-1">
           <div class="col-lg-4"></div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="renewPassword">Nhập Lại Mật Khẩu Mới</label>
+            <label class="font-weight-bold col-form-label" for="renewPassword">Nhập Lại Mật Khẩu Mới</label>
             <label class="text-danger">*</label>
             <input v-bind:title="titleRenewPassword" v-model="renewPassword" id="renewPassword" name="renewPassword"
               type="password" class="form-control  text-size-13px " placeholder="Nhập Lại Mật khẩu Mới..." style="margin-top: -5px;">
@@ -226,15 +226,15 @@ const ChangePassword = {
           <div class="col-12">
             <div style="float:right">
               <button :disabled="!changePasswordFormIsValid" type="submit"
-                class="btn text-size-15px rounded btn-hover-blue"
-                style="background-color: #056299;color: white;">
+                class="btn rounded btn-hover-blue"
+                style="background-color: #056299;color: white;font-size:13px;">
                 <i class="far fa-save fa-lg"></i>
                 &nbsp;Lưu
               </button>
             </div>
             <div style="float:right; margin-right: 10px;">
               <button :disabled="!refreshFormChangePassword" @click="clearInputChangePasswordForm"
-                class="btn btn-success text-size-15px rounded">
+                class="btn btn-success rounded" style="font-size:13px;">
                 <i class="fas fa-sync-alt"></i>
                 &nbsp;Làm mới
               </button>

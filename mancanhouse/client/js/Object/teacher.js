@@ -51,10 +51,13 @@ const ListTeacher = {
     },
     getDetailTeacher(teacher) {
       this.teacher = teacher;
-      this.image = `
-      <img class="img-fluid img-thumbnail rounded-circle" src="../api/Photos/teacher/download/` + this.teacher.image + `" width="100px"
+      this.image =
+        `
+      <img class="img-fluid img-thumbnail rounded-circle" src="../api/Photos/teacher/download/` +
+        this.teacher.image +
+        `" width="100px"
       height="100px" alt="teacher-image"/>
-      `
+      `;
       this.birthdayFormat = this.formatDate(this.teacher.birthday);
     },
 
@@ -78,16 +81,16 @@ const ListTeacher = {
   },
   template: `
   <div class="card shadow mb-4" style="margin-top: -5px;">
-    <div class="card-header py-3">
+    <div class="card-header py-3" style="margin-bottom:-40px">
       <div class="row">
         <div class="col-md-4">
-          <h5 class="m-0 font-weight-bold text-primary">Danh sách Giảng Viên</h5>
+          <h6 class="m-0 font-weight-bold text-dark">Danh sách Giảng Viên</h6>
         </div>
         <div class="col-md-6"></div>
         <div class="col-md-2" style="padding-left:68px;">
           <router-link :to="{ name: 'addTeacher' }">
-            <button :title="titleButtonAdd" class="btn text-size-15px rounded btn-hover-blue"
-              style="background-color: #056299;color: white;">
+            <button :title="titleButtonAdd" class="btn rounded btn-hover-blue"
+              style="background-color: #056299;color: white;font-size:14px;">
               <i class="fas fa-plus"></i>
               &nbsp;Thêm
             </button>
@@ -96,7 +99,8 @@ const ListTeacher = {
       </div>
     </div>
     <div class="card-body">
-      <div class="table-responsive">
+      <hr style="height:1px;color:lightgray;background-color:lightgray">
+      <div class="table-responsive" style="margin-top:-8px">
         <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
           <thead>
             <tr>
@@ -148,14 +152,14 @@ const ListTeacher = {
                   <div class="col-lg-4">
                     <button :title="titleButtonEdit" @click="getDataTeacherUpdate(teacher)"
                       class="btn btn-warning btn-sm h-28px w-28px rounded" type="submit"
-                      style="margin-left: -10px;">
+                      style="margin-left: -15.5px;">
                       <i class="fas fa-edit fa-md ml--2px"></i>
                     </button>
                   </div>
                   <div class="col-lg-4">
                     <button :title="titleButtonDelete" data-toggle="modal" @click="getDetailTeacher(teacher)"
                       data-target="#deleteTeacherModal" class="btn btn-danger btn-sm h-28px w-28px rounded"
-                      style="margin-left: -20px;">
+                      style="margin-left: -30px;">
                       <i class="far fa-trash-alt fa-md ml--1px"></i>
                     </button>
                   </div>
@@ -358,16 +362,15 @@ const AddTeacher = {
     },
   },
   methods: {
-    onFileSelected(event){
+    onFileSelected(event) {
       this.selectedFile = event.target.files[0];
     },
     submitAddTeacherForm() {
       if (this.addTeacherFormIsValid) {
         let lengthTeachers = this.teachers.length;
-        if ( lengthTeachers == 0) {
-          this.teacherId == 'GV001';
-        }
-        else {
+        if (lengthTeachers == 0) {
+          this.teacherId = "GV001";
+        } else {
           let currentId = this.teachers[lengthTeachers - 1].id;
           if (currentId > -1 && currentId < 9) {
             this.teacherId = "GV00" + (currentId + 1);
@@ -423,11 +426,17 @@ const AddTeacher = {
                     } else {
                       var fileName = null;
                       const fd = new FormData();
-                      if(this.selectedFile != null) {
-                        fd.append("image", this.selectedFile, this.selectedFile.name);
-                        var start = this.selectedFile.name.lastIndexOf('.');
+                      if (this.selectedFile != null) {
+                        fd.append(
+                          "image",
+                          this.selectedFile,
+                          this.selectedFile.name
+                        );
+                        var start = this.selectedFile.name.lastIndexOf(".");
                         var end = this.selectedFile.length;
-                        fileName = this.teacherId + this.selectedFile.name.slice(start, end);
+                        fileName =
+                          this.teacherId +
+                          this.selectedFile.name.slice(start, end);
                       }
                       const teacher = {
                         teacherId: this.teacherId,
@@ -458,12 +467,17 @@ const AddTeacher = {
                           };
                           const url = "http://localhost:3000/api/accounts";
                           axios.post(url, account_teacher);
-                          if(this.selectedFile != null){
-                            axios.post('http://localhost:3000/api/Photos/teacher/upload?filename=' + fileName, fd)
-                              .then(res => {
+                          if (this.selectedFile != null) {
+                            axios
+                              .post(
+                                "http://localhost:3000/api/Photos/teacher/upload?filename=" +
+                                  fileName,
+                                fd
+                              )
+                              .then((res) => {
                                 console.log(res);
                               })
-                              .catch(err => console.log(err));
+                              .catch((err) => console.log(err));
                           }
                         });
                       setTimeout(() => {
@@ -515,23 +529,23 @@ const AddTeacher = {
   template: `
   <div class="card shadow mb-4" style="margin-top: -5px;">
     <div class="card-header py-3">
-      <h5 class="m-0 font-weight-bold text-primary">Thêm Giảng Viên</h5>
+      <h6 class="m-0 font-weight-bold text-dark">Thêm Giảng Viên</h6>
     </div>
     <div class="card-body">
       <form @submit.prevent="submitAddTeacherForm" action="POST" method="" autocomplete="off">
         <div class="row mt-2">
           <div class="col-lg-4">
-            <label class="font-weight-bold">Thông Tin Giảng Viên:</label>
+            <label class="font-weight-bold text-size-15px ">Thông Tin Giảng Viên:</label>
             <p style="font-size: 11px;">Thông tin phục vụ cho việc quản lý nhiều người Giảng Viên</p>
           </div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="fullName">Họ và Tên</label>
+            <label class="font-weight-bold col-form-label" for="fullName">Họ và Tên</label>
             <label class="text-danger">*</label>
             <input type="text" id="fullName" name="fullName" v-model="fullName" :title="titleFullName"
               class="form-control text-size-13px " placeholder="Nhập Họ và Tên..." style=" margin-top: -5px;">
           </div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="gender">Giới Tính</label>
+            <label class="font-weight-bold col-form-label" for="gender">Giới Tính</label>
             <label class="text-danger">*</label>
             <select class="custom-select  text-size-13px  h-32px" v-model="gender" name="gender"
               id="gender" style="margin-top: -5px;">
@@ -544,13 +558,13 @@ const AddTeacher = {
         <div class="row mt-1">
           <div class="col-lg-4"></div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="birthday">Ngày Sinh</label>
+            <label class="font-weight-bold col-form-label" for="birthday">Ngày Sinh</label>
             <label class="text-danger">*</label>
             <input v-model="birthday" name="birthday" id="birthday" type="date" :title="titleBirthday"
               class="form-control  text-size-13px " style="margin-top: -5px;">
           </div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="subject">Bộ Môn</label>
+            <label class="font-weight-bold col-form-label" for="subject">Bộ Môn</label>
             <label class="text-danger">*</label>
             <select class="custom-select  text-size-13px  h-32px" v-model="subject" name="subject"
               id="subject" style="margin-top: -5px;">
@@ -563,7 +577,7 @@ const AddTeacher = {
         <div class="row mt-2">
           <div class="col-lg-4"></div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="phone">Số Điện Thoại</label>
+            <label class="font-weight-bold col-form-label" for="phone">Số Điện Thoại</label>
             <label class="text-danger">*</label>
             <input v-model="phone" name="phone" id="phone" type="text" :title="titlePhone"
               v-model="phone" class="form-control  text-size-13px " placeholder="Nhập Số điện thoại..."
@@ -572,7 +586,7 @@ const AddTeacher = {
               định dạng</span>
           </div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="email">Email</label>
+            <label class="font-weight-bold col-form-label" for="email">Email</label>
             <label class="text-danger">*</label>
             <input v-model="email" name="email" id="email" type="text" :title="titleEmail"
               class="form-control  text-size-13px " placeholder="Nhập Địa chỉ email..."
@@ -584,7 +598,7 @@ const AddTeacher = {
         <div class="row mt-2">
           <div class="col-lg-4"></div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="status">Trạng Thái</label>
+            <label class="font-weight-bold col-form-label" for="status">Trạng Thái</label>
             <label class="text-danger">*</label>
             <select class="custom-select  text-size-13px  h-32px" v-model="status" name="status" id="status"
               style="margin-top: -5px;">
@@ -594,7 +608,7 @@ const AddTeacher = {
             </select>
           </div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="image">Hình Ảnh</label>
+            <label class="font-weight-bold col-form-label" for="image">Hình Ảnh</label>
             <input type="file" id="image" @change="onFileSelected" :title="titlePicture"
               class="form-control rounded text-size-13px" style="margin-top: -5px;" />
           </div>
@@ -603,22 +617,22 @@ const AddTeacher = {
           <div class="col-12">
             <div style="float:right">
               <button :disabled="!addTeacherFormIsValid" type="submit"
-                class="btn text-size-15px rounded btn-hover-blue"
-                style="background-color: #056299;color: white;">
+                class="btn rounded btn-hover-blue"
+                style="background-color: #056299;color: white;font-size:13px;">
                 <i class="far fa-save fa-lg"></i>
                 &nbsp;Lưu
               </button>
             </div>
             <div style="float:right; margin-right: 10px;">
               <button :disabled="!refreshFormTeacher" @click="clearInputTeacherForm"
-                class="btn btn-success text-size-15px rounded">
+                class="btn btn-success rounded" style="font-size:13px;">
                 <i class="fas fa-sync-alt"></i>
                 &nbsp;Làm mới
               </button>
             </div>
-            <div style="float:right; margin-right: 335px;">
-              <button class="btn text-size-15px rounded btn-hover-blue"
-                style="background-color: #056299;color: white;" @click="toListTeacher">
+            <div style="float:right; margin-right: 360px;">
+              <button class="btn rounded btn-hover-blue"
+                style="background-color: #056299;color: white;font-size:13px;" @click="toListTeacher">
                 <i class="fas fa-fast-backward"></i>
                 &nbsp;Quay lại
               </button>
@@ -785,12 +799,13 @@ const EditTeacher = {
               }
             );
           } else {
-            if(this.selectedFile != null) {
+            if (this.selectedFile != null) {
               const fd = new FormData();
-              fd.append('image', this.selectedFile, this.selectedFile.name);
-              var start = this.selectedFile.name.lastIndexOf('.');
+              fd.append("image", this.selectedFile, this.selectedFile.name);
+              var start = this.selectedFile.name.lastIndexOf(".");
               var end = this.selectedFile.length;
-              var fileName = this.teacherId + this.selectedFile.name.slice(start, end);
+              var fileName =
+                this.teacherId + this.selectedFile.name.slice(start, end);
               if (this.imageEdit != null) {
                 const teacher = {
                   teacherId: this.teacherId,
@@ -805,18 +820,29 @@ const EditTeacher = {
                   id: this.$route.params.id,
                 };
                 const url =
-                  "http://localhost:3000/api/teachers/" + teacher.id + "/replace";
+                  "http://localhost:3000/api/teachers/" +
+                  teacher.id +
+                  "/replace";
                 axios.post(url, teacher);
-                axios.delete("http://localhost:3000/api/Photos/teacher/files/" + this.imageEdit)
-                  .then(resp => {
+                axios
+                  .delete(
+                    "http://localhost:3000/api/Photos/teacher/files/" +
+                      this.imageEdit
+                  )
+                  .then((resp) => {
                     console.log(resp);
                   })
-                  .catch(err => console.log(err));
-                axios.post('http://localhost:3000/api/Photos/teacher/upload?filename=' + fileName, fd)
-                  .then(res => {
+                  .catch((err) => console.log(err));
+                axios
+                  .post(
+                    "http://localhost:3000/api/Photos/teacher/upload?filename=" +
+                      fileName,
+                    fd
+                  )
+                  .then((res) => {
                     console.log(res);
                   })
-                  .catch(err => console.log(err));
+                  .catch((err) => console.log(err));
               } else {
                 const teacher = {
                   teacherId: this.teacherId,
@@ -831,13 +857,20 @@ const EditTeacher = {
                   id: this.$route.params.id,
                 };
                 const url =
-                  "http://localhost:3000/api/teachers/" + teacher.id + "/replace";
+                  "http://localhost:3000/api/teachers/" +
+                  teacher.id +
+                  "/replace";
                 axios.post(url, teacher);
-                axios.post('http://localhost:3000/api/Photos/teacher/upload?filename=' + fileName, fd)
-                  .then(res => {
+                axios
+                  .post(
+                    "http://localhost:3000/api/Photos/teacher/upload?filename=" +
+                      fileName,
+                    fd
+                  )
+                  .then((res) => {
                     console.log(res);
                   })
-                  .catch(err => console.log(err));
+                  .catch((err) => console.log(err));
               }
             } else {
               const teacher = {
@@ -894,12 +927,17 @@ const EditTeacher = {
                     }
                   );
                 } else {
-                  if(this.selectedFile != null) {
+                  if (this.selectedFile != null) {
                     const fd = new FormData();
-                    fd.append('image', this.selectedFile, this.selectedFile.name);
-                    var start = this.selectedFile.name.lastIndexOf('.');
+                    fd.append(
+                      "image",
+                      this.selectedFile,
+                      this.selectedFile.name
+                    );
+                    var start = this.selectedFile.name.lastIndexOf(".");
                     var end = this.selectedFile.length;
-                    var fileName = this.teacherId + this.selectedFile.name.slice(start, end);
+                    var fileName =
+                      this.teacherId + this.selectedFile.name.slice(start, end);
                     if (this.imageEdit != null) {
                       const teacher = {
                         teacherId: this.teacherId,
@@ -914,18 +952,29 @@ const EditTeacher = {
                         id: this.$route.params.id,
                       };
                       const url =
-                        "http://localhost:3000/api/teachers/" + teacher.id + "/replace";
+                        "http://localhost:3000/api/teachers/" +
+                        teacher.id +
+                        "/replace";
                       axios.post(url, teacher);
-                      axios.delete("http://localhost:3000/api/Photos/teacher/files/" + this.imageEdit)
-                        .then(resp => {
+                      axios
+                        .delete(
+                          "http://localhost:3000/api/Photos/teacher/files/" +
+                            this.imageEdit
+                        )
+                        .then((resp) => {
                           console.log(resp);
                         })
-                        .catch(err => console.log(err));
-                      axios.post('http://localhost:3000/api/Photos/teacher/upload?filename=' + fileName, fd)
-                        .then(res => {
+                        .catch((err) => console.log(err));
+                      axios
+                        .post(
+                          "http://localhost:3000/api/Photos/teacher/upload?filename=" +
+                            fileName,
+                          fd
+                        )
+                        .then((res) => {
                           console.log(res);
                         })
-                        .catch(err => console.log(err));
+                        .catch((err) => console.log(err));
                     } else {
                       const teacher = {
                         teacherId: this.teacherId,
@@ -940,13 +989,20 @@ const EditTeacher = {
                         id: this.$route.params.id,
                       };
                       const url =
-                        "http://localhost:3000/api/teachers/" + teacher.id + "/replace";
+                        "http://localhost:3000/api/teachers/" +
+                        teacher.id +
+                        "/replace";
                       axios.post(url, teacher);
-                      axios.post('http://localhost:3000/api/Photos/teacher/upload?filename=' + fileName, fd)
-                        .then(res => {
+                      axios
+                        .post(
+                          "http://localhost:3000/api/Photos/teacher/upload?filename=" +
+                            fileName,
+                          fd
+                        )
+                        .then((res) => {
                           console.log(res);
                         })
-                        .catch(err => console.log(err));
+                        .catch((err) => console.log(err));
                     }
                   } else {
                     const teacher = {
@@ -962,7 +1018,9 @@ const EditTeacher = {
                       id: this.$route.params.id,
                     };
                     const url =
-                      "http://localhost:3000/api/teachers/" + teacher.id + "/replace";
+                      "http://localhost:3000/api/teachers/" +
+                      teacher.id +
+                      "/replace";
                     axios.post(url, teacher);
                   }
                   setTimeout(() => {
@@ -1009,12 +1067,17 @@ const EditTeacher = {
                     }
                   );
                 } else {
-                  if(this.selectedFile != null) {
+                  if (this.selectedFile != null) {
                     const fd = new FormData();
-                    fd.append('image', this.selectedFile, this.selectedFile.name);
-                    var start = this.selectedFile.name.lastIndexOf('.');
+                    fd.append(
+                      "image",
+                      this.selectedFile,
+                      this.selectedFile.name
+                    );
+                    var start = this.selectedFile.name.lastIndexOf(".");
                     var end = this.selectedFile.length;
-                    var fileName = this.teacherId + this.selectedFile.name.slice(start, end);
+                    var fileName =
+                      this.teacherId + this.selectedFile.name.slice(start, end);
                     if (this.imageEdit != null) {
                       const teacher = {
                         teacherId: this.teacherId,
@@ -1029,18 +1092,29 @@ const EditTeacher = {
                         id: this.$route.params.id,
                       };
                       const url =
-                        "http://localhost:3000/api/teachers/" + teacher.id + "/replace";
+                        "http://localhost:3000/api/teachers/" +
+                        teacher.id +
+                        "/replace";
                       axios.post(url, teacher);
-                      axios.delete("http://localhost:3000/api/Photos/teacher/files/" + this.imageEdit)
-                        .then(resp => {
+                      axios
+                        .delete(
+                          "http://localhost:3000/api/Photos/teacher/files/" +
+                            this.imageEdit
+                        )
+                        .then((resp) => {
                           console.log(resp);
                         })
-                        .catch(err => console.log(err));
-                      axios.post('http://localhost:3000/api/Photos/teacher/upload?filename=' + fileName, fd)
-                        .then(res => {
+                        .catch((err) => console.log(err));
+                      axios
+                        .post(
+                          "http://localhost:3000/api/Photos/teacher/upload?filename=" +
+                            fileName,
+                          fd
+                        )
+                        .then((res) => {
                           console.log(res);
                         })
-                        .catch(err => console.log(err));
+                        .catch((err) => console.log(err));
                     } else {
                       const teacher = {
                         teacherId: this.teacherId,
@@ -1055,13 +1129,20 @@ const EditTeacher = {
                         id: this.$route.params.id,
                       };
                       const url =
-                        "http://localhost:3000/api/teachers/" + teacher.id + "/replace";
+                        "http://localhost:3000/api/teachers/" +
+                        teacher.id +
+                        "/replace";
                       axios.post(url, teacher);
-                      axios.post('http://localhost:3000/api/Photos/teacher/upload?filename=' + fileName, fd)
-                        .then(res => {
+                      axios
+                        .post(
+                          "http://localhost:3000/api/Photos/teacher/upload?filename=" +
+                            fileName,
+                          fd
+                        )
+                        .then((res) => {
                           console.log(res);
                         })
-                        .catch(err => console.log(err));
+                        .catch((err) => console.log(err));
                     }
                   } else {
                     const teacher = {
@@ -1077,7 +1158,9 @@ const EditTeacher = {
                       id: this.$route.params.id,
                     };
                     const url =
-                      "http://localhost:3000/api/teachers/" + teacher.id + "/replace";
+                      "http://localhost:3000/api/teachers/" +
+                      teacher.id +
+                      "/replace";
                     axios.post(url, teacher);
                   }
                   setTimeout(() => {
@@ -1132,12 +1215,18 @@ const EditTeacher = {
                           }
                         );
                       } else {
-                        if(this.selectedFile != null) {
+                        if (this.selectedFile != null) {
                           const fd = new FormData();
-                          fd.append('image', this.selectedFile, this.selectedFile.name);
-                          var start = this.selectedFile.name.lastIndexOf('.');
+                          fd.append(
+                            "image",
+                            this.selectedFile,
+                            this.selectedFile.name
+                          );
+                          var start = this.selectedFile.name.lastIndexOf(".");
                           var end = this.selectedFile.length;
-                          var fileName = this.teacherId + this.selectedFile.name.slice(start, end);
+                          var fileName =
+                            this.teacherId +
+                            this.selectedFile.name.slice(start, end);
                           if (this.imageEdit != null) {
                             const teacher = {
                               teacherId: this.teacherId,
@@ -1152,18 +1241,29 @@ const EditTeacher = {
                               id: this.$route.params.id,
                             };
                             const url =
-                              "http://localhost:3000/api/teachers/" + teacher.id + "/replace";
+                              "http://localhost:3000/api/teachers/" +
+                              teacher.id +
+                              "/replace";
                             axios.post(url, teacher);
-                            axios.delete("http://localhost:3000/api/Photos/teacher/files/" + this.imageEdit)
-                              .then(resp => {
+                            axios
+                              .delete(
+                                "http://localhost:3000/api/Photos/teacher/files/" +
+                                  this.imageEdit
+                              )
+                              .then((resp) => {
                                 console.log(resp);
                               })
-                              .catch(err => console.log(err));
-                            axios.post('http://localhost:3000/api/Photos/teacher/upload?filename=' + fileName, fd)
-                              .then(res => {
+                              .catch((err) => console.log(err));
+                            axios
+                              .post(
+                                "http://localhost:3000/api/Photos/teacher/upload?filename=" +
+                                  fileName,
+                                fd
+                              )
+                              .then((res) => {
                                 console.log(res);
                               })
-                              .catch(err => console.log(err));
+                              .catch((err) => console.log(err));
                           } else {
                             const teacher = {
                               teacherId: this.teacherId,
@@ -1178,13 +1278,20 @@ const EditTeacher = {
                               id: this.$route.params.id,
                             };
                             const url =
-                              "http://localhost:3000/api/teachers/" + teacher.id + "/replace";
+                              "http://localhost:3000/api/teachers/" +
+                              teacher.id +
+                              "/replace";
                             axios.post(url, teacher);
-                            axios.post('http://localhost:3000/api/Photos/teacher/upload?filename=' + fileName, fd)
-                              .then(res => {
+                            axios
+                              .post(
+                                "http://localhost:3000/api/Photos/teacher/upload?filename=" +
+                                  fileName,
+                                fd
+                              )
+                              .then((res) => {
                                 console.log(res);
                               })
-                              .catch(err => console.log(err));
+                              .catch((err) => console.log(err));
                           }
                         } else {
                           const teacher = {
@@ -1200,7 +1307,9 @@ const EditTeacher = {
                             id: this.$route.params.id,
                           };
                           const url =
-                            "http://localhost:3000/api/teachers/" + teacher.id + "/replace";
+                            "http://localhost:3000/api/teachers/" +
+                            teacher.id +
+                            "/replace";
                           axios.post(url, teacher);
                         }
                         setTimeout(() => {
@@ -1253,24 +1362,24 @@ const EditTeacher = {
   template: `
   <div class="card shadow mb-4" style="margin-top: -5px;">
     <div class="card-header py-3">
-      <h5 class="m-0 font-weight-bold text-primary">Chỉnh sửa Giảng Viên</h5>
+      <h6 class="m-0 font-weight-bold text-dark">Chỉnh sửa Giảng Viên</h6>
     </div>
     <div class="card-body">
       <form @submit.prevent="submitEditTeacherForm" action="POST" method="" autocomplete="off">
         <div class="row mt-2">
           <div class="col-lg-4">
-            <label class="font-weight-bold">Thông Tin Giảng Viên:</label>
+            <label class="font-weight-bold text-size-15px ">Thông Tin Giảng Viên:</label>
             <p style="font-size: 11px;">Thông tin phục vụ cho việc quản lý nhiều người Giảng Viên</p>
           </div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="fullName">Họ và Tên</label>
+            <label class="font-weight-bold col-form-label" for="fullName">Họ và Tên</label>
             <label class="text-danger">*</label>
             <input type="text" id="fullName" name="fullName" v-model="fullName" :title="titleFullName"
             :value="fullName" v-on:keyup="fullName = $event.target.value"
             class="form-control text-size-13px " placeholder="Nhập Họ và Tên..." style=" margin-top: -5px;">
           </div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="gender">Giới Tính</label>
+            <label class="font-weight-bold col-form-label" for="gender">Giới Tính</label>
             <label class="text-danger">*</label>
             <select class="custom-select  text-size-13px  h-32px" v-model="gender" name="gender"
               id="gender" style="margin-top: -5px;">
@@ -1283,14 +1392,14 @@ const EditTeacher = {
         <div class="row mt-1">
           <div class="col-lg-4"></div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="birthday">Ngày Sinh</label>
+            <label class="font-weight-bold col-form-label" for="birthday">Ngày Sinh</label>
             <label class="text-danger">*</label>
             <input v-model="birthday" name="birthday" id="birthday" type="date" :title="titleBirthday"
             :value="birthday" v-on:keyup="birthday = $event.target.value"
               class="form-control  text-size-13px " style="margin-top: -5px;">
           </div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="subject">Bộ Môn</label>
+            <label class="font-weight-bold col-form-label" for="subject">Bộ Môn</label>
             <label class="text-danger">*</label>
             <select class="custom-select  text-size-13px  h-32px" v-model="subject" name="subject"
               id="subject" style="margin-top: -5px;">
@@ -1303,7 +1412,7 @@ const EditTeacher = {
         <div class="row mt-2">
           <div class="col-lg-4"></div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="phone">Số Điện Thoại</label>
+            <label class="font-weight-bold col-form-label" for="phone">Số Điện Thoại</label>
             <label class="text-danger">*</label>
             <input v-model="phone" name="phone" id="phone" type="text" :title="titlePhone"
               v-model="phone" :value="phone" v-on:keyup="phone = $event.target.value"
@@ -1313,7 +1422,7 @@ const EditTeacher = {
               định dạng</span>
           </div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="email">Email</label>
+            <label class="font-weight-bold col-form-label" for="email">Email</label>
             <label class="text-danger">*</label>
             <input v-model="email" name="email" id="email" type="text" :title="titleEmail"
             :value="email" v-on:keyup="email = $event.target.value"
@@ -1326,7 +1435,7 @@ const EditTeacher = {
         <div class="row mt-1">
           <div class="col-lg-4"></div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="status">Trạng Thái</label>
+            <label class="font-weight-bold col-form-label" for="status">Trạng Thái</label>
             <label class="text-danger">*</label>
             <select class="custom-select  text-size-13px  h-32px" v-model="status" name="status" id="status"
               style="margin-top: -5px;">
@@ -1336,7 +1445,7 @@ const EditTeacher = {
             </select>
           </div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="image">Hình Ảnh</label>
+            <label class="font-weight-bold col-form-label" for="image">Hình Ảnh</label>
             <input type="file" id="image" @change="onFileSelected" :title="titlePicture"
               class="form-control rounded text-size-13px" style="margin-top: -5px;" />
           </div>
@@ -1345,22 +1454,22 @@ const EditTeacher = {
           <div class="col-12">
             <div style="float:right">
               <button :disabled="!editTeacherFormIsValid" type="submit"
-                class="btn text-size-15px rounded btn-hover-blue"
-                style="background-color: #056299;color: white;">
+                class="btn rounded btn-hover-blue"
+                style="background-color: #056299;color: white;font-size:13px;">
                 <i class="far fa-save fa-lg"></i>
                 &nbsp;Lưu
               </button>
             </div>
             <div style="float:right; margin-right: 10px;">
               <button :disabled="!refreshFormTeacher" @click="clearInputTeacherForm"
-                class="btn btn-success text-size-15px rounded">
+                class="btn btn-success rounded" style="font-size:13px;">
                 <i class="fas fa-sync-alt"></i>
                 &nbsp;Làm mới
               </button>
             </div>
-            <div style="float:right; margin-right: 335px;">
-              <button class="btn text-size-15px rounded btn-hover-blue"
-                style="background-color: #056299;color: white;" @click="toListTeacher">
+            <div style="float:right; margin-right: 360px;">
+              <button class="btn rounded btn-hover-blue"
+                style="background-color: #056299;color: white;font-size:13px;" @click="toListTeacher">
                 <i class="fas fa-fast-backward"></i>
                 &nbsp;Quay lại
               </button>

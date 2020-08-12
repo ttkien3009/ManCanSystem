@@ -51,10 +51,13 @@ const ListSpiritualGuide = {
     },
     getDetailSpiritualGuide(spiritualGuide) {
       this.spiritualGuide = spiritualGuide;
-      this.image = `
-      <img class="img-fluid img-thumbnail rounded-circle" src="../api/Photos/spiritualGuide/download/` + this.spiritualGuide.image + `" width="100px"
+      this.image =
+        `
+      <img class="img-fluid img-thumbnail rounded-circle" src="../api/Photos/spiritualGuide/download/` +
+        this.spiritualGuide.image +
+        `" width="100px"
       height="100px" alt="spiritualGuide-image"/>
-      `
+      `;
       this.birthdayFormat = this.formatDate(this.spiritualGuide.birthday);
     },
 
@@ -81,16 +84,16 @@ const ListSpiritualGuide = {
   },
   template: `
   <div class="card shadow mb-4" style="margin-top: -5px;">
-    <div class="card-header py-3">
+    <div class="card-header py-3" style="margin-bottom:-40px">
       <div class="row">
         <div class="col-md-4">
-          <h5 class="m-0 font-weight-bold text-primary">Danh sách Người Linh Hướng</h5>
+          <h6 class="m-0 font-weight-bold text-dark">Danh sách Người Linh Hướng</h6>
         </div>
         <div class="col-md-6"></div>
         <div class="col-md-2" style="padding-left:68px;">
           <router-link :to="{ name: 'addSpiritualGuide' }">
-            <button :title="titleButtonAdd" class="btn text-size-15px rounded btn-hover-blue"
-              style="background-color: #056299;color: white;">
+            <button :title="titleButtonAdd" class="btn rounded btn-hover-blue"
+              style="background-color: #056299;color: white;font-size:14px;">
               <i class="fas fa-plus"></i>
               &nbsp;Thêm
             </button>
@@ -99,7 +102,8 @@ const ListSpiritualGuide = {
       </div>
     </div>
     <div class="card-body">
-      <div class="table-responsive">
+      <hr style="height:1px;color:lightgray;background-color:lightgray">
+      <div class="table-responsive" style="margin-top:-8px">
         <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
           <thead>
             <tr>
@@ -107,7 +111,6 @@ const ListSpiritualGuide = {
               <th>Họ và Tên</th>
               <th>Số Điện Thoại</th>
               <th>Email</th>
-              <th>Chức Vụ</th>
               <th>Nhóm Cộng Đoàn</th>
               <th>Trạng Thái</th>
               <th>Action</th>
@@ -119,7 +122,6 @@ const ListSpiritualGuide = {
               <th>Họ và Tên</th>
               <th>Số Điện Thoại</th>
               <th>Email</th>
-              <th>Chức Vụ</th>
               <th>Nhóm Cộng Đoàn</th>
               <th>Trạng Thái</th>
               <th>Action</th>
@@ -131,7 +133,6 @@ const ListSpiritualGuide = {
               <td>{{ spiritualGuide.fullName }}</td>
               <td>{{ spiritualGuide.phone }}</td>
               <td>{{ spiritualGuide.email }}</td>
-              <td v-for="department in positions" v-if="department.id == spiritualGuide.position">{{ department.positionType }}-{{ department.name }}</td>
               <td v-for="grCom in groupCommunities" v-if="grCom.id == spiritualGuide.groupCommunity">{{ grCom.name }}</td>
               <td v-if="spiritualGuide.status == 1">
                 <i class="fas fa-toggle-on fa-lg text-success"></i>
@@ -151,14 +152,14 @@ const ListSpiritualGuide = {
                   <div class="col-lg-4">
                     <button :title="titleButtonEdit" @click="getDataSpiritualGuideUpdate(spiritualGuide)"
                       class="btn btn-warning btn-sm h-28px w-28px rounded" type="submit"
-                      style="margin-left: -8px;">
+                      style="margin-left: -17px;">
                       <i class="fas fa-edit fa-md ml--2px"></i>
                     </button>
                   </div>
                   <div class="col-lg-4">
                     <button :title="titleButtonDelete" data-toggle="modal" @click="getDetailSpiritualGuide(spiritualGuide)"
                       data-target="#deleteSpiritualGuideModal" class="btn btn-danger btn-sm h-28px w-28px rounded"
-                      style="margin-left: -16px;">
+                      style="margin-left: -33px;">
                       <i class="far fa-trash-alt fa-md ml--1px"></i>
                     </button>
                   </div>
@@ -369,16 +370,15 @@ const AddSpiritualGuide = {
     },
   },
   methods: {
-    onFileSelected(event){
+    onFileSelected(event) {
       this.selectedFile = event.target.files[0];
     },
     submitAddSpiritualGuideForm() {
       if (this.addSpiritualGuideFormIsValid) {
         let lengthSpiritualGuides = this.spiritualGuides.length;
-        if ( lengthSpiritualGuides == 0) {
-          this.spiritualGuideId == 'LH001';
-        }
-        else {
+        if (lengthSpiritualGuides == 0) {
+          this.spiritualGuideId = "LH001";
+        } else {
           let currentId = this.spiritualGuides[lengthSpiritualGuides - 1].id;
           if (currentId > -1 && currentId < 9) {
             this.spiritualGuideId = "LH00" + (currentId + 1);
@@ -434,11 +434,17 @@ const AddSpiritualGuide = {
                   } else {
                     var fileName = null;
                     const fd = new FormData();
-                    if(this.selectedFile != null) {
-                      fd.append("image", this.selectedFile, this.selectedFile.name);
-                      var start = this.selectedFile.name.lastIndexOf('.');
+                    if (this.selectedFile != null) {
+                      fd.append(
+                        "image",
+                        this.selectedFile,
+                        this.selectedFile.name
+                      );
+                      var start = this.selectedFile.name.lastIndexOf(".");
                       var end = this.selectedFile.length;
-                      fileName = this.spiritualGuideId + this.selectedFile.name.slice(start, end);
+                      fileName =
+                        this.spiritualGuideId +
+                        this.selectedFile.name.slice(start, end);
                     }
                     const spiritualGuide = {
                       spiritualGuideId: this.spiritualGuideId,
@@ -489,12 +495,17 @@ const AddSpiritualGuide = {
                             };
                             const url = "http://localhost:3000/api/accounts";
                             axios.post(url, account_spiritualGuide);
-                            if(this.selectedFile != null){
-                              axios.post('http://localhost:3000/api/Photos/spiritualGuide/upload?filename=' + fileName, fd)
-                                .then(res => {
+                            if (this.selectedFile != null) {
+                              axios
+                                .post(
+                                  "http://localhost:3000/api/Photos/spiritualGuide/upload?filename=" +
+                                    fileName,
+                                  fd
+                                )
+                                .then((res) => {
                                   console.log(res);
                                 })
-                                .catch(err => console.log(err));
+                                .catch((err) => console.log(err));
                             }
                           });
                       });
@@ -549,23 +560,23 @@ const AddSpiritualGuide = {
   template: `
   <div class="card shadow mb-4" style="margin-top: -5px;">
     <div class="card-header py-3">
-      <h5 class="m-0 font-weight-bold text-primary">Thêm Người Linh Hướng</h5>
+      <h6 class="m-0 font-weight-bold text-dark">Thêm Người Linh Hướng</h6>
     </div>
     <div class="card-body">
       <form @submit.prevent="submitAddSpiritualGuideForm" action="POST" method="" autocomplete="off">
         <div class="row mt-2">
           <div class="col-lg-4">
-            <label class="font-weight-bold">Thông Tin Người Linh Hướng:</label>
+            <label class="font-weight-bold text-size-15px ">Thông Tin Người Linh Hướng:</label>
             <p style="font-size: 11px;">Thông tin phục vụ cho việc quản lý nhiều Người Linh Hướng</p>
           </div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="fullName">Họ và Tên</label>
+            <label class="font-weight-bold col-form-label" for="fullName">Họ và Tên</label>
             <label class="text-danger">*</label>
             <input type="text" id="fullName" name="fullName" v-model="fullName" :title="titleFullName"
               class="form-control text-size-13px " placeholder="Nhập Họ và Tên..." style=" margin-top: -5px;">
           </div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="christianName">Tên Thánh</label>
+            <label class="font-weight-bold col-form-label" for="christianName">Tên Thánh</label>
             <label class="text-danger">*</label>
             <input type="text" :title="titleChristianName" name="christianName" id="christianName"
               v-model="christianName" class="form-control  text-size-13px " placeholder="Nhập Tên Thánh..."
@@ -575,13 +586,13 @@ const AddSpiritualGuide = {
         <div class="row">
           <div class="col-lg-4"></div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="birthday">Ngày Sinh</label>
+            <label class="font-weight-bold col-form-label" for="birthday">Ngày Sinh</label>
             <label class="text-danger">*</label>
             <input v-model="birthday" name="birthday" id="birthday" type="date" :title="titleBirthday"
               class="form-control  text-size-13px " style="margin-top: -5px;">
           </div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="position">Chức Vụ</label>
+            <label class="font-weight-bold col-form-label" for="position">Chức Vụ</label>
             <label class="text-danger">*</label>
             <select class="custom-select  text-size-13px  h-32px" v-model="position" name="position"
               id="position" style="margin-top: -5px;">
@@ -596,7 +607,7 @@ const AddSpiritualGuide = {
         <div class="row mt-1">
           <div class="col-lg-4"></div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="phone">Số Điện Thoại</label>
+            <label class="font-weight-bold col-form-label" for="phone">Số Điện Thoại</label>
             <label class="text-danger">*</label>
             <input v-model="phone" name="phone" id="phone" type="text" :title="titlePhone"
               v-model="phone" class="form-control  text-size-13px " placeholder="Nhập Số điện thoại..."
@@ -605,7 +616,7 @@ const AddSpiritualGuide = {
               định dạng</span>
           </div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="email">Email</label>
+            <label class="font-weight-bold col-form-label" for="email">Email</label>
             <label class="text-danger">*</label>
             <input v-model="email" name="email" id="email" type="text" :title="titleEmail"
               class="form-control  text-size-13px " placeholder="Nhập Địa chỉ email..."
@@ -617,7 +628,7 @@ const AddSpiritualGuide = {
         <div class="row mt-1">
           <div class="col-lg-4"></div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="groupCommunity">Nhóm Cộng Đoàn</label>
+            <label class="font-weight-bold col-form-label" for="groupCommunity">Nhóm Cộng Đoàn</label>
             <label class="text-danger">*</label>
             <select class="custom-select  text-size-13px  h-32px" v-model="groupCommunity" name="groupCommunity" id="groupCommunity"
               style="margin-top: -5px;">
@@ -627,7 +638,7 @@ const AddSpiritualGuide = {
             </select>
           </div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="status">Trạng Thái</label>
+            <label class="font-weight-bold col-form-label" for="status">Trạng Thái</label>
             <label class="text-danger">*</label>
             <select class="custom-select  text-size-13px  h-32px" v-model="status" name="status" id="status"
               style="margin-top: -5px;">
@@ -640,7 +651,7 @@ const AddSpiritualGuide = {
         <div class="row mt-1">
           <div class="col-lg-4"></div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="image">Hình Ảnh</label>
+            <label class="font-weight-bold col-form-label" for="image">Hình Ảnh</label>
             <input type="file" id="image" @change="onFileSelected" :title="titlePicture"
               class="form-control rounded text-size-13px" style="margin-top: -5px;" />
           </div>
@@ -649,22 +660,22 @@ const AddSpiritualGuide = {
           <div class="col-12">
             <div style="float:right">
               <button :disabled="!addSpiritualGuideFormIsValid" type="submit"
-                class="btn text-size-15px rounded btn-hover-blue"
-                style="background-color: #056299;color: white;">
+                class="btn rounded btn-hover-blue"
+                style="background-color: #056299;color: white;font-size:13px;">
                 <i class="far fa-save fa-lg"></i>
                 &nbsp;Lưu
               </button>
             </div>
             <div style="float:right; margin-right: 10px;">
               <button :disabled="!refreshFormSpiritualGuide" @click="clearInputSpiritualGuideForm"
-                class="btn btn-success text-size-15px rounded">
+                class="btn btn-success rounded" style="font-size:13px;">
                 <i class="fas fa-sync-alt"></i>
                 &nbsp;Làm mới
               </button>
             </div>
-            <div style="float:right; margin-right: 335px;">
-              <button class="btn text-size-15px rounded btn-hover-blue"
-                style="background-color: #056299;color: white;" @click="toListSpiritualGuide">
+            <div style="float:right; margin-right: 360px;">
+              <button class="btn rounded btn-hover-blue"
+                style="background-color: #056299;color: white;font-size:13px;" @click="toListSpiritualGuide">
                 <i class="fas fa-fast-backward"></i>
                 &nbsp;Quay lại
               </button>
@@ -836,12 +847,14 @@ const EditSpiritualGuide = {
               }
             );
           } else {
-            if(this.selectedFile != null) {
+            if (this.selectedFile != null) {
               const fd = new FormData();
-              fd.append('image', this.selectedFile, this.selectedFile.name);
-              var start = this.selectedFile.name.lastIndexOf('.');
+              fd.append("image", this.selectedFile, this.selectedFile.name);
+              var start = this.selectedFile.name.lastIndexOf(".");
               var end = this.selectedFile.length;
-              var fileName = this.spiritualGuideId + this.selectedFile.name.slice(start, end);
+              var fileName =
+                this.spiritualGuideId +
+                this.selectedFile.name.slice(start, end);
               if (this.imageEdit != null) {
                 const spiritualGuide = {
                   spiritualGuideId: this.spiritualGuideId,
@@ -861,16 +874,25 @@ const EditSpiritualGuide = {
                   spiritualGuide.id +
                   "/replace";
                 axios.post(url, spiritualGuide);
-                axios.delete("http://localhost:3000/api/Photos/spiritualGuide/files/" + this.imageEdit)
-                  .then(resp => {
+                axios
+                  .delete(
+                    "http://localhost:3000/api/Photos/spiritualGuide/files/" +
+                      this.imageEdit
+                  )
+                  .then((resp) => {
                     console.log(resp);
                   })
-                  .catch(err => console.log(err));
-                axios.post('http://localhost:3000/api/Photos/spiritualGuide/upload?filename=' + fileName, fd)
-                  .then(res => {
+                  .catch((err) => console.log(err));
+                axios
+                  .post(
+                    "http://localhost:3000/api/Photos/spiritualGuide/upload?filename=" +
+                      fileName,
+                    fd
+                  )
+                  .then((res) => {
                     console.log(res);
                   })
-                  .catch(err => console.log(err));
+                  .catch((err) => console.log(err));
               } else {
                 const spiritualGuide = {
                   spiritualGuideId: this.spiritualGuideId,
@@ -890,11 +912,16 @@ const EditSpiritualGuide = {
                   spiritualGuide.id +
                   "/replace";
                 axios.post(url, spiritualGuide);
-                axios.post('http://localhost:3000/api/Photos/spiritualGuide/upload?filename=' + fileName, fd)
-                  .then(res => {
+                axios
+                  .post(
+                    "http://localhost:3000/api/Photos/spiritualGuide/upload?filename=" +
+                      fileName,
+                    fd
+                  )
+                  .then((res) => {
                     console.log(res);
                   })
-                  .catch(err => console.log(err));
+                  .catch((err) => console.log(err));
               }
             } else {
               const spiritualGuide = {
@@ -953,12 +980,14 @@ const EditSpiritualGuide = {
                   }
                 );
               } else {
-                if(this.selectedFile != null) {
+                if (this.selectedFile != null) {
                   const fd = new FormData();
-                  fd.append('image', this.selectedFile, this.selectedFile.name);
-                  var start = this.selectedFile.name.lastIndexOf('.');
+                  fd.append("image", this.selectedFile, this.selectedFile.name);
+                  var start = this.selectedFile.name.lastIndexOf(".");
                   var end = this.selectedFile.length;
-                  var fileName = this.spiritualGuideId + this.selectedFile.name.slice(start, end);
+                  var fileName =
+                    this.spiritualGuideId +
+                    this.selectedFile.name.slice(start, end);
                   if (this.imageEdit != null) {
                     const spiritualGuide = {
                       spiritualGuideId: this.spiritualGuideId,
@@ -978,16 +1007,25 @@ const EditSpiritualGuide = {
                       spiritualGuide.id +
                       "/replace";
                     axios.post(url, spiritualGuide);
-                    axios.delete("http://localhost:3000/api/Photos/spiritualGuide/files/" + this.imageEdit)
-                      .then(resp => {
+                    axios
+                      .delete(
+                        "http://localhost:3000/api/Photos/spiritualGuide/files/" +
+                          this.imageEdit
+                      )
+                      .then((resp) => {
                         console.log(resp);
                       })
-                      .catch(err => console.log(err));
-                    axios.post('http://localhost:3000/api/Photos/spiritualGuide/upload?filename=' + fileName, fd)
-                      .then(res => {
+                      .catch((err) => console.log(err));
+                    axios
+                      .post(
+                        "http://localhost:3000/api/Photos/spiritualGuide/upload?filename=" +
+                          fileName,
+                        fd
+                      )
+                      .then((res) => {
                         console.log(res);
                       })
-                      .catch(err => console.log(err));
+                      .catch((err) => console.log(err));
                   } else {
                     const spiritualGuide = {
                       spiritualGuideId: this.spiritualGuideId,
@@ -1007,11 +1045,16 @@ const EditSpiritualGuide = {
                       spiritualGuide.id +
                       "/replace";
                     axios.post(url, spiritualGuide);
-                    axios.post('http://localhost:3000/api/Photos/spiritualGuide/upload?filename=' + fileName, fd)
-                      .then(res => {
+                    axios
+                      .post(
+                        "http://localhost:3000/api/Photos/spiritualGuide/upload?filename=" +
+                          fileName,
+                        fd
+                      )
+                      .then((res) => {
                         console.log(res);
                       })
-                      .catch(err => console.log(err));
+                      .catch((err) => console.log(err));
                   }
                 } else {
                   const spiritualGuide = {
@@ -1075,12 +1118,14 @@ const EditSpiritualGuide = {
                   }
                 );
               } else {
-                if(this.selectedFile != null) {
+                if (this.selectedFile != null) {
                   const fd = new FormData();
-                  fd.append('image', this.selectedFile, this.selectedFile.name);
-                  var start = this.selectedFile.name.lastIndexOf('.');
+                  fd.append("image", this.selectedFile, this.selectedFile.name);
+                  var start = this.selectedFile.name.lastIndexOf(".");
                   var end = this.selectedFile.length;
-                  var fileName = this.spiritualGuideId + this.selectedFile.name.slice(start, end);
+                  var fileName =
+                    this.spiritualGuideId +
+                    this.selectedFile.name.slice(start, end);
                   if (this.imageEdit != null) {
                     const spiritualGuide = {
                       spiritualGuideId: this.spiritualGuideId,
@@ -1100,16 +1145,25 @@ const EditSpiritualGuide = {
                       spiritualGuide.id +
                       "/replace";
                     axios.post(url, spiritualGuide);
-                    axios.delete("http://localhost:3000/api/Photos/spiritualGuide/files/" + this.imageEdit)
-                      .then(resp => {
+                    axios
+                      .delete(
+                        "http://localhost:3000/api/Photos/spiritualGuide/files/" +
+                          this.imageEdit
+                      )
+                      .then((resp) => {
                         console.log(resp);
                       })
-                      .catch(err => console.log(err));
-                    axios.post('http://localhost:3000/api/Photos/spiritualGuide/upload?filename=' + fileName, fd)
-                      .then(res => {
+                      .catch((err) => console.log(err));
+                    axios
+                      .post(
+                        "http://localhost:3000/api/Photos/spiritualGuide/upload?filename=" +
+                          fileName,
+                        fd
+                      )
+                      .then((res) => {
                         console.log(res);
                       })
-                      .catch(err => console.log(err));
+                      .catch((err) => console.log(err));
                   } else {
                     const spiritualGuide = {
                       spiritualGuideId: this.spiritualGuideId,
@@ -1129,11 +1183,16 @@ const EditSpiritualGuide = {
                       spiritualGuide.id +
                       "/replace";
                     axios.post(url, spiritualGuide);
-                    axios.post('http://localhost:3000/api/Photos/spiritualGuide/upload?filename=' + fileName, fd)
-                      .then(res => {
+                    axios
+                      .post(
+                        "http://localhost:3000/api/Photos/spiritualGuide/upload?filename=" +
+                          fileName,
+                        fd
+                      )
+                      .then((res) => {
                         console.log(res);
                       })
-                      .catch(err => console.log(err));
+                      .catch((err) => console.log(err));
                   }
                 } else {
                   const spiritualGuide = {
@@ -1205,12 +1264,18 @@ const EditSpiritualGuide = {
                         }
                       );
                     } else {
-                      if(this.selectedFile != null) {
+                      if (this.selectedFile != null) {
                         const fd = new FormData();
-                        fd.append('image', this.selectedFile, this.selectedFile.name);
-                        var start = this.selectedFile.name.lastIndexOf('.');
+                        fd.append(
+                          "image",
+                          this.selectedFile,
+                          this.selectedFile.name
+                        );
+                        var start = this.selectedFile.name.lastIndexOf(".");
                         var end = this.selectedFile.length;
-                        var fileName = this.spiritualGuideId + this.selectedFile.name.slice(start, end);
+                        var fileName =
+                          this.spiritualGuideId +
+                          this.selectedFile.name.slice(start, end);
                         if (this.imageEdit != null) {
                           const spiritualGuide = {
                             spiritualGuideId: this.spiritualGuideId,
@@ -1230,16 +1295,25 @@ const EditSpiritualGuide = {
                             spiritualGuide.id +
                             "/replace";
                           axios.post(url, spiritualGuide);
-                          axios.delete("http://localhost:3000/api/Photos/spiritualGuide/files/" + this.imageEdit)
-                            .then(resp => {
+                          axios
+                            .delete(
+                              "http://localhost:3000/api/Photos/spiritualGuide/files/" +
+                                this.imageEdit
+                            )
+                            .then((resp) => {
                               console.log(resp);
                             })
-                            .catch(err => console.log(err));
-                          axios.post('http://localhost:3000/api/Photos/spiritualGuide/upload?filename=' + fileName, fd)
-                            .then(res => {
+                            .catch((err) => console.log(err));
+                          axios
+                            .post(
+                              "http://localhost:3000/api/Photos/spiritualGuide/upload?filename=" +
+                                fileName,
+                              fd
+                            )
+                            .then((res) => {
                               console.log(res);
                             })
-                            .catch(err => console.log(err));
+                            .catch((err) => console.log(err));
                         } else {
                           const spiritualGuide = {
                             spiritualGuideId: this.spiritualGuideId,
@@ -1259,11 +1333,16 @@ const EditSpiritualGuide = {
                             spiritualGuide.id +
                             "/replace";
                           axios.post(url, spiritualGuide);
-                          axios.post('http://localhost:3000/api/Photos/spiritualGuide/upload?filename=' + fileName, fd)
-                            .then(res => {
+                          axios
+                            .post(
+                              "http://localhost:3000/api/Photos/spiritualGuide/upload?filename=" +
+                                fileName,
+                              fd
+                            )
+                            .then((res) => {
                               console.log(res);
                             })
-                            .catch(err => console.log(err));
+                            .catch((err) => console.log(err));
                         }
                       } else {
                         const spiritualGuide = {
@@ -1337,24 +1416,24 @@ const EditSpiritualGuide = {
   template: `
   <div class="card shadow mb-4" style="margin-top: -5px;">
     <div class="card-header py-3">
-      <h5 class="m-0 font-weight-bold text-primary">Chỉnh sửa Người Linh Hướng</h5>
+      <h6 class="m-0 font-weight-bold text-dark">Chỉnh sửa Người Linh Hướng</h6>
     </div>
     <div class="card-body">
       <form @submit.prevent="submitEditSpiritualGuideForm" action="POST" method="" autocomplete="off">
         <div class="row mt-2">
           <div class="col-lg-4">
-            <label class="font-weight-bold">Thông Tin Người Linh Hướng:</label>
+            <label class="font-weight-bold text-size-15px ">Thông Tin Người Linh Hướng:</label>
             <p style="font-size: 11px;">Thông tin phục vụ cho việc quản lý nhiều Người Linh Hướng</p>
           </div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="fullName">Họ và Tên</label>
+            <label class="font-weight-bold col-form-label" for="fullName">Họ và Tên</label>
             <label class="text-danger">*</label>
             <input type="text" id="fullName" name="fullName" v-model="fullName" :title="titleFullName"
             :value="fullName" v-on:keyup="fullName = $event.target.value"
             class="form-control text-size-13px " placeholder="Nhập Họ và Tên..." style=" margin-top: -5px;">
           </div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="christianName">Tên Thánh</label>
+            <label class="font-weight-bold col-form-label" for="christianName">Tên Thánh</label>
             <label class="text-danger">*</label>
             <input type="text" :title="titleChristianName" name="christianName" id="christianName"
               v-model="christianName" :value="christianName" v-on:keyup="christianName = $event.target.value" 
@@ -1365,14 +1444,14 @@ const EditSpiritualGuide = {
         <div class="row">
           <div class="col-lg-4"></div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="birthday">Ngày Sinh</label>
+            <label class="font-weight-bold col-form-label" for="birthday">Ngày Sinh</label>
             <label class="text-danger">*</label>
             <input v-model="birthday" name="birthday" id="birthday" type="date" :title="titleBirthday"
             :value="birthday" v-on:keyup="birthday = $event.target.value"
               class="form-control  text-size-13px " style="margin-top: -5px;">
           </div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="position">Chức Vụ</label>
+            <label class="font-weight-bold col-form-label" for="position">Chức Vụ</label>
             <label class="text-danger">*</label>
             <select class="custom-select  text-size-13px  h-32px" v-model="position" name="position"
               id="position" style="margin-top: -5px;">
@@ -1388,7 +1467,7 @@ const EditSpiritualGuide = {
         <div class="row mt-1">
           <div class="col-lg-4"></div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="phone">Số Điện Thoại</label>
+            <label class="font-weight-bold col-form-label" for="phone">Số Điện Thoại</label>
             <label class="text-danger">*</label>
             <input v-model="phone" name="phone" id="phone" type="text" :title="titlePhone"
               v-model="phone" :value="phone" v-on:keyup="phone = $event.target.value"
@@ -1398,7 +1477,7 @@ const EditSpiritualGuide = {
               định dạng</span>
           </div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="email">Email</label>
+            <label class="font-weight-bold col-form-label" for="email">Email</label>
             <label class="text-danger">*</label>
             <input v-model="email" name="email" id="email" type="text" :title="titleEmail"
             :value="email" v-on:keyup="email = $event.target.value"
@@ -1411,7 +1490,7 @@ const EditSpiritualGuide = {
         <div class="row mt-1">
           <div class="col-lg-4"></div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="groupCommunity">Nhóm Cộng Đoàn</label>
+            <label class="font-weight-bold col-form-label" for="groupCommunity">Nhóm Cộng Đoàn</label>
             <label class="text-danger">*</label>
             <select class="custom-select  text-size-13px  h-32px" v-model="groupCommunity" name="groupCommunity" id="groupCommunity"
               style="margin-top: -5px;">
@@ -1421,7 +1500,7 @@ const EditSpiritualGuide = {
             </select>
           </div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="status">Trạng Thái</label>
+            <label class="font-weight-bold col-form-label" for="status">Trạng Thái</label>
             <label class="text-danger">*</label>
             <select class="custom-select  text-size-13px  h-32px" v-model="status" name="status" id="status"
               style="margin-top: -5px;">
@@ -1434,7 +1513,7 @@ const EditSpiritualGuide = {
         <div class="row mt-1">
           <div class="col-lg-4"></div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="image">Hình Ảnh</label>
+            <label class="font-weight-bold col-form-label" for="image">Hình Ảnh</label>
             <input type="file" id="image" @change="onFileSelected" :title="titlePicture"
               class="form-control rounded text-size-13px" style="margin-top: -5px;" />
           </div>
@@ -1443,22 +1522,22 @@ const EditSpiritualGuide = {
           <div class="col-12">
             <div style="float:right">
               <button :disabled="!editSpiritualGuideFormIsValid" type="submit"
-                class="btn text-size-15px rounded btn-hover-blue"
-                style="background-color: #056299;color: white;">
+                class="btn rounded btn-hover-blue"
+                style="background-color: #056299;color: white;font-size:13px;">
                 <i class="far fa-save fa-lg"></i>
                 &nbsp;Lưu
               </button>
             </div>
             <div style="float:right; margin-right: 10px;">
               <button :disabled="!refreshFormSpiritualGuide" @click="clearInputSpiritualGuideForm"
-                class="btn btn-success text-size-15px rounded">
+                class="btn btn-success rounded" style="font-size:13px;">
                 <i class="fas fa-sync-alt"></i>
                 &nbsp;Làm mới
               </button>
             </div>
-            <div style="float:right; margin-right: 335px;">
-              <button class="btn text-size-15px rounded btn-hover-blue"
-                style="background-color: #056299;color: white;" @click="toListSpiritualGuide">
+            <div style="float:right; margin-right: 360px;">
+              <button class="btn rounded btn-hover-blue"
+                style="background-color: #056299;color: white;font-size:13px;" @click="toListSpiritualGuide">
                 <i class="fas fa-fast-backward"></i>
                 &nbsp;Quay lại
               </button>

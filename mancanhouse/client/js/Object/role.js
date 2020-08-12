@@ -45,16 +45,16 @@ const ListRole = {
   },
   template: `
   <div class="card shadow mb-4" style="margin-top: -5px;">
-    <div class="card-header py-3">
+    <div class="card-header py-3" style="margin-bottom:-40px">
       <div class="row">
         <div class="col-md-4">
-          <h5 class="m-0 font-weight-bold text-primary">Danh sách Phân Quyền</h5>
+          <h6 class="m-0 font-weight-bold text-dark">Danh sách Phân Quyền</h6>
         </div>
         <div class="col-md-6"></div>
         <div class="col-md-2" style="padding-left:68px;">
           <router-link :to="{ name: 'addRole' }">
-            <button :title="titleButtonAdd" class="btn text-size-15px rounded btn-hover-blue"
-              style="background-color: #056299;color: white;">
+            <button :title="titleButtonAdd" class="btn rounded btn-hover-blue"
+              style="background-color: #056299;color: white;font-size:14px;">
               <i class="fas fa-plus"></i>
               &nbsp;Thêm
             </button>
@@ -63,7 +63,8 @@ const ListRole = {
       </div>
     </div>
     <div class="card-body">
-      <div class="table-responsive">
+      <hr style="height:1px;color:lightgray;background-color:lightgray">
+      <div class="table-responsive" style="margin-top:-8px">
         <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
           <thead>
             <tr>
@@ -189,17 +190,17 @@ const AddRole = {
   template: `
   <div class="card shadow mb-4" style="margin-top: -5px;">
     <div class="card-header py-3">
-      <h5 class="m-0 font-weight-bold text-primary">Thêm Phân Quyền</h5>
+      <h6 class="m-0 font-weight-bold text-dark">Thêm Phân Quyền</h6>
     </div>
     <div class="card-body">
       <form @submit.prevent="submitAddRoleForm" action="POST" method="" autocomplete="off">
         <div class="row mt-2">
           <div class="col-lg-4">
-            <label class="font-weight-bold">Thông Tin Phân Quyền:</label>
+            <label class="font-weight-bold text-size-15px">Thông Tin Phân Quyền:</label>
             <p style="font-size: 11px;">Thông tin phục vụ cho việc quản lý nhiều Phần Quyền</p>
           </div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="roleName">Tên Phân Quyền</label>
+            <label class="font-weight-bold col-form-label" for="roleName">Tên Phân Quyền</label>
             <label class="text-danger">*</label>
             <input v-model="roleName" name="roleName" id="roleName" type="text" :title="titleRole"
             class="form-control  text-size-13px " style="margin-top: -5px;" placeholder="Nhập Tên Phân Quyền...">
@@ -209,22 +210,22 @@ const AddRole = {
           <div class="col-12">
             <div style="float:right">
               <button :disabled="!addRoleFormIsValid" type="submit"
-                class="btn text-size-15px rounded btn-hover-blue"
-                style="background-color: #056299;color: white;">
+                class="btn rounded btn-hover-blue"
+                style="background-color: #056299;color: white;font-size:13px;">
                 <i class="far fa-save fa-lg"></i>
                 &nbsp;Lưu
               </button>
             </div>
             <div style="float:right; margin-right: 10px;">
               <button :disabled="!refreshFormRole" @click="clearInputRoleForm"
-                class="btn btn-success text-size-15px rounded">
+                class="btn btn-success rounded" style="font-size:13px;">
                 <i class="fas fa-sync-alt"></i>
                 &nbsp;Làm mới
               </button>
             </div>
-            <div style="float:right; margin-right: 335px;">
-              <button class="btn text-size-15px rounded btn-hover-blue"
-                style="background-color: #056299;color: white;" @click="toListRole">
+            <div style="float:right; margin-right: 360px;">
+              <button class="btn rounded btn-hover-blue"
+                style="background-color: #056299;color: white;font-size:13px;" @click="toListRole">
                 <i class="fas fa-fast-backward"></i>
                 &nbsp;Quay lại
               </button>
@@ -307,17 +308,17 @@ const EditRole = {
   template: `
   <div class="card shadow mb-4" style="margin-top: -5px;">
     <div class="card-header py-3">
-      <h5 class="m-0 font-weight-bold text-primary">Chỉnh sửa Phân Quyền</h5>
+      <h6 class="m-0 font-weight-bold text-dark">Chỉnh sửa Phân Quyền</h6>
     </div>
     <div class="card-body">
       <form @submit.prevent="submitEditRoleForm" action="POST" method="" autocomplete="off">
         <div class="row mt-2">
           <div class="col-lg-4">
-            <label class="font-weight-bold">Thông Tin Phân Quyền:</label>
+            <label class="font-weight-bold text-size-15px">Thông Tin Phân Quyền:</label>
             <p style="font-size: 11px;">Thông tin phục vụ cho việc quản lý nhiều Phân Quyền</p>
           </div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="roleName">Tên Phân Quyền</label>
+            <label class="font-weight-bold col-form-label" for="roleName">Tên Phân Quyền</label>
             <label class="text-danger">*</label>
             <input v-model="roleName" name="roleName" id="roleName" type="text" :title="titleRole"
             :value="roleName" v-on:keyup="roleName = $event.target.value" class="form-control  text-size-13px " style="margin-top: -5px;">
@@ -327,22 +328,22 @@ const EditRole = {
           <div class="col-12">
             <div style="float:right">
               <button :disabled="!editRoleFormIsValid" type="submit"
-                class="btn text-size-15px rounded btn-hover-blue"
-                style="background-color: #056299;color: white;">
+                class="btn rounded btn-hover-blue"
+                style="background-color: #056299;color: white;font-size:13px;">
                 <i class="far fa-save fa-lg"></i>
                 &nbsp;Lưu
               </button>
             </div>
             <div style="float:right; margin-right: 10px;">
               <button :disabled="!refreshFormRole" @click="clearInputRoleForm"
-                class="btn btn-success text-size-15px rounded">
+                class="btn btn-success rounded" style="font-size:13px;">
                 <i class="fas fa-sync-alt"></i>
                 &nbsp;Làm mới
               </button>
             </div>
-            <div style="float:right; margin-right: 335px;">
-              <button class="btn text-size-15px rounded btn-hover-blue"
-                style="background-color: #056299;color: white;" @click="toListRole">
+            <div style="float:right; margin-right: 360px;">
+              <button class="btn rounded btn-hover-blue"
+                style="background-color: #056299;color: white;font-size:13px;" @click="toListRole">
                 <i class="fas fa-fast-backward"></i>
                 &nbsp;Quay lại
               </button>

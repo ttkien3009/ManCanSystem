@@ -56,15 +56,15 @@ const ListAccount = {
   },
   template: `
   <div class="card shadow mb-4" style="margin-top: -5px;">
-    <div class="card-header py-3">
+    <div class="card-header py-3" style="margin-bottom:-40px">
       <div class="row">
         <div class="col-md-4">
-          <h5 class="m-0 font-weight-bold text-primary">Danh sách Tài Khoản</h5>
+          <h6 class="m-0 font-weight-bold text-dark">Danh sách Tài Khoản</h6>
         </div>
         <div class="col-md-6"></div>
         <div class="col-md-2" style="padding-left:68px;">
           <router-link :to="{ name: 'addAccount' }">
-          <button :title="titleButtonAdd" class="btn text-size-15px rounded btn-hover-blue" style="background-color: #056299;color: white;">
+          <button :title="titleButtonAdd" class="btn rounded btn-hover-blue" style="background-color: #056299;color: white;font-size:14px;">
             <i class="fas fa-plus"></i>
             &nbsp;Thêm
           </button>
@@ -73,11 +73,12 @@ const ListAccount = {
       </div>
     </div>
     <div class="card-body">
-      <div class="table-responsive">
+      <hr style="height:1px;color:lightgray;background-color:lightgray">
+      <div class="table-responsive" style="margin-top:-8px">
         <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
           <thead>
             <tr>
-              <th scope="col">ID</th>
+              <th scope="col">STT</th>
               <th scope="col">Mã TK</th>
               <th scope="col">Tài Khoản</th>
               <th scope="col">Phân Quyền</th>
@@ -87,7 +88,7 @@ const ListAccount = {
           </thead>
           <tfoot>
             <tr>
-              <th scope="col">ID</th>
+              <th scope="col">STT</th>
               <th scope="col">Mã TK</th>
               <th scope="col">Tài Khoản</th>
               <th scope="col">Phân Quyền</th>
@@ -115,7 +116,7 @@ const ListAccount = {
                       <i class="fas fa-edit fa-md ml--2px"></i>
                     </button>
                   </div>
-                  <div class="col-4" style="margin-left:-10px;">
+                  <div class="col-4" style="margin-left:-15px;">
                     <button :title="titleButtonDelete" data-toggle="modal" @click="getDetailAccount(account)"
                       data-target="#deleteAccountModal" class="btn btn-danger btn-sm h-28px w-28px rounded">
                       <i class="far fa-trash-alt fa-md ml--1px"></i>
@@ -342,24 +343,24 @@ const AddAccount = {
   template: `
   <div class="card shadow mb-4" style="margin-top: -5px;">
     <div class="card-header py-3">
-      <h5 class="m-0 font-weight-bold text-primary">Thêm Tài Khoản</h5>
+      <h6 class="m-0 font-weight-bold text-dark">Thêm Tài Khoản</h6>
     </div>
     <div class="card-body">
       <form @submit.prevent="submitAddAccountForm" action="POST" method="" autocomplete="off">
         <div class="row mt-2">
           <div class="col-lg-4">
-            <label class="font-weight-bold">Thông Tin Tài Khoản:</label>
-            <p style="font-size: 15px;">Thông tin phục vụ cho việc quản lý nhiều Tài Khoản</p>
+            <label class="font-weight-bold text-size-15px ">Thông Tin Tài Khoản:</label>
+            <p style="font-size: 12px;">Thông tin phục vụ cho việc quản lý nhiều Tài Khoản</p>
           </div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="username">Tài Khoản</label>
+            <label class="font-weight-bold col-form-label" for="username">Tài Khoản</label>
             <label class="text-danger">*</label>
             <input type="text" v-bind:title="titleUsername" name="username" id="username" v-model="username"
               class="form-control text-size-13px " placeholder="Nhập Tài khoản..."
               style="margin-top: -5px;">
           </div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="password">Mật Khẩu</label>
+            <label class="font-weight-bold col-form-label" for="password">Mật Khẩu</label>
             <label class="text-danger">*</label>
             <input v-bind:title="titlePassword" v-model="password" id="password" name="password" type="password"
               class="form-control  text-size-13px " placeholder="Nhập Mật khẩu..."
@@ -374,7 +375,7 @@ const AddAccount = {
         <div class="row mt-1">
           <div class="col-lg-4"></div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="role">Phân Quyền</label>
+            <label class="font-weight-bold col-form-label" for="role">Phân Quyền</label>
             <label class="text-danger">*</label>
             <select class="custom-select  text-size-13px  h-32px" v-model="role" id="role" name="role"
               style="margin-top: -5px;">
@@ -383,7 +384,7 @@ const AddAccount = {
             </select>
           </div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="status">Tình Trạng</label>
+            <label class="font-weight-bold col-form-label" for="status">Tình Trạng</label>
             <label class="text-danger">*</label>
             <select class="custom-select  text-size-13px h-32px form-control" v-model="status"
               name="status" id="status" style="margin-top: -5px;">
@@ -395,22 +396,22 @@ const AddAccount = {
         <div class="row" style="margin-top: 30px;">
           <div class="col-12">
             <div style="float:right">
-              <button :disabled="!addAccountFormIsValid" type="submit" class="btn text-size-15px rounded btn-hover-blue"
-                style="background-color: #056299;color: white;">
+              <button :disabled="!addAccountFormIsValid" type="submit" class="btn rounded btn-hover-blue"
+                style="background-color: #056299;color: white;font-size:13px;">
                 <i class="far fa-save fa-lg"></i>
                 &nbsp;Lưu
               </button>
             </div>
             <div style="float:right; margin-right: 10px;">
               <button :disabled="!refreshAccountForm" @click="clearInputAccountForm"
-                class="btn btn-success text-size-15px rounded">
+                class="btn btn-success rounded" style="font-size:13px;">
                 <i class="fas fa-sync-alt"></i>
                 &nbsp;Làm mới
               </button>
             </div>
-            <div style="float:right; margin-right: 335px;">
-              <button class="btn text-size-15px rounded btn-hover-blue"
-                style="background-color: #056299;color: white;" @click="toListAccount">
+            <div style="float:right; margin-right: 360px;">
+              <button class="btn rounded btn-hover-blue"
+                style="background-color: #056299;color: white;font-size:13px;" @click="toListAccount">
                 <i class="fas fa-fast-backward"></i>
                 &nbsp;Quay lại
               </button>
@@ -597,17 +598,17 @@ const EditAccount = {
   template: `
   <div class="card shadow mb-4" style="margin-top: -5px;">
   <div class="card-header py-3">
-    <h5 class="m-0 font-weight-bold text-primary">Chỉnh sửa Tài Khoản</h5>
+    <h6 class="m-0 font-weight-bold text-dark">Chỉnh sửa Tài Khoản</h6>
   </div>
   <div class="card-body">
     <form @submit.prevent="submitEditAccountForm" action="POST" method="" autocomplete="off">
       <div class="row mt-2">
         <div class="col-lg-4">
-          <label class="font-weight-bold">Thông Tin Tài Khoản:</label>
+          <label class="font-weight-bold text-size-15px">Thông Tin Tài Khoản:</label>
           <p style="font-size: 15px;">Thông tin phục vụ cho việc quản lý nhiều Tài Khoản</p>
         </div>
         <div class="col-lg-4">
-          <label class="text-size-15px font-weight-bold col-form-label" for="usernameEdit">Tài Khoản</label>
+          <label class="font-weight-bold col-form-label" for="usernameEdit">Tài Khoản</label>
           <label class="text-danger">*</label>
           <input type="text" v-bind:title="titleUsername" v-model="usernameEdit" id="usernameEdit"
             name="usernameEdit" class="form-control text-size-13px " placeholder="Nhập Tài khoản..."
@@ -615,7 +616,7 @@ const EditAccount = {
             style="margin-top: -5px;">
         </div>
         <div class="col-lg-4">
-          <label class="text-size-15px font-weight-bold col-form-label" for="passwordEdit">Mật Khẩu</label>
+          <label class="font-weight-bold col-form-label" for="passwordEdit">Mật Khẩu</label>
           <label class="text-danger">*</label>
           <input v-bind:title="titlePassword" v-model="passwordEdit" id="passwordEdit" name="passwordEdit"
             type="password" class="form-control  text-size-13px " placeholder="Nhập Mật khẩu..."
@@ -630,7 +631,7 @@ const EditAccount = {
       <div class="row mt-1">
         <div class="col-lg-4"></div>
         <div class="col-lg-4">
-          <label class="text-size-15px font-weight-bold col-form-label" for="roleEdit">Phân Quyền</label>
+          <label class="font-weight-bold col-form-label" for="roleEdit">Phân Quyền</label>
           <label class="text-danger">*</label>
           <select class="custom-select  text-size-13px  h-32px" v-model="roleEdit" id="roleEdit" name="roleEdit"
             style="margin-top: -5px;">
@@ -639,7 +640,7 @@ const EditAccount = {
           </select>
         </div>
         <div class="col-lg-4">
-          <label class="text-size-15px font-weight-bold col-form-label" for="statusEdit">Tình Trạng</label>
+          <label class="font-weight-bold col-form-label" for="statusEdit">Tình Trạng</label>
           <label class="text-danger">*</label>
           <select class="custom-select  text-size-13px h-32px form-control" v-model="statusEdit" name="statusEdit"
             id="statusEdit" style="margin-top: -5px;">
@@ -652,22 +653,22 @@ const EditAccount = {
         <div class="col-12">
           <div style="float:right">
             <button :disabled="!editAccountFormIsValid" type="submit"
-              class="btn text-size-15px rounded btn-hover-blue"
-              style="background-color: #056299;color: white;">
+              class="btn rounded btn-hover-blue"
+              style="background-color: #056299;color: white;font-size:13px;">
               <i class="far fa-save fa-lg"></i>
               &nbsp;Lưu
             </button>
           </div>
           <div style="float:right; margin-right: 10px;">
             <button :disabled="!refreshForm" @click="clearInput"
-              class="btn btn-success text-size-15px rounded">
+              class="btn btn-success rounded" style="font-size:13px;">
               <i class="fas fa-sync-alt"></i>
               &nbsp;Làm mới
             </button>
           </div>
-          <div style="float:right; margin-right: 335px;">
-            <button class="btn text-size-15px rounded btn-hover-blue"
-              style="background-color: #056299;color: white;" @click="toListAccount">
+          <div style="float:right; margin-right: 360px;">
+            <button class="btn rounded btn-hover-blue"
+              style="background-color: #056299;color: white;font-size:13px;" @click="toListAccount">
               <i class="fas fa-fast-backward"></i>
               &nbsp;Quay lại
             </button>

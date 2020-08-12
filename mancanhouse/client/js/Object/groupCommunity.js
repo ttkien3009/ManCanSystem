@@ -55,16 +55,16 @@ const ListGroupCommunity = {
   },
   template: `
   <div class="card shadow mb-4" style="margin-top: -5px;">
-    <div class="card-header py-3">
+    <div class="card-header py-3" style="margin-bottom:-40px">
       <div class="row">
         <div class="col-md-4">
-          <h5 class="m-0 font-weight-bold text-primary">Danh sách Nhóm Cộng Đoàn</h5>
+          <h6 class="m-0 font-weight-bold text-dark">Danh sách Nhóm Cộng Đoàn</h6>
         </div>
         <div class="col-md-6"></div>
         <div class="col-md-2" style="padding-left:68px;">
           <router-link :to="{ name: 'addGroupCommunity' }">
-            <button :title="titleButtonAdd" class="btn text-size-15px rounded btn-hover-blue"
-              style="background-color: #056299;color: white;">
+            <button :title="titleButtonAdd" class="btn rounded btn-hover-blue"
+              style="background-color: #056299;color: white;font-size:14px;">
               <i class="fas fa-plus"></i>
               &nbsp;Thêm
             </button>
@@ -73,7 +73,8 @@ const ListGroupCommunity = {
       </div>
     </div>
     <div class="card-body">
-      <div class="table-responsive">
+      <hr style="height:1px;color:lightgray;background-color:lightgray">
+      <div class="table-responsive" style="margin-top:-8px">
         <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
           <thead>
             <tr>
@@ -282,23 +283,23 @@ const AddGroupCommunity = {
   template: `
   <div class="card shadow mb-4" style="margin-top: -5px;">
     <div class="card-header py-3">
-      <h5 class="m-0 font-weight-bold text-primary">Thêm Nhóm Cộng Đoàn</h5>
+      <h6 class="m-0 font-weight-bold text-dark">Thêm Nhóm Cộng Đoàn</h6>
     </div>
     <div class="card-body">
       <form @submit.prevent="submitAddGroupCommunityForm" action="POST" method="" autocomplete="off">
         <div class="row mt-2">
           <div class="col-lg-4">
-            <label class="font-weight-bold">Thông Tin Nhóm Cộng Đoàn:</label>
+            <label class="font-weight-bold text-size-15px ">Thông Tin Nhóm Cộng Đoàn:</label>
             <p style="font-size: 11px;">Thông tin phục vụ cho việc quản lý nhiều Nhóm Cộng Đoàn</p>
           </div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="name">Tên Nhóm Cộng Đoàn</label>
+            <label class="font-weight-bold col-form-label" for="name">Tên Nhóm Cộng Đoàn</label>
             <label class="text-danger">*</label>
             <input type="text" id="name" name="name" v-model="name" :title="titleName"
               class="form-control text-size-13px " placeholder="Nhập Tên Nhóm Cộng Đoàn..." style=" margin-top: -5px;">
           </div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="firstCom">Cộng Đoàn 1</label>
+            <label class="font-weight-bold col-form-label" for="firstCom">Cộng Đoàn 1</label>
             <select class="custom-select  text-size-13px  h-32px" v-model="firstCom" name="firstCom"
               id="firstCom" style="margin-top: -5px;">
               <option value="0" disabled selected>--- Chọn Cộng Đoàn 1 ---</option>
@@ -309,7 +310,7 @@ const AddGroupCommunity = {
         <div class="row" mt-2>
           <div class="col-lg-4"></div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="secondCom">Cộng Đoàn 2</label>
+            <label class="font-weight-bold col-form-label" for="secondCom">Cộng Đoàn 2</label>
             <select class="custom-select  text-size-13px  h-32px" v-model="secondCom" name="secondCom"
               id="secondCom" style="margin-top: -5px;">
               <option value="0" disabled selected>--- Chọn Cộng Đoàn 2 ---</option>
@@ -317,7 +318,7 @@ const AddGroupCommunity = {
             </select>
           </div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="thirdCom">Cộng Đoàn 3</label>
+            <label class="font-weight-bold col-form-label" for="thirdCom">Cộng Đoàn 3</label>
             <select class="custom-select  text-size-13px  h-32px" v-model="thirdCom" name="thirdCom"
               id="thirdCom" style="margin-top: -5px;">
               <option value="0" disabled selected>--- Chọn Cộng Đoàn 3 ---</option>
@@ -328,7 +329,7 @@ const AddGroupCommunity = {
         <div class="row mt-2">
           <div class="col-lg-4"></div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="fourthCom">Cộng Đoàn 4</label>
+            <label class="font-weight-bold col-form-label" for="fourthCom">Cộng Đoàn 4</label>
             <select class="custom-select  text-size-13px  h-32px" v-model="fourthCom" name="fourthCom"
               id="fourthCom" style="margin-top: -5px;">
               <option value="0" disabled selected>--- Chọn Cộng Đoàn 4 ---</option>
@@ -336,7 +337,7 @@ const AddGroupCommunity = {
             </select>
           </div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="fifthCom">Cộng Đoàn 5</label>
+            <label class="font-weight-bold col-form-label" for="fifthCom">Cộng Đoàn 5</label>
             <select class="custom-select  text-size-13px  h-32px" v-model="fifthCom" name="fifthCom"
               id="fifthCom" style="margin-top: -5px;">
               <option value="0" disabled selected>--- Chọn Cộng Đoàn 5 ---</option>
@@ -348,22 +349,22 @@ const AddGroupCommunity = {
           <div class="col-12">
             <div style="float:right">
               <button :disabled="!addGroupCommunityFormIsValid" type="submit"
-                class="btn text-size-15px rounded btn-hover-blue"
-                style="background-color: #056299;color: white;">
+                class="btn rounded btn-hover-blue"
+                style="background-color: #056299;color: white;font-size:13px;">
                 <i class="far fa-save fa-lg"></i>
                 &nbsp;Lưu
               </button>
             </div>
             <div style="float:right; margin-right: 10px;">
               <button :disabled="!refreshFormGroupCommunity" @click="clearInputGroupCommunityForm"
-                class="btn btn-success text-size-15px rounded">
+                class="btn btn-success rounded" style="font-size:13px;">
                 <i class="fas fa-sync-alt"></i>
                 &nbsp;Làm mới
               </button>
             </div>
-            <div style="float:right; margin-right: 335px;">
-              <button class="btn text-size-15px rounded btn-hover-blue"
-                style="background-color: #056299;color: white;" @click="toListGroupCommunity">
+            <div style="float:right; margin-right: 360px;">
+              <button class="btn rounded btn-hover-blue"
+                style="background-color: #056299;color: white;font-size:13px;" @click="toListGroupCommunity">
                 <i class="fas fa-fast-backward"></i>
                 &nbsp;Quay lại
               </button>
@@ -419,7 +420,7 @@ const EditGroupCommunity = {
     },
 
     firstComIsValid() {
-      return !!this.fifthCom;
+      return !!this.firstCom;
     },
 
     secondComIsValid() {
@@ -507,24 +508,24 @@ const EditGroupCommunity = {
   template: `
   <div class="card shadow mb-4" style="margin-top: -5px;">
     <div class="card-header py-3">
-      <h5 class="m-0 font-weight-bold text-primary">Chỉnh sửa Nhóm Cộng Đoàn</h5>
+      <h6 class="m-0 font-weight-bold text-dark">Chỉnh sửa Nhóm Cộng Đoàn</h6>
     </div>
     <div class="card-body">
       <form @submit.prevent="submitEditGroupCommunityForm" action="POST" method="" autocomplete="off">
         <div class="row mt-2">
           <div class="col-lg-4">
-            <label class="font-weight-bold">Thông Tin Nhóm Cộng Đoàn:</label>
+            <label class="font-weight-bold text-size-15px ">Thông Tin Nhóm Cộng Đoàn:</label>
             <p style="font-size: 11px;">Thông tin phục vụ cho việc quản lý nhiều Nhóm Cộng Đoàn</p>
           </div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="name">Tên Nhóm Cộng Đoàn</label>
+            <label class="font-weight-bold col-form-label" for="name">Tên Nhóm Cộng Đoàn</label>
             <label class="text-danger">*</label>
             <input type="text" id="name" name="name" v-model="name" :title="titleName"
             :value="name" v-on:keyup="name = $event.target.value"
               class="form-control text-size-13px " placeholder="Nhập Tên Nhóm Cộng Đoàn..." style=" margin-top: -5px;">
           </div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="firstCom">Cộng Đoàn 1</label>
+            <label class="font-weight-bold col-form-label" for="firstCom">Cộng Đoàn 1</label>
             <select class="custom-select  text-size-13px  h-32px" v-model="firstCom" name="firstCom"
               id="firstCom" style="margin-top: -5px;">
               <option value="0" disabled>--- Chọn Cộng Đoàn 1 ---</option>
@@ -536,7 +537,7 @@ const EditGroupCommunity = {
         <div class="row mt-1">
           <div class="col-lg-4"></div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="secondCom">Cộng Đoàn 2</label>
+            <label class="font-weight-bold col-form-label" for="secondCom">Cộng Đoàn 2</label>
             <select class="custom-select  text-size-13px  h-32px" v-model="secondCom" name="secondCom"
               id="secondCom" style="margin-top: -5px;">
               <option value="0" disabled>--- Chọn Cộng Đoàn 2 ---</option>
@@ -545,7 +546,7 @@ const EditGroupCommunity = {
             </select>
           </div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="thirdCom">Cộng Đoàn 3</label>
+            <label class="font-weight-bold col-form-label" for="thirdCom">Cộng Đoàn 3</label>
             <select class="custom-select  text-size-13px  h-32px" v-model="thirdCom" name="thirdCom"
               id="thirdCom" style="margin-top: -5px;">
               <option value="0" disabled>--- Chọn Cộng Đoàn 3 ---</option>
@@ -557,7 +558,7 @@ const EditGroupCommunity = {
         <div class="row mt-2">
           <div class="col-lg-4"></div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="fourthCom">Cộng Đoàn 4</label>
+            <label class="font-weight-bold col-form-label" for="fourthCom">Cộng Đoàn 4</label>
             <select class="custom-select  text-size-13px  h-32px" v-model="fourthCom" name="fourthCom"
               id="fourthCom" style="margin-top: -5px;">
               <option value="0" disabled>--- Chọn Cộng Đoàn 4 ---</option>
@@ -566,7 +567,7 @@ const EditGroupCommunity = {
             </select>
           </div>
           <div class="col-lg-4">
-            <label class="text-size-15px font-weight-bold col-form-label" for="fifthCom">Cộng Đoàn 5</label>
+            <label class="font-weight-bold col-form-label" for="fifthCom">Cộng Đoàn 5</label>
             <select class="custom-select  text-size-13px  h-32px" v-model="fifthCom" name="fifthCom"
               id="fifthCom" style="margin-top: -5px;">
               <option value="0" disabled>--- Chọn Cộng Đoàn 5 ---</option>
@@ -579,22 +580,22 @@ const EditGroupCommunity = {
           <div class="col-12">
             <div style="float:right">
               <button :disabled="!editGroupCommunityFormIsValid" type="submit"
-                class="btn text-size-15px rounded btn-hover-blue"
-                style="background-color: #056299;color: white;">
+                class="btn rounded btn-hover-blue"
+                style="background-color: #056299;color: white;font-size:13px;">
                 <i class="far fa-save fa-lg"></i>
                 &nbsp;Lưu
               </button>
             </div>
             <div style="float:right; margin-right: 10px;">
               <button :disabled="!refreshFormGroupCommunity" @click="clearInputGroupCommunityForm"
-                class="btn btn-success text-size-15px rounded">
+                class="btn btn-success rounded" style="font-size:13px;">
                 <i class="fas fa-sync-alt"></i>
                 &nbsp;Làm mới
               </button>
             </div>
-            <div style="float:right; margin-right: 335px;">
-              <button class="btn text-size-15px rounded btn-hover-blue"
-                style="background-color: #056299;color: white;" @click="toListGroupCommunity">
+            <div style="float:right; margin-right: 360px;">
+              <button class="btn rounded btn-hover-blue"
+                style="background-color: #056299;color: white;font-size:13px;" @click="toListGroupCommunity">
                 <i class="fas fa-fast-backward"></i>
                 &nbsp;Quay lại
               </button>
