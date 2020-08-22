@@ -1,51 +1,18 @@
 const store = new Vuex.Store({
   state: {
-    status: "",
-    token: localStorage.getItem("token") || "",
-    user: {},
-    userInfo: {
-      id: 0,
-      userId: null,
-      username: null,
-      password: null,
-      role: 0,
-      idTable: 0,
-    },
+    idTable: 0,
   },
   mutations: {
-    auth_request(state) {
-      state.status = "loading";
-    },
-
-    auth_success(state, token, user) {
-      state.status = "success";
-      state.token = token;
-      state.user = user;
-    },
-
-    auth_error(state) {
-      state.status = "error";
-    },
-
-    updateUserInfo(state, userInfo) {
-      state.userInfo = userInfo;
-    },
-
-    logout(state) {
-      state.status = "";
-      state.token = "";
+    updateIdTable(state, id) {
+      state.idTable = id;
     },
   },
   actions: {
-    updateUserInfo: ({ commit }, userInfo) => {
-      commit("updateUserInfo", userInfo);
+    updateIdTable: ({ commit }, id) => {
+      commit("updateIdTable", id);
     },
-    logout({ commit }) {},
   },
-  getters: {
-    isLoggedIn: (state) => !!state.token,
-    authStatus: (state) => state.status,
-  },
+  getters: {},
 });
 
 const Login = {
@@ -268,12 +235,10 @@ Vue.component("page-header", {
       axios
         .delete("http://localhost:3000/api/logins/" + this.id)
         .then((response) => {
-          this.$router.push("/");
           setTimeout(() => {
             this.$router.push("/login");
-          }, 5);
+          }, 1);
         });
-      // this.$router.push("/login");
     },
   },
   template: `
@@ -370,7 +335,7 @@ Vue.component("page-menu", {
               <router-link tag="li" :to="{ name: 'listGroupCommunity'}" v-show="role == 1 || role == 8">
                 <i class="menu-icon fas fa-house-damage fa-lg"></i><a href="#">Nhóm Cộng Đoàn</a>
               </router-link>
-              <router-link tag="li" :to="{ name: 'listScheduleCompanions'}" v-show="role == 1 || role == 8 || role == 9 || role == 5">
+              <router-link tag="li" :to="{ name: 'listScheduleCompanions'}" v-show="role == 8 || role == 9 || role == 5">
                 <i class="menu-icon far fa-calendar fa-lg"></i><a href="#">Lịch Đồng Hành</a>
               </router-link>
             </ul>
@@ -384,7 +349,7 @@ Vue.component("page-menu", {
               <router-link tag="li" :to="{ name: 'listGroupCommunity'}" v-show="role == 1 || role == 6">
                 <i class="menu-icon fas fa-house-damage fa-lg"></i><a href="#">Nhóm Cộng Đoàn</a>
               </router-link>
-              <router-link tag="li" :to="{ name: 'listScheduleSpiritualGuides'}" v-show="role == 1 || role == 6 || role == 7 || role == 5">
+              <router-link tag="li" :to="{ name: 'listScheduleSpiritualGuides'}" v-show="role == 6 || role == 7 || role == 5">
                 <i class="menu-icon far fa-calendar fa-lg"></i><a href="#">Lịch Linh Hướng</a>
               </router-link>
             </ul>
@@ -405,11 +370,17 @@ Vue.component("page-menu", {
             <a><i class="menu-icon fas fa-boxes fa-lg"></i>Phòng Ban </a>
           </li>
         </router-link>
-        <router-link v-show="role == 1 || role == 3" style="text-decoration: none; color: inherit;" :to="{ name: 'listStatistics'}">
-          <li>
-            <a><i class="menu-icon fas fa-chart-line fa-lg"></i>Thống Kê </a>
-          </li>
-        </router-link>
+        <li class="menu-item-has-children dropdown" v-show="role == 1 || role == 6 || role == 7 || role == 8 || role == 9">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> <i class="menu-icon fas fa-chart-line fa-lg"></i>Thống Kê</a>
+            <ul class="sub-menu children dropdown-menu">
+              <router-link tag="li" :to="{ name: 'listMetCompanion'}" v-show="role == 1 || role == 8|| role == 9">
+                <i class="menu-icon far fa-handshake fa-lg"></i><a href="#">Gặp Đồng Hành</a>
+              </router-link>
+              <router-link tag="li" :to="{ name: 'listMetSpiritualGuide'}" v-show="role == 1 || role == 6 || role == 7">
+                <i class="menu-icon fas fa-handshake fa-lg"></i><a href="#">Gặp Linh Hướng</a>
+              </router-link>
+            </ul>
+        </li>
         <li class="menu-item-has-children dropdown" v-show="role == 1">
             <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> <i class="menu-icon fab fa-windows fa-lg"></i>Hệ Thống</a>
             <ul class="sub-menu children dropdown-menu">
@@ -11929,19 +11900,240 @@ const RegisteringScheduleCompanion = {
         { id: 6, time: "15:00 - 16:00" },
       ],
       scheduleCompanions: [],
+      companions: [],
+      candidates: [],
+      groupCommunity: [],
       statuses: [
         { id: 1, name: "Đang hoạt động" },
         { id: 2, name: "Vô hiệu hóa" },
       ],
       scheduleCompanion: {},
+      role: 0,
+      idTable: 0,
+      metCompanions: [],
     };
   },
   mounted() {
+    // let promiseResponse = axios.get("http://localhost:3000/api/logins/findOne?filter[where][token]=token")
+    //                     .then(response => response.data)
+    //                     .then(data => {return data})
+    // console.log(promiseResponse);
+    // Promise.resolve(promiseResponse).then((jsonResults) => {
+    //   console.log(jsonResults);
+    //   this.data().idTable = jsonResults.idTable;
+    //   console.log(this.idTable);
+    // })
+    var path =
+      "http://localhost:3000/api/logins/findOne?filter[where][token]=token";
+    function loadDataPromise(path) {
+      return new Promise(function (res, rej) {
+        axios
+          .get(path)
+          .then(function (response) {
+            res(response.data);
+          })
+          .catch(function (err) {
+            rej(err);
+          });
+      });
+    }
+    async function Loaddata() {
+      let c = await loadDataPromise(path);
+      return c;
+    }
+    Loaddata().then((data) => {
+      console.log(data.idTable);
+    });
+
+    // var obj = loadDataPromise(path).then((resp) => {
+    //   return resp.json();
+    // });
+    // console.log(obj);
     axios
-      .get("http://localhost:3000/api/scheduleCompanions")
+      .get(
+        "http://localhost:3000/api/logins/findOne?filter[where][token]=token"
+      )
+      .then((resp) => {
+        this.idTable = resp.data.idTable;
+        this.role = resp.data.role;
+      });
+    axios
+      .get(
+        "http://localhost:3000/api/scheduleCompanions?filter[where][companion]=12"
+      )
       .then((response) => {
         this.scheduleCompanions = response.data;
       });
+    axios.get("http://localhost:3000/api/candidates").then((resp) => {
+      this.candidates = resp.data;
+    });
+
+    // axios
+    //   .get(
+    //     "http://localhost:3000/api/logins/findOne?filter[where][token]=token"
+    //   )
+    //   .then((resp) => {
+    //     this.idTable = resp.data.idTable;
+    //     this.role = resp.data.role;
+    //     if (this.role == 8 || this.role == 9) {
+    //       axios
+    //         .get(
+    //           "http://localhost:3000/api/scheduleCompanions?filter[where][companion]=" +
+    //             this.idTable
+    //         )
+    //         .then((response) => {
+    //           this.scheduleCompanions = response.data;
+    //           console.log(this.scheduleCompanions);
+    //         });
+    //     }
+    //     else if (this.role == 5) {
+    //       axios
+    //         .get(
+    //           "http://localhost:3000/api/candidates?filter[where][id]=" +
+    //             this.idTable
+    //         )
+    //         .then((respCan) => {
+    //           var community = respCan.data[0].community;
+    //           axios
+    //             .get(
+    //               "http://localhost:3000/api/groupCommunities?filter[where][firstCom]=" + community)
+    //             .then((respGroupCom) => {
+    //               var groupCommunity = {};
+    //               groupCommunity = respGroupCom.data;
+    //               if(groupCommunity != null){
+    //                 var idGroup = respGroupCom.data[0].id;
+    //                 axios
+    //                   .get(
+    //                     "http://localhost:3000/api/companions?filter[where][groupCommunity]=" +
+    //                       idGroup
+    //                   )
+    //                   .then((respCom) => {
+    //                     var companion = respCom.data[0].id;
+    //                     axios
+    //                       .get(
+    //                         "http://localhost:3000/api/scheduleCompanions?filter[where][companion]=" +
+    //                           companion
+    //                       )
+    //                       .then((respSchedule) => {
+    //                         this.scheduleCompanions = respSchedule.data;
+    //                       });
+    //                   });
+    //               } else{
+    //                 axios
+    //                   .get(
+    //                     "http://localhost:3000/api/groupCommunities?filter[where][secondCom]=" + community)
+    //                   .then((respGroupCom) => {
+    //                     var groupCommunity = {};
+    //                     groupCommunity = respGroupCom.data;
+    //                     if(groupCommunity != null){
+    //                       var idGroup = respGroupCom.data[0].id;
+    //                     axios
+    //                       .get(
+    //                         "http://localhost:3000/api/companions?filter[where][groupCommunity]=" +
+    //                           idGroup
+    //                       )
+    //                       .then((respCom) => {
+    //                         var companion = respCom.data[0].id;
+    //                         axios
+    //                           .get(
+    //                             "http://localhost:3000/api/scheduleCompanions?filter[where][companion]=" +
+    //                               companion
+    //                           )
+    //                           .then((resp) => {
+    //                             this.scheduleCompanions = resp.data;
+    //                           });
+    //                       });
+    //                     } else{
+    //                       axios
+    //                         .get(
+    //                           "http://localhost:3000/api/groupCommunities?filter[where][thirdCom]=" + community)
+    //                         .then((respGroupCom) => {
+    //                           var groupCommunity = {};
+    //                           groupCommunity = respGroupCom.data;
+    //                           if(groupCommunity != null){
+    //                             var idGroup = respGroupCom.data[0].id;
+    //                           axios
+    //                             .get(
+    //                               "http://localhost:3000/api/companions?filter[where][groupCommunity]=" +
+    //                                 idGroup
+    //                             )
+    //                             .then((respCom) => {
+    //                               var companion = respCom.data[0].id;
+    //                               axios
+    //                                 .get(
+    //                                   "http://localhost:3000/api/scheduleCompanions?filter[where][companion]=" +
+    //                                     companion
+    //                                 )
+    //                                 .then((respSchedule) => {
+    //                                   this.scheduleCompanions = respSchedule.data;
+    //                                 });
+    //                             });
+    //                           } else {
+    //                             axios
+    //                               .get(
+    //                                 "http://localhost:3000/api/groupCommunities?filter[where][fourthCom]=" + community)
+    //                               .then((respGroupCom) => {
+    //                                 var groupCommunity = {};
+    //                                 groupCommunity = respGroupCom.data;
+    //                                 if(groupCommunity != null){
+    //                                   var idGroup = respGroupCom.data[0].id;
+    //                                 axios
+    //                                   .get(
+    //                                     "http://localhost:3000/api/companions?filter[where][groupCommunity]=" +
+    //                                       idGroup
+    //                                   )
+    //                                   .then((respCom) => {
+    //                                     var companion = respCom.data[0].id;
+    //                                     axios
+    //                                       .get(
+    //                                         "http://localhost:3000/api/scheduleCompanions?filter[where][companion]=" +
+    //                                           companion
+    //                                       )
+    //                                       .then((respSchedule) => {
+    //                                         this.scheduleCompanions = respSchedule.data;
+    //                                       });
+    //                                   });
+    //                                 } else{
+    //                                   axios
+    //                                     .get(
+    //                                       "http://localhost:3000/api/groupCommunities?filter[where][fifthCom]=" + community)
+    //                                     .then((respGroupCom) => {
+    //                                       var groupCommunity = {};
+    //                                       groupCommunity = respGroupCom.data;
+    //                                       if(groupCommunity != null){
+    //                                         var idGroup = respGroupCom.data[0].id;
+    //                                       axios
+    //                                         .get(
+    //                                           "http://localhost:3000/api/companions?filter[where][groupCommunity]=" +
+    //                                             idGroup
+    //                                         )
+    //                                         .then((respCom) => {
+    //                                           var companion = respCom.data[0].id;
+    //                                           axios
+    //                                             .get(
+    //                                               "http://localhost:3000/api/scheduleCompanions?filter[where][companion]=" +
+    //                                                 companion
+    //                                             )
+    //                                             .then((respSchedule) => {
+    //                                               this.scheduleCompanions = respSchedule.data;
+    //                                             });
+    //                                         });
+    //                                       }
+    //                                     });
+    //                                 }
+    //                               });
+    //                           }
+    //                         });
+    //                     }
+    //                   });
+    //               }
+    //             });
+    //         });
+    //     }
+    //   });
+    axios.get("http://localhost:3000/api/metCompanions").then((resp) => {
+      this.metCompanions = resp.data;
+    });
   },
   computed: {
     isThirtyOneTrue() {
@@ -12017,7 +12209,7 @@ const RegisteringScheduleCompanion = {
             var mm = String(today.getMonth() + 1).padStart(2, "0");
             var day = dd + "/" + mm;
             const scheduleCompanion = {
-              companion: 1,
+              companion: this.idTable,
               candidate: null,
               session: this.sessions[sess].time,
               date: day,
@@ -12039,7 +12231,7 @@ const RegisteringScheduleCompanion = {
             var mm = String(today.getMonth() + 1).padStart(2, "0");
             var day = dd + "/" + mm;
             const scheduleCompanion = {
-              companion: 1,
+              companion: this.idTable,
               candidate: null,
               session: this.sessions[sess].time,
               date: day,
@@ -12065,7 +12257,7 @@ const RegisteringScheduleCompanion = {
               var mm = String(today.getMonth() + 1).padStart(2, "0");
               var day = dd + "/" + mm;
               const scheduleCompanion = {
-                companion: 1,
+                companion: this.idTable,
                 candidate: null,
                 session: this.sessions[sess].time,
                 date: day,
@@ -12087,7 +12279,7 @@ const RegisteringScheduleCompanion = {
               var mm = String(today.getMonth() + 1).padStart(2, "0");
               var day = dd + "/" + mm;
               const scheduleCompanion = {
-                companion: 1,
+                companion: this.idTable,
                 candidate: null,
                 session: this.sessions[sess].time,
                 date: day,
@@ -12108,18 +12300,82 @@ const RegisteringScheduleCompanion = {
 
     DeleteScheduleCompanion() {
       axios
-        .delete(
-          "http://localhost:3000/api/scheduleCompanions?[where][companion]=" +
-            this.$store.state.user.idTable
+        .get(
+          "http://localhost:3000/api/scheduleCompanions?filter[where][companion]=" +
+            this.idTable
         )
-        .then((response) => {
-          console.log(response);
-          this.scheduleCompanions.splice(id, 1);
-          this.$router.push("/");
-          setTimeout(() => {
-            this.$router.push("/scheduleCompanions");
-            location.reload();
-          }, 5);
+        .then((resp) => {
+          var arrayScheduleCompanions = resp.data;
+          var lengthScheduleCompanions = arrayScheduleCompanions.length;
+          if (lengthScheduleCompanions != 0) {
+            var firstId = arrayScheduleCompanions[0].id;
+            // var maxId = lengthScheduleCompanions + firstId
+            var maxIdFirst = firstId + 60;
+            for (i = firstId; i < maxIdFirst; i++) {
+              axios
+                .delete("http://localhost:3000/api/scheduleCompanions/" + i)
+                .then((response) => {
+                  console.log(response);
+                  this.scheduleCompanions.splice(i, 1);
+                });
+            }
+            var maxIdSecond = maxIdFirst + 60;
+            for (i = maxIdFirst; i < maxIdSecond; i++) {
+              axios
+                .delete("http://localhost:3000/api/scheduleCompanions/" + i)
+                .then((response) => {
+                  console.log(response);
+                  this.scheduleCompanions.splice(i, 1);
+                });
+            }
+            if (lengthScheduleCompanions == 168) {
+              var maxIdThird = maxIdSecond + 48;
+              for (i = maxIdSecond; i < maxIdThird; i++) {
+                axios
+                  .delete("http://localhost:3000/api/scheduleCompanions/" + i)
+                  .then((response) => {
+                    console.log(response);
+                    this.scheduleCompanions.splice(i, 1);
+                  });
+              }
+            }
+            if (lengthScheduleCompanions == 174) {
+              var maxIdThird = maxIdSecond + 54;
+              for (i = maxIdSecond; i < maxIdThird; i++) {
+                axios
+                  .delete("http://localhost:3000/api/scheduleCompanions/" + i)
+                  .then((response) => {
+                    console.log(response);
+                    this.scheduleCompanions.splice(i, 1);
+                  });
+              }
+            }
+            if (lengthScheduleCompanions >= 180) {
+              var maxIdThird = maxIdSecond + 60;
+              for (i = maxIdSecond; i < maxIdThird; i++) {
+                axios
+                  .delete("http://localhost:3000/api/scheduleCompanions/" + i)
+                  .then((response) => {
+                    console.log(response);
+                    this.scheduleCompanions.splice(i, 1);
+                  });
+              }
+            }
+            if (lengthScheduleCompanions == 186) {
+              var maxIdFourth = maxIdThird + 6;
+              for (i = maxIdThird; i < maxIdFourth; i++) {
+                axios
+                  .delete("http://localhost:3000/api/scheduleCompanions/" + i)
+                  .then((response) => {
+                    console.log(response);
+                    this.scheduleCompanions.splice(i, 1);
+                  });
+              }
+            }
+            setTimeout(() => {
+              location.reload();
+            }, 1000);
+          }
         });
     },
 
@@ -12138,35 +12394,102 @@ const RegisteringScheduleCompanion = {
             status: response.data.scheduleCompanion.status,
             groupSession: response.data.scheduleCompanion.groupSession,
           };
-          var role = "";
-          if (role == "Người đồng hành") {
+          if (this.role == 8 || this.role == 9) {
             const scheduleCompanionNew = {
               companion: scheduleCompanionOld.companion,
-              candidate: 1,
+              candidate: scheduleCompanionOld.candidate,
               session: scheduleCompanionOld.session,
               date: scheduleCompanionOld.date,
               status: 2,
               groupSession: scheduleCompanionOld.groupSession,
             };
-          } else if (role == "Ứng sinh") {
-            const scheduleCompanionNew = {
-              companion: scheduleCompanionOld.companion,
-              candidate: null,
-              session: scheduleCompanionOld.session,
-              date: scheduleCompanionOld.date,
-              status: 2,
-              groupSession: scheduleCompanionOld.groupSession,
-            };
+            const url =
+              "http://localhost:3000/api/scheduleCompanions/" +
+              scheduleCompanionEdit.id +
+              "/replace";
+            axios.post(url, scheduleCompanionNew);
+            setTimeout(() => {
+              location.reload();
+            }, 50);
+          } else if (this.role == 5) {
+            var max = this.scheduleCompanions.length;
+            var check = 0;
+            for (i = 0; i < max; i++) {
+              if (
+                this.scheduleCompanions[i].candidate == this.idTable &&
+                this.scheduleCompanions[i].status == 1
+              ) {
+                check++;
+              }
+              if (
+                this.scheduleCompanions[i].candidate == this.idTable &&
+                this.scheduleCompanions[i].status == 2
+              ) {
+                axios
+                  .get(
+                    "http://localhost:3000/api/scheduleCompanions?filter[where][candidate]=" +
+                      this.idTable +
+                      "&filter[status]=2"
+                  )
+                  .then((resp) => {
+                    axios
+                      .get(
+                        "http://localhost:3000/api/metCompanions?filter[where][idSchedule]=" +
+                          resp.data[0].id
+                      )
+                      .then((response) => {
+                        axios
+                          .delete(
+                            "http://localhost:3000/api/metCompanions/" +
+                              response.data[0].id
+                          )
+                          .then((resp) => {
+                            this.metCompanions.splice(response.data[0].id, 1);
+                            setTimeout(() => {
+                              location.reload();
+                            }, 100);
+                          });
+                      });
+                  });
+              }
+            }
+            if (check != 0) {
+              alertify.alert(
+                "Thông báo",
+                "Mỗi ứng sinh chỉ đăng ký một phiên!",
+                function () {
+                  alertify.success("Ok");
+                }
+              );
+            } else {
+              const scheduleCompanionNew = {
+                companion: scheduleCompanionOld.companion,
+                candidate: this.idTable,
+                session: scheduleCompanionOld.session,
+                date: scheduleCompanionOld.date,
+                status: 1,
+                groupSession: scheduleCompanionOld.groupSession,
+              };
+              var currentDate = new Date();
+              const metCompanion = {
+                companion: scheduleCompanionNew.companion,
+                candidate: this.idTable,
+                registeredDate: currentDate,
+                status: 1,
+                idSchedule: scheduleCompanionEdit.id,
+              };
+              const url_1 = `http://localhost:3000/api/metCompanions`;
+              axios.post(url_1, metCompanion);
+              const url =
+                "http://localhost:3000/api/scheduleCompanions/" +
+                scheduleCompanionEdit.id +
+                "/replace";
+              axios.post(url, scheduleCompanionNew);
+              setTimeout(() => {
+                location.reload();
+              }, 100);
+            }
           }
-          const url =
-            "http://localhost:3000/api/scheduleCompanions/" +
-            scheduleCompanionEdit.id +
-            "/replace";
-          axios.post(url, scheduleCompanionNew);
-          setTimeout(() => {
-            this.$router.push("/scheduleCompanions");
-            location.reload();
-          }, 100);
         });
     },
 
@@ -12185,35 +12508,133 @@ const RegisteringScheduleCompanion = {
             status: response.data.scheduleCompanion.status,
             groupSession: response.data.scheduleCompanion.groupSession,
           };
-          var role = "";
-          if (role == "Người đồng hành") {
-            const scheduleCompanionNew = {
-              companion: scheduleCompanionOld.companion,
-              candidate: scheduleCompanionOld.candidate,
-              session: scheduleCompanionOld.session,
-              date: scheduleCompanionOld.date,
-              status: 1,
-              groupSession: scheduleCompanionOld.groupSession,
-            };
-          } else if (role == "Ứng sinh") {
-            const scheduleCompanionNew = {
-              companion: scheduleCompanionOld.companion,
-              candidate: null,
-              session: scheduleCompanionOld.session,
-              date: scheduleCompanionOld.date,
-              status: 1,
-              groupSession: scheduleCompanionOld.groupSession,
-            };
+          if (this.role == 8 || this.role == 9) {
+            if (scheduleCompanionOld.status == 2) {
+              const scheduleCompanionNew = {
+                companion: scheduleCompanionOld.companion,
+                candidate: null,
+                session: scheduleCompanionOld.session,
+                date: scheduleCompanionOld.date,
+                status: 1,
+                groupSession: scheduleCompanionOld.groupSession,
+              };
+              const url =
+                "http://localhost:3000/api/scheduleCompanions/" +
+                scheduleCompanionEdit.id +
+                "/replace";
+              axios.post(url, scheduleCompanionNew);
+              setTimeout(() => {
+                location.reload();
+              }, 50);
+            } else if (
+              scheduleCompanionOld.candidate != null &&
+              scheduleCompanionOld.status == 1
+            ) {
+              var emailCandidate = null;
+              axios
+                .get(
+                  "http://localhost:3000/api/candidates?filter[where][id]=" +
+                    scheduleCompanionOld.candidate
+                )
+                .then((resp) => {
+                  emailCandidate = resp.data[0].email;
+                  axios
+                    .get(
+                      "http://localhost:3000/api/companions?filter[where][id]=" +
+                        scheduleCompanionOld.companion
+                    )
+                    .then((respCom) => {
+                      Email.send({
+                        Host: "smtp.gmail.com",
+                        Username: "mancanhouse2020@gmail.com",
+                        Password: "akyqnlcmanojglqb",
+                        To: emailCandidate,
+                        From: "mancanhouse2020@gmail.com",
+                        Subject: "Thông Báo Hủy Lịch Gặp Đồng Hành",
+                        Body:
+                          "Xin lỗi vì sự bất tiện này. Người đồng hành của bạn" +
+                          " đã có việc bận nên không thể có lịch gặp như bạn mong muốn. Vui lòng chọn một lịch gặp khác hoặc liên hệ" +
+                          " với người đồng hành qua số điện thoại: " +
+                          respCom.data[0].phone +
+                          " hoặc địa chỉ email: " +
+                          respCom.data[0].email +
+                          ". Xin cảm ơn.",
+                      })
+                        .then
+                        // message => alert(message)
+                        ();
+                    });
+                  //Gửi mail báo bận.
+                });
+              const scheduleCompanionNew = {
+                companion: scheduleCompanionOld.companion,
+                candidate: scheduleCompanionOld.candidate,
+                session: scheduleCompanionOld.session,
+                date: scheduleCompanionOld.date,
+                status: 2,
+                groupSession: scheduleCompanionOld.groupSession,
+              };
+              const url =
+                "http://localhost:3000/api/scheduleCompanions/" +
+                scheduleCompanionEdit.id +
+                "/replace";
+              axios.post(url, scheduleCompanionNew);
+              setTimeout(() => {
+                location.reload();
+              }, 2000);
+            }
+          } else if (this.role == 5) {
+            var max = this.scheduleCompanions.length;
+            var checkCancel = 0;
+            var idSchedule = 0;
+            for (i = 0; i < max; i++) {
+              if (this.scheduleCompanions[i].candidate == this.idTable) {
+                checkCancel++;
+                idSchedule = this.scheduleCompanions[i].id;
+              }
+            }
+            if (checkCancel != 0 && scheduleCompanionEdit.id != idSchedule) {
+              alertify.alert(
+                "Thông báo",
+                "Hủy lịch gặp không hợp lệ. Vui lòng kiểm tra lại!",
+                function () {
+                  alertify.success("Ok");
+                }
+              );
+            } else {
+              const scheduleCompanionNew = {
+                companion: scheduleCompanionOld.companion,
+                candidate: null,
+                session: scheduleCompanionOld.session,
+                date: scheduleCompanionOld.date,
+                status: 1,
+                groupSession: scheduleCompanionOld.groupSession,
+              };
+              const url =
+                "http://localhost:3000/api/scheduleCompanions/" +
+                scheduleCompanionEdit.id +
+                "/replace";
+              axios.post(url, scheduleCompanionNew);
+              axios
+                .get(
+                  "http://localhost:3000/api/metCompanions?filter[where][idSchedule]=" +
+                    scheduleCompanionEdit.id
+                )
+                .then((response) => {
+                  axios
+                    .delete(
+                      "http://localhost:3000/api/metCompanions/" +
+                        response.data[0].id
+                    )
+                    .then((resp) => {
+                      this.metCompanions.splice(response.data[0].id, 1);
+                      setTimeout(() => {
+                        location.reload();
+                      }, 100);
+                    });
+                });
+            }
           }
-          const url =
-            "http://localhost:3000/api/scheduleCompanions/" +
-            scheduleCompanionEdit.id +
-            "/replace";
-          axios.post(url, scheduleCompanionNew);
-          setTimeout(() => {
-            this.$router.push("/scheduleCompanions");
-            location.reload();
-          }, 100);
         });
     },
   },
@@ -12225,13 +12646,14 @@ const RegisteringScheduleCompanion = {
           <h6 class="m-0 font-weight-bold text-dark">Đăng ký Lịch đồng hành</h6>
         </div>
         <div class="col-md-4"></div>
-        <div class="col-md-2" style="padding-left:110px;">
-          <button class="btn rounded btn-danger" style="font-size:14px;" data-toggle="modal" data-target="#deleteScheduleCompanionModal">
+        <div class="col-md-2" style="padding-left:110px;" v-show="role == 8 || role == 9">
+          <button class="btn rounded btn-danger" style="font-size:14px;" 
+          data-toggle="modal" data-target="#deleteScheduleCompanionModal">
             <i class="fas fa-trash-alt"></i>
             &nbsp;Xóa lịch
           </button>
         </div>
-        <div class="col-md-2" style="padding-left:50px;">
+        <div class="col-md-2" style="padding-left:50px;" v-show="role == 8 || role == 9">
           <button class="btn rounded btn-hover-blue"
             style="background-color: #056299;color: white;font-size:14px;" @click="CreateScheduleCompanion">
             <i class="fas fa-plus"></i>
@@ -12261,9 +12683,19 @@ const RegisteringScheduleCompanion = {
               <th v-if="!scheduleCompanionsIsNull">{{ scheduleCompanions[0].date }}</th>
               <td class="align-middle text-center" scope="row" v-for="scheduleCompanion in scheduleCompanions"
                 :key="scheduleCompanion.id" v-if="scheduleCompanion.groupSession == 1">
-                <span class="text-center">Trống</span><br />
-                <div class="mt-1">
-                  <button class="btn btn-primary btn-sm"
+                <span class="text-center" v-if="scheduleCompanion.status === 2">Bận Việc</span>
+                <span class="text-center" v-else-if="scheduleCompanion.candidate === null && scheduleCompanion.status === 1">Trống</span>
+                <span class="text-center" v-else v-for="candidate in candidates">
+                  <span v-if="candidate.id == scheduleCompanion.candidate">{{ candidate.candidateId }}</span>
+                </span>
+                <br />
+                <div class="mt-1" v-show="(role === 5 && scheduleCompanion.candidate === null && scheduleCompanion.status === 1) 
+                  || (role === 5 && scheduleCompanion.candidate === idTable && scheduleCompanion.status === 1) 
+                  || role === 8 || role === 9">
+                  <button v-show="(role === 8 && scheduleCompanion.candidate === null && scheduleCompanion.status === 1) 
+                    || (role === 9 && scheduleCompanion.candidate === null && scheduleCompanion.status === 1) 
+                    || (role === 5 && scheduleCompanion.status === 1 && scheduleCompanion.candidate === null)
+                    || (role === 5 && scheduleCompanion.status === 1 && scheduleCompanion.candidate === null)" class="btn btn-primary btn-sm"
                     style="width: 62px;height: 25px;font-size:12px;border-radius:35px;"
                     @click="updateScheduleCompanion(scheduleCompanion)">Đăng ký</button>
                   <button class="btn btn-danger btn-sm"
@@ -12276,9 +12708,19 @@ const RegisteringScheduleCompanion = {
               <th v-if="!scheduleCompanionsIsNull">{{ scheduleCompanions[6].date }}</th>
               <td class="align-middle text-center" scope="row" v-for="scheduleCompanion in scheduleCompanions"
                 :key="scheduleCompanion.id" v-if="scheduleCompanion.groupSession == 2">
-                <span class="text-center">Trống</span><br />
-                <div class="mt-1">
-                  <button class="btn btn-primary btn-sm"
+                <span class="text-center" v-if="scheduleCompanion.status === 2">Bận Việc</span>
+                <span class="text-center" v-else-if="scheduleCompanion.candidate === null && scheduleCompanion.status === 1">Trống</span>
+                <span class="text-center" v-else v-for="candidate in candidates">
+                  <span v-if="candidate.id == scheduleCompanion.candidate">{{ candidate.candidateId }}</span>
+                </span>
+                <br />
+                <div class="mt-1" v-show="(role === 5 && scheduleCompanion.candidate === null && scheduleCompanion.status === 1) 
+                  || (role === 5 && scheduleCompanion.candidate === idTable && scheduleCompanion.status === 1) 
+                  || role === 8 || role === 9">
+                  <button v-show="(role === 8 && scheduleCompanion.candidate === null && scheduleCompanion.status === 1) 
+                    || (role === 9 && scheduleCompanion.candidate === null && scheduleCompanion.status === 1) 
+                    || (role === 5 && scheduleCompanion.status === 1 && scheduleCompanion.candidate === null)
+                    || (role === 5 && scheduleCompanion.status === 1 && scheduleCompanion.candidate === null)" class="btn btn-primary btn-sm"
                     style="width: 62px;height: 25px;font-size:12px;border-radius:35px;"
                     @click="updateScheduleCompanion(scheduleCompanion)">Đăng ký</button>
                   <button class="btn btn-danger btn-sm"
@@ -12291,9 +12733,19 @@ const RegisteringScheduleCompanion = {
               <th v-if="!scheduleCompanionsIsNull">{{ scheduleCompanions[12].date }}</th>
               <td class="align-middle text-center" scope="row" v-for="scheduleCompanion in scheduleCompanions"
                 :key="scheduleCompanion.id" v-if="scheduleCompanion.groupSession == 3">
-                <span class="text-center">Trống</span><br />
-                <div class="mt-1">
-                  <button class="btn btn-primary btn-sm"
+                <span class="text-center" v-if="scheduleCompanion.status === 2">Bận Việc</span>
+                <span class="text-center" v-else-if="scheduleCompanion.candidate === null && scheduleCompanion.status === 1">Trống</span>
+                <span class="text-center" v-else v-for="candidate in candidates">
+                  <span v-if="candidate.id == scheduleCompanion.candidate">{{ candidate.candidateId }}</span>
+                </span>
+                <br />
+                <div class="mt-1" v-show="(role === 5 && scheduleCompanion.candidate === null && scheduleCompanion.status === 1) 
+                  || (role === 5 && scheduleCompanion.candidate === idTable && scheduleCompanion.status === 1) 
+                  || role === 8 || role === 9">
+                  <button v-show="(role === 8 && scheduleCompanion.candidate === null && scheduleCompanion.status === 1) 
+                    || (role === 9 && scheduleCompanion.candidate === null && scheduleCompanion.status === 1) 
+                    || (role === 5 && scheduleCompanion.status === 1 && scheduleCompanion.candidate === null)
+                    || (role === 5 && scheduleCompanion.status === 1 && scheduleCompanion.candidate === null)" class="btn btn-primary btn-sm"
                     style="width: 62px;height: 25px;font-size:12px;border-radius:35px;"
                     @click="updateScheduleCompanion(scheduleCompanion)">Đăng ký</button>
                   <button class="btn btn-danger btn-sm"
@@ -12306,9 +12758,19 @@ const RegisteringScheduleCompanion = {
               <th v-if="!scheduleCompanionsIsNull">{{ scheduleCompanions[18].date }}</th>
               <td class="align-middle text-center" scope="row" v-for="scheduleCompanion in scheduleCompanions"
                 :key="scheduleCompanion.id" v-if="scheduleCompanion.groupSession == 4">
-                <span class="text-center">Trống</span><br />
-                <div class="mt-1">
-                  <button class="btn btn-primary btn-sm"
+                <span class="text-center" v-if="scheduleCompanion.status === 2">Bận Việc</span>
+                <span class="text-center" v-else-if="scheduleCompanion.candidate === null && scheduleCompanion.status === 1">Trống</span>
+                <span class="text-center" v-else v-for="candidate in candidates">
+                  <span v-if="candidate.id == scheduleCompanion.candidate">{{ candidate.candidateId }}</span>
+                </span>
+                <br />
+                <div class="mt-1" v-show="(role === 5 && scheduleCompanion.candidate === null && scheduleCompanion.status === 1) 
+                  || (role === 5 && scheduleCompanion.candidate === idTable && scheduleCompanion.status === 1) 
+                  || role === 8 || role === 9">
+                  <button v-show="(role === 8 && scheduleCompanion.candidate === null && scheduleCompanion.status === 1) 
+                    || (role === 9 && scheduleCompanion.candidate === null && scheduleCompanion.status === 1) 
+                    || (role === 5 && scheduleCompanion.status === 1 && scheduleCompanion.candidate === null)
+                    || (role === 5 && scheduleCompanion.status === 1 && scheduleCompanion.candidate === null)" class="btn btn-primary btn-sm"
                     style="width: 62px;height: 25px;font-size:12px;border-radius:35px;"
                     @click="updateScheduleCompanion(scheduleCompanion)">Đăng ký</button>
                   <button class="btn btn-danger btn-sm"
@@ -12321,9 +12783,19 @@ const RegisteringScheduleCompanion = {
               <th v-if="!scheduleCompanionsIsNull">{{ scheduleCompanions[24].date }}</th>
               <td class="align-middle text-center" scope="row" v-for="scheduleCompanion in scheduleCompanions"
                 :key="scheduleCompanion.id" v-if="scheduleCompanion.groupSession == 5">
-                <span class="text-center">Trống</span><br />
-                <div class="mt-1">
-                  <button class="btn btn-primary btn-sm"
+                <span class="text-center" v-if="scheduleCompanion.status === 2">Bận Việc</span>
+                <span class="text-center" v-else-if="scheduleCompanion.candidate === null && scheduleCompanion.status === 1">Trống</span>
+                <span class="text-center" v-else v-for="candidate in candidates">
+                  <span v-if="candidate.id == scheduleCompanion.candidate">{{ candidate.candidateId }}</span>
+                </span>
+                <br />
+                <div class="mt-1" v-show="(role === 5 && scheduleCompanion.candidate === null && scheduleCompanion.status === 1) 
+                  || (role === 5 && scheduleCompanion.candidate === idTable && scheduleCompanion.status === 1) 
+                  || role === 8 || role === 9">
+                  <button v-show="(role === 8 && scheduleCompanion.candidate === null && scheduleCompanion.status === 1) 
+                    || (role === 9 && scheduleCompanion.candidate === null && scheduleCompanion.status === 1) 
+                    || (role === 5 && scheduleCompanion.status === 1 && scheduleCompanion.candidate === null)
+                    || (role === 5 && scheduleCompanion.status === 1 && scheduleCompanion.candidate === null)" class="btn btn-primary btn-sm"
                     style="width: 62px;height: 25px;font-size:12px;border-radius:35px;"
                     @click="updateScheduleCompanion(scheduleCompanion)">Đăng ký</button>
                   <button class="btn btn-danger btn-sm"
@@ -12336,9 +12808,19 @@ const RegisteringScheduleCompanion = {
               <th v-if="!scheduleCompanionsIsNull">{{ scheduleCompanions[30].date }}</th>
               <td class="align-middle text-center" scope="row" v-for="scheduleCompanion in scheduleCompanions"
                 :key="scheduleCompanion.id" v-if="scheduleCompanion.groupSession == 6">
-                <span class="text-center">Trống</span><br />
-                <div class="mt-1">
-                  <button class="btn btn-primary btn-sm"
+                <span class="text-center" v-if="scheduleCompanion.status === 2">Bận Việc</span>
+                <span class="text-center" v-else-if="scheduleCompanion.candidate === null && scheduleCompanion.status === 1">Trống</span>
+                <span class="text-center" v-else v-for="candidate in candidates">
+                  <span v-if="candidate.id == scheduleCompanion.candidate">{{ candidate.candidateId }}</span>
+                </span>
+                <br />
+                <div class="mt-1" v-show="(role === 5 && scheduleCompanion.candidate === null && scheduleCompanion.status === 1) 
+                  || (role === 5 && scheduleCompanion.candidate === idTable && scheduleCompanion.status === 1) 
+                  || role === 8 || role === 9">
+                  <button v-show="(role === 8 && scheduleCompanion.candidate === null && scheduleCompanion.status === 1) 
+                    || (role === 9 && scheduleCompanion.candidate === null && scheduleCompanion.status === 1) 
+                    || (role === 5 && scheduleCompanion.status === 1 && scheduleCompanion.candidate === null)
+                    || (role === 5 && scheduleCompanion.status === 1 && scheduleCompanion.candidate === null)" class="btn btn-primary btn-sm"
                     style="width: 62px;height: 25px;font-size:12px;border-radius:35px;"
                     @click="updateScheduleCompanion(scheduleCompanion)">Đăng ký</button>
                   <button class="btn btn-danger btn-sm"
@@ -12351,9 +12833,19 @@ const RegisteringScheduleCompanion = {
               <th v-if="!scheduleCompanionsIsNull">{{ scheduleCompanions[36].date }}</th>
               <td class="align-middle text-center" scope="row" v-for="scheduleCompanion in scheduleCompanions"
                 :key="scheduleCompanion.id" v-if="scheduleCompanion.groupSession == 7">
-                <span class="text-center">Trống</span><br />
-                <div class="mt-1">
-                  <button class="btn btn-primary btn-sm"
+                <span class="text-center" v-if="scheduleCompanion.status === 2">Bận Việc</span>
+                <span class="text-center" v-else-if="scheduleCompanion.candidate === null && scheduleCompanion.status === 1">Trống</span>
+                <span class="text-center" v-else v-for="candidate in candidates">
+                  <span v-if="candidate.id == scheduleCompanion.candidate">{{ candidate.candidateId }}</span>
+                </span>
+                <br />
+                <div class="mt-1" v-show="(role === 5 && scheduleCompanion.candidate === null && scheduleCompanion.status === 1) 
+                  || (role === 5 && scheduleCompanion.candidate === idTable && scheduleCompanion.status === 1) 
+                  || role === 8 || role === 9">
+                  <button v-show="(role === 8 && scheduleCompanion.candidate === null && scheduleCompanion.status === 1) 
+                    || (role === 9 && scheduleCompanion.candidate === null && scheduleCompanion.status === 1) 
+                    || (role === 5 && scheduleCompanion.status === 1 && scheduleCompanion.candidate === null)
+                    || (role === 5 && scheduleCompanion.status === 1 && scheduleCompanion.candidate === null)" class="btn btn-primary btn-sm"
                     style="width: 62px;height: 25px;font-size:12px;border-radius:35px;"
                     @click="updateScheduleCompanion(scheduleCompanion)">Đăng ký</button>
                   <button class="btn btn-danger btn-sm"
@@ -12366,9 +12858,19 @@ const RegisteringScheduleCompanion = {
               <th v-if="!scheduleCompanionsIsNull">{{ scheduleCompanions[42].date }}</th>
               <td class="align-middle text-center" scope="row" v-for="scheduleCompanion in scheduleCompanions"
                 :key="scheduleCompanion.id" v-if="scheduleCompanion.groupSession == 8">
-                <span class="text-center">Trống</span><br />
-                <div class="mt-1">
-                  <button class="btn btn-primary btn-sm"
+                <span class="text-center" v-if="scheduleCompanion.status === 2">Bận Việc</span>
+                <span class="text-center" v-else-if="scheduleCompanion.candidate === null && scheduleCompanion.status === 1">Trống</span>
+                <span class="text-center" v-else v-for="candidate in candidates">
+                  <span v-if="candidate.id == scheduleCompanion.candidate">{{ candidate.candidateId }}</span>
+                </span>
+                <br />
+                <div class="mt-1" v-show="(role === 5 && scheduleCompanion.candidate === null && scheduleCompanion.status === 1) 
+                  || (role === 5 && scheduleCompanion.candidate === idTable && scheduleCompanion.status === 1) 
+                  || role === 8 || role === 9">
+                  <button v-show="(role === 8 && scheduleCompanion.candidate === null && scheduleCompanion.status === 1) 
+                    || (role === 9 && scheduleCompanion.candidate === null && scheduleCompanion.status === 1) 
+                    || (role === 5 && scheduleCompanion.status === 1 && scheduleCompanion.candidate === null)
+                    || (role === 5 && scheduleCompanion.status === 1 && scheduleCompanion.candidate === null)" class="btn btn-primary btn-sm"
                     style="width: 62px;height: 25px;font-size:12px;border-radius:35px;"
                     @click="updateScheduleCompanion(scheduleCompanion)">Đăng ký</button>
                   <button class="btn btn-danger btn-sm"
@@ -12381,9 +12883,19 @@ const RegisteringScheduleCompanion = {
               <th v-if="!scheduleCompanionsIsNull">{{ scheduleCompanions[48].date }}</th>
               <td class="align-middle text-center" scope="row" v-for="scheduleCompanion in scheduleCompanions"
                 :key="scheduleCompanion.id" v-if="scheduleCompanion.groupSession == 9">
-                <span class="text-center">Trống</span><br />
-                <div class="mt-1">
-                  <button class="btn btn-primary btn-sm"
+                <span class="text-center" v-if="scheduleCompanion.status === 2">Bận Việc</span>
+                <span class="text-center" v-else-if="scheduleCompanion.candidate === null && scheduleCompanion.status === 1">Trống</span>
+                <span class="text-center" v-else v-for="candidate in candidates">
+                  <span v-if="candidate.id == scheduleCompanion.candidate">{{ candidate.candidateId }}</span>
+                </span>
+                <br />
+                <div class="mt-1" v-show="(role === 5 && scheduleCompanion.candidate === null && scheduleCompanion.status === 1) 
+                  || (role === 5 && scheduleCompanion.candidate === idTable && scheduleCompanion.status === 1) 
+                  || role === 8 || role === 9">
+                  <button v-show="(role === 8 && scheduleCompanion.candidate === null && scheduleCompanion.status === 1) 
+                    || (role === 9 && scheduleCompanion.candidate === null && scheduleCompanion.status === 1) 
+                    || (role === 5 && scheduleCompanion.status === 1 && scheduleCompanion.candidate === null)
+                    || (role === 5 && scheduleCompanion.status === 1 && scheduleCompanion.candidate === null)" class="btn btn-primary btn-sm"
                     style="width: 62px;height: 25px;font-size:12px;border-radius:35px;"
                     @click="updateScheduleCompanion(scheduleCompanion)">Đăng ký</button>
                   <button class="btn btn-danger btn-sm"
@@ -12396,9 +12908,19 @@ const RegisteringScheduleCompanion = {
               <th v-if="!scheduleCompanionsIsNull">{{ scheduleCompanions[54].date }}</th>
               <td class="align-middle text-center" scope="row" v-for="scheduleCompanion in scheduleCompanions"
                 :key="scheduleCompanion.id" v-if="scheduleCompanion.groupSession == 10">
-                <span class="text-center">Trống</span><br />
-                <div class="mt-1">
-                  <button class="btn btn-primary btn-sm"
+                <span class="text-center" v-if="scheduleCompanion.status === 2">Bận Việc</span>
+                <span class="text-center" v-else-if="scheduleCompanion.candidate === null && scheduleCompanion.status === 1">Trống</span>
+                <span class="text-center" v-else v-for="candidate in candidates">
+                  <span v-if="candidate.id == scheduleCompanion.candidate">{{ candidate.candidateId }}</span>
+                </span>
+                <br />
+                <div class="mt-1" v-show="(role === 5 && scheduleCompanion.candidate === null && scheduleCompanion.status === 1) 
+                  || (role === 5 && scheduleCompanion.candidate === idTable && scheduleCompanion.status === 1) 
+                  || role === 8 || role === 9">
+                  <button v-show="(role === 8 && scheduleCompanion.candidate === null && scheduleCompanion.status === 1) 
+                    || (role === 9 && scheduleCompanion.candidate === null && scheduleCompanion.status === 1) 
+                    || (role === 5 && scheduleCompanion.status === 1 && scheduleCompanion.candidate === null)
+                    || (role === 5 && scheduleCompanion.status === 1 && scheduleCompanion.candidate === null)" class="btn btn-primary btn-sm"
                     style="width: 62px;height: 25px;font-size:12px;border-radius:35px;"
                     @click="updateScheduleCompanion(scheduleCompanion)">Đăng ký</button>
                   <button class="btn btn-danger btn-sm"
@@ -12411,9 +12933,19 @@ const RegisteringScheduleCompanion = {
               <th v-if="!scheduleCompanionsIsNull">{{ scheduleCompanions[60].date }}</th>
               <td class="align-middle text-center" scope="row" v-for="scheduleCompanion in scheduleCompanions"
                 :key="scheduleCompanion.id" v-if="scheduleCompanion.groupSession == 11">
-                <span class="text-center">Trống</span><br />
-                <div class="mt-1">
-                  <button class="btn btn-primary btn-sm"
+                <span class="text-center" v-if="scheduleCompanion.status === 2">Bận Việc</span>
+                <span class="text-center" v-else-if="scheduleCompanion.candidate === null && scheduleCompanion.status === 1">Trống</span>
+                <span class="text-center" v-else v-for="candidate in candidates">
+                  <span v-if="candidate.id == scheduleCompanion.candidate">{{ candidate.candidateId }}</span>
+                </span>
+                <br />
+                <div class="mt-1" v-show="(role === 5 && scheduleCompanion.candidate === null && scheduleCompanion.status === 1) 
+                  || (role === 5 && scheduleCompanion.candidate === idTable && scheduleCompanion.status === 1) 
+                  || role === 8 || role === 9">
+                  <button v-show="(role === 8 && scheduleCompanion.candidate === null && scheduleCompanion.status === 1) 
+                    || (role === 9 && scheduleCompanion.candidate === null && scheduleCompanion.status === 1) 
+                    || (role === 5 && scheduleCompanion.status === 1 && scheduleCompanion.candidate === null)
+                    || (role === 5 && scheduleCompanion.status === 1 && scheduleCompanion.candidate === null)" class="btn btn-primary btn-sm"
                     style="width: 62px;height: 25px;font-size:12px;border-radius:35px;"
                     @click="updateScheduleCompanion(scheduleCompanion)">Đăng ký</button>
                   <button class="btn btn-danger btn-sm"
@@ -12426,9 +12958,19 @@ const RegisteringScheduleCompanion = {
               <th v-if="!scheduleCompanionsIsNull">{{ scheduleCompanions[66].date }}</th>
               <td class="align-middle text-center" scope="row" v-for="scheduleCompanion in scheduleCompanions"
                 :key="scheduleCompanion.id" v-if="scheduleCompanion.groupSession == 12">
-                <span class="text-center">Trống</span><br />
-                <div class="mt-1">
-                  <button class="btn btn-primary btn-sm"
+                <span class="text-center" v-if="scheduleCompanion.status === 2">Bận Việc</span>
+                <span class="text-center" v-else-if="scheduleCompanion.candidate === null && scheduleCompanion.status === 1">Trống</span>
+                <span class="text-center" v-else v-for="candidate in candidates">
+                  <span v-if="candidate.id == scheduleCompanion.candidate">{{ candidate.candidateId }}</span>
+                </span>
+                <br />
+                <div class="mt-1" v-show="(role === 5 && scheduleCompanion.candidate === null && scheduleCompanion.status === 1) 
+                  || (role === 5 && scheduleCompanion.candidate === idTable && scheduleCompanion.status === 1) 
+                  || role === 8 || role === 9">
+                  <button v-show="(role === 8 && scheduleCompanion.candidate === null && scheduleCompanion.status === 1) 
+                    || (role === 9 && scheduleCompanion.candidate === null && scheduleCompanion.status === 1) 
+                    || (role === 5 && scheduleCompanion.status === 1 && scheduleCompanion.candidate === null)
+                    || (role === 5 && scheduleCompanion.status === 1 && scheduleCompanion.candidate === null)" class="btn btn-primary btn-sm"
                     style="width: 62px;height: 25px;font-size:12px;border-radius:35px;"
                     @click="updateScheduleCompanion(scheduleCompanion)">Đăng ký</button>
                   <button class="btn btn-danger btn-sm"
@@ -12441,9 +12983,19 @@ const RegisteringScheduleCompanion = {
               <th v-if="!scheduleCompanionsIsNull">{{ scheduleCompanions[72].date }}</th>
               <td class="align-middle text-center" scope="row" v-for="scheduleCompanion in scheduleCompanions"
                 :key="scheduleCompanion.id" v-if="scheduleCompanion.groupSession == 13">
-                <span class="text-center">Trống</span><br />
-                <div class="mt-1">
-                  <button class="btn btn-primary btn-sm"
+                <span class="text-center" v-if="scheduleCompanion.status === 2">Bận Việc</span>
+                <span class="text-center" v-else-if="scheduleCompanion.candidate === null && scheduleCompanion.status === 1">Trống</span>
+                <span class="text-center" v-else v-for="candidate in candidates">
+                  <span v-if="candidate.id == scheduleCompanion.candidate">{{ candidate.candidateId }}</span>
+                </span>
+                <br />
+                <div class="mt-1" v-show="(role === 5 && scheduleCompanion.candidate === null && scheduleCompanion.status === 1) 
+                  || (role === 5 && scheduleCompanion.candidate === idTable && scheduleCompanion.status === 1) 
+                  || role === 8 || role === 9">
+                  <button v-show="(role === 8 && scheduleCompanion.candidate === null && scheduleCompanion.status === 1) 
+                    || (role === 9 && scheduleCompanion.candidate === null && scheduleCompanion.status === 1) 
+                    || (role === 5 && scheduleCompanion.status === 1 && scheduleCompanion.candidate === null)
+                    || (role === 5 && scheduleCompanion.status === 1 && scheduleCompanion.candidate === null)" class="btn btn-primary btn-sm"
                     style="width: 62px;height: 25px;font-size:12px;border-radius:35px;"
                     @click="updateScheduleCompanion(scheduleCompanion)">Đăng ký</button>
                   <button class="btn btn-danger btn-sm"
@@ -12456,9 +13008,19 @@ const RegisteringScheduleCompanion = {
               <th v-if="!scheduleCompanionsIsNull">{{ scheduleCompanions[78].date }}</th>
               <td class="align-middle text-center" scope="row" v-for="scheduleCompanion in scheduleCompanions"
                 :key="scheduleCompanion.id" v-if="scheduleCompanion.groupSession == 14">
-                <span class="text-center">Trống</span><br />
-                <div class="mt-1">
-                  <button class="btn btn-primary btn-sm"
+                <span class="text-center" v-if="scheduleCompanion.status === 2">Bận Việc</span>
+                <span class="text-center" v-else-if="scheduleCompanion.candidate === null && scheduleCompanion.status === 1">Trống</span>
+                <span class="text-center" v-else v-for="candidate in candidates">
+                  <span v-if="candidate.id == scheduleCompanion.candidate">{{ candidate.candidateId }}</span>
+                </span>
+                <br />
+                <div class="mt-1" v-show="(role === 5 && scheduleCompanion.candidate === null && scheduleCompanion.status === 1) 
+                  || (role === 5 && scheduleCompanion.candidate === idTable && scheduleCompanion.status === 1) 
+                  || role === 8 || role === 9">
+                  <button v-show="(role === 8 && scheduleCompanion.candidate === null && scheduleCompanion.status === 1) 
+                    || (role === 9 && scheduleCompanion.candidate === null && scheduleCompanion.status === 1) 
+                    || (role === 5 && scheduleCompanion.status === 1 && scheduleCompanion.candidate === null)
+                    || (role === 5 && scheduleCompanion.status === 1 && scheduleCompanion.candidate === null)" class="btn btn-primary btn-sm"
                     style="width: 62px;height: 25px;font-size:12px;border-radius:35px;"
                     @click="updateScheduleCompanion(scheduleCompanion)">Đăng ký</button>
                   <button class="btn btn-danger btn-sm"
@@ -12471,9 +13033,19 @@ const RegisteringScheduleCompanion = {
               <th v-if="!scheduleCompanionsIsNull">{{ scheduleCompanions[84].date }}</th>
               <td class="align-middle text-center" scope="row" v-for="scheduleCompanion in scheduleCompanions"
                 :key="scheduleCompanion.id" v-if="scheduleCompanion.groupSession == 15">
-                <span class="text-center">Trống</span><br />
-                <div class="mt-1">
-                  <button class="btn btn-primary btn-sm"
+                <span class="text-center" v-if="scheduleCompanion.status === 2">Bận Việc</span>
+                <span class="text-center" v-else-if="scheduleCompanion.candidate === null && scheduleCompanion.status === 1">Trống</span>
+                <span class="text-center" v-else v-for="candidate in candidates">
+                  <span v-if="candidate.id == scheduleCompanion.candidate">{{ candidate.candidateId }}</span>
+                </span>
+                <br />
+                <div class="mt-1" v-show="(role === 5 && scheduleCompanion.candidate === null && scheduleCompanion.status === 1) 
+                  || (role === 5 && scheduleCompanion.candidate === idTable && scheduleCompanion.status === 1) 
+                  || role === 8 || role === 9">
+                  <button v-show="(role === 8 && scheduleCompanion.candidate === null && scheduleCompanion.status === 1) 
+                    || (role === 9 && scheduleCompanion.candidate === null && scheduleCompanion.status === 1) 
+                    || (role === 5 && scheduleCompanion.status === 1 && scheduleCompanion.candidate === null)
+                    || (role === 5 && scheduleCompanion.status === 1 && scheduleCompanion.candidate === null)" class="btn btn-primary btn-sm"
                     style="width: 62px;height: 25px;font-size:12px;border-radius:35px;"
                     @click="updateScheduleCompanion(scheduleCompanion)">Đăng ký</button>
                   <button class="btn btn-danger btn-sm"
@@ -12486,9 +13058,19 @@ const RegisteringScheduleCompanion = {
               <th v-if="!scheduleCompanionsIsNull">{{ scheduleCompanions[90].date }}</th>
               <td class="align-middle text-center" scope="row" v-for="scheduleCompanion in scheduleCompanions"
                 :key="scheduleCompanion.id" v-if="scheduleCompanion.groupSession == 16">
-                <span class="text-center">Trống</span><br />
-                <div class="mt-1">
-                  <button class="btn btn-primary btn-sm"
+                <span class="text-center" v-if="scheduleCompanion.status === 2">Bận Việc</span>
+                <span class="text-center" v-else-if="scheduleCompanion.candidate === null && scheduleCompanion.status === 1">Trống</span>
+                <span class="text-center" v-else v-for="candidate in candidates">
+                  <span v-if="candidate.id == scheduleCompanion.candidate">{{ candidate.candidateId }}</span>
+                </span>
+                <br />
+                <div class="mt-1" v-show="(role === 5 && scheduleCompanion.candidate === null && scheduleCompanion.status === 1) 
+                  || (role === 5 && scheduleCompanion.candidate === idTable && scheduleCompanion.status === 1) 
+                  || role === 8 || role === 9">
+                  <button v-show="(role === 8 && scheduleCompanion.candidate === null && scheduleCompanion.status === 1) 
+                    || (role === 9 && scheduleCompanion.candidate === null && scheduleCompanion.status === 1) 
+                    || (role === 5 && scheduleCompanion.status === 1 && scheduleCompanion.candidate === null)
+                    || (role === 5 && scheduleCompanion.status === 1 && scheduleCompanion.candidate === null)" class="btn btn-primary btn-sm"
                     style="width: 62px;height: 25px;font-size:12px;border-radius:35px;"
                     @click="updateScheduleCompanion(scheduleCompanion)">Đăng ký</button>
                   <button class="btn btn-danger btn-sm"
@@ -12501,9 +13083,19 @@ const RegisteringScheduleCompanion = {
               <th v-if="!scheduleCompanionsIsNull">{{ scheduleCompanions[96].date }}</th>
               <td class="align-middle text-center" scope="row" v-for="scheduleCompanion in scheduleCompanions"
                 :key="scheduleCompanion.id" v-if="scheduleCompanion.groupSession == 17">
-                <span class="text-center">Trống</span><br />
-                <div class="mt-1">
-                  <button class="btn btn-primary btn-sm"
+                <span class="text-center" v-if="scheduleCompanion.status === 2">Bận Việc</span>
+                <span class="text-center" v-else-if="scheduleCompanion.candidate === null && scheduleCompanion.status === 1">Trống</span>
+                <span class="text-center" v-else v-for="candidate in candidates">
+                  <span v-if="candidate.id == scheduleCompanion.candidate">{{ candidate.candidateId }}</span>
+                </span>
+                <br />
+                <div class="mt-1" v-show="(role === 5 && scheduleCompanion.candidate === null && scheduleCompanion.status === 1) 
+                  || (role === 5 && scheduleCompanion.candidate === idTable && scheduleCompanion.status === 1) 
+                  || role === 8 || role === 9">
+                  <button v-show="(role === 8 && scheduleCompanion.candidate === null && scheduleCompanion.status === 1) 
+                    || (role === 9 && scheduleCompanion.candidate === null && scheduleCompanion.status === 1) 
+                    || (role === 5 && scheduleCompanion.status === 1 && scheduleCompanion.candidate === null)
+                    || (role === 5 && scheduleCompanion.status === 1 && scheduleCompanion.candidate === null)" class="btn btn-primary btn-sm"
                     style="width: 62px;height: 25px;font-size:12px;border-radius:35px;"
                     @click="updateScheduleCompanion(scheduleCompanion)">Đăng ký</button>
                   <button class="btn btn-danger btn-sm"
@@ -12516,9 +13108,19 @@ const RegisteringScheduleCompanion = {
               <th v-if="!scheduleCompanionsIsNull">{{ scheduleCompanions[102].date }}</th>
               <td class="align-middle text-center" scope="row" v-for="scheduleCompanion in scheduleCompanions"
                 :key="scheduleCompanion.id" v-if="scheduleCompanion.groupSession == 18">
-                <span class="text-center">Trống</span><br />
-                <div class="mt-1">
-                  <button class="btn btn-primary btn-sm"
+                <span class="text-center" v-if="scheduleCompanion.status === 2">Bận Việc</span>
+                <span class="text-center" v-else-if="scheduleCompanion.candidate === null && scheduleCompanion.status === 1">Trống</span>
+                <span class="text-center" v-else v-for="candidate in candidates">
+                  <span v-if="candidate.id == scheduleCompanion.candidate">{{ candidate.candidateId }}</span>
+                </span>
+                <br />
+                <div class="mt-1" v-show="(role === 5 && scheduleCompanion.candidate === null && scheduleCompanion.status === 1) 
+                  || (role === 5 && scheduleCompanion.candidate === idTable && scheduleCompanion.status === 1) 
+                  || role === 8 || role === 9">
+                  <button v-show="(role === 8 && scheduleCompanion.candidate === null && scheduleCompanion.status === 1) 
+                    || (role === 9 && scheduleCompanion.candidate === null && scheduleCompanion.status === 1) 
+                    || (role === 5 && scheduleCompanion.status === 1 && scheduleCompanion.candidate === null)
+                    || (role === 5 && scheduleCompanion.status === 1 && scheduleCompanion.candidate === null)" class="btn btn-primary btn-sm"
                     style="width: 62px;height: 25px;font-size:12px;border-radius:35px;"
                     @click="updateScheduleCompanion(scheduleCompanion)">Đăng ký</button>
                   <button class="btn btn-danger btn-sm"
@@ -12531,9 +13133,19 @@ const RegisteringScheduleCompanion = {
               <th v-if="!scheduleCompanionsIsNull">{{ scheduleCompanions[108].date }}</th>
               <td class="align-middle text-center" scope="row" v-for="scheduleCompanion in scheduleCompanions"
                 :key="scheduleCompanion.id" v-if="scheduleCompanion.groupSession == 19">
-                <span class="text-center">Trống</span><br />
-                <div class="mt-1">
-                  <button class="btn btn-primary btn-sm"
+                <span class="text-center" v-if="scheduleCompanion.status === 2">Bận Việc</span>
+                <span class="text-center" v-else-if="scheduleCompanion.candidate === null && scheduleCompanion.status === 1">Trống</span>
+                <span class="text-center" v-else v-for="candidate in candidates">
+                  <span v-if="candidate.id == scheduleCompanion.candidate">{{ candidate.candidateId }}</span>
+                </span>
+                <br />
+                <div class="mt-1" v-show="(role === 5 && scheduleCompanion.candidate === null && scheduleCompanion.status === 1) 
+                  || (role === 5 && scheduleCompanion.candidate === idTable && scheduleCompanion.status === 1) 
+                  || role === 8 || role === 9">
+                  <button v-show="(role === 8 && scheduleCompanion.candidate === null && scheduleCompanion.status === 1) 
+                    || (role === 9 && scheduleCompanion.candidate === null && scheduleCompanion.status === 1) 
+                    || (role === 5 && scheduleCompanion.status === 1 && scheduleCompanion.candidate === null)
+                    || (role === 5 && scheduleCompanion.status === 1 && scheduleCompanion.candidate === null)" class="btn btn-primary btn-sm"
                     style="width: 62px;height: 25px;font-size:12px;border-radius:35px;"
                     @click="updateScheduleCompanion(scheduleCompanion)">Đăng ký</button>
                   <button class="btn btn-danger btn-sm"
@@ -12546,9 +13158,19 @@ const RegisteringScheduleCompanion = {
               <th v-if="!scheduleCompanionsIsNull">{{ scheduleCompanions[114].date }}</th>
               <td class="align-middle text-center" scope="row" v-for="scheduleCompanion in scheduleCompanions"
                 :key="scheduleCompanion.id" v-if="scheduleCompanion.groupSession == 20">
-                <span class="text-center">Trống</span><br />
-                <div class="mt-1">
-                  <button class="btn btn-primary btn-sm"
+                <span class="text-center" v-if="scheduleCompanion.status === 2">Bận Việc</span>
+                <span class="text-center" v-else-if="scheduleCompanion.candidate === null && scheduleCompanion.status === 1">Trống</span>
+                <span class="text-center" v-else v-for="candidate in candidates">
+                  <span v-if="candidate.id == scheduleCompanion.candidate">{{ candidate.candidateId }}</span>
+                </span>
+                <br />
+                <div class="mt-1" v-show="(role === 5 && scheduleCompanion.candidate === null && scheduleCompanion.status === 1) 
+                  || (role === 5 && scheduleCompanion.candidate === idTable && scheduleCompanion.status === 1) 
+                  || role === 8 || role === 9">
+                  <button v-show="(role === 8 && scheduleCompanion.candidate === null && scheduleCompanion.status === 1) 
+                    || (role === 9 && scheduleCompanion.candidate === null && scheduleCompanion.status === 1) 
+                    || (role === 5 && scheduleCompanion.status === 1 && scheduleCompanion.candidate === null)
+                    || (role === 5 && scheduleCompanion.status === 1 && scheduleCompanion.candidate === null)" class="btn btn-primary btn-sm"
                     style="width: 62px;height: 25px;font-size:12px;border-radius:35px;"
                     @click="updateScheduleCompanion(scheduleCompanion)">Đăng ký</button>
                   <button class="btn btn-danger btn-sm"
@@ -12561,9 +13183,19 @@ const RegisteringScheduleCompanion = {
               <th v-if="!scheduleCompanionsIsNull">{{ scheduleCompanions[120].date }}</th>
               <td class="align-middle text-center" scope="row" v-for="scheduleCompanion in scheduleCompanions"
                 :key="scheduleCompanion.id" v-if="scheduleCompanion.groupSession == 21">
-                <span class="text-center">Trống</span><br />
-                <div class="mt-1">
-                  <button class="btn btn-primary btn-sm"
+                <span class="text-center" v-if="scheduleCompanion.status === 2">Bận Việc</span>
+                <span class="text-center" v-else-if="scheduleCompanion.candidate === null && scheduleCompanion.status === 1">Trống</span>
+                <span class="text-center" v-else v-for="candidate in candidates">
+                  <span v-if="candidate.id == scheduleCompanion.candidate">{{ candidate.candidateId }}</span>
+                </span>
+                <br />
+                <div class="mt-1" v-show="(role === 5 && scheduleCompanion.candidate === null && scheduleCompanion.status === 1) 
+                  || (role === 5 && scheduleCompanion.candidate === idTable && scheduleCompanion.status === 1) 
+                  || role === 8 || role === 9">
+                  <button v-show="(role === 8 && scheduleCompanion.candidate === null && scheduleCompanion.status === 1) 
+                    || (role === 9 && scheduleCompanion.candidate === null && scheduleCompanion.status === 1) 
+                    || (role === 5 && scheduleCompanion.status === 1 && scheduleCompanion.candidate === null)
+                    || (role === 5 && scheduleCompanion.status === 1 && scheduleCompanion.candidate === null)" class="btn btn-primary btn-sm"
                     style="width: 62px;height: 25px;font-size:12px;border-radius:35px;"
                     @click="updateScheduleCompanion(scheduleCompanion)">Đăng ký</button>
                   <button class="btn btn-danger btn-sm"
@@ -12576,9 +13208,19 @@ const RegisteringScheduleCompanion = {
               <th v-if="!scheduleCompanionsIsNull">{{ scheduleCompanions[126].date }}</th>
               <td class="align-middle text-center" scope="row" v-for="scheduleCompanion in scheduleCompanions"
                 :key="scheduleCompanion.id" v-if="scheduleCompanion.groupSession == 22">
-                <span class="text-center">Trống</span><br />
-                <div class="mt-1">
-                  <button class="btn btn-primary btn-sm"
+                <span class="text-center" v-if="scheduleCompanion.status === 2">Bận Việc</span>
+                <span class="text-center" v-else-if="scheduleCompanion.candidate === null && scheduleCompanion.status === 1">Trống</span>
+                <span class="text-center" v-else v-for="candidate in candidates">
+                  <span v-if="candidate.id == scheduleCompanion.candidate">{{ candidate.candidateId }}</span>
+                </span>
+                <br />
+                <div class="mt-1" v-show="(role === 5 && scheduleCompanion.candidate === null && scheduleCompanion.status === 1) 
+                  || (role === 5 && scheduleCompanion.candidate === idTable && scheduleCompanion.status === 1) 
+                  || role === 8 || role === 9">
+                  <button v-show="(role === 8 && scheduleCompanion.candidate === null && scheduleCompanion.status === 1) 
+                    || (role === 9 && scheduleCompanion.candidate === null && scheduleCompanion.status === 1) 
+                    || (role === 5 && scheduleCompanion.status === 1 && scheduleCompanion.candidate === null)
+                    || (role === 5 && scheduleCompanion.status === 1 && scheduleCompanion.candidate === null)" class="btn btn-primary btn-sm"
                     style="width: 62px;height: 25px;font-size:12px;border-radius:35px;"
                     @click="updateScheduleCompanion(scheduleCompanion)">Đăng ký</button>
                   <button class="btn btn-danger btn-sm"
@@ -12591,9 +13233,19 @@ const RegisteringScheduleCompanion = {
               <th v-if="!scheduleCompanionsIsNull">{{ scheduleCompanions[132].date }}</th>
               <td class="align-middle text-center" scope="row" v-for="scheduleCompanion in scheduleCompanions"
                 :key="scheduleCompanion.id" v-if="scheduleCompanion.groupSession == 23">
-                <span class="text-center">Trống</span><br />
-                <div class="mt-1">
-                  <button class="btn btn-primary btn-sm"
+                <span class="text-center" v-if="scheduleCompanion.status === 2">Bận Việc</span>
+                <span class="text-center" v-else-if="scheduleCompanion.candidate === null && scheduleCompanion.status === 1">Trống</span>
+                <span class="text-center" v-else v-for="candidate in candidates">
+                  <span v-if="candidate.id == scheduleCompanion.candidate">{{ candidate.candidateId }}</span>
+                </span>
+                <br />
+                <div class="mt-1" v-show="(role === 5 && scheduleCompanion.candidate === null && scheduleCompanion.status === 1) 
+                  || (role === 5 && scheduleCompanion.candidate === idTable && scheduleCompanion.status === 1) 
+                  || role === 8 || role === 9">
+                  <button v-show="(role === 8 && scheduleCompanion.candidate === null && scheduleCompanion.status === 1) 
+                    || (role === 9 && scheduleCompanion.candidate === null && scheduleCompanion.status === 1) 
+                    || (role === 5 && scheduleCompanion.status === 1 && scheduleCompanion.candidate === null)
+                    || (role === 5 && scheduleCompanion.status === 1 && scheduleCompanion.candidate === null)" class="btn btn-primary btn-sm"
                     style="width: 62px;height: 25px;font-size:12px;border-radius:35px;"
                     @click="updateScheduleCompanion(scheduleCompanion)">Đăng ký</button>
                   <button class="btn btn-danger btn-sm"
@@ -12606,9 +13258,19 @@ const RegisteringScheduleCompanion = {
               <th v-if="!scheduleCompanionsIsNull">{{ scheduleCompanions[138].date }}</th>
               <td class="align-middle text-center" scope="row" v-for="scheduleCompanion in scheduleCompanions"
                 :key="scheduleCompanion.id" v-if="scheduleCompanion.groupSession == 24">
-                <span class="text-center">Trống</span><br />
-                <div class="mt-1">
-                  <button class="btn btn-primary btn-sm"
+                <span class="text-center" v-if="scheduleCompanion.status === 2">Bận Việc</span>
+                <span class="text-center" v-else-if="scheduleCompanion.candidate === null && scheduleCompanion.status === 1">Trống</span>
+                <span class="text-center" v-else v-for="candidate in candidates">
+                  <span v-if="candidate.id == scheduleCompanion.candidate">{{ candidate.candidateId }}</span>
+                </span>
+                <br />
+                <div class="mt-1" v-show="(role === 5 && scheduleCompanion.candidate === null && scheduleCompanion.status === 1) 
+                  || (role === 5 && scheduleCompanion.candidate === idTable && scheduleCompanion.status === 1) 
+                  || role === 8 || role === 9">
+                  <button v-show="(role === 8 && scheduleCompanion.candidate === null && scheduleCompanion.status === 1) 
+                    || (role === 9 && scheduleCompanion.candidate === null && scheduleCompanion.status === 1) 
+                    || (role === 5 && scheduleCompanion.status === 1 && scheduleCompanion.candidate === null)
+                    || (role === 5 && scheduleCompanion.status === 1 && scheduleCompanion.candidate === null)" class="btn btn-primary btn-sm"
                     style="width: 62px;height: 25px;font-size:12px;border-radius:35px;"
                     @click="updateScheduleCompanion(scheduleCompanion)">Đăng ký</button>
                   <button class="btn btn-danger btn-sm"
@@ -12621,9 +13283,19 @@ const RegisteringScheduleCompanion = {
               <th v-if="!scheduleCompanionsIsNull">{{ scheduleCompanions[144].date }}</th>
               <td class="align-middle text-center" scope="row" v-for="scheduleCompanion in scheduleCompanions"
                 :key="scheduleCompanion.id" v-if="scheduleCompanion.groupSession == 25">
-                <span class="text-center">Trống</span><br />
-                <div class="mt-1">
-                  <button class="btn btn-primary btn-sm"
+                <span class="text-center" v-if="scheduleCompanion.status === 2">Bận Việc</span>
+                <span class="text-center" v-else-if="scheduleCompanion.candidate === null && scheduleCompanion.status === 1">Trống</span>
+                <span class="text-center" v-else v-for="candidate in candidates">
+                  <span v-if="candidate.id == scheduleCompanion.candidate">{{ candidate.candidateId }}</span>
+                </span>
+                <br />
+                <div class="mt-1" v-show="(role === 5 && scheduleCompanion.candidate === null && scheduleCompanion.status === 1) 
+                  || (role === 5 && scheduleCompanion.candidate === idTable && scheduleCompanion.status === 1) 
+                  || role === 8 || role === 9">
+                  <button v-show="(role === 8 && scheduleCompanion.candidate === null && scheduleCompanion.status === 1) 
+                    || (role === 9 && scheduleCompanion.candidate === null && scheduleCompanion.status === 1) 
+                    || (role === 5 && scheduleCompanion.status === 1 && scheduleCompanion.candidate === null)
+                    || (role === 5 && scheduleCompanion.status === 1 && scheduleCompanion.candidate === null)" class="btn btn-primary btn-sm"
                     style="width: 62px;height: 25px;font-size:12px;border-radius:35px;"
                     @click="updateScheduleCompanion(scheduleCompanion)">Đăng ký</button>
                   <button class="btn btn-danger btn-sm"
@@ -12636,9 +13308,19 @@ const RegisteringScheduleCompanion = {
               <th v-if="!scheduleCompanionsIsNull">{{ scheduleCompanions[150].date }}</th>
               <td class="align-middle text-center" scope="row" v-for="scheduleCompanion in scheduleCompanions"
                 :key="scheduleCompanion.id" v-if="scheduleCompanion.groupSession == 26">
-                <span class="text-center">Trống</span><br />
-                <div class="mt-1">
-                  <button class="btn btn-primary btn-sm"
+                <span class="text-center" v-if="scheduleCompanion.status === 2">Bận Việc</span>
+                <span class="text-center" v-else-if="scheduleCompanion.candidate === null && scheduleCompanion.status === 1">Trống</span>
+                <span class="text-center" v-else v-for="candidate in candidates">
+                  <span v-if="candidate.id == scheduleCompanion.candidate">{{ candidate.candidateId }}</span>
+                </span>
+                <br />
+                <div class="mt-1" v-show="(role === 5 && scheduleCompanion.candidate === null && scheduleCompanion.status === 1) 
+                  || (role === 5 && scheduleCompanion.candidate === idTable && scheduleCompanion.status === 1) 
+                  || role === 8 || role === 9">
+                  <button v-show="(role === 8 && scheduleCompanion.candidate === null && scheduleCompanion.status === 1) 
+                    || (role === 9 && scheduleCompanion.candidate === null && scheduleCompanion.status === 1) 
+                    || (role === 5 && scheduleCompanion.status === 1 && scheduleCompanion.candidate === null)
+                    || (role === 5 && scheduleCompanion.status === 1 && scheduleCompanion.candidate === null)" class="btn btn-primary btn-sm"
                     style="width: 62px;height: 25px;font-size:12px;border-radius:35px;"
                     @click="updateScheduleCompanion(scheduleCompanion)">Đăng ký</button>
                   <button class="btn btn-danger btn-sm"
@@ -12651,9 +13333,19 @@ const RegisteringScheduleCompanion = {
               <th v-if="!scheduleCompanionsIsNull">{{ scheduleCompanions[156].date }}</th>
               <td class="align-middle text-center" scope="row" v-for="scheduleCompanion in scheduleCompanions"
                 :key="scheduleCompanion.id" v-if="scheduleCompanion.groupSession == 27">
-                <span class="text-center">Trống</span><br />
-                <div class="mt-1">
-                  <button class="btn btn-primary btn-sm"
+                <span class="text-center" v-if="scheduleCompanion.status === 2">Bận Việc</span>
+                <span class="text-center" v-else-if="scheduleCompanion.candidate === null && scheduleCompanion.status === 1">Trống</span>
+                <span class="text-center" v-else v-for="candidate in candidates">
+                  <span v-if="candidate.id == scheduleCompanion.candidate">{{ candidate.candidateId }}</span>
+                </span>
+                <br />
+                <div class="mt-1" v-show="(role === 5 && scheduleCompanion.candidate === null && scheduleCompanion.status === 1) 
+                  || (role === 5 && scheduleCompanion.candidate === idTable && scheduleCompanion.status === 1) 
+                  || role === 8 || role === 9">
+                  <button v-show="(role === 8 && scheduleCompanion.candidate === null && scheduleCompanion.status === 1) 
+                    || (role === 9 && scheduleCompanion.candidate === null && scheduleCompanion.status === 1) 
+                    || (role === 5 && scheduleCompanion.status === 1 && scheduleCompanion.candidate === null)
+                    || (role === 5 && scheduleCompanion.status === 1 && scheduleCompanion.candidate === null)" class="btn btn-primary btn-sm"
                     style="width: 62px;height: 25px;font-size:12px;border-radius:35px;"
                     @click="updateScheduleCompanion(scheduleCompanion)">Đăng ký</button>
                   <button class="btn btn-danger btn-sm"
@@ -12666,9 +13358,19 @@ const RegisteringScheduleCompanion = {
               <th v-if="!scheduleCompanionsIsNull">{{ scheduleCompanions[162].date }}</th>
               <td class="align-middle text-center" scope="row" v-for="scheduleCompanion in scheduleCompanions"
                 :key="scheduleCompanion.id" v-if="scheduleCompanion.groupSession == 28">
-                <span class="text-center">Trống</span><br />
-                <div class="mt-1">
-                  <button class="btn btn-primary btn-sm"
+                <span class="text-center" v-if="scheduleCompanion.status === 2">Bận Việc</span>
+                <span class="text-center" v-else-if="scheduleCompanion.candidate === null && scheduleCompanion.status === 1">Trống</span>
+                <span class="text-center" v-else v-for="candidate in candidates">
+                  <span v-if="candidate.id == scheduleCompanion.candidate">{{ candidate.candidateId }}</span>
+                </span>
+                <br />
+                <div class="mt-1" v-show="(role === 5 && scheduleCompanion.candidate === null && scheduleCompanion.status === 1) 
+                  || (role === 5 && scheduleCompanion.candidate === idTable && scheduleCompanion.status === 1) 
+                  || role === 8 || role === 9">
+                  <button v-show="(role === 8 && scheduleCompanion.candidate === null && scheduleCompanion.status === 1) 
+                    || (role === 9 && scheduleCompanion.candidate === null && scheduleCompanion.status === 1) 
+                    || (role === 5 && scheduleCompanion.status === 1 && scheduleCompanion.candidate === null)
+                    || (role === 5 && scheduleCompanion.status === 1 && scheduleCompanion.candidate === null)" class="btn btn-primary btn-sm"
                     style="width: 62px;height: 25px;font-size:12px;border-radius:35px;"
                     @click="updateScheduleCompanion(scheduleCompanion)">Đăng ký</button>
                   <button class="btn btn-danger btn-sm"
@@ -12681,9 +13383,19 @@ const RegisteringScheduleCompanion = {
               <th v-if="!scheduleCompanionsIsNull">{{ scheduleCompanions[168].date }}</th>
               <td class="align-middle text-center" scope="row" v-for="scheduleCompanion in scheduleCompanions"
                 :key="scheduleCompanion.id" v-if="scheduleCompanion.groupSession == 29">
-                <span class="text-center">Trống</span><br />
-                <div class="mt-1">
-                  <button class="btn btn-primary btn-sm"
+                <span class="text-center" v-if="scheduleCompanion.status === 2">Bận Việc</span>
+                <span class="text-center" v-else-if="scheduleCompanion.candidate === null && scheduleCompanion.status === 1">Trống</span>
+                <span class="text-center" v-else v-for="candidate in candidates">
+                  <span v-if="candidate.id == scheduleCompanion.candidate">{{ candidate.candidateId }}</span>
+                </span>
+                <br />
+                <div class="mt-1" v-show="(role === 5 && scheduleCompanion.candidate === null && scheduleCompanion.status === 1) 
+                  || (role === 5 && scheduleCompanion.candidate === idTable && scheduleCompanion.status === 1) 
+                  || role === 8 || role === 9">
+                  <button v-show="(role === 8 && scheduleCompanion.candidate === null && scheduleCompanion.status === 1) 
+                    || (role === 9 && scheduleCompanion.candidate === null && scheduleCompanion.status === 1) 
+                    || (role === 5 && scheduleCompanion.status === 1 && scheduleCompanion.candidate === null)
+                    || (role === 5 && scheduleCompanion.status === 1 && scheduleCompanion.candidate === null)" class="btn btn-primary btn-sm"
                     style="width: 62px;height: 25px;font-size:12px;border-radius:35px;"
                     @click="updateScheduleCompanion(scheduleCompanion)">Đăng ký</button>
                   <button class="btn btn-danger btn-sm"
@@ -12696,9 +13408,19 @@ const RegisteringScheduleCompanion = {
               <th v-if="!scheduleCompanionsIsNull">{{ scheduleCompanions[174].date }}</th>
               <td class="align-middle text-center" scope="row" v-for="scheduleCompanion in scheduleCompanions"
                 :key="scheduleCompanion.id" v-if="scheduleCompanion.groupSession == 30">
-                <span class="text-center">Trống</span><br />
-                <div class="mt-1">
-                  <button class="btn btn-primary btn-sm"
+                <span class="text-center" v-if="scheduleCompanion.status === 2">Bận Việc</span>
+                <span class="text-center" v-else-if="scheduleCompanion.candidate === null && scheduleCompanion.status === 1">Trống</span>
+                <span class="text-center" v-else v-for="candidate in candidates">
+                  <span v-if="candidate.id == scheduleCompanion.candidate">{{ candidate.candidateId }}</span>
+                </span>
+                <br />
+                <div class="mt-1" v-show="(role === 5 && scheduleCompanion.candidate === null && scheduleCompanion.status === 1) 
+                  || (role === 5 && scheduleCompanion.candidate === idTable && scheduleCompanion.status === 1) 
+                  || role === 8 || role === 9">
+                  <button v-show="(role === 8 && scheduleCompanion.candidate === null && scheduleCompanion.status === 1) 
+                    || (role === 9 && scheduleCompanion.candidate === null && scheduleCompanion.status === 1) 
+                    || (role === 5 && scheduleCompanion.status === 1 && scheduleCompanion.candidate === null)
+                    || (role === 5 && scheduleCompanion.status === 1 && scheduleCompanion.candidate === null)" class="btn btn-primary btn-sm"
                     style="width: 62px;height: 25px;font-size:12px;border-radius:35px;"
                     @click="updateScheduleCompanion(scheduleCompanion)">Đăng ký</button>
                   <button class="btn btn-danger btn-sm"
@@ -12711,9 +13433,19 @@ const RegisteringScheduleCompanion = {
               <th v-if="!scheduleCompanionsIsNull">{{ scheduleCompanions[180].date }}</th>
               <td class="align-middle text-center" scope="row" v-for="scheduleCompanion in scheduleCompanions"
                 :key="scheduleCompanion.id" v-if="scheduleCompanion.groupSession == 31">
-                <span class="text-center">Trống</span><br />
-                <div class="mt-1">
-                  <button class="btn btn-primary btn-sm"
+                <span class="text-center" v-if="scheduleCompanion.status === 2">Bận Việc</span>
+                <span class="text-center" v-else-if="scheduleCompanion.candidate === null && scheduleCompanion.status === 1">Trống</span>
+                <span class="text-center" v-else v-for="candidate in candidates">
+                  <span v-if="candidate.id == scheduleCompanion.candidate">{{ candidate.candidateId }}</span>
+                </span>
+                <br />
+                <div class="mt-1" v-show="(role === 5 && scheduleCompanion.candidate === null && scheduleCompanion.status === 1) 
+                  || (role === 5 && scheduleCompanion.candidate === idTable && scheduleCompanion.status === 1) 
+                  || role === 8 || role === 9">
+                  <button v-show="(role === 8 && scheduleCompanion.candidate === null && scheduleCompanion.status === 1) 
+                    || (role === 9 && scheduleCompanion.candidate === null && scheduleCompanion.status === 1) 
+                    || (role === 5 && scheduleCompanion.status === 1 && scheduleCompanion.candidate === null)
+                    || (role === 5 && scheduleCompanion.status === 1 && scheduleCompanion.candidate === null)" class="btn btn-primary btn-sm"
                     style="width: 62px;height: 25px;font-size:12px;border-radius:35px;"
                     @click="updateScheduleCompanion(scheduleCompanion)">Đăng ký</button>
                   <button class="btn btn-danger btn-sm"
@@ -12752,6 +13484,22 @@ const RegisteringScheduleCompanion = {
   </div>
   `,
 };
+
+const ReportCompanion = {
+  template: `
+  <div>
+    <router-view />
+  </div>
+  `,
+};
+
+const ListReportCompanion = {
+
+},
+
+const AddReportCompanion = {
+
+};
 // Schedule Spiritual Guide
 const ScheduleSpiritualGuide = {
   template: `
@@ -12777,19 +13525,213 @@ const RegisteringScheduleSpiritualGuide = {
         { id: 6, time: "15:00 - 16:00" },
       ],
       scheduleSpiritualGuides: [],
+      spiritualGuides: [],
+      candidates: [],
+      groupCommunity: [],
       statuses: [
         { id: 1, name: "Đang hoạt động" },
         { id: 2, name: "Vô hiệu hóa" },
       ],
       scheduleSpiritualGuide: {},
+      role: 0,
+      idTable: 0,
+      metSpiritualGuides: [],
     };
   },
   mounted() {
+    // let promiseResponse = axios.get("http://localhost:3000/api/logins/findOne?filter[where][token]=token")
+    //                     .then(response => response.data)
+    //                     .then(data => {return data})
+    // Promise.resolve(promiseResponse).then((jsonResults) => {
+    //   console.log(jsonResults);
+    //   this.idTable = jsonResults.idTable;
+    //   console.log(this.idTable);
+    // })
     axios
-      .get("http://localhost:3000/api/scheduleSpiritualGuides")
+      .get(
+        "http://localhost:3000/api/logins/findOne?filter[where][token]=token"
+      )
+      .then((resp) => {
+        this.idTable = resp.data.idTable;
+        this.role = resp.data.role;
+      });
+    axios
+      .get(
+        "http://localhost:3000/api/scheduleSpiritualGuides?filter[where][spiritualGuide]=8"
+      )
       .then((response) => {
         this.scheduleSpiritualGuides = response.data;
       });
+    axios.get("http://localhost:3000/api/candidates").then((resp) => {
+      this.candidates = resp.data;
+    });
+
+    // axios
+    //   .get(
+    //     "http://localhost:3000/api/logins/findOne?filter[where][token]=token"
+    //   )
+    //   .then((resp) => {
+    //     this.idTable = resp.data.idTable;
+    //     this.role = resp.data.role;
+    //     if (this.role == 8 || this.role == 9) {
+    //       axios
+    //         .get(
+    //           "http://localhost:3000/api/scheduleSpiritualGuides?filter[where][spiritualGuide]=" +
+    //             this.idTable
+    //         )
+    //         .then((response) => {
+    //           this.scheduleSpiritualGuides = response.data;
+    //           console.log(this.scheduleSpiritualGuides);
+    //         });
+    //     }
+    //     else if (this.role == 5) {
+    //       axios
+    //         .get(
+    //           "http://localhost:3000/api/candidates?filter[where][id]=" +
+    //             this.idTable
+    //         )
+    //         .then((respCan) => {
+    //           var community = respCan.data[0].community;
+    //           axios
+    //             .get(
+    //               "http://localhost:3000/api/groupCommunities?filter[where][firstCom]=" + community)
+    //             .then((respGroupCom) => {
+    //               var groupCommunity = {};
+    //               groupCommunity = respGroupCom.data;
+    //               if(groupCommunity != null){
+    //                 var idGroup = respGroupCom.data[0].id;
+    //                 axios
+    //                   .get(
+    //                     "http://localhost:3000/api/spiritualGuides?filter[where][groupCommunity]=" +
+    //                       idGroup
+    //                   )
+    //                   .then((respCom) => {
+    //                     var spiritualGuide = respCom.data[0].id;
+    //                     axios
+    //                       .get(
+    //                         "http://localhost:3000/api/scheduleSpiritualGuides?filter[where][spiritualGuide]=" +
+    //                           spiritualGuide
+    //                       )
+    //                       .then((respSchedule) => {
+    //                         this.scheduleSpiritualGuides = respSchedule.data;
+    //                       });
+    //                   });
+    //               } else{
+    //                 axios
+    //                   .get(
+    //                     "http://localhost:3000/api/groupCommunities?filter[where][secondCom]=" + community)
+    //                   .then((respGroupCom) => {
+    //                     var groupCommunity = {};
+    //                     groupCommunity = respGroupCom.data;
+    //                     if(groupCommunity != null){
+    //                       var idGroup = respGroupCom.data[0].id;
+    //                     axios
+    //                       .get(
+    //                         "http://localhost:3000/api/spiritualGuides?filter[where][groupCommunity]=" +
+    //                           idGroup
+    //                       )
+    //                       .then((respCom) => {
+    //                         var spiritualGuide = respCom.data[0].id;
+    //                         axios
+    //                           .get(
+    //                             "http://localhost:3000/api/scheduleSpiritualGuides?filter[where][spiritualGuide]=" +
+    //                               spiritualGuide
+    //                           )
+    //                           .then((resp) => {
+    //                             this.scheduleSpiritualGuides = resp.data;
+    //                           });
+    //                       });
+    //                     } else{
+    //                       axios
+    //                         .get(
+    //                           "http://localhost:3000/api/groupCommunities?filter[where][thirdCom]=" + community)
+    //                         .then((respGroupCom) => {
+    //                           var groupCommunity = {};
+    //                           groupCommunity = respGroupCom.data;
+    //                           if(groupCommunity != null){
+    //                             var idGroup = respGroupCom.data[0].id;
+    //                           axios
+    //                             .get(
+    //                               "http://localhost:3000/api/spiritualGuides?filter[where][groupCommunity]=" +
+    //                                 idGroup
+    //                             )
+    //                             .then((respCom) => {
+    //                               var spiritualGuide = respCom.data[0].id;
+    //                               axios
+    //                                 .get(
+    //                                   "http://localhost:3000/api/scheduleSpiritualGuides?filter[where][spiritualGuide]=" +
+    //                                     spiritualGuide
+    //                                 )
+    //                                 .then((respSchedule) => {
+    //                                   this.scheduleSpiritualGuides = respSchedule.data;
+    //                                 });
+    //                             });
+    //                           } else {
+    //                             axios
+    //                               .get(
+    //                                 "http://localhost:3000/api/groupCommunities?filter[where][fourthCom]=" + community)
+    //                               .then((respGroupCom) => {
+    //                                 var groupCommunity = {};
+    //                                 groupCommunity = respGroupCom.data;
+    //                                 if(groupCommunity != null){
+    //                                   var idGroup = respGroupCom.data[0].id;
+    //                                 axios
+    //                                   .get(
+    //                                     "http://localhost:3000/api/spiritualGuides?filter[where][groupCommunity]=" +
+    //                                       idGroup
+    //                                   )
+    //                                   .then((respCom) => {
+    //                                     var spiritualGuide = respCom.data[0].id;
+    //                                     axios
+    //                                       .get(
+    //                                         "http://localhost:3000/api/scheduleSpiritualGuides?filter[where][spiritualGuide]=" +
+    //                                           spiritualGuide
+    //                                       )
+    //                                       .then((respSchedule) => {
+    //                                         this.scheduleSpiritualGuides = respSchedule.data;
+    //                                       });
+    //                                   });
+    //                                 } else{
+    //                                   axios
+    //                                     .get(
+    //                                       "http://localhost:3000/api/groupCommunities?filter[where][fifthCom]=" + community)
+    //                                     .then((respGroupCom) => {
+    //                                       var groupCommunity = {};
+    //                                       groupCommunity = respGroupCom.data;
+    //                                       if(groupCommunity != null){
+    //                                         var idGroup = respGroupCom.data[0].id;
+    //                                       axios
+    //                                         .get(
+    //                                           "http://localhost:3000/api/spiritualGuides?filter[where][groupCommunity]=" +
+    //                                             idGroup
+    //                                         )
+    //                                         .then((respCom) => {
+    //                                           var spiritualGuide = respCom.data[0].id;
+    //                                           axios
+    //                                             .get(
+    //                                               "http://localhost:3000/api/scheduleSpiritualGuides?filter[where][spiritualGuide]=" +
+    //                                                 spiritualGuide
+    //                                             )
+    //                                             .then((respSchedule) => {
+    //                                               this.scheduleSpiritualGuides = respSchedule.data;
+    //                                             });
+    //                                         });
+    //                                       }
+    //                                     });
+    //                                 }
+    //                               });
+    //                           }
+    //                         });
+    //                     }
+    //                   });
+    //               }
+    //             });
+    //         });
+    //     }
+    //   });
+    axios.get("http://localhost:3000/api/metSpiritualGuides").then((resp) => {
+      this.metSpiritualGuides = resp.data;
+    });
   },
   computed: {
     isThirtyOneTrue() {
@@ -12865,7 +13807,7 @@ const RegisteringScheduleSpiritualGuide = {
             var mm = String(today.getMonth() + 1).padStart(2, "0");
             var day = dd + "/" + mm;
             const scheduleSpiritualGuide = {
-              spiritualGuide: 1,
+              spiritualGuide: this.idTable,
               candidate: null,
               session: this.sessions[sess].time,
               date: day,
@@ -12887,7 +13829,7 @@ const RegisteringScheduleSpiritualGuide = {
             var mm = String(today.getMonth() + 1).padStart(2, "0");
             var day = dd + "/" + mm;
             const scheduleSpiritualGuide = {
-              spiritualGuide: 1,
+              spiritualGuide: this.idTable,
               candidate: null,
               session: this.sessions[sess].time,
               date: day,
@@ -12913,7 +13855,7 @@ const RegisteringScheduleSpiritualGuide = {
               var mm = String(today.getMonth() + 1).padStart(2, "0");
               var day = dd + "/" + mm;
               const scheduleSpiritualGuide = {
-                spiritualGuide: 1,
+                spiritualGuide: this.idTable,
                 candidate: null,
                 session: this.sessions[sess].time,
                 date: day,
@@ -12935,7 +13877,7 @@ const RegisteringScheduleSpiritualGuide = {
               var mm = String(today.getMonth() + 1).padStart(2, "0");
               var day = dd + "/" + mm;
               const scheduleSpiritualGuide = {
-                spiritualGuide: 1,
+                spiritualGuide: this.idTable,
                 candidate: null,
                 session: this.sessions[sess].time,
                 date: day,
@@ -12956,18 +13898,97 @@ const RegisteringScheduleSpiritualGuide = {
 
     DeleteScheduleSpiritualGuide() {
       axios
-        .delete(
-          "http://localhost:3000/api/scheduleSpiritualGuides?[where][spiritualGuide]=" +
-            this.$store.state.user.idTable
+        .get(
+          "http://localhost:3000/api/scheduleSpiritualGuides?filter[where][spiritualGuide]=" +
+            this.idTable
         )
-        .then((response) => {
-          console.log(response);
-          this.scheduleSpiritualGuides.splice(id, 1);
-          this.$router.push("/");
-          setTimeout(() => {
-            this.$router.push("/scheduleSpiritualGuides");
-            location.reload();
-          }, 5);
+        .then((resp) => {
+          var arrayScheduleSpiritualGuides = resp.data;
+          var lengthScheduleSpiritualGuides =
+            arrayScheduleSpiritualGuides.length;
+          if (lengthScheduleSpiritualGuides != 0) {
+            var firstId = arrayScheduleSpiritualGuides[0].id;
+            // var maxId = lengthScheduleSpiritualGuides + firstId
+            var maxIdFirst = firstId + 60;
+            for (i = firstId; i < maxIdFirst; i++) {
+              axios
+                .delete(
+                  "http://localhost:3000/api/scheduleSpiritualGuides/" + i
+                )
+                .then((response) => {
+                  console.log(response);
+                  this.scheduleSpiritualGuides.splice(i, 1);
+                });
+            }
+            var maxIdSecond = maxIdFirst + 60;
+            for (i = maxIdFirst; i < maxIdSecond; i++) {
+              axios
+                .delete(
+                  "http://localhost:3000/api/scheduleSpiritualGuides/" + i
+                )
+                .then((response) => {
+                  console.log(response);
+                  this.scheduleSpiritualGuides.splice(i, 1);
+                });
+            }
+            if (lengthScheduleSpiritualGuides == 168) {
+              var maxIdThird = maxIdSecond + 48;
+              for (i = maxIdSecond; i < maxIdThird; i++) {
+                axios
+                  .delete(
+                    "http://localhost:3000/api/scheduleSpiritualGuides/" + i
+                  )
+                  .then((response) => {
+                    console.log(response);
+                    this.scheduleSpiritualGuides.splice(i, 1);
+                  });
+              }
+            }
+            if (lengthScheduleSpiritualGuides == 174) {
+              var maxIdThird = maxIdSecond + 54;
+              for (i = maxIdSecond; i < maxIdThird; i++) {
+                axios
+                  .delete(
+                    "http://localhost:3000/api/scheduleSpiritualGuides/" + i
+                  )
+                  .then((response) => {
+                    console.log(response);
+                    this.scheduleSpiritualGuides.splice(i, 1);
+                  });
+              }
+            }
+            if (lengthScheduleSpiritualGuides >= 180) {
+              var maxIdThird = maxIdSecond + 60;
+              for (i = maxIdSecond; i < maxIdThird; i++) {
+                axios
+                  .delete(
+                    "http://localhost:3000/api/scheduleSpiritualGuides/" + i
+                  )
+                  .then((response) => {
+                    console.log(response);
+                    this.scheduleSpiritualGuides.splice(i, 1);
+                  });
+              }
+            }
+            if (lengthScheduleSpiritualGuides == 186) {
+              var maxIdFourth = maxIdThird + 6;
+              for (i = maxIdThird; i < maxIdFourth; i++) {
+                axios
+                  .delete(
+                    "http://localhost:3000/api/scheduleSpiritualGuides/" + i
+                  )
+                  .then((response) => {
+                    console.log(response);
+                    this.scheduleSpiritualGuides.splice(i, 1);
+                  });
+              }
+            }
+            this.$router.push("/");
+            setTimeout(() => {
+              this.$router.push("/scheduleSpiritualGuides");
+              location.reload();
+            }, 1000);
+          }
         });
     },
 
@@ -12986,35 +14007,107 @@ const RegisteringScheduleSpiritualGuide = {
             status: response.data.scheduleSpiritualGuide.status,
             groupSession: response.data.scheduleSpiritualGuide.groupSession,
           };
-          var role = "";
-          if (role == "Người linh hướng") {
+          if (this.role == 6 || this.role == 7) {
             const scheduleSpiritualGuideNew = {
               spiritualGuide: scheduleSpiritualGuideOld.spiritualGuide,
-              candidate: 1,
+              candidate: scheduleSpiritualGuideOld.candidate,
               session: scheduleSpiritualGuideOld.session,
               date: scheduleSpiritualGuideOld.date,
               status: 2,
               groupSession: scheduleSpiritualGuideOld.groupSession,
             };
-          } else if (role == "Ứng sinh") {
-            const scheduleSpiritualGuideNew = {
-              spiritualGuide: scheduleSpiritualGuideOld.spiritualGuide,
-              candidate: null,
-              session: scheduleSpiritualGuideOld.session,
-              date: scheduleSpiritualGuideOld.date,
-              status: 2,
-              groupSession: scheduleSpiritualGuideOld.groupSession,
-            };
+            const url =
+              "http://localhost:3000/api/scheduleSpiritualGuides/" +
+              scheduleSpiritualGuideEdit.id +
+              "/replace";
+            axios.post(url, scheduleSpiritualGuideNew);
+            setTimeout(() => {
+              this.$router.push("/scheduleSpiritualGuides");
+              location.reload();
+            }, 100);
+          } else if (this.role == 5) {
+            var max = this.scheduleSpiritualGuides.length;
+            var check = 0;
+            for (i = 0; i < max; i++) {
+              if (
+                this.scheduleSpiritualGuides[i].candidate == this.idTable &&
+                this.scheduleSpiritualGuides[i].status == 1
+              ) {
+                check++;
+              }
+              if (
+                this.scheduleSpiritualGuides[i].candidate == this.idTable &&
+                this.scheduleSpiritualGuides[i].status == 2
+              ) {
+                axios
+                  .get(
+                    "http://localhost:3000/api/scheduleSpiritualGuides?filter[where][candidate]=" +
+                      this.idTable +
+                      "&filter[status]=2"
+                  )
+                  .then((resp) => {
+                    axios
+                      .get(
+                        "http://localhost:3000/api/metSpiritualGuides?filter[where][idSchedule]=" +
+                          resp.data[0].id
+                      )
+                      .then((response) => {
+                        axios
+                          .delete(
+                            "http://localhost:3000/api/metSpiritualGuides/" +
+                              response.data[0].id
+                          )
+                          .then((resp) => {
+                            this.metSpiritualGuides.splice(
+                              response.data[0].id,
+                              1
+                            );
+                            setTimeout(() => {
+                              location.reload();
+                            }, 100);
+                          });
+                      });
+                  });
+              }
+            }
+            if (check != 0) {
+              alertify.alert(
+                "Thông báo",
+                "Mỗi ứng sinh chỉ đăng ký một phiên!",
+                function () {
+                  alertify.success("Ok");
+                }
+              );
+            } else {
+              const scheduleSpiritualGuideNew = {
+                spiritualGuide: scheduleSpiritualGuideOld.spiritualGuide,
+                candidate: this.idTable,
+                session: scheduleSpiritualGuideOld.session,
+                date: scheduleSpiritualGuideOld.date,
+                status: 1,
+                groupSession: scheduleSpiritualGuideOld.groupSession,
+              };
+              var currentDate = new Date();
+              const metSpiritualGuide = {
+                spiritualGuide: scheduleSpiritualGuideNew.spiritualGuide,
+                candidate: this.idTable,
+                registeredDate: currentDate,
+                status: 1,
+                idSchedule: scheduleSpiritualGuideEdit.id,
+              };
+              const url_1 = `http://localhost:3000/api/metSpiritualGuides`;
+              axios.post(url_1, metSpiritualGuide);
+              const url =
+                "http://localhost:3000/api/scheduleSpiritualGuides/" +
+                scheduleSpiritualGuideEdit.id +
+                "/replace";
+              axios.post(url, scheduleSpiritualGuideNew);
+              setTimeout(() => {
+                this.$router.push("/scheduleSpiritualGuides");
+                location.reload();
+              }, 100);
+            }
           }
-          const url =
-            "http://localhost:3000/api/scheduleSpiritualGuides/" +
-            scheduleSpiritualGuideEdit.id +
-            "/replace";
-          axios.post(url, scheduleSpiritualGuideNew);
-          setTimeout(() => {
-            this.$router.push("/scheduleSpiritualGuides");
-            location.reload();
-          }, 100);
         });
     },
 
@@ -13033,35 +14126,136 @@ const RegisteringScheduleSpiritualGuide = {
             status: response.data.scheduleSpiritualGuide.status,
             groupSession: response.data.scheduleSpiritualGuide.groupSession,
           };
-          var role = "";
-          if (role == "Người linh hướng") {
-            const scheduleSpiritualGuideNew = {
-              spiritualGuide: scheduleSpiritualGuideOld.spiritualGuide,
-              candidate: scheduleSpiritualGuideOld.candidate,
-              session: scheduleSpiritualGuideOld.session,
-              date: scheduleSpiritualGuideOld.date,
-              status: 1,
-              groupSession: scheduleSpiritualGuideOld.groupSession,
-            };
-          } else if (role == "Ứng sinh") {
-            const scheduleSpiritualGuideNew = {
-              spiritualGuide: scheduleSpiritualGuideOld.spiritualGuide,
-              candidate: null,
-              session: scheduleSpiritualGuideOld.session,
-              date: scheduleSpiritualGuideOld.date,
-              status: 1,
-              groupSession: scheduleSpiritualGuideOld.groupSession,
-            };
+          if (this.role == 6 || this.role == 7) {
+            if (scheduleSpiritualGuideOld.status == 2) {
+              const scheduleSpiritualGuideNew = {
+                spiritualGuide: scheduleSpiritualGuideOld.spiritualGuide,
+                candidate: null,
+                session: scheduleSpiritualGuideOld.session,
+                date: scheduleSpiritualGuideOld.date,
+                status: 1,
+                groupSession: scheduleSpiritualGuideOld.groupSession,
+              };
+              const url =
+                "http://localhost:3000/api/scheduleSpiritualGuides/" +
+                scheduleSpiritualGuideEdit.id +
+                "/replace";
+              axios.post(url, scheduleSpiritualGuideNew);
+              setTimeout(() => {
+                location.reload();
+              }, 50);
+            } else if (
+              scheduleSpiritualGuideOld.candidate != null &&
+              scheduleSpiritualGuideOld.status == 1
+            ) {
+              var emailCandidate = null;
+              axios
+                .get(
+                  "http://localhost:3000/api/candidates?filter[where][id]=" +
+                    scheduleSpiritualGuideOld.candidate
+                )
+                .then((resp) => {
+                  emailCandidate = resp.data[0].email;
+                  axios
+                    .get(
+                      "http://localhost:3000/api/spiritualGuides?filter[where][id]=" +
+                        scheduleSpiritualGuideOld.spiritualGuide
+                    )
+                    .then((respCom) => {
+                      Email.send({
+                        Host: "smtp.gmail.com",
+                        Username: "mancanhouse2020@gmail.com",
+                        Password: "akyqnlcmanojglqb",
+                        To: emailCandidate,
+                        From: "mancanhouse2020@gmail.com",
+                        Subject: "Thông Báo Hủy Lịch Gặp Linh Hướng",
+                        Body:
+                          "Xin lỗi vì sự bất tiện này. Người linh hướng của bạn" +
+                          " đã có việc bận nên không thể có lịch gặp như bạn mong muốn. Vui lòng chọn một lịch gặp khác hoặc liên hệ" +
+                          " với người linh hướng qua số điện thoại: " +
+                          respCom.data[0].phone +
+                          " hoặc địa chỉ email: " +
+                          respCom.data[0].email +
+                          ". Xin cảm ơn.",
+                      })
+                        .then
+                        // message => alert(message)
+                        ();
+                    });
+                  //Gửi mail báo bận.
+                });
+              const scheduleSpiritualGuideNew = {
+                spiritualGuide: scheduleSpiritualGuideOld.spiritualGuide,
+                candidate: scheduleSpiritualGuideOld.candidate,
+                session: scheduleSpiritualGuideOld.session,
+                date: scheduleSpiritualGuideOld.date,
+                status: 2,
+                groupSession: scheduleSpiritualGuideOld.groupSession,
+              };
+              const url =
+                "http://localhost:3000/api/scheduleSpiritualGuides/" +
+                scheduleSpiritualGuideEdit.id +
+                "/replace";
+              axios.post(url, scheduleSpiritualGuideNew);
+              setTimeout(() => {
+                location.reload();
+              }, 2000);
+            }
+          } else if (this.role == 5) {
+            var max = this.scheduleSpiritualGuides.length;
+            var checkCancel = 0;
+            var idSchedule = 0;
+            for (i = 0; i < max; i++) {
+              if (this.scheduleSpiritualGuides[i].candidate == this.idTable) {
+                checkCancel++;
+                idSchedule = this.scheduleSpiritualGuides[i].id;
+              }
+            }
+            if (
+              checkCancel != 0 &&
+              scheduleSpiritualGuideEdit.id != idSchedule
+            ) {
+              alertify.alert(
+                "Thông báo",
+                "Hủy lịch gặp không hợp lệ. Vui lòng kiểm tra lại!",
+                function () {
+                  alertify.success("Ok");
+                }
+              );
+            } else {
+              const scheduleSpiritualGuideNew = {
+                spiritualGuide: scheduleSpiritualGuideOld.spiritualGuide,
+                candidate: null,
+                session: scheduleSpiritualGuideOld.session,
+                date: scheduleSpiritualGuideOld.date,
+                status: 1,
+                groupSession: scheduleSpiritualGuideOld.groupSession,
+              };
+              const url =
+                "http://localhost:3000/api/scheduleSpiritualGuides/" +
+                scheduleSpiritualGuideEdit.id +
+                "/replace";
+              axios.post(url, scheduleSpiritualGuideNew);
+              axios
+                .get(
+                  "http://localhost:3000/api/metSpiritualGuides?filter[where][idSchedule]=" +
+                    scheduleSpiritualGuideEdit.id
+                )
+                .then((response) => {
+                  axios
+                    .delete(
+                      "http://localhost:3000/api/metSpiritualGuides/" +
+                        response.data[0].id
+                    )
+                    .then((resp) => {
+                      this.metSpiritualGuides.splice(response.data[0].id, 1);
+                      setTimeout(() => {
+                        location.reload();
+                      }, 100);
+                    });
+                });
+            }
           }
-          const url =
-            "http://localhost:3000/api/scheduleSpiritualGuides/" +
-            scheduleSpiritualGuideEdit.id +
-            "/replace";
-          axios.post(url, scheduleSpiritualGuideNew);
-          setTimeout(() => {
-            this.$router.push("/scheduleSpiritualGuides");
-            location.reload();
-          }, 100);
         });
     },
   },
@@ -13073,13 +14267,14 @@ const RegisteringScheduleSpiritualGuide = {
           <h6 class="m-0 font-weight-bold text-dark">Đăng ký Lịch linh hướng</h6>
         </div>
         <div class="col-md-4"></div>
-        <div class="col-md-2" style="padding-left:110px;">
-          <button class="btn rounded btn-danger" style="font-size:14px;" data-toggle="modal" data-target="#deleteScheduleSpiritualGuideModal">
+        <div class="col-md-2" style="padding-left:110px;" v-show="role == 6 || role == 7">
+          <button class="btn rounded btn-danger" style="font-size:14px;" 
+          data-toggle="modal" data-target="#deleteScheduleSpiritualGuideModal">
             <i class="fas fa-trash-alt"></i>
             &nbsp;Xóa lịch
           </button>
         </div>
-        <div class="col-md-2" style="padding-left:50px;">
+        <div class="col-md-2" style="padding-left:50px;" v-show="role == 6 || role == 7">
           <button class="btn rounded btn-hover-blue"
             style="background-color: #056299;color: white;font-size:14px;" @click="CreateScheduleSpiritualGuide">
             <i class="fas fa-plus"></i>
@@ -13109,9 +14304,19 @@ const RegisteringScheduleSpiritualGuide = {
               <th v-if="!scheduleSpiritualGuidesIsNull">{{ scheduleSpiritualGuides[0].date }}</th>
               <td class="align-middle text-center" scope="row" v-for="scheduleSpiritualGuide in scheduleSpiritualGuides"
                 :key="scheduleSpiritualGuide.id" v-if="scheduleSpiritualGuide.groupSession == 1">
-                <span class="text-center">Trống</span><br />
-                <div class="mt-1">
-                  <button class="btn btn-primary btn-sm"
+                <span class="text-center" v-if="scheduleSpiritualGuide.status === 2">Bận Việc</span>
+                <span class="text-center" v-else-if="scheduleSpiritualGuide.candidate === null && scheduleSpiritualGuide.status === 1">Trống</span>
+                <span class="text-center" v-else v-for="candidate in candidates">
+                  <span v-if="candidate.id == scheduleSpiritualGuide.candidate">{{ candidate.candidateId }}</span>
+                </span>
+                <br />
+                <div class="mt-1" v-show="(role === 5 && scheduleSpiritualGuide.candidate === null && scheduleSpiritualGuide.status === 1) 
+                  || (role === 5 && scheduleSpiritualGuide.candidate === idTable && scheduleSpiritualGuide.status === 1) 
+                  || role === 6 || role === 7">
+                  <button v-show="(role === 6 && scheduleSpiritualGuide.candidate === null && scheduleSpiritualGuide.status === 1) 
+                    || (role === 7 && scheduleSpiritualGuide.candidate === null && scheduleSpiritualGuide.status === 1) 
+                    || (role === 5 && scheduleSpiritualGuide.status === 1 && scheduleSpiritualGuide.candidate === null)
+                    || (role === 5 && scheduleSpiritualGuide.status === 1 && scheduleSpiritualGuide.candidate === null)" class="btn btn-primary btn-sm"
                     style="width: 62px;height: 25px;font-size:12px;border-radius:35px;"
                     @click="updateScheduleSpiritualGuide(scheduleSpiritualGuide)">Đăng ký</button>
                   <button class="btn btn-danger btn-sm"
@@ -13124,9 +14329,19 @@ const RegisteringScheduleSpiritualGuide = {
               <th v-if="!scheduleSpiritualGuidesIsNull">{{ scheduleSpiritualGuides[6].date }}</th>
               <td class="align-middle text-center" scope="row" v-for="scheduleSpiritualGuide in scheduleSpiritualGuides"
                 :key="scheduleSpiritualGuide.id" v-if="scheduleSpiritualGuide.groupSession == 2">
-                <span class="text-center">Trống</span><br />
-                <div class="mt-1">
-                  <button class="btn btn-primary btn-sm"
+                <span class="text-center" v-if="scheduleSpiritualGuide.status === 2">Bận Việc</span>
+                <span class="text-center" v-else-if="scheduleSpiritualGuide.candidate === null && scheduleSpiritualGuide.status === 1">Trống</span>
+                <span class="text-center" v-else v-for="candidate in candidates">
+                  <span v-if="candidate.id == scheduleSpiritualGuide.candidate">{{ candidate.candidateId }}</span>
+                </span>
+                <br />
+                <div class="mt-1" v-show="(role === 5 && scheduleSpiritualGuide.candidate === null && scheduleSpiritualGuide.status === 1) 
+                  || (role === 5 && scheduleSpiritualGuide.candidate === idTable && scheduleSpiritualGuide.status === 1) 
+                  || role === 6 || role === 7">
+                  <button v-show="(role === 6 && scheduleSpiritualGuide.candidate === null && scheduleSpiritualGuide.status === 1) 
+                    || (role === 7 && scheduleSpiritualGuide.candidate === null && scheduleSpiritualGuide.status === 1) 
+                    || (role === 5 && scheduleSpiritualGuide.status === 1 && scheduleSpiritualGuide.candidate === null)
+                    || (role === 5 && scheduleSpiritualGuide.status === 1 && scheduleSpiritualGuide.candidate === null)" class="btn btn-primary btn-sm"
                     style="width: 62px;height: 25px;font-size:12px;border-radius:35px;"
                     @click="updateScheduleSpiritualGuide(scheduleSpiritualGuide)">Đăng ký</button>
                   <button class="btn btn-danger btn-sm"
@@ -13139,9 +14354,19 @@ const RegisteringScheduleSpiritualGuide = {
               <th v-if="!scheduleSpiritualGuidesIsNull">{{ scheduleSpiritualGuides[12].date }}</th>
               <td class="align-middle text-center" scope="row" v-for="scheduleSpiritualGuide in scheduleSpiritualGuides"
                 :key="scheduleSpiritualGuide.id" v-if="scheduleSpiritualGuide.groupSession == 3">
-                <span class="text-center">Trống</span><br />
-                <div class="mt-1">
-                  <button class="btn btn-primary btn-sm"
+                <span class="text-center" v-if="scheduleSpiritualGuide.status === 2">Bận Việc</span>
+                <span class="text-center" v-else-if="scheduleSpiritualGuide.candidate === null && scheduleSpiritualGuide.status === 1">Trống</span>
+                <span class="text-center" v-else v-for="candidate in candidates">
+                  <span v-if="candidate.id == scheduleSpiritualGuide.candidate">{{ candidate.candidateId }}</span>
+                </span>
+                <br />
+                <div class="mt-1" v-show="(role === 5 && scheduleSpiritualGuide.candidate === null && scheduleSpiritualGuide.status === 1) 
+                  || (role === 5 && scheduleSpiritualGuide.candidate === idTable && scheduleSpiritualGuide.status === 1) 
+                  || role === 6 || role === 7">
+                  <button v-show="(role === 6 && scheduleSpiritualGuide.candidate === null && scheduleSpiritualGuide.status === 1) 
+                    || (role === 7 && scheduleSpiritualGuide.candidate === null && scheduleSpiritualGuide.status === 1) 
+                    || (role === 5 && scheduleSpiritualGuide.status === 1 && scheduleSpiritualGuide.candidate === null)
+                    || (role === 5 && scheduleSpiritualGuide.status === 1 && scheduleSpiritualGuide.candidate === null)" class="btn btn-primary btn-sm"
                     style="width: 62px;height: 25px;font-size:12px;border-radius:35px;"
                     @click="updateScheduleSpiritualGuide(scheduleSpiritualGuide)">Đăng ký</button>
                   <button class="btn btn-danger btn-sm"
@@ -13154,9 +14379,19 @@ const RegisteringScheduleSpiritualGuide = {
               <th v-if="!scheduleSpiritualGuidesIsNull">{{ scheduleSpiritualGuides[18].date }}</th>
               <td class="align-middle text-center" scope="row" v-for="scheduleSpiritualGuide in scheduleSpiritualGuides"
                 :key="scheduleSpiritualGuide.id" v-if="scheduleSpiritualGuide.groupSession == 4">
-                <span class="text-center">Trống</span><br />
-                <div class="mt-1">
-                  <button class="btn btn-primary btn-sm"
+                <span class="text-center" v-if="scheduleSpiritualGuide.status === 2">Bận Việc</span>
+                <span class="text-center" v-else-if="scheduleSpiritualGuide.candidate === null && scheduleSpiritualGuide.status === 1">Trống</span>
+                <span class="text-center" v-else v-for="candidate in candidates">
+                  <span v-if="candidate.id == scheduleSpiritualGuide.candidate">{{ candidate.candidateId }}</span>
+                </span>
+                <br />
+                <div class="mt-1" v-show="(role === 5 && scheduleSpiritualGuide.candidate === null && scheduleSpiritualGuide.status === 1) 
+                  || (role === 5 && scheduleSpiritualGuide.candidate === idTable && scheduleSpiritualGuide.status === 1) 
+                  || role === 6 || role === 7">
+                  <button v-show="(role === 6 && scheduleSpiritualGuide.candidate === null && scheduleSpiritualGuide.status === 1) 
+                    || (role === 7 && scheduleSpiritualGuide.candidate === null && scheduleSpiritualGuide.status === 1) 
+                    || (role === 5 && scheduleSpiritualGuide.status === 1 && scheduleSpiritualGuide.candidate === null)
+                    || (role === 5 && scheduleSpiritualGuide.status === 1 && scheduleSpiritualGuide.candidate === null)" class="btn btn-primary btn-sm"
                     style="width: 62px;height: 25px;font-size:12px;border-radius:35px;"
                     @click="updateScheduleSpiritualGuide(scheduleSpiritualGuide)">Đăng ký</button>
                   <button class="btn btn-danger btn-sm"
@@ -13169,9 +14404,19 @@ const RegisteringScheduleSpiritualGuide = {
               <th v-if="!scheduleSpiritualGuidesIsNull">{{ scheduleSpiritualGuides[24].date }}</th>
               <td class="align-middle text-center" scope="row" v-for="scheduleSpiritualGuide in scheduleSpiritualGuides"
                 :key="scheduleSpiritualGuide.id" v-if="scheduleSpiritualGuide.groupSession == 5">
-                <span class="text-center">Trống</span><br />
-                <div class="mt-1">
-                  <button class="btn btn-primary btn-sm"
+                <span class="text-center" v-if="scheduleSpiritualGuide.status === 2">Bận Việc</span>
+                <span class="text-center" v-else-if="scheduleSpiritualGuide.candidate === null && scheduleSpiritualGuide.status === 1">Trống</span>
+                <span class="text-center" v-else v-for="candidate in candidates">
+                  <span v-if="candidate.id == scheduleSpiritualGuide.candidate">{{ candidate.candidateId }}</span>
+                </span>
+                <br />
+                <div class="mt-1" v-show="(role === 5 && scheduleSpiritualGuide.candidate === null && scheduleSpiritualGuide.status === 1) 
+                  || (role === 5 && scheduleSpiritualGuide.candidate === idTable && scheduleSpiritualGuide.status === 1) 
+                  || role === 6 || role === 7">
+                  <button v-show="(role === 6 && scheduleSpiritualGuide.candidate === null && scheduleSpiritualGuide.status === 1) 
+                    || (role === 7 && scheduleSpiritualGuide.candidate === null && scheduleSpiritualGuide.status === 1) 
+                    || (role === 5 && scheduleSpiritualGuide.status === 1 && scheduleSpiritualGuide.candidate === null)
+                    || (role === 5 && scheduleSpiritualGuide.status === 1 && scheduleSpiritualGuide.candidate === null)" class="btn btn-primary btn-sm"
                     style="width: 62px;height: 25px;font-size:12px;border-radius:35px;"
                     @click="updateScheduleSpiritualGuide(scheduleSpiritualGuide)">Đăng ký</button>
                   <button class="btn btn-danger btn-sm"
@@ -13184,9 +14429,19 @@ const RegisteringScheduleSpiritualGuide = {
               <th v-if="!scheduleSpiritualGuidesIsNull">{{ scheduleSpiritualGuides[30].date }}</th>
               <td class="align-middle text-center" scope="row" v-for="scheduleSpiritualGuide in scheduleSpiritualGuides"
                 :key="scheduleSpiritualGuide.id" v-if="scheduleSpiritualGuide.groupSession == 6">
-                <span class="text-center">Trống</span><br />
-                <div class="mt-1">
-                  <button class="btn btn-primary btn-sm"
+                <span class="text-center" v-if="scheduleSpiritualGuide.status === 2">Bận Việc</span>
+                <span class="text-center" v-else-if="scheduleSpiritualGuide.candidate === null && scheduleSpiritualGuide.status === 1">Trống</span>
+                <span class="text-center" v-else v-for="candidate in candidates">
+                  <span v-if="candidate.id == scheduleSpiritualGuide.candidate">{{ candidate.candidateId }}</span>
+                </span>
+                <br />
+                <div class="mt-1" v-show="(role === 5 && scheduleSpiritualGuide.candidate === null && scheduleSpiritualGuide.status === 1) 
+                  || (role === 5 && scheduleSpiritualGuide.candidate === idTable && scheduleSpiritualGuide.status === 1) 
+                  || role === 6 || role === 7">
+                  <button v-show="(role === 6 && scheduleSpiritualGuide.candidate === null && scheduleSpiritualGuide.status === 1) 
+                    || (role === 7 && scheduleSpiritualGuide.candidate === null && scheduleSpiritualGuide.status === 1) 
+                    || (role === 5 && scheduleSpiritualGuide.status === 1 && scheduleSpiritualGuide.candidate === null)
+                    || (role === 5 && scheduleSpiritualGuide.status === 1 && scheduleSpiritualGuide.candidate === null)" class="btn btn-primary btn-sm"
                     style="width: 62px;height: 25px;font-size:12px;border-radius:35px;"
                     @click="updateScheduleSpiritualGuide(scheduleSpiritualGuide)">Đăng ký</button>
                   <button class="btn btn-danger btn-sm"
@@ -13199,9 +14454,19 @@ const RegisteringScheduleSpiritualGuide = {
               <th v-if="!scheduleSpiritualGuidesIsNull">{{ scheduleSpiritualGuides[36].date }}</th>
               <td class="align-middle text-center" scope="row" v-for="scheduleSpiritualGuide in scheduleSpiritualGuides"
                 :key="scheduleSpiritualGuide.id" v-if="scheduleSpiritualGuide.groupSession == 7">
-                <span class="text-center">Trống</span><br />
-                <div class="mt-1">
-                  <button class="btn btn-primary btn-sm"
+                <span class="text-center" v-if="scheduleSpiritualGuide.status === 2">Bận Việc</span>
+                <span class="text-center" v-else-if="scheduleSpiritualGuide.candidate === null && scheduleSpiritualGuide.status === 1">Trống</span>
+                <span class="text-center" v-else v-for="candidate in candidates">
+                  <span v-if="candidate.id == scheduleSpiritualGuide.candidate">{{ candidate.candidateId }}</span>
+                </span>
+                <br />
+                <div class="mt-1" v-show="(role === 5 && scheduleSpiritualGuide.candidate === null && scheduleSpiritualGuide.status === 1) 
+                  || (role === 5 && scheduleSpiritualGuide.candidate === idTable && scheduleSpiritualGuide.status === 1) 
+                  || role === 6 || role === 7">
+                  <button v-show="(role === 6 && scheduleSpiritualGuide.candidate === null && scheduleSpiritualGuide.status === 1) 
+                    || (role === 7 && scheduleSpiritualGuide.candidate === null && scheduleSpiritualGuide.status === 1) 
+                    || (role === 5 && scheduleSpiritualGuide.status === 1 && scheduleSpiritualGuide.candidate === null)
+                    || (role === 5 && scheduleSpiritualGuide.status === 1 && scheduleSpiritualGuide.candidate === null)" class="btn btn-primary btn-sm"
                     style="width: 62px;height: 25px;font-size:12px;border-radius:35px;"
                     @click="updateScheduleSpiritualGuide(scheduleSpiritualGuide)">Đăng ký</button>
                   <button class="btn btn-danger btn-sm"
@@ -13214,9 +14479,19 @@ const RegisteringScheduleSpiritualGuide = {
               <th v-if="!scheduleSpiritualGuidesIsNull">{{ scheduleSpiritualGuides[42].date }}</th>
               <td class="align-middle text-center" scope="row" v-for="scheduleSpiritualGuide in scheduleSpiritualGuides"
                 :key="scheduleSpiritualGuide.id" v-if="scheduleSpiritualGuide.groupSession == 8">
-                <span class="text-center">Trống</span><br />
-                <div class="mt-1">
-                  <button class="btn btn-primary btn-sm"
+                <span class="text-center" v-if="scheduleSpiritualGuide.status === 2">Bận Việc</span>
+                <span class="text-center" v-else-if="scheduleSpiritualGuide.candidate === null && scheduleSpiritualGuide.status === 1">Trống</span>
+                <span class="text-center" v-else v-for="candidate in candidates">
+                  <span v-if="candidate.id == scheduleSpiritualGuide.candidate">{{ candidate.candidateId }}</span>
+                </span>
+                <br />
+                <div class="mt-1" v-show="(role === 5 && scheduleSpiritualGuide.candidate === null && scheduleSpiritualGuide.status === 1) 
+                  || (role === 5 && scheduleSpiritualGuide.candidate === idTable && scheduleSpiritualGuide.status === 1) 
+                  || role === 6 || role === 7">
+                  <button v-show="(role === 6 && scheduleSpiritualGuide.candidate === null && scheduleSpiritualGuide.status === 1) 
+                    || (role === 7 && scheduleSpiritualGuide.candidate === null && scheduleSpiritualGuide.status === 1) 
+                    || (role === 5 && scheduleSpiritualGuide.status === 1 && scheduleSpiritualGuide.candidate === null)
+                    || (role === 5 && scheduleSpiritualGuide.status === 1 && scheduleSpiritualGuide.candidate === null)" class="btn btn-primary btn-sm"
                     style="width: 62px;height: 25px;font-size:12px;border-radius:35px;"
                     @click="updateScheduleSpiritualGuide(scheduleSpiritualGuide)">Đăng ký</button>
                   <button class="btn btn-danger btn-sm"
@@ -13229,9 +14504,19 @@ const RegisteringScheduleSpiritualGuide = {
               <th v-if="!scheduleSpiritualGuidesIsNull">{{ scheduleSpiritualGuides[48].date }}</th>
               <td class="align-middle text-center" scope="row" v-for="scheduleSpiritualGuide in scheduleSpiritualGuides"
                 :key="scheduleSpiritualGuide.id" v-if="scheduleSpiritualGuide.groupSession == 9">
-                <span class="text-center">Trống</span><br />
-                <div class="mt-1">
-                  <button class="btn btn-primary btn-sm"
+                <span class="text-center" v-if="scheduleSpiritualGuide.status === 2">Bận Việc</span>
+                <span class="text-center" v-else-if="scheduleSpiritualGuide.candidate === null && scheduleSpiritualGuide.status === 1">Trống</span>
+                <span class="text-center" v-else v-for="candidate in candidates">
+                  <span v-if="candidate.id == scheduleSpiritualGuide.candidate">{{ candidate.candidateId }}</span>
+                </span>
+                <br />
+                <div class="mt-1" v-show="(role === 5 && scheduleSpiritualGuide.candidate === null && scheduleSpiritualGuide.status === 1) 
+                  || (role === 5 && scheduleSpiritualGuide.candidate === idTable && scheduleSpiritualGuide.status === 1) 
+                  || role === 6 || role === 7">
+                  <button v-show="(role === 6 && scheduleSpiritualGuide.candidate === null && scheduleSpiritualGuide.status === 1) 
+                    || (role === 7 && scheduleSpiritualGuide.candidate === null && scheduleSpiritualGuide.status === 1) 
+                    || (role === 5 && scheduleSpiritualGuide.status === 1 && scheduleSpiritualGuide.candidate === null)
+                    || (role === 5 && scheduleSpiritualGuide.status === 1 && scheduleSpiritualGuide.candidate === null)" class="btn btn-primary btn-sm"
                     style="width: 62px;height: 25px;font-size:12px;border-radius:35px;"
                     @click="updateScheduleSpiritualGuide(scheduleSpiritualGuide)">Đăng ký</button>
                   <button class="btn btn-danger btn-sm"
@@ -13244,9 +14529,19 @@ const RegisteringScheduleSpiritualGuide = {
               <th v-if="!scheduleSpiritualGuidesIsNull">{{ scheduleSpiritualGuides[54].date }}</th>
               <td class="align-middle text-center" scope="row" v-for="scheduleSpiritualGuide in scheduleSpiritualGuides"
                 :key="scheduleSpiritualGuide.id" v-if="scheduleSpiritualGuide.groupSession == 10">
-                <span class="text-center">Trống</span><br />
-                <div class="mt-1">
-                  <button class="btn btn-primary btn-sm"
+                <span class="text-center" v-if="scheduleSpiritualGuide.status === 2">Bận Việc</span>
+                <span class="text-center" v-else-if="scheduleSpiritualGuide.candidate === null && scheduleSpiritualGuide.status === 1">Trống</span>
+                <span class="text-center" v-else v-for="candidate in candidates">
+                  <span v-if="candidate.id == scheduleSpiritualGuide.candidate">{{ candidate.candidateId }}</span>
+                </span>
+                <br />
+                <div class="mt-1" v-show="(role === 5 && scheduleSpiritualGuide.candidate === null && scheduleSpiritualGuide.status === 1) 
+                  || (role === 5 && scheduleSpiritualGuide.candidate === idTable && scheduleSpiritualGuide.status === 1) 
+                  || role === 6 || role === 7">
+                  <button v-show="(role === 6 && scheduleSpiritualGuide.candidate === null && scheduleSpiritualGuide.status === 1) 
+                    || (role === 7 && scheduleSpiritualGuide.candidate === null && scheduleSpiritualGuide.status === 1) 
+                    || (role === 5 && scheduleSpiritualGuide.status === 1 && scheduleSpiritualGuide.candidate === null)
+                    || (role === 5 && scheduleSpiritualGuide.status === 1 && scheduleSpiritualGuide.candidate === null)" class="btn btn-primary btn-sm"
                     style="width: 62px;height: 25px;font-size:12px;border-radius:35px;"
                     @click="updateScheduleSpiritualGuide(scheduleSpiritualGuide)">Đăng ký</button>
                   <button class="btn btn-danger btn-sm"
@@ -13259,9 +14554,19 @@ const RegisteringScheduleSpiritualGuide = {
               <th v-if="!scheduleSpiritualGuidesIsNull">{{ scheduleSpiritualGuides[60].date }}</th>
               <td class="align-middle text-center" scope="row" v-for="scheduleSpiritualGuide in scheduleSpiritualGuides"
                 :key="scheduleSpiritualGuide.id" v-if="scheduleSpiritualGuide.groupSession == 11">
-                <span class="text-center">Trống</span><br />
-                <div class="mt-1">
-                  <button class="btn btn-primary btn-sm"
+                <span class="text-center" v-if="scheduleSpiritualGuide.status === 2">Bận Việc</span>
+                <span class="text-center" v-else-if="scheduleSpiritualGuide.candidate === null && scheduleSpiritualGuide.status === 1">Trống</span>
+                <span class="text-center" v-else v-for="candidate in candidates">
+                  <span v-if="candidate.id == scheduleSpiritualGuide.candidate">{{ candidate.candidateId }}</span>
+                </span>
+                <br />
+                <div class="mt-1" v-show="(role === 5 && scheduleSpiritualGuide.candidate === null && scheduleSpiritualGuide.status === 1) 
+                  || (role === 5 && scheduleSpiritualGuide.candidate === idTable && scheduleSpiritualGuide.status === 1) 
+                  || role === 6 || role === 7">
+                  <button v-show="(role === 6 && scheduleSpiritualGuide.candidate === null && scheduleSpiritualGuide.status === 1) 
+                    || (role === 7 && scheduleSpiritualGuide.candidate === null && scheduleSpiritualGuide.status === 1) 
+                    || (role === 5 && scheduleSpiritualGuide.status === 1 && scheduleSpiritualGuide.candidate === null)
+                    || (role === 5 && scheduleSpiritualGuide.status === 1 && scheduleSpiritualGuide.candidate === null)" class="btn btn-primary btn-sm"
                     style="width: 62px;height: 25px;font-size:12px;border-radius:35px;"
                     @click="updateScheduleSpiritualGuide(scheduleSpiritualGuide)">Đăng ký</button>
                   <button class="btn btn-danger btn-sm"
@@ -13274,9 +14579,19 @@ const RegisteringScheduleSpiritualGuide = {
               <th v-if="!scheduleSpiritualGuidesIsNull">{{ scheduleSpiritualGuides[66].date }}</th>
               <td class="align-middle text-center" scope="row" v-for="scheduleSpiritualGuide in scheduleSpiritualGuides"
                 :key="scheduleSpiritualGuide.id" v-if="scheduleSpiritualGuide.groupSession == 12">
-                <span class="text-center">Trống</span><br />
-                <div class="mt-1">
-                  <button class="btn btn-primary btn-sm"
+                <span class="text-center" v-if="scheduleSpiritualGuide.status === 2">Bận Việc</span>
+                <span class="text-center" v-else-if="scheduleSpiritualGuide.candidate === null && scheduleSpiritualGuide.status === 1">Trống</span>
+                <span class="text-center" v-else v-for="candidate in candidates">
+                  <span v-if="candidate.id == scheduleSpiritualGuide.candidate">{{ candidate.candidateId }}</span>
+                </span>
+                <br />
+                <div class="mt-1" v-show="(role === 5 && scheduleSpiritualGuide.candidate === null && scheduleSpiritualGuide.status === 1) 
+                  || (role === 5 && scheduleSpiritualGuide.candidate === idTable && scheduleSpiritualGuide.status === 1) 
+                  || role === 6 || role === 7">
+                  <button v-show="(role === 6 && scheduleSpiritualGuide.candidate === null && scheduleSpiritualGuide.status === 1) 
+                    || (role === 7 && scheduleSpiritualGuide.candidate === null && scheduleSpiritualGuide.status === 1) 
+                    || (role === 5 && scheduleSpiritualGuide.status === 1 && scheduleSpiritualGuide.candidate === null)
+                    || (role === 5 && scheduleSpiritualGuide.status === 1 && scheduleSpiritualGuide.candidate === null)" class="btn btn-primary btn-sm"
                     style="width: 62px;height: 25px;font-size:12px;border-radius:35px;"
                     @click="updateScheduleSpiritualGuide(scheduleSpiritualGuide)">Đăng ký</button>
                   <button class="btn btn-danger btn-sm"
@@ -13289,9 +14604,19 @@ const RegisteringScheduleSpiritualGuide = {
               <th v-if="!scheduleSpiritualGuidesIsNull">{{ scheduleSpiritualGuides[72].date }}</th>
               <td class="align-middle text-center" scope="row" v-for="scheduleSpiritualGuide in scheduleSpiritualGuides"
                 :key="scheduleSpiritualGuide.id" v-if="scheduleSpiritualGuide.groupSession == 13">
-                <span class="text-center">Trống</span><br />
-                <div class="mt-1">
-                  <button class="btn btn-primary btn-sm"
+                <span class="text-center" v-if="scheduleSpiritualGuide.status === 2">Bận Việc</span>
+                <span class="text-center" v-else-if="scheduleSpiritualGuide.candidate === null && scheduleSpiritualGuide.status === 1">Trống</span>
+                <span class="text-center" v-else v-for="candidate in candidates">
+                  <span v-if="candidate.id == scheduleSpiritualGuide.candidate">{{ candidate.candidateId }}</span>
+                </span>
+                <br />
+                <div class="mt-1" v-show="(role === 5 && scheduleSpiritualGuide.candidate === null && scheduleSpiritualGuide.status === 1) 
+                  || (role === 5 && scheduleSpiritualGuide.candidate === idTable && scheduleSpiritualGuide.status === 1) 
+                  || role === 6 || role === 7">
+                  <button v-show="(role === 6 && scheduleSpiritualGuide.candidate === null && scheduleSpiritualGuide.status === 1) 
+                    || (role === 7 && scheduleSpiritualGuide.candidate === null && scheduleSpiritualGuide.status === 1) 
+                    || (role === 5 && scheduleSpiritualGuide.status === 1 && scheduleSpiritualGuide.candidate === null)
+                    || (role === 5 && scheduleSpiritualGuide.status === 1 && scheduleSpiritualGuide.candidate === null)" class="btn btn-primary btn-sm"
                     style="width: 62px;height: 25px;font-size:12px;border-radius:35px;"
                     @click="updateScheduleSpiritualGuide(scheduleSpiritualGuide)">Đăng ký</button>
                   <button class="btn btn-danger btn-sm"
@@ -13304,9 +14629,19 @@ const RegisteringScheduleSpiritualGuide = {
               <th v-if="!scheduleSpiritualGuidesIsNull">{{ scheduleSpiritualGuides[78].date }}</th>
               <td class="align-middle text-center" scope="row" v-for="scheduleSpiritualGuide in scheduleSpiritualGuides"
                 :key="scheduleSpiritualGuide.id" v-if="scheduleSpiritualGuide.groupSession == 14">
-                <span class="text-center">Trống</span><br />
-                <div class="mt-1">
-                  <button class="btn btn-primary btn-sm"
+                <span class="text-center" v-if="scheduleSpiritualGuide.status === 2">Bận Việc</span>
+                <span class="text-center" v-else-if="scheduleSpiritualGuide.candidate === null && scheduleSpiritualGuide.status === 1">Trống</span>
+                <span class="text-center" v-else v-for="candidate in candidates">
+                  <span v-if="candidate.id == scheduleSpiritualGuide.candidate">{{ candidate.candidateId }}</span>
+                </span>
+                <br />
+                <div class="mt-1" v-show="(role === 5 && scheduleSpiritualGuide.candidate === null && scheduleSpiritualGuide.status === 1) 
+                  || (role === 5 && scheduleSpiritualGuide.candidate === idTable && scheduleSpiritualGuide.status === 1) 
+                  || role === 6 || role === 7">
+                  <button v-show="(role === 6 && scheduleSpiritualGuide.candidate === null && scheduleSpiritualGuide.status === 1) 
+                    || (role === 7 && scheduleSpiritualGuide.candidate === null && scheduleSpiritualGuide.status === 1) 
+                    || (role === 5 && scheduleSpiritualGuide.status === 1 && scheduleSpiritualGuide.candidate === null)
+                    || (role === 5 && scheduleSpiritualGuide.status === 1 && scheduleSpiritualGuide.candidate === null)" class="btn btn-primary btn-sm"
                     style="width: 62px;height: 25px;font-size:12px;border-radius:35px;"
                     @click="updateScheduleSpiritualGuide(scheduleSpiritualGuide)">Đăng ký</button>
                   <button class="btn btn-danger btn-sm"
@@ -13319,9 +14654,19 @@ const RegisteringScheduleSpiritualGuide = {
               <th v-if="!scheduleSpiritualGuidesIsNull">{{ scheduleSpiritualGuides[84].date }}</th>
               <td class="align-middle text-center" scope="row" v-for="scheduleSpiritualGuide in scheduleSpiritualGuides"
                 :key="scheduleSpiritualGuide.id" v-if="scheduleSpiritualGuide.groupSession == 15">
-                <span class="text-center">Trống</span><br />
-                <div class="mt-1">
-                  <button class="btn btn-primary btn-sm"
+                <span class="text-center" v-if="scheduleSpiritualGuide.status === 2">Bận Việc</span>
+                <span class="text-center" v-else-if="scheduleSpiritualGuide.candidate === null && scheduleSpiritualGuide.status === 1">Trống</span>
+                <span class="text-center" v-else v-for="candidate in candidates">
+                  <span v-if="candidate.id == scheduleSpiritualGuide.candidate">{{ candidate.candidateId }}</span>
+                </span>
+                <br />
+                <div class="mt-1" v-show="(role === 5 && scheduleSpiritualGuide.candidate === null && scheduleSpiritualGuide.status === 1) 
+                  || (role === 5 && scheduleSpiritualGuide.candidate === idTable && scheduleSpiritualGuide.status === 1) 
+                  || role === 6 || role === 7">
+                  <button v-show="(role === 6 && scheduleSpiritualGuide.candidate === null && scheduleSpiritualGuide.status === 1) 
+                    || (role === 7 && scheduleSpiritualGuide.candidate === null && scheduleSpiritualGuide.status === 1) 
+                    || (role === 5 && scheduleSpiritualGuide.status === 1 && scheduleSpiritualGuide.candidate === null)
+                    || (role === 5 && scheduleSpiritualGuide.status === 1 && scheduleSpiritualGuide.candidate === null)" class="btn btn-primary btn-sm"
                     style="width: 62px;height: 25px;font-size:12px;border-radius:35px;"
                     @click="updateScheduleSpiritualGuide(scheduleSpiritualGuide)">Đăng ký</button>
                   <button class="btn btn-danger btn-sm"
@@ -13334,9 +14679,19 @@ const RegisteringScheduleSpiritualGuide = {
               <th v-if="!scheduleSpiritualGuidesIsNull">{{ scheduleSpiritualGuides[90].date }}</th>
               <td class="align-middle text-center" scope="row" v-for="scheduleSpiritualGuide in scheduleSpiritualGuides"
                 :key="scheduleSpiritualGuide.id" v-if="scheduleSpiritualGuide.groupSession == 16">
-                <span class="text-center">Trống</span><br />
-                <div class="mt-1">
-                  <button class="btn btn-primary btn-sm"
+                <span class="text-center" v-if="scheduleSpiritualGuide.status === 2">Bận Việc</span>
+                <span class="text-center" v-else-if="scheduleSpiritualGuide.candidate === null && scheduleSpiritualGuide.status === 1">Trống</span>
+                <span class="text-center" v-else v-for="candidate in candidates">
+                  <span v-if="candidate.id == scheduleSpiritualGuide.candidate">{{ candidate.candidateId }}</span>
+                </span>
+                <br />
+                <div class="mt-1" v-show="(role === 5 && scheduleSpiritualGuide.candidate === null && scheduleSpiritualGuide.status === 1) 
+                  || (role === 5 && scheduleSpiritualGuide.candidate === idTable && scheduleSpiritualGuide.status === 1) 
+                  || role === 6 || role === 7">
+                  <button v-show="(role === 6 && scheduleSpiritualGuide.candidate === null && scheduleSpiritualGuide.status === 1) 
+                    || (role === 7 && scheduleSpiritualGuide.candidate === null && scheduleSpiritualGuide.status === 1) 
+                    || (role === 5 && scheduleSpiritualGuide.status === 1 && scheduleSpiritualGuide.candidate === null)
+                    || (role === 5 && scheduleSpiritualGuide.status === 1 && scheduleSpiritualGuide.candidate === null)" class="btn btn-primary btn-sm"
                     style="width: 62px;height: 25px;font-size:12px;border-radius:35px;"
                     @click="updateScheduleSpiritualGuide(scheduleSpiritualGuide)">Đăng ký</button>
                   <button class="btn btn-danger btn-sm"
@@ -13349,9 +14704,19 @@ const RegisteringScheduleSpiritualGuide = {
               <th v-if="!scheduleSpiritualGuidesIsNull">{{ scheduleSpiritualGuides[96].date }}</th>
               <td class="align-middle text-center" scope="row" v-for="scheduleSpiritualGuide in scheduleSpiritualGuides"
                 :key="scheduleSpiritualGuide.id" v-if="scheduleSpiritualGuide.groupSession == 17">
-                <span class="text-center">Trống</span><br />
-                <div class="mt-1">
-                  <button class="btn btn-primary btn-sm"
+                <span class="text-center" v-if="scheduleSpiritualGuide.status === 2">Bận Việc</span>
+                <span class="text-center" v-else-if="scheduleSpiritualGuide.candidate === null && scheduleSpiritualGuide.status === 1">Trống</span>
+                <span class="text-center" v-else v-for="candidate in candidates">
+                  <span v-if="candidate.id == scheduleSpiritualGuide.candidate">{{ candidate.candidateId }}</span>
+                </span>
+                <br />
+                <div class="mt-1" v-show="(role === 5 && scheduleSpiritualGuide.candidate === null && scheduleSpiritualGuide.status === 1) 
+                  || (role === 5 && scheduleSpiritualGuide.candidate === idTable && scheduleSpiritualGuide.status === 1) 
+                  || role === 6 || role === 7">
+                  <button v-show="(role === 6 && scheduleSpiritualGuide.candidate === null && scheduleSpiritualGuide.status === 1) 
+                    || (role === 7 && scheduleSpiritualGuide.candidate === null && scheduleSpiritualGuide.status === 1) 
+                    || (role === 5 && scheduleSpiritualGuide.status === 1 && scheduleSpiritualGuide.candidate === null)
+                    || (role === 5 && scheduleSpiritualGuide.status === 1 && scheduleSpiritualGuide.candidate === null)" class="btn btn-primary btn-sm"
                     style="width: 62px;height: 25px;font-size:12px;border-radius:35px;"
                     @click="updateScheduleSpiritualGuide(scheduleSpiritualGuide)">Đăng ký</button>
                   <button class="btn btn-danger btn-sm"
@@ -13364,9 +14729,19 @@ const RegisteringScheduleSpiritualGuide = {
               <th v-if="!scheduleSpiritualGuidesIsNull">{{ scheduleSpiritualGuides[102].date }}</th>
               <td class="align-middle text-center" scope="row" v-for="scheduleSpiritualGuide in scheduleSpiritualGuides"
                 :key="scheduleSpiritualGuide.id" v-if="scheduleSpiritualGuide.groupSession == 18">
-                <span class="text-center">Trống</span><br />
-                <div class="mt-1">
-                  <button class="btn btn-primary btn-sm"
+                <span class="text-center" v-if="scheduleSpiritualGuide.status === 2">Bận Việc</span>
+                <span class="text-center" v-else-if="scheduleSpiritualGuide.candidate === null && scheduleSpiritualGuide.status === 1">Trống</span>
+                <span class="text-center" v-else v-for="candidate in candidates">
+                  <span v-if="candidate.id == scheduleSpiritualGuide.candidate">{{ candidate.candidateId }}</span>
+                </span>
+                <br />
+                <div class="mt-1" v-show="(role === 5 && scheduleSpiritualGuide.candidate === null && scheduleSpiritualGuide.status === 1) 
+                  || (role === 5 && scheduleSpiritualGuide.candidate === idTable && scheduleSpiritualGuide.status === 1) 
+                  || role === 6 || role === 7">
+                  <button v-show="(role === 6 && scheduleSpiritualGuide.candidate === null && scheduleSpiritualGuide.status === 1) 
+                    || (role === 7 && scheduleSpiritualGuide.candidate === null && scheduleSpiritualGuide.status === 1) 
+                    || (role === 5 && scheduleSpiritualGuide.status === 1 && scheduleSpiritualGuide.candidate === null)
+                    || (role === 5 && scheduleSpiritualGuide.status === 1 && scheduleSpiritualGuide.candidate === null)" class="btn btn-primary btn-sm"
                     style="width: 62px;height: 25px;font-size:12px;border-radius:35px;"
                     @click="updateScheduleSpiritualGuide(scheduleSpiritualGuide)">Đăng ký</button>
                   <button class="btn btn-danger btn-sm"
@@ -13379,9 +14754,19 @@ const RegisteringScheduleSpiritualGuide = {
               <th v-if="!scheduleSpiritualGuidesIsNull">{{ scheduleSpiritualGuides[108].date }}</th>
               <td class="align-middle text-center" scope="row" v-for="scheduleSpiritualGuide in scheduleSpiritualGuides"
                 :key="scheduleSpiritualGuide.id" v-if="scheduleSpiritualGuide.groupSession == 19">
-                <span class="text-center">Trống</span><br />
-                <div class="mt-1">
-                  <button class="btn btn-primary btn-sm"
+                <span class="text-center" v-if="scheduleSpiritualGuide.status === 2">Bận Việc</span>
+                <span class="text-center" v-else-if="scheduleSpiritualGuide.candidate === null && scheduleSpiritualGuide.status === 1">Trống</span>
+                <span class="text-center" v-else v-for="candidate in candidates">
+                  <span v-if="candidate.id == scheduleSpiritualGuide.candidate">{{ candidate.candidateId }}</span>
+                </span>
+                <br />
+                <div class="mt-1" v-show="(role === 5 && scheduleSpiritualGuide.candidate === null && scheduleSpiritualGuide.status === 1) 
+                  || (role === 5 && scheduleSpiritualGuide.candidate === idTable && scheduleSpiritualGuide.status === 1) 
+                  || role === 6 || role === 7">
+                  <button v-show="(role === 6 && scheduleSpiritualGuide.candidate === null && scheduleSpiritualGuide.status === 1) 
+                    || (role === 7 && scheduleSpiritualGuide.candidate === null && scheduleSpiritualGuide.status === 1) 
+                    || (role === 5 && scheduleSpiritualGuide.status === 1 && scheduleSpiritualGuide.candidate === null)
+                    || (role === 5 && scheduleSpiritualGuide.status === 1 && scheduleSpiritualGuide.candidate === null)" class="btn btn-primary btn-sm"
                     style="width: 62px;height: 25px;font-size:12px;border-radius:35px;"
                     @click="updateScheduleSpiritualGuide(scheduleSpiritualGuide)">Đăng ký</button>
                   <button class="btn btn-danger btn-sm"
@@ -13394,9 +14779,19 @@ const RegisteringScheduleSpiritualGuide = {
               <th v-if="!scheduleSpiritualGuidesIsNull">{{ scheduleSpiritualGuides[114].date }}</th>
               <td class="align-middle text-center" scope="row" v-for="scheduleSpiritualGuide in scheduleSpiritualGuides"
                 :key="scheduleSpiritualGuide.id" v-if="scheduleSpiritualGuide.groupSession == 20">
-                <span class="text-center">Trống</span><br />
-                <div class="mt-1">
-                  <button class="btn btn-primary btn-sm"
+                <span class="text-center" v-if="scheduleSpiritualGuide.status === 2">Bận Việc</span>
+                <span class="text-center" v-else-if="scheduleSpiritualGuide.candidate === null && scheduleSpiritualGuide.status === 1">Trống</span>
+                <span class="text-center" v-else v-for="candidate in candidates">
+                  <span v-if="candidate.id == scheduleSpiritualGuide.candidate">{{ candidate.candidateId }}</span>
+                </span>
+                <br />
+                <div class="mt-1" v-show="(role === 5 && scheduleSpiritualGuide.candidate === null && scheduleSpiritualGuide.status === 1) 
+                  || (role === 5 && scheduleSpiritualGuide.candidate === idTable && scheduleSpiritualGuide.status === 1) 
+                  || role === 6 || role === 7">
+                  <button v-show="(role === 6 && scheduleSpiritualGuide.candidate === null && scheduleSpiritualGuide.status === 1) 
+                    || (role === 7 && scheduleSpiritualGuide.candidate === null && scheduleSpiritualGuide.status === 1) 
+                    || (role === 5 && scheduleSpiritualGuide.status === 1 && scheduleSpiritualGuide.candidate === null)
+                    || (role === 5 && scheduleSpiritualGuide.status === 1 && scheduleSpiritualGuide.candidate === null)" class="btn btn-primary btn-sm"
                     style="width: 62px;height: 25px;font-size:12px;border-radius:35px;"
                     @click="updateScheduleSpiritualGuide(scheduleSpiritualGuide)">Đăng ký</button>
                   <button class="btn btn-danger btn-sm"
@@ -13409,9 +14804,19 @@ const RegisteringScheduleSpiritualGuide = {
               <th v-if="!scheduleSpiritualGuidesIsNull">{{ scheduleSpiritualGuides[120].date }}</th>
               <td class="align-middle text-center" scope="row" v-for="scheduleSpiritualGuide in scheduleSpiritualGuides"
                 :key="scheduleSpiritualGuide.id" v-if="scheduleSpiritualGuide.groupSession == 21">
-                <span class="text-center">Trống</span><br />
-                <div class="mt-1">
-                  <button class="btn btn-primary btn-sm"
+                <span class="text-center" v-if="scheduleSpiritualGuide.status === 2">Bận Việc</span>
+                <span class="text-center" v-else-if="scheduleSpiritualGuide.candidate === null && scheduleSpiritualGuide.status === 1">Trống</span>
+                <span class="text-center" v-else v-for="candidate in candidates">
+                  <span v-if="candidate.id == scheduleSpiritualGuide.candidate">{{ candidate.candidateId }}</span>
+                </span>
+                <br />
+                <div class="mt-1" v-show="(role === 5 && scheduleSpiritualGuide.candidate === null && scheduleSpiritualGuide.status === 1) 
+                  || (role === 5 && scheduleSpiritualGuide.candidate === idTable && scheduleSpiritualGuide.status === 1) 
+                  || role === 6 || role === 7">
+                  <button v-show="(role === 6 && scheduleSpiritualGuide.candidate === null && scheduleSpiritualGuide.status === 1) 
+                    || (role === 7 && scheduleSpiritualGuide.candidate === null && scheduleSpiritualGuide.status === 1) 
+                    || (role === 5 && scheduleSpiritualGuide.status === 1 && scheduleSpiritualGuide.candidate === null)
+                    || (role === 5 && scheduleSpiritualGuide.status === 1 && scheduleSpiritualGuide.candidate === null)" class="btn btn-primary btn-sm"
                     style="width: 62px;height: 25px;font-size:12px;border-radius:35px;"
                     @click="updateScheduleSpiritualGuide(scheduleSpiritualGuide)">Đăng ký</button>
                   <button class="btn btn-danger btn-sm"
@@ -13424,9 +14829,19 @@ const RegisteringScheduleSpiritualGuide = {
               <th v-if="!scheduleSpiritualGuidesIsNull">{{ scheduleSpiritualGuides[126].date }}</th>
               <td class="align-middle text-center" scope="row" v-for="scheduleSpiritualGuide in scheduleSpiritualGuides"
                 :key="scheduleSpiritualGuide.id" v-if="scheduleSpiritualGuide.groupSession == 22">
-                <span class="text-center">Trống</span><br />
-                <div class="mt-1">
-                  <button class="btn btn-primary btn-sm"
+                <span class="text-center" v-if="scheduleSpiritualGuide.status === 2">Bận Việc</span>
+                <span class="text-center" v-else-if="scheduleSpiritualGuide.candidate === null && scheduleSpiritualGuide.status === 1">Trống</span>
+                <span class="text-center" v-else v-for="candidate in candidates">
+                  <span v-if="candidate.id == scheduleSpiritualGuide.candidate">{{ candidate.candidateId }}</span>
+                </span>
+                <br />
+                <div class="mt-1" v-show="(role === 5 && scheduleSpiritualGuide.candidate === null && scheduleSpiritualGuide.status === 1) 
+                  || (role === 5 && scheduleSpiritualGuide.candidate === idTable && scheduleSpiritualGuide.status === 1) 
+                  || role === 6 || role === 7">
+                  <button v-show="(role === 6 && scheduleSpiritualGuide.candidate === null && scheduleSpiritualGuide.status === 1) 
+                    || (role === 7 && scheduleSpiritualGuide.candidate === null && scheduleSpiritualGuide.status === 1) 
+                    || (role === 5 && scheduleSpiritualGuide.status === 1 && scheduleSpiritualGuide.candidate === null)
+                    || (role === 5 && scheduleSpiritualGuide.status === 1 && scheduleSpiritualGuide.candidate === null)" class="btn btn-primary btn-sm"
                     style="width: 62px;height: 25px;font-size:12px;border-radius:35px;"
                     @click="updateScheduleSpiritualGuide(scheduleSpiritualGuide)">Đăng ký</button>
                   <button class="btn btn-danger btn-sm"
@@ -13439,9 +14854,19 @@ const RegisteringScheduleSpiritualGuide = {
               <th v-if="!scheduleSpiritualGuidesIsNull">{{ scheduleSpiritualGuides[132].date }}</th>
               <td class="align-middle text-center" scope="row" v-for="scheduleSpiritualGuide in scheduleSpiritualGuides"
                 :key="scheduleSpiritualGuide.id" v-if="scheduleSpiritualGuide.groupSession == 23">
-                <span class="text-center">Trống</span><br />
-                <div class="mt-1">
-                  <button class="btn btn-primary btn-sm"
+                <span class="text-center" v-if="scheduleSpiritualGuide.status === 2">Bận Việc</span>
+                <span class="text-center" v-else-if="scheduleSpiritualGuide.candidate === null && scheduleSpiritualGuide.status === 1">Trống</span>
+                <span class="text-center" v-else v-for="candidate in candidates">
+                  <span v-if="candidate.id == scheduleSpiritualGuide.candidate">{{ candidate.candidateId }}</span>
+                </span>
+                <br />
+                <div class="mt-1" v-show="(role === 5 && scheduleSpiritualGuide.candidate === null && scheduleSpiritualGuide.status === 1) 
+                  || (role === 5 && scheduleSpiritualGuide.candidate === idTable && scheduleSpiritualGuide.status === 1) 
+                  || role === 6 || role === 7">
+                  <button v-show="(role === 6 && scheduleSpiritualGuide.candidate === null && scheduleSpiritualGuide.status === 1) 
+                    || (role === 7 && scheduleSpiritualGuide.candidate === null && scheduleSpiritualGuide.status === 1) 
+                    || (role === 5 && scheduleSpiritualGuide.status === 1 && scheduleSpiritualGuide.candidate === null)
+                    || (role === 5 && scheduleSpiritualGuide.status === 1 && scheduleSpiritualGuide.candidate === null)" class="btn btn-primary btn-sm"
                     style="width: 62px;height: 25px;font-size:12px;border-radius:35px;"
                     @click="updateScheduleSpiritualGuide(scheduleSpiritualGuide)">Đăng ký</button>
                   <button class="btn btn-danger btn-sm"
@@ -13454,9 +14879,19 @@ const RegisteringScheduleSpiritualGuide = {
               <th v-if="!scheduleSpiritualGuidesIsNull">{{ scheduleSpiritualGuides[138].date }}</th>
               <td class="align-middle text-center" scope="row" v-for="scheduleSpiritualGuide in scheduleSpiritualGuides"
                 :key="scheduleSpiritualGuide.id" v-if="scheduleSpiritualGuide.groupSession == 24">
-                <span class="text-center">Trống</span><br />
-                <div class="mt-1">
-                  <button class="btn btn-primary btn-sm"
+                <span class="text-center" v-if="scheduleSpiritualGuide.status === 2">Bận Việc</span>
+                <span class="text-center" v-else-if="scheduleSpiritualGuide.candidate === null && scheduleSpiritualGuide.status === 1">Trống</span>
+                <span class="text-center" v-else v-for="candidate in candidates">
+                  <span v-if="candidate.id == scheduleSpiritualGuide.candidate">{{ candidate.candidateId }}</span>
+                </span>
+                <br />
+                <div class="mt-1" v-show="(role === 5 && scheduleSpiritualGuide.candidate === null && scheduleSpiritualGuide.status === 1) 
+                  || (role === 5 && scheduleSpiritualGuide.candidate === idTable && scheduleSpiritualGuide.status === 1) 
+                  || role === 6 || role === 7">
+                  <button v-show="(role === 6 && scheduleSpiritualGuide.candidate === null && scheduleSpiritualGuide.status === 1) 
+                    || (role === 7 && scheduleSpiritualGuide.candidate === null && scheduleSpiritualGuide.status === 1) 
+                    || (role === 5 && scheduleSpiritualGuide.status === 1 && scheduleSpiritualGuide.candidate === null)
+                    || (role === 5 && scheduleSpiritualGuide.status === 1 && scheduleSpiritualGuide.candidate === null)" class="btn btn-primary btn-sm"
                     style="width: 62px;height: 25px;font-size:12px;border-radius:35px;"
                     @click="updateScheduleSpiritualGuide(scheduleSpiritualGuide)">Đăng ký</button>
                   <button class="btn btn-danger btn-sm"
@@ -13469,9 +14904,19 @@ const RegisteringScheduleSpiritualGuide = {
               <th v-if="!scheduleSpiritualGuidesIsNull">{{ scheduleSpiritualGuides[144].date }}</th>
               <td class="align-middle text-center" scope="row" v-for="scheduleSpiritualGuide in scheduleSpiritualGuides"
                 :key="scheduleSpiritualGuide.id" v-if="scheduleSpiritualGuide.groupSession == 25">
-                <span class="text-center">Trống</span><br />
-                <div class="mt-1">
-                  <button class="btn btn-primary btn-sm"
+                <span class="text-center" v-if="scheduleSpiritualGuide.status === 2">Bận Việc</span>
+                <span class="text-center" v-else-if="scheduleSpiritualGuide.candidate === null && scheduleSpiritualGuide.status === 1">Trống</span>
+                <span class="text-center" v-else v-for="candidate in candidates">
+                  <span v-if="candidate.id == scheduleSpiritualGuide.candidate">{{ candidate.candidateId }}</span>
+                </span>
+                <br />
+                <div class="mt-1" v-show="(role === 5 && scheduleSpiritualGuide.candidate === null && scheduleSpiritualGuide.status === 1) 
+                  || (role === 5 && scheduleSpiritualGuide.candidate === idTable && scheduleSpiritualGuide.status === 1) 
+                  || role === 6 || role === 7">
+                  <button v-show="(role === 6 && scheduleSpiritualGuide.candidate === null && scheduleSpiritualGuide.status === 1) 
+                    || (role === 7 && scheduleSpiritualGuide.candidate === null && scheduleSpiritualGuide.status === 1) 
+                    || (role === 5 && scheduleSpiritualGuide.status === 1 && scheduleSpiritualGuide.candidate === null)
+                    || (role === 5 && scheduleSpiritualGuide.status === 1 && scheduleSpiritualGuide.candidate === null)" class="btn btn-primary btn-sm"
                     style="width: 62px;height: 25px;font-size:12px;border-radius:35px;"
                     @click="updateScheduleSpiritualGuide(scheduleSpiritualGuide)">Đăng ký</button>
                   <button class="btn btn-danger btn-sm"
@@ -13484,9 +14929,19 @@ const RegisteringScheduleSpiritualGuide = {
               <th v-if="!scheduleSpiritualGuidesIsNull">{{ scheduleSpiritualGuides[150].date }}</th>
               <td class="align-middle text-center" scope="row" v-for="scheduleSpiritualGuide in scheduleSpiritualGuides"
                 :key="scheduleSpiritualGuide.id" v-if="scheduleSpiritualGuide.groupSession == 26">
-                <span class="text-center">Trống</span><br />
-                <div class="mt-1">
-                  <button class="btn btn-primary btn-sm"
+                <span class="text-center" v-if="scheduleSpiritualGuide.status === 2">Bận Việc</span>
+                <span class="text-center" v-else-if="scheduleSpiritualGuide.candidate === null && scheduleSpiritualGuide.status === 1">Trống</span>
+                <span class="text-center" v-else v-for="candidate in candidates">
+                  <span v-if="candidate.id == scheduleSpiritualGuide.candidate">{{ candidate.candidateId }}</span>
+                </span>
+                <br />
+                <div class="mt-1" v-show="(role === 5 && scheduleSpiritualGuide.candidate === null && scheduleSpiritualGuide.status === 1) 
+                  || (role === 5 && scheduleSpiritualGuide.candidate === idTable && scheduleSpiritualGuide.status === 1) 
+                  || role === 6 || role === 7">
+                  <button v-show="(role === 6 && scheduleSpiritualGuide.candidate === null && scheduleSpiritualGuide.status === 1) 
+                    || (role === 7 && scheduleSpiritualGuide.candidate === null && scheduleSpiritualGuide.status === 1) 
+                    || (role === 5 && scheduleSpiritualGuide.status === 1 && scheduleSpiritualGuide.candidate === null)
+                    || (role === 5 && scheduleSpiritualGuide.status === 1 && scheduleSpiritualGuide.candidate === null)" class="btn btn-primary btn-sm"
                     style="width: 62px;height: 25px;font-size:12px;border-radius:35px;"
                     @click="updateScheduleSpiritualGuide(scheduleSpiritualGuide)">Đăng ký</button>
                   <button class="btn btn-danger btn-sm"
@@ -13499,9 +14954,19 @@ const RegisteringScheduleSpiritualGuide = {
               <th v-if="!scheduleSpiritualGuidesIsNull">{{ scheduleSpiritualGuides[156].date }}</th>
               <td class="align-middle text-center" scope="row" v-for="scheduleSpiritualGuide in scheduleSpiritualGuides"
                 :key="scheduleSpiritualGuide.id" v-if="scheduleSpiritualGuide.groupSession == 27">
-                <span class="text-center">Trống</span><br />
-                <div class="mt-1">
-                  <button class="btn btn-primary btn-sm"
+                <span class="text-center" v-if="scheduleSpiritualGuide.status === 2">Bận Việc</span>
+                <span class="text-center" v-else-if="scheduleSpiritualGuide.candidate === null && scheduleSpiritualGuide.status === 1">Trống</span>
+                <span class="text-center" v-else v-for="candidate in candidates">
+                  <span v-if="candidate.id == scheduleSpiritualGuide.candidate">{{ candidate.candidateId }}</span>
+                </span>
+                <br />
+                <div class="mt-1" v-show="(role === 5 && scheduleSpiritualGuide.candidate === null && scheduleSpiritualGuide.status === 1) 
+                  || (role === 5 && scheduleSpiritualGuide.candidate === idTable && scheduleSpiritualGuide.status === 1) 
+                  || role === 6 || role === 7">
+                  <button v-show="(role === 6 && scheduleSpiritualGuide.candidate === null && scheduleSpiritualGuide.status === 1) 
+                    || (role === 7 && scheduleSpiritualGuide.candidate === null && scheduleSpiritualGuide.status === 1) 
+                    || (role === 5 && scheduleSpiritualGuide.status === 1 && scheduleSpiritualGuide.candidate === null)
+                    || (role === 5 && scheduleSpiritualGuide.status === 1 && scheduleSpiritualGuide.candidate === null)" class="btn btn-primary btn-sm"
                     style="width: 62px;height: 25px;font-size:12px;border-radius:35px;"
                     @click="updateScheduleSpiritualGuide(scheduleSpiritualGuide)">Đăng ký</button>
                   <button class="btn btn-danger btn-sm"
@@ -13514,9 +14979,19 @@ const RegisteringScheduleSpiritualGuide = {
               <th v-if="!scheduleSpiritualGuidesIsNull">{{ scheduleSpiritualGuides[162].date }}</th>
               <td class="align-middle text-center" scope="row" v-for="scheduleSpiritualGuide in scheduleSpiritualGuides"
                 :key="scheduleSpiritualGuide.id" v-if="scheduleSpiritualGuide.groupSession == 28">
-                <span class="text-center">Trống</span><br />
-                <div class="mt-1">
-                  <button class="btn btn-primary btn-sm"
+                <span class="text-center" v-if="scheduleSpiritualGuide.status === 2">Bận Việc</span>
+                <span class="text-center" v-else-if="scheduleSpiritualGuide.candidate === null && scheduleSpiritualGuide.status === 1">Trống</span>
+                <span class="text-center" v-else v-for="candidate in candidates">
+                  <span v-if="candidate.id == scheduleSpiritualGuide.candidate">{{ candidate.candidateId }}</span>
+                </span>
+                <br />
+                <div class="mt-1" v-show="(role === 5 && scheduleSpiritualGuide.candidate === null && scheduleSpiritualGuide.status === 1) 
+                  || (role === 5 && scheduleSpiritualGuide.candidate === idTable && scheduleSpiritualGuide.status === 1) 
+                  || role === 6 || role === 7">
+                  <button v-show="(role === 6 && scheduleSpiritualGuide.candidate === null && scheduleSpiritualGuide.status === 1) 
+                    || (role === 7 && scheduleSpiritualGuide.candidate === null && scheduleSpiritualGuide.status === 1) 
+                    || (role === 5 && scheduleSpiritualGuide.status === 1 && scheduleSpiritualGuide.candidate === null)
+                    || (role === 5 && scheduleSpiritualGuide.status === 1 && scheduleSpiritualGuide.candidate === null)" class="btn btn-primary btn-sm"
                     style="width: 62px;height: 25px;font-size:12px;border-radius:35px;"
                     @click="updateScheduleSpiritualGuide(scheduleSpiritualGuide)">Đăng ký</button>
                   <button class="btn btn-danger btn-sm"
@@ -13529,9 +15004,19 @@ const RegisteringScheduleSpiritualGuide = {
               <th v-if="!scheduleSpiritualGuidesIsNull">{{ scheduleSpiritualGuides[168].date }}</th>
               <td class="align-middle text-center" scope="row" v-for="scheduleSpiritualGuide in scheduleSpiritualGuides"
                 :key="scheduleSpiritualGuide.id" v-if="scheduleSpiritualGuide.groupSession == 29">
-                <span class="text-center">Trống</span><br />
-                <div class="mt-1">
-                  <button class="btn btn-primary btn-sm"
+                <span class="text-center" v-if="scheduleSpiritualGuide.status === 2">Bận Việc</span>
+                <span class="text-center" v-else-if="scheduleSpiritualGuide.candidate === null && scheduleSpiritualGuide.status === 1">Trống</span>
+                <span class="text-center" v-else v-for="candidate in candidates">
+                  <span v-if="candidate.id == scheduleSpiritualGuide.candidate">{{ candidate.candidateId }}</span>
+                </span>
+                <br />
+                <div class="mt-1" v-show="(role === 5 && scheduleSpiritualGuide.candidate === null && scheduleSpiritualGuide.status === 1) 
+                  || (role === 5 && scheduleSpiritualGuide.candidate === idTable && scheduleSpiritualGuide.status === 1) 
+                  || role === 6 || role === 7">
+                  <button v-show="(role === 6 && scheduleSpiritualGuide.candidate === null && scheduleSpiritualGuide.status === 1) 
+                    || (role === 7 && scheduleSpiritualGuide.candidate === null && scheduleSpiritualGuide.status === 1) 
+                    || (role === 5 && scheduleSpiritualGuide.status === 1 && scheduleSpiritualGuide.candidate === null)
+                    || (role === 5 && scheduleSpiritualGuide.status === 1 && scheduleSpiritualGuide.candidate === null)" class="btn btn-primary btn-sm"
                     style="width: 62px;height: 25px;font-size:12px;border-radius:35px;"
                     @click="updateScheduleSpiritualGuide(scheduleSpiritualGuide)">Đăng ký</button>
                   <button class="btn btn-danger btn-sm"
@@ -13544,9 +15029,19 @@ const RegisteringScheduleSpiritualGuide = {
               <th v-if="!scheduleSpiritualGuidesIsNull">{{ scheduleSpiritualGuides[174].date }}</th>
               <td class="align-middle text-center" scope="row" v-for="scheduleSpiritualGuide in scheduleSpiritualGuides"
                 :key="scheduleSpiritualGuide.id" v-if="scheduleSpiritualGuide.groupSession == 30">
-                <span class="text-center">Trống</span><br />
-                <div class="mt-1">
-                  <button class="btn btn-primary btn-sm"
+                <span class="text-center" v-if="scheduleSpiritualGuide.status === 2">Bận Việc</span>
+                <span class="text-center" v-else-if="scheduleSpiritualGuide.candidate === null && scheduleSpiritualGuide.status === 1">Trống</span>
+                <span class="text-center" v-else v-for="candidate in candidates">
+                  <span v-if="candidate.id == scheduleSpiritualGuide.candidate">{{ candidate.candidateId }}</span>
+                </span>
+                <br />
+                <div class="mt-1" v-show="(role === 5 && scheduleSpiritualGuide.candidate === null && scheduleSpiritualGuide.status === 1) 
+                  || (role === 5 && scheduleSpiritualGuide.candidate === idTable && scheduleSpiritualGuide.status === 1) 
+                  || role === 6 || role === 7">
+                  <button v-show="(role === 6 && scheduleSpiritualGuide.candidate === null && scheduleSpiritualGuide.status === 1) 
+                    || (role === 7 && scheduleSpiritualGuide.candidate === null && scheduleSpiritualGuide.status === 1) 
+                    || (role === 5 && scheduleSpiritualGuide.status === 1 && scheduleSpiritualGuide.candidate === null)
+                    || (role === 5 && scheduleSpiritualGuide.status === 1 && scheduleSpiritualGuide.candidate === null)" class="btn btn-primary btn-sm"
                     style="width: 62px;height: 25px;font-size:12px;border-radius:35px;"
                     @click="updateScheduleSpiritualGuide(scheduleSpiritualGuide)">Đăng ký</button>
                   <button class="btn btn-danger btn-sm"
@@ -13559,9 +15054,19 @@ const RegisteringScheduleSpiritualGuide = {
               <th v-if="!scheduleSpiritualGuidesIsNull">{{ scheduleSpiritualGuides[180].date }}</th>
               <td class="align-middle text-center" scope="row" v-for="scheduleSpiritualGuide in scheduleSpiritualGuides"
                 :key="scheduleSpiritualGuide.id" v-if="scheduleSpiritualGuide.groupSession == 31">
-                <span class="text-center">Trống</span><br />
-                <div class="mt-1">
-                  <button class="btn btn-primary btn-sm"
+                <span class="text-center" v-if="scheduleSpiritualGuide.status === 2">Bận Việc</span>
+                <span class="text-center" v-else-if="scheduleSpiritualGuide.candidate === null && scheduleSpiritualGuide.status === 1">Trống</span>
+                <span class="text-center" v-else v-for="candidate in candidates">
+                  <span v-if="candidate.id == scheduleSpiritualGuide.candidate">{{ candidate.candidateId }}</span>
+                </span>
+                <br />
+                <div class="mt-1" v-show="(role === 5 && scheduleSpiritualGuide.candidate === null && scheduleSpiritualGuide.status === 1) 
+                  || (role === 5 && scheduleSpiritualGuide.candidate === idTable && scheduleSpiritualGuide.status === 1) 
+                  || role === 6 || role === 7">
+                  <button v-show="(role === 6 && scheduleSpiritualGuide.candidate === null && scheduleSpiritualGuide.status === 1) 
+                    || (role === 7 && scheduleSpiritualGuide.candidate === null && scheduleSpiritualGuide.status === 1) 
+                    || (role === 5 && scheduleSpiritualGuide.status === 1 && scheduleSpiritualGuide.candidate === null)
+                    || (role === 5 && scheduleSpiritualGuide.status === 1 && scheduleSpiritualGuide.candidate === null)" class="btn btn-primary btn-sm"
                     style="width: 62px;height: 25px;font-size:12px;border-radius:35px;"
                     @click="updateScheduleSpiritualGuide(scheduleSpiritualGuide)">Đăng ký</button>
                   <button class="btn btn-danger btn-sm"
@@ -17229,6 +18734,346 @@ const ChangePassword = {
   </div>
   `,
 };
+
+//Met Companion
+const MetCompanion = {
+  template: `
+  <div>
+    <router-view />
+  </div>
+  `,
+};
+
+const ListMetCompanion = {
+  data() {
+    return {
+      statuses: [
+        { id: 1, name: "Chưa gặp người ĐH" },
+        { id: 2, name: "Đã gặp người ĐH" },
+      ],
+      reportStatuses: [
+        { id: 1, name: "Chưa làm báo cáo" },
+        { id: 2, name: "Đã làm báo cáo" },
+      ],
+      metCompanions: [],
+      titleButtonConfirm: "Xác nhận đã gặp",
+      companions: [],
+      candidates: [],
+      idTable: 0,
+      role: 0,
+    };
+  },
+  mounted() {
+    // axios
+    //   .get(
+    //     "http://localhost:3000/api/logins/findOne?filter[where][token]=token"
+    //   )
+    //   .then((resp) => {
+    //     this.idTable = resp.data.idTable;
+    //     this.role = resp.data.role;
+    //   });
+    // if (this.role === 8 || this.role === 9) {
+    //   axios
+    //     .get(
+    //       "http://localhost:3000/api/metCompanions?filter[where][companion]=" +
+    //         this.idTable
+    //     )
+    //     .then((response) => {
+    //       this.metCompanions = response.data;
+    //     });
+    // } else if (this.role === 1 || this.role === 2) {
+    //   axios.get("http://localhost:3000/api/metCompanions").then((response) => {
+    //     this.metCompanions = response.data;
+    //   });
+    // }
+
+    axios.get("http://localhost:3000/api/metCompanions").then((response) => {
+      this.metCompanions = response.data;
+    });
+    axios.get("http://localhost:3000/api/companions").then((respCom) => {
+      this.companions = respCom.data;
+    });
+    axios.get("http://localhost:3000/api/candidates").then((respCan) => {
+      this.candidates = respCan.data;
+    });
+  },
+  computed: {},
+  methods: {
+    ConfirmMetCompanion(metCompanion) {
+      if (metCompanion.status == 1) {
+        const newMetCompanion = {
+          companion: metCompanion.companion,
+          candidate: metCompanion.candidate,
+          registeredDate: metCompanion.registeredDate,
+          status: 2,
+          reportStatus: metCompanion.reportStatus,
+          idSchedule: metCompanion.idSchedule,
+        };
+        const url =
+          "http://localhost:3000/api/metCompanions/" +
+          metCompanion.id +
+          "/replace";
+        axios.post(url, newMetCompanion);
+        setTimeout(() => {
+          location.reload();
+        }, 50);
+      } else if (metCompanion.status == 2) {
+        const newMetCompanion = {
+          companion: metCompanion.companion,
+          candidate: metCompanion.candidate,
+          registeredDate: metCompanion.registeredDate,
+          status: 1,
+          reportStatus: metCompanion.reportStatus,
+          idSchedule: metCompanion.idSchedule,
+        };
+        const url =
+          "http://localhost:3000/api/metCompanions/" +
+          metCompanion.id +
+          "/replace";
+        axios.post(url, newMetCompanion);
+        setTimeout(() => {
+          location.reload();
+        }, 50);
+      }
+    },
+  },
+  template: `
+  <div class="card shadow mb-4" style="margin-top: -5px;">
+    <div class="card-header py-3" style="margin-bottom:-40px">
+      <div class="row">
+        <div class="col-md-4">
+          <h6 class="m-0 font-weight-bold text-dark">Thống Kê Ứng Sinh Gặp Đồng Hành</h6>
+        </div>
+        <div class="col-md-6"></div>
+        <div class="col-md-2"></div>
+      </div>
+    </div>
+    <div class="card-body">
+      <hr style="height:1px;color:lightgray;background-color:lightgray">
+      <div class="table-responsive" style="margin-top:-8px">
+        <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+          <thead>
+            <tr>
+              <th scope="col">STT</th>
+              <th scope="col">Người Đồng Hành</th>
+              <th scope="col">Ứng Sinh</th>
+              <th scope="col">Ngày Đăng Ký</th>
+              <th scope="col">Trạng Thái</th>
+              <th scope="col">Báo Cáo ĐH</th>
+              <th scope="col">Action</th>
+            </tr>
+          </thead>
+          <tfoot>
+            <tr>
+              <th scope="col">STT</th>
+              <th scope="col">Người Đồng Hành</th>
+              <th scope="col">Ứng Sinh</th>
+              <th scope="col">Ngày Đăng Ký</th>
+              <th scope="col">Trạng Thái</th>
+              <th scope="col">Báo Cáo ĐH</th>
+              <th scope="col">Action</th>
+            </tr>
+          </tfoot>
+          <tbody>
+            <tr v-for="(metCompanion, index) in metCompanions" :key="metCompanion.id">
+              <th class="align-middle" scope="row">{{ index + 1 }}</th>
+              <td v-for="companion in companions" v-if="companion.id == metCompanion.companion">{{ companion.fullName }}</td>
+              <td v-for="candidate in candidates" v-if="candidate.id == metCompanion.candidate">{{ candidate.fullName }}</td>
+              <td>{{ crypt.formatDate(metCompanion.registeredDate) }}</td>
+              <td v-for="status in statuses" v-if="metCompanion.status == status.id">{{ status.name }}</td>
+              <td v-for="reportStatus in reportStatuses" v-if="metCompanion.reportStatus == reportStatus.id">{{ reportStatus.name }}</td>
+              <td class="align-middle">
+                <div class="row" style="margin-left:-15px;">
+                  <div class="col-4">
+                    <button :title="titleButtonConfirm" @click="ConfirmMetCompanion(metCompanion)" class="btn btn-primary btn-sm h-28px w-28px rounded"
+                      type="submit">
+                      <i class="fas fa-check fa-md ml--2px"></i>
+                    </button>
+                  </div>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  `,
+};
+
+const MetSpiritualGuide = {
+  template: `
+  <div>
+    <router-view />
+  </div>
+  `,
+};
+
+const ListMetSpiritualGuide = {
+  data() {
+    return {
+      statuses: [
+        { id: 1, name: "Chưa gặp người LH" },
+        { id: 2, name: "Đã gặp người LH" },
+      ],
+      reportStatuses: [
+        { id: 1, name: "Chưa làm báo cáo" },
+        { id: 2, name: "Đã làm báo cáo" },
+      ],
+      metSpiritualGuides: [],
+      titleButtonConfirm: "Xác nhận đã gặp",
+      spiritualGuides: [],
+      candidates: [],
+      idTable: 0,
+      role: 0,
+    };
+  },
+  mounted() {
+    // axios
+    //   .get(
+    //     "http://localhost:3000/api/logins/findOne?filter[where][token]=token"
+    //   )
+    //   .then((resp) => {
+    //     this.idTable = resp.data.idTable;
+    //     this.role = resp.data.role;
+    //   });
+    // if (this.role === 8 || this.role === 9) {
+    //   axios
+    //     .get(
+    //       "http://localhost:3000/api/metSpiritualGuides?filter[where][spiritualGuide]=" +
+    //         this.idTable
+    //     )
+    //     .then((response) => {
+    //       this.metSpiritualGuides = response.data;
+    //     });
+    // } else if (this.role === 1 || this.role === 2) {
+    //   axios.get("http://localhost:3000/api/metSpiritualGuides").then((response) => {
+    //     this.metSpiritualGuides = response.data;
+    //   });
+    // }
+    axios
+      .get("http://localhost:3000/api/metSpiritualGuides")
+      .then((response) => {
+        this.metSpiritualGuides = response.data;
+      });
+    axios
+      .get("http://localhost:3000/api/spiritualGuides")
+      .then((respSpirit) => {
+        this.spiritualGuides = respSpirit.data;
+      });
+    axios.get("http://localhost:3000/api/candidates").then((respCan) => {
+      this.candidates = respCan.data;
+    });
+  },
+  computed: {},
+  methods: {
+    ConfirmMetSpiritualGuide(metSpiritualGuide) {
+      if (metSpiritualGuide.status == 1) {
+        const newMetSpiritualGuide = {
+          spiritualGuide: metSpiritualGuide.spiritualGuide,
+          candidate: metSpiritualGuide.candidate,
+          registeredDate: metSpiritualGuide.registeredDate,
+          status: 2,
+          reportStatus: metSpiritualGuide.reportStatus,
+          idSchedule: metSpiritualGuide.idSchedule,
+        };
+        const url =
+          "http://localhost:3000/api/metSpiritualGuides/" +
+          metSpiritualGuide.id +
+          "/replace";
+        axios.post(url, newMetSpiritualGuide);
+        setTimeout(() => {
+          location.reload();
+        }, 50);
+      } else if (metSpiritualGuide.status == 2) {
+        const newMetSpiritualGuide = {
+          spiritualGuide: metSpiritualGuide.spiritualGuide,
+          candidate: metSpiritualGuide.candidate,
+          registeredDate: metSpiritualGuide.registeredDate,
+          status: 1,
+          reportStatus: metSpiritualGuide.reportStatus,
+          idSchedule: metSpiritualGuide.idSchedule,
+        };
+        const url =
+          "http://localhost:3000/api/metSpiritualGuides/" +
+          metSpiritualGuide.id +
+          "/replace";
+        axios.post(url, newMetSpiritualGuide);
+        setTimeout(() => {
+          location.reload();
+        }, 50);
+      }
+    },
+  },
+  template: `
+  <div class="card shadow mb-4" style="margin-top: -5px;">
+    <div class="card-header py-3" style="margin-bottom:-40px">
+      <div class="row">
+        <div class="col-md-4">
+          <h6 class="m-0 font-weight-bold text-dark">Thống Kê Ứng Sinh Gặp Linh Hướng</h6>
+        </div>
+        <div class="col-md-6"></div>
+        <div class="col-md-2"></div>
+      </div>
+    </div>
+    <div class="card-body">
+      <hr style="height:1px;color:lightgray;background-color:lightgray">
+      <div class="table-responsive" style="margin-top:-8px">
+        <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+          <thead>
+            <tr>
+              <th scope="col">STT</th>
+              <th scope="col">Người Đồng Hành</th>
+              <th scope="col">Ứng Sinh</th>
+              <th scope="col">Ngày Đăng Ký</th>
+              <th scope="col">Trạng Thái</th>
+              <th scope="col">Báo Cáo LH</th>
+              <th scope="col">Action</th>
+            </tr>
+          </thead>
+          <tfoot>
+            <tr>
+              <th scope="col">STT</th>
+              <th scope="col">Người Đồng Hành</th>
+              <th scope="col">Ứng Sinh</th>
+              <th scope="col">Ngày Đăng Ký</th>
+              <th scope="col">Trạng Thái</th>
+              <th scope="col">Báo Cáo LH</th>
+              <th scope="col">Action</th>
+            </tr>
+          </tfoot>
+          <tbody>
+            <tr v-for="(metSpiritualGuide, index) in metSpiritualGuides" :key="metSpiritualGuide.id">
+              <th class="align-middle" scope="row">{{ index + 1 }}</th>
+              <td v-for="spiritualGuide in spiritualGuides" v-if="spiritualGuide.id == metSpiritualGuide.spiritualGuide">
+                {{ spiritualGuide.fullName }}
+              </td>
+              <td v-for="candidate in candidates" v-if="candidate.id == metSpiritualGuide.candidate">
+                {{ candidate.fullName }}
+              </td>
+              <td>{{ crypt.formatDate(metSpiritualGuide.registeredDate) }}</td>
+              <td v-for="status in statuses" v-if="metSpiritualGuide.status == status.id">
+                {{ status.name }}
+              </td>
+              <td v-for="reportStatus in reportStatuses" v-if="metSpiritualGuide.reportStatus == reportStatus.id">
+                {{ reportStatus.name }}
+              </td>
+              <td class="align-middle">
+                <div class="row" style="margin-left:-15px;">
+                  <div class="col-4">
+                    <button :title="titleButtonConfirm" @click="ConfirmMetSpiritualGuide(metSpiritualGuide)" class="btn btn-primary btn-sm h-28px w-28px rounded"
+                      type="submit">
+                      <i class="fas fa-check fa-md ml--2px"></i>
+                    </button>
+                  </div>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  `,
+};
 //ROUTES
 const routes = [
   {
@@ -17378,6 +19223,16 @@ const routes = [
         ],
       },
       {
+        path: "/reportCompanions",
+        name: "reportCompanions",
+        component: ReportCompanion,
+        children: [
+          { path: "", name: "listReportCompanion", component: ListReportCompanion },
+          { path: "add", name: "addReportCompanion", component: AddReportCompanion },
+          { path: ":id/edit", name: "editReportCompanion", component: EditReportCompanion },
+        ],
+      },
+      {
         path: "/scheduleSpiritualGuides",
         name: "ScheduleSpiritualGuides",
         component: ScheduleSpiritualGuide,
@@ -17387,6 +19242,16 @@ const routes = [
             name: "listScheduleSpiritualGuides",
             component: RegisteringScheduleSpiritualGuide,
           },
+        ],
+      },
+      {
+        path: "/reportSpiritualGuides",
+        name: "reportSpiritualGuides",
+        component: ReportSpiritualGuide,
+        children: [
+          { path: "", name: "listReportSpiritualGuide", component: ListReportSpiritualGuide },
+          { path: "add", name: "addReportSpiritualGuide", component: AddReportSpiritualGuide },
+          { path: ":id/edit", name: "editReportSpiritualGuide", component: EditReportSpiritualGuide },
         ],
       },
       {
@@ -17413,6 +19278,26 @@ const routes = [
         component: LayoutChangePassword,
         children: [
           { path: "", name: "changePassword", component: ChangePassword },
+        ],
+      },
+      {
+        path: "/metCompanions",
+        name: "metCompanions",
+        component: MetCompanion,
+        children: [
+          { path: "", name: "listMetCompanion", component: ListMetCompanion },
+        ],
+      },
+      {
+        path: "/metSpiritualGuides",
+        name: "metSpiritualGuides",
+        component: MetSpiritualGuide,
+        children: [
+          {
+            path: "",
+            name: "listMetSpiritualGuide",
+            component: ListMetSpiritualGuide,
+          },
         ],
       },
     ],
@@ -17445,13 +19330,18 @@ var crypt = {
   formatDate: function (dateFormat) {
     var date = new Date(dateFormat);
     return (
-      date.getFullYear() +
-      "-" +
+      (date.getDate() > 9 ? date.getDate() : "0" + date.getDate()) + "/" +
       (date.getMonth() > 8
         ? date.getMonth() + 1
         : "0" + (date.getMonth() + 1)) +
-      "-" +
-      (date.getDate() > 9 ? date.getDate() : "0" + date.getDate())
+      "/" + date.getFullYear()
+      //  +
+      // "-" +
+      // (date.getMonth() > 8
+      //   ? date.getMonth() + 1
+      //   : "0" + (date.getMonth() + 1)) +
+      // "-" +
+      // (date.getDate() > 9 ? date.getDate() : "0" + date.getDate())
     );
   },
   getAge: function (birthday) {

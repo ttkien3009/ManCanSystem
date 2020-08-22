@@ -1,0 +1,67 @@
+{
+  "name": "reportCompanion",
+  "base": "PersistedModel",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "properties": {
+    "candidate": {
+      "type": "number",
+      "required": true
+    },
+    "companion": {
+      "type": "number",
+      "required": true
+    },
+    "reportDate": {
+      "type": "date",
+      "required": true
+    },
+    "brightTL": {
+      "type": "string"
+    },
+    "brightNB": {
+      "type": "string"
+    },
+    "brightTT": {
+      "type": "string"
+    },
+    "brightCD": {
+      "type": "string"
+    },
+    "brightTD": {
+      "type": "string"
+    },
+    "darkTL": {
+      "type": "string"
+    },
+    "darkNB": {
+      "type": "string"
+    },
+    "darkTT": {
+      "type": "string"
+    },
+    "darkCD": {
+      "type": "string"
+    },
+    "darkTD": {
+      "type": "string"
+    },
+    "targetNextMonth": {
+      "type": "string"
+    },
+    "idSchedule": {
+      "type": "number",
+      "required": true
+    },
+    "isRead": {
+      "type": "number",
+      "required": true
+    }
+  },
+  "validations": [],
+  "relations": {},
+  "acls": [],
+  "methods": {}
+}

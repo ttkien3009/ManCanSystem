@@ -1,165 +1,238 @@
-<div class="card shadow mb-4" style="margin-top: -5px;">
-  <div class="card-header py-3">
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>Báo Cáo - Quản lý nhà ứng sinh Dòng Tên Việt Nam</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <link rel="apple-touch-icon" href="apple-icon.png">
+  <link rel="shortcut icon" href="../images/favicon.ico">
+
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+    integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+  <link rel="stylesheet" href="../vendor/fontawesome/css/all.css">
+  <link rel="stylesheet" href="../css/Dashboard.css">
+  <link rel="stylesheet" type="text/css" href="../css/Home.css">
+  <link rel="stylesheet" type="text/css" href="../css/styles.css">
+  <link rel="stylesheet" type="text/css" href="../css/Login.css">
+  <link rel="stylesheet" href="../css/modals.css">
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,600,700,800' rel='stylesheet' type='text/css'>
+  <link href="../vendor/datatables/dataTables.bootstrap4.min.css" rel="stylesheet">
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
+
+  <style>
+    .table-report table,
+    td {
+      border: 1.5px dashed black;
+      border-collapse: collapse;
+      text-align: center;
+    }
+
+    .table-report td {
+      padding: 5px;
+    }
+
+    .table-report-content th,
+    td {
+      padding: 9px;
+    }
+
+    .table-report-content table,
+    th,
+    td {
+      border: 1.5px solid black;
+      border-collapse: collapse;
+      text-align: center;
+    }
+  </style>
+
+</head>
+
+<body>
+  <div class="container-fluid mt-5">
     <div class="row">
-      <div class="col-md-4">
-        <h5 class="m-0 font-weight-bold text-primary">Danh sách Quản Lý</h5>
+      <div class="col-md-9">
+        <span class="text-danger">Nhà Ứng Sinh Dòng Tên Việt Nam</span>
+        <hr style="height:1px;color:lightgray;background-color:lightgray;margin-top: -1px;">
       </div>
-      <div class="col-md-6"></div>
-      <div class="col-md-2" style="padding-left:68px;">
-        <router-link :to="{ name: 'addManager' }">
-          <button :title="titleButtonAdd" class="btn text-size-15px rounded btn-hover-blue"
-            style="background-color: #056299;color: white;">
-            <i class="fas fa-plus"></i>
-            &nbsp;Thêm
-          </button>
-        </router-link>
+      <div class="col-md-3">
+        <img src="../client/images/logoungsinh.png"
+          style="width: 80px;height: 80px;margin-top: -43px;margin-left: -35px;" alt="logo-nus" />
       </div>
     </div>
-  </div>
-  <div class="card-body">
-    <div class="table-responsive">
-      <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
-        <thead>
+    <div class="row">
+      <div class="col-md-9 text-center">
+        <strong style="font-size: larger;">NỘI DUNG GẶP ĐỒNG HÀNH</strong>
+      </div>
+    </div>
+    <div class="row mt-4">
+      <div class="col-md-9">
+        <table style="width:60%;border: 1.5px dashed black;border-collapse: collapse;text-align: center;"
+          class="mx-auto w-auto">
+          <tr>
+            <td
+              style="width: 40%;border: 1.5px dashed black;border-collapse: collapse;text-align: center;padding: 5px;">
+              Họ và tên</td>
+            <td style="border: 1.5px dashed black;border-collapse: collapse;text-align: center;padding: 5px;">Giuse Cao
+              Văn Hai</td>
+          </tr>
+          <tr>
+            <td style="border: 1.5px dashed black;border-collapse: collapse;text-align: center;padding: 5px;">Cộng đoàn
+            </td>
+            <td style="border: 1.5px dashed black;border-collapse: collapse;text-align: center;padding: 5px;">Andrew Phú
+              Yên</td>
+          </tr>
+          <tr>
+            <td style="border: 1.5px dashed black;border-collapse: collapse;text-align: center;padding: 5px;">Ngày,
+              tháng, năm đồng hành</td>
+            <td style="border: 1.5px dashed black;border-collapse: collapse;text-align: center;padding: 5px;">29/05/2019
+            </td>
+          </tr>
+        </table>
+      </div>
+    </div>
+    <div class="row mt-5">
+      <div class="col-md-9">
+        <strong>1. <u>Những kinh nghiệm giúp tôi lớn lên hơn, dấn thân hơn trong đời sống ơn gọi.</u></strong>
+      </div>
+    </div>
+    <div class="row mt-1">
+      <div class="col-md-9 table-report-content">
+        <table style="width:100%" class="mx-auto w-auto">
           <tr>
             <th>STT</th>
-            <th>Họ và Tên</th>
-            <th>Số Điện Thoại</th>
-            <th>Email</th>
-            <th>Chức Vụ</th>
-            <th>Quê Quán</th>
-            <th>Trạng Thái</th>
-            <th>Action</th>
+            <th style="width: 20%;">PHƯƠNG DIỆN</th>
+            <th>KINH NGHIỆM</th>
           </tr>
-        </thead>
-        <tfoot>
+          <tr>
+            <td>1</td>
+            <th>Thiêng liêng</th>
+            <td class="text-left">
+              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Dành giờ cầu nguyện vời Đức Mẹ nhiều hơn.
+              Dành thời gian đi xưng tội và Chầu Thánh Thể hàng tuần.
+              Sốt sắng hơn trong Thánh lễ và các giờ thiêng liêng.
+            </td>
+          </tr>
+          <tr>
+            <td>2</td>
+            <th>Nhân bản</th>
+            <td class="text-left">
+              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Sống đồng cảm hơn,
+              biết nhìn nhận sự yếu đuối nơi bản thân để từ đó biết sống cảm thông với anh em hơn.
+              Ý thức hơn trong các công việc chung. Kiểm soát hơn lời nói của mình.
+            </td>
+          </tr>
+          <tr>
+            <td>3</td>
+            <th>Tri thức</th>
+            <td class="text-left">
+              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Sống đồng cảm hơn,
+              biết nhìn nhận sự yếu đuối nơi bản thân để từ đó biết sống cảm thông với anh em hơn.
+              Ý thức hơn trong các công việc chung. Kiểm soát hơn lời nói của mình.
+            </td>
+          </tr>
+          <tr>
+            <td>4</td>
+            <th>Cộng đoàn</th>
+            <td class="text-left">
+              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Sống đồng cảm hơn,
+              biết nhìn nhận sự yếu đuối nơi bản thân để từ đó biết sống cảm thông với anh em hơn.
+              Ý thức hơn trong các công việc chung. Kiểm soát hơn lời nói của mình.
+            </td>
+          </tr>
+          <tr>
+            <td>5</td>
+            <th>Tông đồ</th>
+            <td class="text-left">
+              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Sống đồng cảm hơn,
+              biết nhìn nhận sự yếu đuối nơi bản thân để từ đó biết sống cảm thông với anh em hơn.
+              Ý thức hơn trong các công việc chung. Kiểm soát hơn lời nói của mình.
+            </td>
+          </tr>
+        </table>
+      </div>
+    </div>
+    <div class="row mt-4">
+      <div class="col-md-9">
+        <strong>2. <u>Những kinh nghiệm khiến đời sống tôi bị trì trệ, cản trở tôi dấn thân trong đời sống ơn
+            gọi.</u></strong>
+      </div>
+    </div>
+    <div class="row mt-1">
+      <div class="col-md-9 table-report-content">
+        <table style="width:100%" class="mx-auto w-auto">
           <tr>
             <th>STT</th>
-            <th>Họ và Tên</th>
-            <th>Số Điện Thoại</th>
-            <th>Email</th>
-            <th>Chức Vụ</th>
-            <th>Quê Quán</th>
-            <th>Trạng Thái</th>
-            <th>Action</th>
+            <th style="width: 20%;">PHƯƠNG DIỆN</th>
+            <th>KINH NGHIỆM</th>
           </tr>
-        </tfoot>
-        <tbody>
-          <tr v-for="(manager, index) in managers" :key="manager.id">
-            <th>{{ index + 1 }}</th>
-            <td>{{ manager.fullName }}</td>
-            <td>{{ manager.phone }}</td>
-            <td>{{ manager.email }}</td>
-            <td v-for="department in positions" v-if="department.id == manager.position">
-              {{ department.positionType }}-{{ department.name }}</td>
-            <td>{{ manager.homeland }}</td>
-            <td v-if="manager.status == 1">
-              <i class="fas fa-toggle-on fa-lg text-success"></i>
-            </td>
-            <td v-if="manager.status == 2">
-              <i class="fas fa-toggle-off fa-lg text-danger"></i>
-            </td>
-            <td>
-              <div class="row" style="margin-left:-18px;">
-                <div class="col-lg-4">
-                  <button :title="titleButtonDisplay" data-toggle="modal" @click="getDetailManager(manager)"
-                    data-target="#detailManagerModal" class="btn btn-primary btn-sm align-middle h-28px w-28px rounded"
-                    type="submit">
-                    <i class="far fa-eye fa-md ml--3px"></i>
-                  </button>
-                </div>
-                <div class="col-lg-4">
-                  <button :title="titleButtonEdit" @click="getDataManagerUpdate(manager)"
-                    class="btn btn-warning btn-sm h-28px w-28px rounded" type="submit" style="margin-left: -8px;">
-                    <i class="fas fa-edit fa-md ml--2px"></i>
-                  </button>
-                </div>
-                <div class="col-lg-4">
-                  <button :title="titleButtonDelete" data-toggle="modal" @click="getDetailManager(manager)"
-                    data-target="#deleteManagerModal" class="btn btn-danger btn-sm h-28px w-28px rounded"
-                    style="margin-left: -16px;">
-                    <i class="far fa-trash-alt fa-md ml--1px"></i>
-                  </button>
-                </div>
-              </div>
+          <tr>
+            <td>1</td>
+            <th>Thiêng liêng</th>
+            <td class="text-left">
+              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Dành giờ cầu nguyện vời Đức Mẹ nhiều hơn.
+              Dành thời gian đi xưng tội và Chầu Thánh Thể hàng tuần.
+              Sốt sắng hơn trong Thánh lễ và các giờ thiêng liêng.
             </td>
           </tr>
-        </tbody>
-      </table>
+          <tr>
+            <td>2</td>
+            <th>Nhân bản</th>
+            <td class="text-left">
+              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Sống đồng cảm hơn,
+              biết nhìn nhận sự yếu đuối nơi bản thân để từ đó biết sống cảm thông với anh em hơn.
+              Ý thức hơn trong các công việc chung. Kiểm soát hơn lời nói của mình.
+            </td>
+          </tr>
+          <tr>
+            <td>3</td>
+            <th>Tri thức</th>
+            <td class="text-left">
+              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Sống đồng cảm hơn,
+              biết nhìn nhận sự yếu đuối nơi bản thân để từ đó biết sống cảm thông với anh em hơn.
+              Ý thức hơn trong các công việc chung. Kiểm soát hơn lời nói của mình.
+            </td>
+          </tr>
+          <tr>
+            <td>4</td>
+            <th>Cộng đoàn</th>
+            <td class="text-left">
+              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Sống đồng cảm hơn,
+              biết nhìn nhận sự yếu đuối nơi bản thân để từ đó biết sống cảm thông với anh em hơn.
+              Ý thức hơn trong các công việc chung. Kiểm soát hơn lời nói của mình.
+            </td>
+          </tr>
+          <tr>
+            <td>5</td>
+            <th>Tông đồ</th>
+            <td class="text-left">
+              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Sống đồng cảm hơn,
+              biết nhìn nhận sự yếu đuối nơi bản thân để từ đó biết sống cảm thông với anh em hơn.
+              Ý thức hơn trong các công việc chung. Kiểm soát hơn lời nói của mình.
+            </td>
+          </tr>
+        </table>
+      </div>
     </div>
-  </div>
-  <div id="deleteManagerModal" class="modal modal-edu-general default-popup-PrimaryModal fade" role="dialog">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header header-color-modal bg-color-1">
-          <h4 class="modal-title" style="margin-left: -30px;">Xóa Người Quản Lý</h4>
-          <div class="modal-close-area modal-close-df" style="padding-left: -200px;padding-bottom:-200px;">
-            <a class="close" data-dismiss="modal" href="#"><i class="fas fa-times"></i></a>
-          </div>
-        </div>
-        <div class="modal-body">
-          <span style="font-size: large;">Bạn có chắc chắn muốn xóa Người Quản Lý {{ manager.managerId }}</span>
-        </div>
-        <div class="modal-footer">
-          <button class="btn btn-danger rounded" data-dismiss="modal">
-            Hủy
-          </button>
-          <button class="btn rounded text-white btn-hover-blue" style="background-color: #056299;"
-            @click="deleteDataManager(manager.id)">
-            Xác Nhận
-          </button>
-        </div>
+    <div class="row mt-4">
+      <div class="col-md-9">
+        <strong>3. <u>Dựa trên nhận định tháng vừa qua, tôi có những ước ao hay quyết tâm gì cho tháng sắp tới.</u></strong>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-9">
+        - Cảm nghiệm sâu hơn trong các giờ thiêng liêng, chu toàn tốt hơn việc đọc sách thiêng liêng.<br>
+        -	Kiểm soát hơn lời ăn, tiếng nói của  mình. Tinh tế hơn trong cách hành xử.<br>
+        -	Cố gắng chu toàn các lịch học của bản thân đã đề ra.<br>
+        -	Hỏi thăm bệnh nhân để đồng cảm hơn nữa. Đưa tinh thần tông đồ về nơi cộng đoàn.<br>
       </div>
     </div>
   </div>
-  <div id="detailManagerModal" class="modal modal-edu-general default-popup-PrimaryModal fade rounded" role="dialog">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header header-color-modal bg-color-1">
-          <h4 class="modal-title" style="margin-left: -30px;">Chi tiết Người Quản Lý</h4>
-          <div class="modal-close-area modal-close-df bg-danger" style="padding-left: -200px;padding-bottom:-200px;">
-            <a class="close" data-dismiss="modal" href="#"><i class="fas fa-times"></i></a>
-          </div>
-        </div>
-        <div class="modal-body">
-          <div class="row">
-            <div class="col-sm-4 text-center">
-              <img class="img-fluid img-thumbnail rounded-circle" src="'../assets/manager/' + this.image" width="100px"
-                height="100px" />
-              <p class="font-weight-bold" style="padding-top: 5px;">{{ manager.managerId }}</p>
-            </div>
-            <div class="col-sm-8 mt-3">
-              <p class="text-uppercase font-weight-bold" style="font-size: larger;">{{ manager.christianName }}
-                {{ manager.fullName }}
-              </p>
-              <div style="margin-left: 12px;">
-                <span class="font-weight-bold">Ngày
-                  Sinh:</span><span> &nbsp;{{ birthdayFormat }}</span><br>
-                <span class="font-weight-bold ">SĐT:</span>
-                <span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{ manager.phone}}</span><br>
-                <span class="font-weight-bold ">Email:</span>
-                <span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                  &nbsp;{{ manager.email }}</span><br>
-                <span class="font-weight-bold ">Chức Vụ:</span>
-                <span v-for="department in positions" v-if="department.id == manager.position">
-                  &nbsp;&nbsp;&nbsp;{{ department.positionType}} - {{ department.name }}</span><br>
-                <span class="font-weight-bold ">Quê Quán:</span>
-                <span> &nbsp;{{ manager.homeland }}</span><br>
-                <span class="font-weight-bold ">Trạng Thái:&nbsp;</span>
-                <span v-if="manager.status == 1">
-                  <i class="fas fa-toggle-on fa-lg text-success"></i>
-                </span>
-                <span v-if="manager.status == 2">
-                  <i class="fas fa-toggle-off fa-lg text-danger"></i>
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="modal-footer">
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-<hr style="height:1px;color:lightgray;background-color:lightgray">
+</body>
+
+</html>

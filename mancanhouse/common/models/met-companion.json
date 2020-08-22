@@ -1,0 +1,32 @@
+{
+  "name": "metCompanion",
+  "base": "PersistedModel",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "properties": {
+    "candidate": {
+      "type": "number"
+    },
+    "companion": {
+      "type": "number"
+    },
+    "registeredDate": {
+      "type": "date"
+    },
+    "status": {
+      "type": "number"
+    },
+    "reportStatus": {
+      "type": "number"
+    },
+    "isSchedule": {
+      "type": "number"
+    }
+  },
+  "validations": [],
+  "relations": {},
+  "acls": [],
+  "methods": {}
+}

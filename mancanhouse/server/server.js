@@ -7,8 +7,12 @@
 
 const loopback = require('loopback');
 const boot = require('loopback-boot');
+var qs = require('qs');
 
 const app = module.exports = loopback();
+app.set('query parser', function(value, option) {
+  return qs.parse(value, {arrayLimit: 500});
+});
 
 app.start = function() {
   // start the web server

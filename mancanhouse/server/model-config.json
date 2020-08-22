@@ -98,5 +98,17 @@
   "Photos": {
     "dataSource": "assets",
     "public": true
+  },
+  "metCompanion": {
+    "dataSource": "canData",
+    "public": true
+  },
+  "metSpiritualGuide": {
+    "dataSource": "canData",
+    "public": true
+  },
+  "reportCompanion": {
+    "dataSource": "canData",
+    "public": true
   }
 }
