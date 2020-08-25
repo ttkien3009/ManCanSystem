@@ -16,130 +16,199 @@
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
-  <link rel="stylesheet" type="text/css" href="http://www.shieldui.com/shared/components/latest/css/light/all.min.css" />
+  <link rel="stylesheet" type="text/css"
+    href="http://www.shieldui.com/shared/components/latest/css/light/all.min.css" />
   <script type="text/javascript" src="http://www.shieldui.com/shared/components/latest/js/shieldui-all.min.js"></script>
 </head>
 
 <body>
-  <div class="container">
-    <div class="row">
-        <div class="col-lg-6 col-md-6">
-            <div class="card ">
-                <div class="card-header">
-                    <h3>Quarterly Sales</h3>
-                </div>
-                <div class="card-block">
-                    <div id="performance1" style="height: 270px;"></div>
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-6 col-md-6">
-            <div class="card ">
-                <div class="card-header">
-                    <h3>Quarterly Sales</h3>
-                </div>
-                <div class="card-block">
-                    <p>
-                        Quarterly Sales reports show that the campaign made tremendous progress towards the end of the period. 
-                        This signifies important changes as opposed to last-year campaign, which demonstrated equal growth. 
-                        It underlines the necessety of regular reports, to detect such changes in earlier stages.                         
-                    </p>
-                </div>
-            </div>
-        </div>
+  <div class="card shadow mb-4" style="margin-top: -5px;">
+    <div class="card-header py-3">
+      <h6 class="m-0 font-weight-bold text-dark">Thêm Báo Cáo</h6>
     </div>
-    <hr />
-    <div class="row">
-        <div class="col-lg-6 col-md-6">
-            <div class="card ">
-                <div class="card-header">
-                    <h3>Quarterly Sales</h3>
-                </div>
-                <div class="card-block">
-                    <div id="performance2" style="height: 270px;"></div>
-                </div>
-            </div>
+    <div class="card-body">
+      <form @submit.prevent="submitAddReportCompanionForm" action="POST" method="" autocomplete="off">
+        <div class="row mt-2">
+          <div class="col-lg-4">
+            <label class="font-weight-bold" style="font-size:15px;">Thông Tin Báo Cáo:</label>
+            <p style="font-size: 12px;">Thông tin phục vụ cho việc xếp hạng ứng sinh hàng tháng</p>
+          </div>
+          <div class="col-lg-4">
+            <label class=" font-weight-bold col-form-label" for="candidate">Ứng Sinh</label>
+            <select class="custom-select  text-size-13px  h-32px" v-model="candidate" name="candidate" id="candidate"
+              style="margin-top: -5px;" disabled>
+              <option v-for="candidate in candidates" v-bind:value="candidate.id" :selected="candidate.id = idTable">
+                {{ candidate.fullName }}</option>
+            </select>
+          </div>
+          <div class="col-lg-4">
+            <label class=" font-weight-bold col-form-label" for="companion">Người Đồng Hành</label>
+            <select class="custom-select  text-size-13px  h-32px" v-model="companion" name="companion" id="companion"
+              style="margin-top: -5px;" disabled>
+              <option v-for="companion in companions" v-bind:value="companion.id"
+                :selected="scheduleCompanion.companion = companion.id">{{ companion.fullName }}</option>
+            </select>
+          </div>
         </div>
-        <div class="col-lg-6 col-md-6">
-            <div class="card ">
-                <div class="card-header">
-                    <h3>Visits Stats</h3>
-                </div>
-                <div class="card-block">
-                    <p>
-                        Campaign budgets have proven to have little influence over the predictability and stable flow of visitors. 
-                        This underlines the necessity for additioal statistics and further analysis. 
-                    </p>
-                </div>
-            </div>
+        <div class="row">
+          <div class="col-md-4"></div>
+          <div class="col-md-8">
+            <strong>1. <u>Những kinh nghiệm giúp tôi lớn lên hơn, dấn thân hơn trong đời sống ơn gọi.</u></strong>
+          </div>
         </div>
+        <div class="row">
+          <div class="col-lg-4"></div>
+          <div class="col-lg-4">
+            <label class=" font-weight-bold col-form-label" for="brightTL">Thiêng Liêng</label>
+            <textarea class="form-control text-size-13px" :title="titleBrightTL" id="brightTL" v-model="brightTL"
+              name="brightTL" rows="4" style="margin-top: -5px;"></textarea>
+          </div>
+          <div class="col-lg-4">
+            <label class=" font-weight-bold col-form-label" for="brightNB">Nhân Bản</label>
+            <textarea class="form-control text-size-13px" :title="titleBrightNB" id="brightNB" v-model="brightNB"
+              name="brightNB" rows="4" style="margin-top: -5px;"></textarea>
+          </div>
+        </div>
+        <div class="row mt-1">
+          <div class="col-lg-4"></div>
+          <div class="col-lg-4">
+            <label class=" font-weight-bold col-form-label" for="brightTT">Tri Thức</label>
+            <textarea class="form-control text-size-13px" :title="titleBrightTT" id="brightTT" v-model="brightTT"
+              name="brightTT" rows="4" style="margin-top: -5px;"></textarea>
+          </div>
+          <div class="col-lg-4">
+            <label class=" font-weight-bold col-form-label" for="brightCD">Cộng Đoàn</label>
+            <textarea class="form-control text-size-13px" :title="titleBrightCD" id="brightCD" v-model="brightCD"
+              name="brightCD" rows="4" style="margin-top: -5px;"></textarea>
+          </div>
+        </div>
+        <div class="row mt-1">
+          <div class="col-lg-4"></div>
+          <div class="col-lg-4">
+            <label class=" font-weight-bold col-form-label" for="brightTD">Tông Đồ</label>
+            <textarea class="form-control text-size-13px" :title="titleBrightTD" id="brightTD" v-model="brightTD"
+              name="brightTD" rows="4" style="margin-top: -5px;"></textarea>
+          </div>
+          <div class="col-lg-4"></div>
+        </div>
+        <div class="row">
+          <div class="col-md-4"></div>
+          <div class="col-md-8">
+            <strong>2. <u>Những kinh nghiệm khiến đời sống tôi bị trì trệ, cản trở tôi dấn thân trong đời sống ơn
+                gọi.</u></strong>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-lg-4"></div>
+          <div class="col-lg-4">
+            <label class=" font-weight-bold col-form-label" for="darkTL">Thiêng Liêng</label>
+            <textarea class="form-control text-size-13px" :title="titleDarkTL" id="darkTL" v-model="darkTL"
+              name="darkTL" rows="4" style="margin-top: -5px;"></textarea>
+          </div>
+          <div class="col-lg-4">
+            <label class=" font-weight-bold col-form-label" for="darkNB">Nhân Bản</label>
+            <textarea class="form-control text-size-13px" :title="titleDarkNB" id="darkNB" v-model="darkNB"
+              name="darkNB" rows="4" style="margin-top: -5px;"></textarea>
+          </div>
+        </div>
+        <div class="row mt-1">
+          <div class="col-lg-4"></div>
+          <div class="col-lg-4">
+            <label class=" font-weight-bold col-form-label" for="darkTT">Tri Thức</label>
+            <textarea class="form-control text-size-13px" :title="titleDarkTT" id="darkTT" v-model="darkTT"
+              name="darkTT" rows="4" style="margin-top: -5px;"></textarea>
+          </div>
+          <div class="col-lg-4">
+            <label class=" font-weight-bold col-form-label" for="darkCD">Cộng Đoàn</label>
+            <textarea class="form-control text-size-13px" :title="titleDarkCD" id="darkCD" v-model="darktCD"
+              name="darkCD" rows="4" style="margin-top: -5px;"></textarea>
+          </div>
+        </div>
+        <div class="row mt-1">
+          <div class="col-lg-4"></div>
+          <div class="col-lg-4">
+            <label class=" font-weight-bold col-form-label" for="darkTD">Tông Đồ</label>
+            <textarea class="form-control text-size-13px" :title="titleDarkTD" id="darkTD" v-model="darkTD"
+              name="darkTD" rows="4" style="margin-top: -5px;"></textarea>
+          </div>
+          <div class="col-lg-4"></div>
+        </div>
+        <div class="row">
+          <div class="col-md-4"></div>
+          <div class="col-md-8">
+            <strong>3. <u>Dựa trên nhận định tháng vừa qua, tôi có những ước ao hay quyết tâm gì cho tháng sắp tới.</u></strong>
+          </div>
+        </div>
+        <div class="row mt-1">
+          <div class="col-lg-4"></div>
+          <div class="col-lg-4">
+            <label class=" font-weight-bold col-form-label" for="targetNextMonth">Mục Tiêu</label>
+            <textarea class="form-control text-size-13px" :title="titleTargetNextMonth" id="targetNextMonth" v-model="targetNextMonth"
+              name="targetNextMonth" rows="4" style="margin-top: -5px;"></textarea>
+          </div>
+          <div class="col-lg-4"></div>
+        </div>
+        <div class="row" style="margin-top: 30px;">
+          <div class="col-12">
+            <div style="float:right">
+              <button type="submit" class="btn  rounded btn-hover-blue"
+                style="background-color: #056299;color: white;font-size:13px;">
+                <i class="far fa-save fa-lg"></i>
+                &nbsp;Lưu
+              </button>
+            </div>
+            <div style="float:right; margin-right: 10px;">
+              <button :disabled="!refreshFormReportCompanion" @click="clearInputReportCompanionForm"
+                class="btn btn-success  rounded" style="font-size:13px;">
+                <i class="fas fa-sync-alt"></i>
+                &nbsp;Làm mới
+              </button>
+            </div>
+          </div>
+        </div>
+      </form>
     </div>
-    <hr />
-    <div class="row">
-        <div class="col-lg-6 col-md-6">
-            <div class="card ">
-                <div class="card-header">
-                    <h3>Quarterly Sales</h3>
-                </div>
-                <div class="card-block">
-                    <div id="performance3" style="height: 270px;"></div>
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-6 col-md-6">
-            <div class="card ">
-                <div class="card-header">
-                    <h3>Budget Stats</h3>
-                </div>
-                <div class="card-block">
-                    <p>
-                        The budget report is in par with the initial business plan. No deviations were detected. 
-                        Better funding is not guaranteed to have direct sales impact, unless further analysis is performed. 
-                    </p>
-                </div>
-            </div>
-        </div>
-    </div>  
   </div>
   <script type="text/javascript">
     jQuery(function ($) {
-        var performance = [12, 3, 4, 2, 12, 3, 4, 17, 22, 34, 54, 67],
-            visits = [3, 9, 12, 14, 22, 32, 45, 12, 67, 45, 55, 7],
-            budget = [23, 19, 11, 134, 242, 352, 435, 22, 637, 445, 555, 57];
-  
-        $("#performance1").shieldChart({
-            primaryHeader: {
-                text: "Quarterly Performance"
-            },
-            dataSeries: [{
-                seriesType: "area",
-                collectionAlias: "Q Data",
-                data: performance
-            }]
-        });
-  
-        $("#performance2").shieldChart({
-            primaryHeader: {
-                text: "Visitors"
-            },
-            dataSeries: [{
-                seriesType: "bar",
-                collectionAlias: "Visits",
-                data: visits
-            }]
-        });
-  
-        $("#performance3").shieldChart({
-            primaryHeader: {
-                text: "Budget"
-            },
-            dataSeries: [{
-                seriesType: "line",
-                collectionAlias: "Budget",
-                data: budget
-            }]
-        });
+      var performance = [12, 3, 4, 2, 12, 3, 4, 17, 22, 34, 54, 67],
+        visits = [3, 9, 12, 14, 22, 32, 45, 12, 67, 45, 55, 7],
+        budget = [23, 19, 11, 134, 242, 352, 435, 22, 637, 445, 555, 57];
+
+      $("#performance1").shieldChart({
+        primaryHeader: {
+          text: "Quarterly Performance"
+        },
+        dataSeries: [{
+          seriesType: "area",
+          collectionAlias: "Q Data",
+          data: performance
+        }]
+      });
+
+      $("#performance2").shieldChart({
+        primaryHeader: {
+          text: "Visitors"
+        },
+        dataSeries: [{
+          seriesType: "bar",
+          collectionAlias: "Visits",
+          data: visits
+        }]
+      });
+
+      $("#performance3").shieldChart({
+        primaryHeader: {
+          text: "Budget"
+        },
+        dataSeries: [{
+          seriesType: "line",
+          collectionAlias: "Budget",
+          data: budget
+        }]
+      });
     });
   </script>
 </body>
+
 </html>

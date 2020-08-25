@@ -50,7 +50,17 @@
   <div id="myApp">
     <router-view></router-view>
   </div>
-
+  <script type = "text/JavaScript">
+    window.onload = function() {
+        //considering there aren't any hashes in the urls already
+        if(!window.location.hash) {
+            //setting window location
+            window.location = window.location + '#myApp';
+            //using reload() method to reload web page
+            window.location.reload();
+        }
+    } 
+ </script>
   <script src="../js/Common.js"></script>
   <script src="../js/main.js"></script>
   <script src="../js/jquery/jquery.min.js"></script>

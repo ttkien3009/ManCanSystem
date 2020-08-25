@@ -110,5 +110,13 @@
   "reportCompanion": {
     "dataSource": "canData",
     "public": true
+  },
+  "rateCandidate": {
+    "dataSource": "canData",
+    "public": true
+  },
+  "countMet": {
+    "dataSource": "canData",
+    "public": true
   }
 }

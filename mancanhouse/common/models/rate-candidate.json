@@ -1,5 +1,5 @@
 {
-  "name": "metCompanion",
+  "name": "rateCandidate",
   "base": "PersistedModel",
   "idInjection": true,
   "options": {
@@ -7,21 +7,19 @@
   },
   "properties": {
     "candidate": {
+      "type": "number",
+      "required": true
+    },
+    "month": {
       "type": "number"
     },
-    "companion": {
+    "year": {
       "type": "number"
     },
-    "registeredDate": {
-      "type": "date"
-    },
-    "reportCompanion": {
+    "score": {
       "type": "number"
     },
-    "status": {
-      "type": "number"
-    },
-    "isSchedule": {
+    "idSchedule": {
       "type": "number"
     }
   },

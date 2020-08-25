@@ -1,5 +1,5 @@
 {
-  "name": "metCompanion",
+  "name": "countMet",
   "base": "PersistedModel",
   "idInjection": true,
   "options": {
@@ -7,21 +7,13 @@
   },
   "properties": {
     "candidate": {
+      "type": "number",
+      "required": true
+    },
+    "countMetCompanion": {
       "type": "number"
     },
-    "companion": {
-      "type": "number"
-    },
-    "registeredDate": {
-      "type": "date"
-    },
-    "reportCompanion": {
-      "type": "number"
-    },
-    "status": {
-      "type": "number"
-    },
-    "isSchedule": {
+    "countMetSpiritualGuide": {
       "type": "number"
     }
   },

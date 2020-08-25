@@ -1,19 +1,19 @@
-const store = new Vuex.Store({
-  state: {
-    idTable: 0,
-  },
-  mutations: {
-    updateIdTable(state, id) {
-      state.idTable = id;
-    },
-  },
-  actions: {
-    updateIdTable: ({ commit }, id) => {
-      commit("updateIdTable", id);
-    },
-  },
-  getters: {},
-});
+// const store = new Vuex.Store({
+//   state: {
+//     idTable: 0,
+//   },
+//   mutations: {
+//     updateIdTable(state, id) {
+//       state.idTable = id;
+//     },
+//   },
+//   actions: {
+//     updateIdTable: ({ commit }, id) => {
+//       commit("updateIdTable", id);
+//     },
+//   },
+//   getters: {},
+// });
 
 const Login = {
   data() {
@@ -50,27 +50,37 @@ const Login = {
                   this.username
               )
               .then((resp) => {
-                const userInfo = {
-                  idAccount: resp.data.id,
-                  userId: resp.data.userId,
-                  username: resp.data.username,
-                  password: crypt.decrypt(resp.data.password),
-                  role: resp.data.role,
-                  idTable: resp.data.idTable,
-                  token: "token",
-                };
-                if (this.password == userInfo.password) {
-                  const url = `http://localhost:3000/api/logins`;
-                  axios.post(url, userInfo);
-                  this.$router.push("/");
-                } else {
+                if (resp.data.status == 2) {
                   alertify.alert(
                     "Thông báo",
-                    "Mật khẩu không đúng!",
+                    "Tài khoản không tồn tại!",
                     function () {
                       alertify.success("Ok");
                     }
                   );
+                } else {
+                  const userInfo = {
+                    idAccount: resp.data.id,
+                    userId: resp.data.userId,
+                    username: resp.data.username,
+                    password: crypt.decrypt(resp.data.password),
+                    role: resp.data.role,
+                    idTable: resp.data.idTable,
+                    token: "token",
+                  };
+                  if (this.password == userInfo.password) {
+                    const url = `http://localhost:3000/api/logins`;
+                    axios.post(url, userInfo);
+                    this.$router.push("/");
+                  } else {
+                    alertify.alert(
+                      "Thông báo",
+                      "Mật khẩu không đúng!",
+                      function () {
+                        alertify.success("Ok");
+                      }
+                    );
+                  }
                 }
               });
           } else {
@@ -338,6 +348,9 @@ Vue.component("page-menu", {
               <router-link tag="li" :to="{ name: 'listScheduleCompanions'}" v-show="role == 8 || role == 9 || role == 5">
                 <i class="menu-icon far fa-calendar fa-lg"></i><a href="#">Lịch Đồng Hành</a>
               </router-link>
+              <router-link tag="li" :to="{ name: 'listReportCompanion'}" v-show="role == 5">
+                <i class="menu-icon fas fa-file-signature fa-lg"></i><a href="#">Báo Cáo Đồng Hành</a>
+              </router-link>
             </ul>
         </li>
         <li class="menu-item-has-children dropdown" v-show="role == 1 || role == 6 || role == 7 || role == 5">
@@ -378,6 +391,12 @@ Vue.component("page-menu", {
               </router-link>
               <router-link tag="li" :to="{ name: 'listMetSpiritualGuide'}" v-show="role == 1 || role == 6 || role == 7">
                 <i class="menu-icon fas fa-handshake fa-lg"></i><a href="#">Gặp Linh Hướng</a>
+              </router-link>
+              <router-link tag="li" :to="{ name: 'listReportCompanion'}" v-show="role == 1 || role == 2 || role == 8 || role == 9">
+                <i class="menu-icon fas fa-file-signature fa-lg"></i><a href="#">Báo Cáo Đồng Hành</a>
+              </router-link>
+              <router-link tag="li" :to="{ name: 'listRateCandidate'}" v-show="role == 1 || role == 2">
+                <i class="menu-icon far fa-chart-bar fa-lg"></i><a href="#">Theo Dõi Ứng Sinh</a>
               </router-link>
             </ul>
         </li>
@@ -496,8 +515,19 @@ const Home = {
       community: 0,
       candidateOut: 0,
       candidateOuts: [],
-      candidateOut: 0,
       account: 0,
+      fullNameGD: null,
+      fullNameQL: null,
+      fullNameGH: null,
+      imageGH: null,
+      imageGD: null,
+      imageQL: null,
+      emailGD: null,
+      emailQL: null,
+      emailGH: null,
+      phoneGD: null,
+      phoneQL: null,
+      phoneGH: null,
     };
   },
   mounted() {
@@ -508,7 +538,7 @@ const Home = {
       this.community = resp.data.count;
     });
     axios
-      .get("http://localhost:3000/api/candidates/?filter[where][status]=2")
+      .get("http://localhost:3000/api/candidates?filter[where][status]=2")
       .then((resp) => {
         this.candidateOuts = resp.data;
         this.candidateOut = this.candidateOuts.length;
@@ -516,7 +546,50 @@ const Home = {
     axios.get("http://localhost:3000/api/accounts/count").then((resp) => {
       this.account = resp.data.count;
     });
+    axios
+      .get(
+        "http://localhost:3000/api/managers?filter[where][and][0][position]=1&filter[where][and][1][status]=1"
+      )
+      .then((respGD) => {
+        this.imageGD =
+          `<img class="profile-user-img img-fluid rounded-circle img-thumbnail" id="image" src="../api/Photos/manager/download/` +
+          respGD.data[0].image +
+          `" alt="GD Image" style="margin-top: -70px;margin-left:85px;">`;
+        this.fullNameGD = respGD.data[0].fullName;
+        this.phoneGD = respGD.data[0].phone;
+        this.emailGD = respGD.data[0].email;
+      });
+    axios
+      .get(
+        "http://localhost:3000/api/managers?filter[where][and][0][position]=4&filter[where][and][1][status]=1"
+      )
+      .then((respQL) => {
+        this.imageQL =
+          `<img class="profile-user-img img-fluid rounded-circle img-thumbnail" id="image" src="../api/Photos/manager/download/` +
+          respQL.data[0].image +
+          `" alt="QL Image" style="margin-top: -70px;margin-left:85px;">
+      `;
+        this.fullNameQL = respQL.data[0].fullName;
+        this.phoneQL = respQL.data[0].phone;
+        this.emailQL = respQL.data[0].email;
+      });
+    axios
+      .get(
+        "http://localhost:3000/api/managers?filter[where][and][0][position]=5&filter[where][and][1][status]=1"
+      )
+      .then((respGH) => {
+        this.imageGH =
+          `<img class="profile-user-img img-fluid rounded-circle img-thumbnail" id="image" src="../api/Photos/manager/download/` +
+          respGH.data[0].image +
+          `" alt="GH Image" style="margin-top: -70px;margin-left:85px;">
+      `;
+        this.fullNameGH = respGH.data[0].fullName;
+        this.phoneGH = respGH.data[0].phone;
+        this.emailGH = respGH.data[0].email;
+      });
   },
+  computed: {},
+  methods: {},
   template: `
   <div>
     <div class="row">
@@ -592,39 +665,39 @@ const Home = {
     <div class="row mt-4">
       <div class="col-md-4">
         <div class="card card-chart">
-          <img class="profile-user-img img-fluid rounded-circle img-thumbnail" id="image" src="../images/user_03.jpg" alt="User Image" style="margin-top: -70px;">
+          <div v-html="imageGH"></div>
           <div class="card-body">
-            <h4 class="card-title text-center">Nguyễn Văn Khang</h4>
+            <h4 class="card-title text-center">{{ fullNameGH }}</h4>
             <h6 class="card-title text-center">(Giám Học)</h6>
             <p class="card-category text-center">
-              <span class="align-middle"><i class="fas fa-mobile-alt text-dark"></i>&nbsp; 0978645123</span><br/>
-              <span class="align-middle"><i class="fas fa-envelope-open-text text-dark"></i></i>&nbsp; vankhan@gmail.com</span>
+              <span class="align-middle"><i class="fas fa-mobile-alt text-dark"></i>&nbsp; {{ phoneGH }}</span><br/>
+              <span class="align-middle"><i class="fas fa-envelope-open-text text-dark"></i></i>&nbsp; {{ emailGH }}</span>
             </p>
           </div>
         </div>
       </div>
       <div class="col-md-4">
         <div class="card card-chart">
-          <img class="profile-user-img img-fluid rounded-circle img-thumbnail" id="image" src="../images/user_04.jpg" alt="User Image" style="margin-top: -70px;">
+          <div v-html="imageGD"></div>
           <div class="card-body">
-            <h4 class="card-title text-center">Nguyễn Quốc Kính</h4>
+            <h4 class="card-title text-center">{{ fullNameGD }}</h4>
             <h6 class="card-title text-center">(Giám Đốc)</h6>
             <p class="card-category text-center">
-              <span class="align-middle"><i class="fas fa-mobile-alt text-dark"></i>&nbsp; 0978645123</span><br/>
-              <span class="align-middle"><i class="fas fa-envelope-open-text text-dark"></i>&nbsp; quockinh@gmail.com</span>
+              <span class="align-middle"><i class="fas fa-mobile-alt text-dark"></i>&nbsp; {{ phoneGD }}</span><br/>
+              <span class="align-middle"><i class="fas fa-envelope-open-text text-dark"></i>&nbsp; {{ emailGD }}</span>
             </p>
           </div>
         </div>
       </div>
       <div class="col-md-4">
         <div class="card card-chart">
-          <img class="profile-user-img img-fluid rounded-circle img-thumbnail" id="image" src="../images/user_08.jpg" alt="User Image" style="margin-top: -70px;">
+          <div v-html="imageQL"></div>
           <div class="card-body">
-            <h4 class="card-title text-center">Nguyễn Ngọc Triêm</h4>
+            <h4 class="card-title text-center">{{ fullNameQL }}</h4>
             <h6 class="card-title text-center">(Quản Lý)</h6>
             <p class="card-category text-center">
-              <span class="align-middle"><i class="fas fa-mobile-alt text-dark"></i>&nbsp; 0978645123</span><br/>
-              <span class="align-middle"><i class="fas fa-envelope-open-text text-dark"></i>&nbsp; ngoctriem@gmail.com</span>
+              <span class="align-middle"><i class="fas fa-mobile-alt text-dark"></i>&nbsp; {{ phoneQL }}</span><br/>
+              <span class="align-middle"><i class="fas fa-envelope-open-text text-dark"></i>&nbsp; {{ emailQL }}</span>
             </p>
           </div>
         </div>
@@ -1382,17 +1455,29 @@ const ListManager = {
       this.$router.push({ name: "editManager", params: { id: manager.id } });
     },
 
-    deleteDataManager(id) {
+    deleteDataManager(manager) {
       axios
-        .delete("http://localhost:3000/api/managers/" + id)
+        .delete("http://localhost:3000/api/managers/" + manager.id)
         .then((response) => {
           console.log(response);
           this.managers.splice(id, 1);
-          this.$router.push("/");
-          setTimeout(() => {
-            this.$router.push("/managers");
-            location.reload();
-          }, 10);
+        });
+      axios
+        .get(
+          "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+            manager.id +
+            "&filter[where][and][1][role]=" +
+            manager.position +
+            1
+        )
+        .then((resp) => {
+          axios
+            .delete("http://localhost:3000/api/accounts/" + resp.data[0].id)
+            .then((respMan) => {
+              setTimeout(() => {
+                location.reload();
+              }, 10);
+            });
         });
     },
   },
@@ -1503,7 +1588,7 @@ const ListManager = {
             <button class="btn btn-danger rounded" data-dismiss="modal">
               Hủy
             </button>
-            <button class="btn rounded text-white btn-hover-blue" style="background-color: #056299;" @click="deleteDataManager(manager.id)">
+            <button class="btn rounded text-white btn-hover-blue" style="background-color: #056299;" @click="deleteDataManager(manager)">
               Xác Nhận
             </button>
           </div>
@@ -2184,6 +2269,32 @@ const EditManager = {
                   status: this.status,
                   id: this.$route.params.id,
                 };
+                if (manager.status == 2) {
+                  axios
+                    .get(
+                      "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                        manager.id +
+                        "&filter[where][and][1][role]=" +
+                        manager.position +
+                        1
+                    )
+                    .then((resp) => {
+                      const account = {
+                        userId: resp.data[0].userId,
+                        username: resp.data[0].username,
+                        password: resp.data[0].password,
+                        role: resp.data[0].role,
+                        status: 2,
+                        idTable: resp.data[0].idTable,
+                        id: resp.data[0].id,
+                      };
+                      const url_5 =
+                        "http://localhost:3000/api/accounts/" +
+                        account.id +
+                        "/replace";
+                      axios.post(url_5, account);
+                    });
+                }
                 const url =
                   "http://localhost:3000/api/managers/" +
                   manager.id +
@@ -2222,6 +2333,32 @@ const EditManager = {
                   status: this.status,
                   id: this.$route.params.id,
                 };
+                if (manager.status == 2) {
+                  axios
+                    .get(
+                      "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                        manager.id +
+                        "&filter[where][and][1][role]=" +
+                        manager.position +
+                        1
+                    )
+                    .then((resp) => {
+                      const account = {
+                        userId: resp.data[0].userId,
+                        username: resp.data[0].username,
+                        password: resp.data[0].password,
+                        role: resp.data[0].role,
+                        status: 2,
+                        idTable: resp.data[0].idTable,
+                        id: resp.data[0].id,
+                      };
+                      const url_5 =
+                        "http://localhost:3000/api/accounts/" +
+                        account.id +
+                        "/replace";
+                      axios.post(url_5, account);
+                    });
+                }
                 const url =
                   "http://localhost:3000/api/managers/" +
                   manager.id +
@@ -2252,6 +2389,32 @@ const EditManager = {
                 status: this.status,
                 id: this.$route.params.id,
               };
+              if (manager.status == 2) {
+                axios
+                  .get(
+                    "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                      manager.id +
+                      "&filter[where][and][1][role]=" +
+                      manager.position +
+                      1
+                  )
+                  .then((resp) => {
+                    const account = {
+                      userId: resp.data[0].userId,
+                      username: resp.data[0].username,
+                      password: resp.data[0].password,
+                      role: resp.data[0].role,
+                      status: 2,
+                      idTable: resp.data[0].idTable,
+                      id: resp.data[0].id,
+                    };
+                    const url_5 =
+                      "http://localhost:3000/api/accounts/" +
+                      account.id +
+                      "/replace";
+                    axios.post(url_5, account);
+                  });
+              }
               const url =
                 "http://localhost:3000/api/managers/" + manager.id + "/replace";
               axios.post(url, manager);
@@ -2312,6 +2475,32 @@ const EditManager = {
                       status: this.status,
                       id: this.$route.params.id,
                     };
+                    if (manager.status == 2) {
+                      axios
+                        .get(
+                          "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                            manager.id +
+                            "&filter[where][and][1][role]=" +
+                            manager.position +
+                            1
+                        )
+                        .then((resp) => {
+                          const account = {
+                            userId: resp.data[0].userId,
+                            username: resp.data[0].username,
+                            password: resp.data[0].password,
+                            role: resp.data[0].role,
+                            status: 2,
+                            idTable: resp.data[0].idTable,
+                            id: resp.data[0].id,
+                          };
+                          const url_5 =
+                            "http://localhost:3000/api/accounts/" +
+                            account.id +
+                            "/replace";
+                          axios.post(url_5, account);
+                        });
+                    }
                     const url =
                       "http://localhost:3000/api/managers/" +
                       manager.id +
@@ -2350,6 +2539,32 @@ const EditManager = {
                       status: this.status,
                       id: this.$route.params.id,
                     };
+                    if (manager.status == 2) {
+                      axios
+                        .get(
+                          "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                            manager.id +
+                            "&filter[where][and][1][role]=" +
+                            manager.position +
+                            1
+                        )
+                        .then((resp) => {
+                          const account = {
+                            userId: resp.data[0].userId,
+                            username: resp.data[0].username,
+                            password: resp.data[0].password,
+                            role: resp.data[0].role,
+                            status: 2,
+                            idTable: resp.data[0].idTable,
+                            id: resp.data[0].id,
+                          };
+                          const url_5 =
+                            "http://localhost:3000/api/accounts/" +
+                            account.id +
+                            "/replace";
+                          axios.post(url_5, account);
+                        });
+                    }
                     const url =
                       "http://localhost:3000/api/managers/" +
                       manager.id +
@@ -2380,6 +2595,32 @@ const EditManager = {
                     status: this.status,
                     id: this.$route.params.id,
                   };
+                  if (manager.status == 2) {
+                    axios
+                      .get(
+                        "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                          manager.id +
+                          "&filter[where][and][1][role]=" +
+                          manager.position +
+                          1
+                      )
+                      .then((resp) => {
+                        const account = {
+                          userId: resp.data[0].userId,
+                          username: resp.data[0].username,
+                          password: resp.data[0].password,
+                          role: resp.data[0].role,
+                          status: 2,
+                          idTable: resp.data[0].idTable,
+                          id: resp.data[0].id,
+                        };
+                        const url_5 =
+                          "http://localhost:3000/api/accounts/" +
+                          account.id +
+                          "/replace";
+                        axios.post(url_5, account);
+                      });
+                  }
                   const url =
                     "http://localhost:3000/api/managers/" +
                     manager.id +
@@ -2447,6 +2688,32 @@ const EditManager = {
                       status: this.status,
                       id: this.$route.params.id,
                     };
+                    if (manager.status == 2) {
+                      axios
+                        .get(
+                          "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                            manager.id +
+                            "&filter[where][and][1][role]=" +
+                            manager.position +
+                            1
+                        )
+                        .then((resp) => {
+                          const account = {
+                            userId: resp.data[0].userId,
+                            username: resp.data[0].username,
+                            password: resp.data[0].password,
+                            role: resp.data[0].role,
+                            status: 2,
+                            idTable: resp.data[0].idTable,
+                            id: resp.data[0].id,
+                          };
+                          const url_5 =
+                            "http://localhost:3000/api/accounts/" +
+                            account.id +
+                            "/replace";
+                          axios.post(url_5, account);
+                        });
+                    }
                     const url =
                       "http://localhost:3000/api/managers/" +
                       manager.id +
@@ -2485,6 +2752,32 @@ const EditManager = {
                       status: this.status,
                       id: this.$route.params.id,
                     };
+                    if (manager.status == 2) {
+                      axios
+                        .get(
+                          "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                            manager.id +
+                            "&filter[where][and][1][role]=" +
+                            manager.position +
+                            1
+                        )
+                        .then((resp) => {
+                          const account = {
+                            userId: resp.data[0].userId,
+                            username: resp.data[0].username,
+                            password: resp.data[0].password,
+                            role: resp.data[0].role,
+                            status: 2,
+                            idTable: resp.data[0].idTable,
+                            id: resp.data[0].id,
+                          };
+                          const url_5 =
+                            "http://localhost:3000/api/accounts/" +
+                            account.id +
+                            "/replace";
+                          axios.post(url_5, account);
+                        });
+                    }
                     const url =
                       "http://localhost:3000/api/managers/" +
                       manager.id +
@@ -2515,6 +2808,32 @@ const EditManager = {
                     status: this.status,
                     id: this.$route.params.id,
                   };
+                  if (manager.status == 2) {
+                    axios
+                      .get(
+                        "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                          manager.id +
+                          "&filter[where][and][1][role]=" +
+                          manager.position +
+                          1
+                      )
+                      .then((resp) => {
+                        const account = {
+                          userId: resp.data[0].userId,
+                          username: resp.data[0].username,
+                          password: resp.data[0].password,
+                          role: resp.data[0].role,
+                          status: 2,
+                          idTable: resp.data[0].idTable,
+                          id: resp.data[0].id,
+                        };
+                        const url_5 =
+                          "http://localhost:3000/api/accounts/" +
+                          account.id +
+                          "/replace";
+                        axios.post(url_5, account);
+                      });
+                  }
                   const url =
                     "http://localhost:3000/api/managers/" +
                     manager.id +
@@ -2595,6 +2914,32 @@ const EditManager = {
                             status: this.status,
                             id: this.$route.params.id,
                           };
+                          if (manager.status == 2) {
+                            axios
+                              .get(
+                                "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                                  manager.id +
+                                  "&filter[where][and][1][role]=" +
+                                  manager.position +
+                                  1
+                              )
+                              .then((resp) => {
+                                const account = {
+                                  userId: resp.data[0].userId,
+                                  username: resp.data[0].username,
+                                  password: resp.data[0].password,
+                                  role: resp.data[0].role,
+                                  status: 2,
+                                  idTable: resp.data[0].idTable,
+                                  id: resp.data[0].id,
+                                };
+                                const url_5 =
+                                  "http://localhost:3000/api/accounts/" +
+                                  account.id +
+                                  "/replace";
+                                axios.post(url_5, account);
+                              });
+                          }
                           const url =
                             "http://localhost:3000/api/managers/" +
                             manager.id +
@@ -2633,6 +2978,32 @@ const EditManager = {
                             status: this.status,
                             id: this.$route.params.id,
                           };
+                          if (manager.status == 2) {
+                            axios
+                              .get(
+                                "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                                  manager.id +
+                                  "&filter[where][and][1][role]=" +
+                                  manager.position +
+                                  1
+                              )
+                              .then((resp) => {
+                                const account = {
+                                  userId: resp.data[0].userId,
+                                  username: resp.data[0].username,
+                                  password: resp.data[0].password,
+                                  role: resp.data[0].role,
+                                  status: 2,
+                                  idTable: resp.data[0].idTable,
+                                  id: resp.data[0].id,
+                                };
+                                const url_5 =
+                                  "http://localhost:3000/api/accounts/" +
+                                  account.id +
+                                  "/replace";
+                                axios.post(url_5, account);
+                              });
+                          }
                           const url =
                             "http://localhost:3000/api/managers/" +
                             manager.id +
@@ -2663,6 +3034,32 @@ const EditManager = {
                           status: this.status,
                           id: this.$route.params.id,
                         };
+                        if (manager.status == 2) {
+                          axios
+                            .get(
+                              "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                                manager.id +
+                                "&filter[where][and][1][role]=" +
+                                manager.position +
+                                1
+                            )
+                            .then((resp) => {
+                              const account = {
+                                userId: resp.data[0].userId,
+                                username: resp.data[0].username,
+                                password: resp.data[0].password,
+                                role: resp.data[0].role,
+                                status: 2,
+                                idTable: resp.data[0].idTable,
+                                id: resp.data[0].id,
+                              };
+                              const url_5 =
+                                "http://localhost:3000/api/accounts/" +
+                                account.id +
+                                "/replace";
+                              axios.post(url_5, account);
+                            });
+                        }
                         const url =
                           "http://localhost:3000/api/managers/" +
                           manager.id +
@@ -2901,7 +3298,7 @@ const ListDepartment = {
   },
   template: `
   <div class="card shadow mb-4" style="margin-top: -5px;">
-    <div class="card-header py-3">
+    <div class="card-header py-3" style="margin-bottom:-40px">
       <div class="row">
         <div class="col-md-4">
           <h6 class="m-0 font-weight-bold text-dark">Danh sách Phòng Ban</h6>
@@ -2918,7 +3315,8 @@ const ListDepartment = {
       </div>
     </div>
     <div class="card-body">
-      <div class="table-responsive">
+      <hr style="height:1px;color:lightgray;background-color:lightgray">
+      <div class="table-responsive" style="margin-top:-8px">
         <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
           <thead>
             <tr>
@@ -3310,17 +3708,27 @@ const ListCandidate = {
       });
     },
 
-    deleteDataCandidate(id) {
+    deleteDataCandidate(candidate) {
       axios
-        .delete("http://localhost:3000/api/candidates/" + id)
+        .delete("http://localhost:3000/api/candidates/" + candidate.id)
         .then((response) => {
           console.log(response);
           this.candidates.splice(id, 1);
-          this.$router.push("/");
-          setTimeout(() => {
-            this.$router.push("/candidates");
-            location.reload();
-          }, 10);
+        });
+      axios
+        .get(
+          "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+            candidate.id +
+            "&filter[where][and][1][role]=5"
+        )
+        .then((resp) => {
+          axios
+            .delete("http://localhost:3000/api/accounts/" + resp.data[0].id)
+            .then((respCan) => {
+              setTimeout(() => {
+                location.reload();
+              }, 10);
+            });
         });
     },
   },
@@ -3354,7 +3762,6 @@ const ListCandidate = {
               <th>Số Điện Thoại</th>
               <th>Email</th>
               <th>Cộng Đoàn</th>
-              <th>Quê Quán</th>
               <th>Trạng Thái</th>
               <th>Action</th>
             </tr>
@@ -3366,7 +3773,6 @@ const ListCandidate = {
               <th>Số Điện Thoại</th>
               <th>Email</th>
               <th>Cộng Đoàn</th>
-              <th>Quê Quán</th>
               <th>Trạng Thái</th>
               <th>Action</th>
             </tr>
@@ -3378,7 +3784,6 @@ const ListCandidate = {
               <td>{{ candidate.phone }}</td>
               <td>{{ candidate.email }}</td>
               <td v-for="community in communities" v-if="community.id == candidate.community">{{ community.communityName }}</td>
-              <td>{{ candidate.homeland }}</td>
               <td v-if="candidate.status == 1">
                 <i class="fas fa-toggle-on fa-lg text-success"></i>
               </td>
@@ -3397,14 +3802,14 @@ const ListCandidate = {
                   <div class="col-lg-4">
                     <button :title="titleButtonEdit" @click="getDataCandidateUpdate(candidate)"
                       class="btn btn-warning btn-sm h-28px w-28px rounded" type="submit"
-                      style="margin-left: -12.5px;">
+                      style="margin-left: -15px;">
                       <i class="fas fa-edit fa-md ml--2px"></i>
                     </button>
                   </div>
                   <div class="col-lg-4">
                     <button :title="titleButtonDelete" data-toggle="modal" @click="getDetailCandidate(candidate)"
                       data-target="#deleteCandidateModal" class="btn btn-danger btn-sm h-28px w-28px rounded"
-                      style="margin-left: -25.5px;">
+                      style="margin-left: -30px;">
                       <i class="far fa-trash-alt fa-md ml--1px"></i>
                     </button>
                   </div>
@@ -3431,7 +3836,7 @@ const ListCandidate = {
             <button class="btn btn-danger rounded" data-dismiss="modal">
               Hủy
             </button>
-            <button class="btn rounded text-white btn-hover-blue" style="background-color: #056299;" @click="deleteDataCandidate(candidate.id)">
+            <button class="btn rounded text-white btn-hover-blue" style="background-color: #056299;" @click="deleteDataCandidate(candidate)">
               Xác Nhận
             </button>
           </div>
@@ -3718,13 +4123,6 @@ const AddCandidate = {
                       homeland: this.homeland,
                       status: this.status,
                     };
-                    const account = {
-                      userId: this.candidateId,
-                      username: this.email,
-                      password: crypt.encrypt(this.phone),
-                      role: 5,
-                      status: this.status,
-                    };
                     axios
                       .get(
                         "http://localhost:3000/api/communities/getCommunity?id=" +
@@ -3763,6 +4161,13 @@ const AddCandidate = {
                               status: resp.data.status,
                               idTable: resp.data.id,
                             };
+                            const rateCandidate = {
+                              candidate: resp.data.id,
+                              month: 0,
+                              year: 0,
+                              score: 0,
+                              idSchedule: 0,
+                            };
                             const url_2 =
                               "http://localhost:3000/api/communities/" +
                               community.id +
@@ -3770,6 +4175,9 @@ const AddCandidate = {
                             axios.post(url_2, community);
                             const url = "http://localhost:3000/api/accounts";
                             axios.post(url, account);
+                            const url_3 =
+                              "http://localhost:3000/api/rateCandidates";
+                            axios.post(url_3, rateCandidate);
                             if (this.selectedFile != null) {
                               axios
                                 .post(
@@ -4164,6 +4572,30 @@ const EditCandidate = {
                   status: this.status,
                   id: this.$route.params.id,
                 };
+                if (candidate.status == 2) {
+                  axios
+                    .get(
+                      "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                        candidate.id +
+                        "&filter[where][and][1][role]=5"
+                    )
+                    .then((resp) => {
+                      const account = {
+                        userId: resp.data[0].userId,
+                        username: resp.data[0].username,
+                        password: resp.data[0].password,
+                        role: resp.data[0].role,
+                        status: 2,
+                        idTable: resp.data[0].idTable,
+                        id: resp.data[0].id,
+                      };
+                      const url_5 =
+                        "http://localhost:3000/api/accounts/" +
+                        account.id +
+                        "/replace";
+                      axios.post(url_5, account);
+                    });
+                }
                 const url =
                   "http://localhost:3000/api/candidates/" +
                   candidate.id +
@@ -4203,6 +4635,30 @@ const EditCandidate = {
                   status: this.status,
                   id: this.$route.params.id,
                 };
+                if (candidate.status == 2) {
+                  axios
+                    .get(
+                      "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                        candidate.id +
+                        "&filter[where][and][1][role]=5"
+                    )
+                    .then((resp) => {
+                      const account = {
+                        userId: resp.data[0].userId,
+                        username: resp.data[0].username,
+                        password: resp.data[0].password,
+                        role: resp.data[0].role,
+                        status: 2,
+                        idTable: resp.data[0].idTable,
+                        id: resp.data[0].id,
+                      };
+                      const url_5 =
+                        "http://localhost:3000/api/accounts/" +
+                        account.id +
+                        "/replace";
+                      axios.post(url_5, account);
+                    });
+                }
                 const url =
                   "http://localhost:3000/api/candidates/" +
                   candidate.id +
@@ -4234,6 +4690,30 @@ const EditCandidate = {
                 status: this.status,
                 id: this.$route.params.id,
               };
+              if (candidate.status == 2) {
+                axios
+                  .get(
+                    "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                      candidate.id +
+                      "&filter[where][and][1][role]=5"
+                  )
+                  .then((resp) => {
+                    const account = {
+                      userId: resp.data[0].userId,
+                      username: resp.data[0].username,
+                      password: resp.data[0].password,
+                      role: resp.data[0].role,
+                      status: 2,
+                      idTable: resp.data[0].idTable,
+                      id: resp.data[0].id,
+                    };
+                    const url_5 =
+                      "http://localhost:3000/api/accounts/" +
+                      account.id +
+                      "/replace";
+                    axios.post(url_5, account);
+                  });
+              }
               const url =
                 "http://localhost:3000/api/candidates/" +
                 candidate.id +
@@ -4474,6 +4954,30 @@ const EditCandidate = {
                             amount: amount,
                             id: this.community,
                           };
+                          if (candidate.status == 2) {
+                            axios
+                              .get(
+                                "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                                  candidate.id +
+                                  "&filter[where][and][1][role]=5"
+                              )
+                              .then((resp) => {
+                                const account = {
+                                  userId: resp.data[0].userId,
+                                  username: resp.data[0].username,
+                                  password: resp.data[0].password,
+                                  role: resp.data[0].role,
+                                  status: 2,
+                                  idTable: resp.data[0].idTable,
+                                  id: resp.data[0].id,
+                                };
+                                const url_5 =
+                                  "http://localhost:3000/api/accounts/" +
+                                  account.id +
+                                  "/replace";
+                                axios.post(url_5, account);
+                              });
+                          }
                           const url_1 =
                             "http://localhost:3000/api/communities/" +
                             community.id +
@@ -4674,6 +5178,30 @@ const EditCandidate = {
                             amount: amount,
                             id: this.community,
                           };
+                          if (candidate.status == 2) {
+                            axios
+                              .get(
+                                "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                                  candidate.id +
+                                  "&filter[where][and][1][role]=5"
+                              )
+                              .then((resp) => {
+                                const account = {
+                                  userId: resp.data[0].userId,
+                                  username: resp.data[0].username,
+                                  password: resp.data[0].password,
+                                  role: resp.data[0].role,
+                                  status: 2,
+                                  idTable: resp.data[0].idTable,
+                                  id: resp.data[0].id,
+                                };
+                                const url_5 =
+                                  "http://localhost:3000/api/accounts/" +
+                                  account.id +
+                                  "/replace";
+                                axios.post(url_5, account);
+                              });
+                          }
                           const url_1 =
                             "http://localhost:3000/api/communities/" +
                             community.id +
@@ -4887,6 +5415,30 @@ const EditCandidate = {
                                   amount: amount,
                                   id: this.community,
                                 };
+                                if (candidate.status == 2) {
+                                  axios
+                                    .get(
+                                      "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                                        candidate.id +
+                                        "&filter[where][and][1][role]=5"
+                                    )
+                                    .then((resp) => {
+                                      const account = {
+                                        userId: resp.data[0].userId,
+                                        username: resp.data[0].username,
+                                        password: resp.data[0].password,
+                                        role: resp.data[0].role,
+                                        status: 2,
+                                        idTable: resp.data[0].idTable,
+                                        id: resp.data[0].id,
+                                      };
+                                      const url_5 =
+                                        "http://localhost:3000/api/accounts/" +
+                                        account.id +
+                                        "/replace";
+                                      axios.post(url_5, account);
+                                    });
+                                }
                                 const url_1 =
                                   "http://localhost:3000/api/communities/" +
                                   community.id +
@@ -5126,7 +5678,11 @@ const ListCommunity = {
       this.communities = response.data;
     });
   },
-  computed: {},
+  computed: {
+    reload() {
+      location.reload();
+    },
+  },
   methods: {
     getDetailCommunity(community) {
       this.community = community;
@@ -5199,7 +5755,7 @@ const ListCommunity = {
             <tr v-for="(community, index) in communities" :key="community.id">
               <th class="align-middle" scope="row">{{ index + 1 }}</th>
               <td>{{ community.communityName }}</td>
-              <td>{{ crypt.formatDate(community.patron) }}</td>
+              <td>{{ crypt.formatDateDisplay(community.patron) }}</td>
               <td>{{ community.address }}</td>
               <td>{{ community.amount }}</td>
               <td class="align-middle">
@@ -5664,18 +6220,46 @@ const ListCompanion = {
       });
     },
 
-    deleteDataCompanion(id) {
+    deleteDataCompanion(companion) {
       axios
-        .delete("http://localhost:3000/api/companions/" + id)
+        .delete("http://localhost:3000/api/companions/" + companion.id)
         .then((response) => {
           console.log(response);
           this.companions.splice(id, 1);
-          this.$router.push("/");
-          setTimeout(() => {
-            this.$router.push("/companions");
-            location.reload();
-          }, 10);
         });
+      if (companion.position == 6) {
+        axios
+          .get(
+            "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+              companion.id +
+              "&filter[where][and][1][role]=8"
+          )
+          .then((resp) => {
+            axios
+              .delete("http://localhost:3000/api/accounts/" + resp.data[0].id)
+              .then((respCom) => {
+                setTimeout(() => {
+                  location.reload();
+                }, 10);
+              });
+          });
+      } else if (companion.position == 7) {
+        axios
+          .get(
+            "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+              companion.id +
+              "&filter[where][and][1][role]=9"
+          )
+          .then((resp) => {
+            axios
+              .delete("http://localhost:3000/api/accounts/" + resp.data[0].id)
+              .then((respCom) => {
+                setTimeout(() => {
+                  location.reload();
+                }, 10);
+              });
+          });
+      }
     },
   },
   template: `
@@ -5782,7 +6366,7 @@ const ListCompanion = {
             <button class="btn btn-danger rounded" data-dismiss="modal">
               Hủy
             </button>
-            <button class="btn rounded text-white btn-hover-blue" style="background-color: #056299;" @click="deleteDataCompanion(companion.id)">
+            <button class="btn rounded text-white btn-hover-blue" style="background-color: #056299;" @click="deleteDataCompanion(companion)">
               Xác Nhận
             </button>
           </div>
@@ -6463,6 +7047,55 @@ const EditCompanion = {
                   status: this.status,
                   id: this.$route.params.id,
                 };
+                if (companion.status == 2) {
+                  if (companion.position == 6) {
+                    axios
+                      .get(
+                        "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                          companion.id +
+                          "&filter[where][and][1][role]=8"
+                      )
+                      .then((resp) => {
+                        const account = {
+                          userId: resp.data[0].userId,
+                          username: resp.data[0].username,
+                          password: resp.data[0].password,
+                          role: resp.data[0].role,
+                          status: 2,
+                          idTable: resp.data[0].idTable,
+                          id: resp.data[0].id,
+                        };
+                        const url_5 =
+                          "http://localhost:3000/api/accounts/" +
+                          account.id +
+                          "/replace";
+                        axios.post(url_5, account);
+                      });
+                  } else if (companion.position == 7) {
+                    axios
+                      .get(
+                        "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                          companion.id +
+                          "&filter[where][and][1][role]=9"
+                      )
+                      .then((resp) => {
+                        const account = {
+                          userId: resp.data[0].userId,
+                          username: resp.data[0].username,
+                          password: resp.data[0].password,
+                          role: resp.data[0].role,
+                          status: 2,
+                          idTable: resp.data[0].idTable,
+                          id: resp.data[0].id,
+                        };
+                        const url_5 =
+                          "http://localhost:3000/api/accounts/" +
+                          account.id +
+                          "/replace";
+                        axios.post(url_5, account);
+                      });
+                  }
+                }
                 const url =
                   "http://localhost:3000/api/companions/" +
                   companion.id +
@@ -6501,6 +7134,55 @@ const EditCompanion = {
                   status: this.status,
                   id: this.$route.params.id,
                 };
+                if (companion.status == 2) {
+                  if (companion.position == 6) {
+                    axios
+                      .get(
+                        "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                          companion.id +
+                          "&filter[where][and][1][role]=8"
+                      )
+                      .then((resp) => {
+                        const account = {
+                          userId: resp.data[0].userId,
+                          username: resp.data[0].username,
+                          password: resp.data[0].password,
+                          role: resp.data[0].role,
+                          status: 2,
+                          idTable: resp.data[0].idTable,
+                          id: resp.data[0].id,
+                        };
+                        const url_5 =
+                          "http://localhost:3000/api/accounts/" +
+                          account.id +
+                          "/replace";
+                        axios.post(url_5, account);
+                      });
+                  } else if (companion.position == 7) {
+                    axios
+                      .get(
+                        "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                          companion.id +
+                          "&filter[where][and][1][role]=9"
+                      )
+                      .then((resp) => {
+                        const account = {
+                          userId: resp.data[0].userId,
+                          username: resp.data[0].username,
+                          password: resp.data[0].password,
+                          role: resp.data[0].role,
+                          status: 2,
+                          idTable: resp.data[0].idTable,
+                          id: resp.data[0].id,
+                        };
+                        const url_5 =
+                          "http://localhost:3000/api/accounts/" +
+                          account.id +
+                          "/replace";
+                        axios.post(url_5, account);
+                      });
+                  }
+                }
                 const url =
                   "http://localhost:3000/api/companions/" +
                   companion.id +
@@ -6531,6 +7213,55 @@ const EditCompanion = {
                 status: this.status,
                 id: this.$route.params.id,
               };
+              if (companion.status == 2) {
+                if (companion.position == 6) {
+                  axios
+                    .get(
+                      "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                        companion.id +
+                        "&filter[where][and][1][role]=8"
+                    )
+                    .then((resp) => {
+                      const account = {
+                        userId: resp.data[0].userId,
+                        username: resp.data[0].username,
+                        password: resp.data[0].password,
+                        role: resp.data[0].role,
+                        status: 2,
+                        idTable: resp.data[0].idTable,
+                        id: resp.data[0].id,
+                      };
+                      const url_5 =
+                        "http://localhost:3000/api/accounts/" +
+                        account.id +
+                        "/replace";
+                      axios.post(url_5, account);
+                    });
+                } else if (companion.position == 7) {
+                  axios
+                    .get(
+                      "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                        companion.id +
+                        "&filter[where][and][1][role]=9"
+                    )
+                    .then((resp) => {
+                      const account = {
+                        userId: resp.data[0].userId,
+                        username: resp.data[0].username,
+                        password: resp.data[0].password,
+                        role: resp.data[0].role,
+                        status: 2,
+                        idTable: resp.data[0].idTable,
+                        id: resp.data[0].id,
+                      };
+                      const url_5 =
+                        "http://localhost:3000/api/accounts/" +
+                        account.id +
+                        "/replace";
+                      axios.post(url_5, account);
+                    });
+                }
+              }
               const url =
                 "http://localhost:3000/api/companions/" +
                 companion.id +
@@ -6595,6 +7326,55 @@ const EditCompanion = {
                       status: this.status,
                       id: this.$route.params.id,
                     };
+                    if (companion.status == 2) {
+                      if (companion.position == 6) {
+                        axios
+                          .get(
+                            "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                              companion.id +
+                              "&filter[where][and][1][role]=8"
+                          )
+                          .then((resp) => {
+                            const account = {
+                              userId: resp.data[0].userId,
+                              username: resp.data[0].username,
+                              password: resp.data[0].password,
+                              role: resp.data[0].role,
+                              status: 2,
+                              idTable: resp.data[0].idTable,
+                              id: resp.data[0].id,
+                            };
+                            const url_5 =
+                              "http://localhost:3000/api/accounts/" +
+                              account.id +
+                              "/replace";
+                            axios.post(url_5, account);
+                          });
+                      } else if (companion.position == 7) {
+                        axios
+                          .get(
+                            "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                              companion.id +
+                              "&filter[where][and][1][role]=9"
+                          )
+                          .then((resp) => {
+                            const account = {
+                              userId: resp.data[0].userId,
+                              username: resp.data[0].username,
+                              password: resp.data[0].password,
+                              role: resp.data[0].role,
+                              status: 2,
+                              idTable: resp.data[0].idTable,
+                              id: resp.data[0].id,
+                            };
+                            const url_5 =
+                              "http://localhost:3000/api/accounts/" +
+                              account.id +
+                              "/replace";
+                            axios.post(url_5, account);
+                          });
+                      }
+                    }
                     const url =
                       "http://localhost:3000/api/companions/" +
                       companion.id +
@@ -6633,6 +7413,55 @@ const EditCompanion = {
                       status: this.status,
                       id: this.$route.params.id,
                     };
+                    if (companion.status == 2) {
+                      if (companion.position == 6) {
+                        axios
+                          .get(
+                            "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                              companion.id +
+                              "&filter[where][and][1][role]=8"
+                          )
+                          .then((resp) => {
+                            const account = {
+                              userId: resp.data[0].userId,
+                              username: resp.data[0].username,
+                              password: resp.data[0].password,
+                              role: resp.data[0].role,
+                              status: 2,
+                              idTable: resp.data[0].idTable,
+                              id: resp.data[0].id,
+                            };
+                            const url_5 =
+                              "http://localhost:3000/api/accounts/" +
+                              account.id +
+                              "/replace";
+                            axios.post(url_5, account);
+                          });
+                      } else if (companion.position == 7) {
+                        axios
+                          .get(
+                            "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                              companion.id +
+                              "&filter[where][and][1][role]=9"
+                          )
+                          .then((resp) => {
+                            const account = {
+                              userId: resp.data[0].userId,
+                              username: resp.data[0].username,
+                              password: resp.data[0].password,
+                              role: resp.data[0].role,
+                              status: 2,
+                              idTable: resp.data[0].idTable,
+                              id: resp.data[0].id,
+                            };
+                            const url_5 =
+                              "http://localhost:3000/api/accounts/" +
+                              account.id +
+                              "/replace";
+                            axios.post(url_5, account);
+                          });
+                      }
+                    }
                     const url =
                       "http://localhost:3000/api/companions/" +
                       companion.id +
@@ -6663,6 +7492,55 @@ const EditCompanion = {
                     status: this.status,
                     id: this.$route.params.id,
                   };
+                  if (companion.status == 2) {
+                    if (companion.position == 6) {
+                      axios
+                        .get(
+                          "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                            companion.id +
+                            "&filter[where][and][1][role]=8"
+                        )
+                        .then((resp) => {
+                          const account = {
+                            userId: resp.data[0].userId,
+                            username: resp.data[0].username,
+                            password: resp.data[0].password,
+                            role: resp.data[0].role,
+                            status: 2,
+                            idTable: resp.data[0].idTable,
+                            id: resp.data[0].id,
+                          };
+                          const url_5 =
+                            "http://localhost:3000/api/accounts/" +
+                            account.id +
+                            "/replace";
+                          axios.post(url_5, account);
+                        });
+                    } else if (companion.position == 7) {
+                      axios
+                        .get(
+                          "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                            companion.id +
+                            "&filter[where][and][1][role]=9"
+                        )
+                        .then((resp) => {
+                          const account = {
+                            userId: resp.data[0].userId,
+                            username: resp.data[0].username,
+                            password: resp.data[0].password,
+                            role: resp.data[0].role,
+                            status: 2,
+                            idTable: resp.data[0].idTable,
+                            id: resp.data[0].id,
+                          };
+                          const url_5 =
+                            "http://localhost:3000/api/accounts/" +
+                            account.id +
+                            "/replace";
+                          axios.post(url_5, account);
+                        });
+                    }
+                  }
                   const url =
                     "http://localhost:3000/api/companions/" +
                     companion.id +
@@ -6732,6 +7610,55 @@ const EditCompanion = {
                       status: this.status,
                       id: this.$route.params.id,
                     };
+                    if (companion.status == 2) {
+                      if (companion.position == 6) {
+                        axios
+                          .get(
+                            "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                              companion.id +
+                              "&filter[where][and][1][role]=8"
+                          )
+                          .then((resp) => {
+                            const account = {
+                              userId: resp.data[0].userId,
+                              username: resp.data[0].username,
+                              password: resp.data[0].password,
+                              role: resp.data[0].role,
+                              status: 2,
+                              idTable: resp.data[0].idTable,
+                              id: resp.data[0].id,
+                            };
+                            const url_5 =
+                              "http://localhost:3000/api/accounts/" +
+                              account.id +
+                              "/replace";
+                            axios.post(url_5, account);
+                          });
+                      } else if (companion.position == 7) {
+                        axios
+                          .get(
+                            "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                              companion.id +
+                              "&filter[where][and][1][role]=9"
+                          )
+                          .then((resp) => {
+                            const account = {
+                              userId: resp.data[0].userId,
+                              username: resp.data[0].username,
+                              password: resp.data[0].password,
+                              role: resp.data[0].role,
+                              status: 2,
+                              idTable: resp.data[0].idTable,
+                              id: resp.data[0].id,
+                            };
+                            const url_5 =
+                              "http://localhost:3000/api/accounts/" +
+                              account.id +
+                              "/replace";
+                            axios.post(url_5, account);
+                          });
+                      }
+                    }
                     const url =
                       "http://localhost:3000/api/companions/" +
                       companion.id +
@@ -6770,6 +7697,55 @@ const EditCompanion = {
                       status: this.status,
                       id: this.$route.params.id,
                     };
+                    if (companion.status == 2) {
+                      if (companion.position == 6) {
+                        axios
+                          .get(
+                            "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                              companion.id +
+                              "&filter[where][and][1][role]=8"
+                          )
+                          .then((resp) => {
+                            const account = {
+                              userId: resp.data[0].userId,
+                              username: resp.data[0].username,
+                              password: resp.data[0].password,
+                              role: resp.data[0].role,
+                              status: 2,
+                              idTable: resp.data[0].idTable,
+                              id: resp.data[0].id,
+                            };
+                            const url_5 =
+                              "http://localhost:3000/api/accounts/" +
+                              account.id +
+                              "/replace";
+                            axios.post(url_5, account);
+                          });
+                      } else if (companion.position == 7) {
+                        axios
+                          .get(
+                            "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                              companion.id +
+                              "&filter[where][and][1][role]=9"
+                          )
+                          .then((resp) => {
+                            const account = {
+                              userId: resp.data[0].userId,
+                              username: resp.data[0].username,
+                              password: resp.data[0].password,
+                              role: resp.data[0].role,
+                              status: 2,
+                              idTable: resp.data[0].idTable,
+                              id: resp.data[0].id,
+                            };
+                            const url_5 =
+                              "http://localhost:3000/api/accounts/" +
+                              account.id +
+                              "/replace";
+                            axios.post(url_5, account);
+                          });
+                      }
+                    }
                     const url =
                       "http://localhost:3000/api/companions/" +
                       companion.id +
@@ -6800,6 +7776,55 @@ const EditCompanion = {
                     status: this.status,
                     id: this.$route.params.id,
                   };
+                  if (companion.status == 2) {
+                    if (companion.position == 6) {
+                      axios
+                        .get(
+                          "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                            companion.id +
+                            "&filter[where][and][1][role]=8"
+                        )
+                        .then((resp) => {
+                          const account = {
+                            userId: resp.data[0].userId,
+                            username: resp.data[0].username,
+                            password: resp.data[0].password,
+                            role: resp.data[0].role,
+                            status: 2,
+                            idTable: resp.data[0].idTable,
+                            id: resp.data[0].id,
+                          };
+                          const url_5 =
+                            "http://localhost:3000/api/accounts/" +
+                            account.id +
+                            "/replace";
+                          axios.post(url_5, account);
+                        });
+                    } else if (companion.position == 7) {
+                      axios
+                        .get(
+                          "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                            companion.id +
+                            "&filter[where][and][1][role]=9"
+                        )
+                        .then((resp) => {
+                          const account = {
+                            userId: resp.data[0].userId,
+                            username: resp.data[0].username,
+                            password: resp.data[0].password,
+                            role: resp.data[0].role,
+                            status: 2,
+                            idTable: resp.data[0].idTable,
+                            id: resp.data[0].id,
+                          };
+                          const url_5 =
+                            "http://localhost:3000/api/accounts/" +
+                            account.id +
+                            "/replace";
+                          axios.post(url_5, account);
+                        });
+                    }
+                  }
                   const url =
                     "http://localhost:3000/api/companions/" +
                     companion.id +
@@ -6882,6 +7907,55 @@ const EditCompanion = {
                             status: this.status,
                             id: this.$route.params.id,
                           };
+                          if (companion.status == 2) {
+                            if (companion.position == 6) {
+                              axios
+                                .get(
+                                  "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                                    companion.id +
+                                    "&filter[where][and][1][role]=8"
+                                )
+                                .then((resp) => {
+                                  const account = {
+                                    userId: resp.data[0].userId,
+                                    username: resp.data[0].username,
+                                    password: resp.data[0].password,
+                                    role: resp.data[0].role,
+                                    status: 2,
+                                    idTable: resp.data[0].idTable,
+                                    id: resp.data[0].id,
+                                  };
+                                  const url_5 =
+                                    "http://localhost:3000/api/accounts/" +
+                                    account.id +
+                                    "/replace";
+                                  axios.post(url_5, account);
+                                });
+                            } else if (companion.position == 7) {
+                              axios
+                                .get(
+                                  "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                                    companion.id +
+                                    "&filter[where][and][1][role]=9"
+                                )
+                                .then((resp) => {
+                                  const account = {
+                                    userId: resp.data[0].userId,
+                                    username: resp.data[0].username,
+                                    password: resp.data[0].password,
+                                    role: resp.data[0].role,
+                                    status: 2,
+                                    idTable: resp.data[0].idTable,
+                                    id: resp.data[0].id,
+                                  };
+                                  const url_5 =
+                                    "http://localhost:3000/api/accounts/" +
+                                    account.id +
+                                    "/replace";
+                                  axios.post(url_5, account);
+                                });
+                            }
+                          }
                           const url =
                             "http://localhost:3000/api/companions/" +
                             companion.id +
@@ -6920,6 +7994,55 @@ const EditCompanion = {
                             status: this.status,
                             id: this.$route.params.id,
                           };
+                          if (companion.status == 2) {
+                            if (companion.position == 6) {
+                              axios
+                                .get(
+                                  "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                                    companion.id +
+                                    "&filter[where][and][1][role]=8"
+                                )
+                                .then((resp) => {
+                                  const account = {
+                                    userId: resp.data[0].userId,
+                                    username: resp.data[0].username,
+                                    password: resp.data[0].password,
+                                    role: resp.data[0].role,
+                                    status: 2,
+                                    idTable: resp.data[0].idTable,
+                                    id: resp.data[0].id,
+                                  };
+                                  const url_5 =
+                                    "http://localhost:3000/api/accounts/" +
+                                    account.id +
+                                    "/replace";
+                                  axios.post(url_5, account);
+                                });
+                            } else if (companion.position == 7) {
+                              axios
+                                .get(
+                                  "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                                    companion.id +
+                                    "&filter[where][and][1][role]=9"
+                                )
+                                .then((resp) => {
+                                  const account = {
+                                    userId: resp.data[0].userId,
+                                    username: resp.data[0].username,
+                                    password: resp.data[0].password,
+                                    role: resp.data[0].role,
+                                    status: 2,
+                                    idTable: resp.data[0].idTable,
+                                    id: resp.data[0].id,
+                                  };
+                                  const url_5 =
+                                    "http://localhost:3000/api/accounts/" +
+                                    account.id +
+                                    "/replace";
+                                  axios.post(url_5, account);
+                                });
+                            }
+                          }
                           const url =
                             "http://localhost:3000/api/companions/" +
                             companion.id +
@@ -6950,6 +8073,55 @@ const EditCompanion = {
                           status: this.status,
                           id: this.$route.params.id,
                         };
+                        if (companion.status == 2) {
+                          if (companion.position == 6) {
+                            axios
+                              .get(
+                                "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                                  companion.id +
+                                  "&filter[where][and][1][role]=8"
+                              )
+                              .then((resp) => {
+                                const account = {
+                                  userId: resp.data[0].userId,
+                                  username: resp.data[0].username,
+                                  password: resp.data[0].password,
+                                  role: resp.data[0].role,
+                                  status: 2,
+                                  idTable: resp.data[0].idTable,
+                                  id: resp.data[0].id,
+                                };
+                                const url_5 =
+                                  "http://localhost:3000/api/accounts/" +
+                                  account.id +
+                                  "/replace";
+                                axios.post(url_5, account);
+                              });
+                          } else if (companion.position == 7) {
+                            axios
+                              .get(
+                                "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                                  companion.id +
+                                  "&filter[where][and][1][role]=9"
+                              )
+                              .then((resp) => {
+                                const account = {
+                                  userId: resp.data[0].userId,
+                                  username: resp.data[0].username,
+                                  password: resp.data[0].password,
+                                  role: resp.data[0].role,
+                                  status: 2,
+                                  idTable: resp.data[0].idTable,
+                                  id: resp.data[0].id,
+                                };
+                                const url_5 =
+                                  "http://localhost:3000/api/accounts/" +
+                                  account.id +
+                                  "/replace";
+                                axios.post(url_5, account);
+                              });
+                          }
+                        }
                         const url =
                           "http://localhost:3000/api/companions/" +
                           companion.id +
@@ -7214,18 +8386,48 @@ const ListSpiritualGuide = {
       });
     },
 
-    deleteDataSpiritualGuide(id) {
+    deleteDataSpiritualGuide(spiritualGuide) {
       axios
-        .delete("http://localhost:3000/api/spiritualGuides/" + id)
+        .delete(
+          "http://localhost:3000/api/spiritualGuides/" + spiritualGuide.id
+        )
         .then((response) => {
           console.log(response);
           this.spiritualGuides.splice(id, 1);
-          this.$router.push("/");
-          setTimeout(() => {
-            this.$router.push("/spiritualGuides");
-            location.reload();
-          }, 5);
         });
+      if (companion.position == 8) {
+        axios
+          .get(
+            "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+              spiritualGuide.id +
+              "&filter[where][and][1][role]=6"
+          )
+          .then((resp) => {
+            axios
+              .delete("http://localhost:3000/api/accounts/" + resp.data[0].id)
+              .then((respSprt) => {
+                setTimeout(() => {
+                  location.reload();
+                }, 10);
+              });
+          });
+      } else if (companion.position == 9) {
+        axios
+          .get(
+            "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+              spiritualGuide.id +
+              "&filter[where][and][1][role]=7"
+          )
+          .then((resp) => {
+            axios
+              .delete("http://localhost:3000/api/accounts/" + resp.data[0].id)
+              .then((respCom) => {
+                setTimeout(() => {
+                  location.reload();
+                }, 10);
+              });
+          });
+      }
     },
   },
   template: `
@@ -7332,7 +8534,7 @@ const ListSpiritualGuide = {
             <button class="btn btn-danger rounded" data-dismiss="modal">
               Hủy
             </button>
-            <button class="btn rounded text-white btn-hover-blue" style="background-color: #056299;" @click="deleteDataSpiritualGuide(spiritualGuide.id)">
+            <button class="btn rounded text-white btn-hover-blue" style="background-color: #056299;" @click="deleteDataSpiritualGuide(spiritualGuide)">
               Xác Nhận
             </button>
           </div>
@@ -8015,6 +9217,55 @@ const EditSpiritualGuide = {
                   status: this.status,
                   id: this.$route.params.id,
                 };
+                if (spiritualGuide.status == 2) {
+                  if (spiritualGuide.position == 8) {
+                    axios
+                      .get(
+                        "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                          spiritualGuide.id +
+                          "&filter[where][and][1][role]=6"
+                      )
+                      .then((resp) => {
+                        const account = {
+                          userId: resp.data[0].userId,
+                          username: resp.data[0].username,
+                          password: resp.data[0].password,
+                          role: resp.data[0].role,
+                          status: 2,
+                          idTable: resp.data[0].idTable,
+                          id: resp.data[0].id,
+                        };
+                        const url_5 =
+                          "http://localhost:3000/api/accounts/" +
+                          account.id +
+                          "/replace";
+                        axios.post(url_5, account);
+                      });
+                  } else if (spiritualGuide.position == 9) {
+                    axios
+                      .get(
+                        "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                          spiritualGuide.id +
+                          "&filter[where][and][1][role]=7"
+                      )
+                      .then((resp) => {
+                        const account = {
+                          userId: resp.data[0].userId,
+                          username: resp.data[0].username,
+                          password: resp.data[0].password,
+                          role: resp.data[0].role,
+                          status: 2,
+                          idTable: resp.data[0].idTable,
+                          id: resp.data[0].id,
+                        };
+                        const url_5 =
+                          "http://localhost:3000/api/accounts/" +
+                          account.id +
+                          "/replace";
+                        axios.post(url_5, account);
+                      });
+                  }
+                }
                 const url =
                   "http://localhost:3000/api/spiritualGuides/" +
                   spiritualGuide.id +
@@ -8053,6 +9304,55 @@ const EditSpiritualGuide = {
                   status: this.status,
                   id: this.$route.params.id,
                 };
+                if (spiritualGuide.status == 2) {
+                  if (spiritualGuide.position == 8) {
+                    axios
+                      .get(
+                        "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                          spiritualGuide.id +
+                          "&filter[where][and][1][role]=6"
+                      )
+                      .then((resp) => {
+                        const account = {
+                          userId: resp.data[0].userId,
+                          username: resp.data[0].username,
+                          password: resp.data[0].password,
+                          role: resp.data[0].role,
+                          status: 2,
+                          idTable: resp.data[0].idTable,
+                          id: resp.data[0].id,
+                        };
+                        const url_5 =
+                          "http://localhost:3000/api/accounts/" +
+                          account.id +
+                          "/replace";
+                        axios.post(url_5, account);
+                      });
+                  } else if (spiritualGuide.position == 9) {
+                    axios
+                      .get(
+                        "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                          spiritualGuide.id +
+                          "&filter[where][and][1][role]=7"
+                      )
+                      .then((resp) => {
+                        const account = {
+                          userId: resp.data[0].userId,
+                          username: resp.data[0].username,
+                          password: resp.data[0].password,
+                          role: resp.data[0].role,
+                          status: 2,
+                          idTable: resp.data[0].idTable,
+                          id: resp.data[0].id,
+                        };
+                        const url_5 =
+                          "http://localhost:3000/api/accounts/" +
+                          account.id +
+                          "/replace";
+                        axios.post(url_5, account);
+                      });
+                  }
+                }
                 const url =
                   "http://localhost:3000/api/spiritualGuides/" +
                   spiritualGuide.id +
@@ -8083,6 +9383,55 @@ const EditSpiritualGuide = {
                 status: this.status,
                 id: this.$route.params.id,
               };
+              if (spiritualGuide.status == 2) {
+                if (spiritualGuide.position == 8) {
+                  axios
+                    .get(
+                      "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                        spiritualGuide.id +
+                        "&filter[where][and][1][role]=6"
+                    )
+                    .then((resp) => {
+                      const account = {
+                        userId: resp.data[0].userId,
+                        username: resp.data[0].username,
+                        password: resp.data[0].password,
+                        role: resp.data[0].role,
+                        status: 2,
+                        idTable: resp.data[0].idTable,
+                        id: resp.data[0].id,
+                      };
+                      const url_5 =
+                        "http://localhost:3000/api/accounts/" +
+                        account.id +
+                        "/replace";
+                      axios.post(url_5, account);
+                    });
+                } else if (spiritualGuide.position == 9) {
+                  axios
+                    .get(
+                      "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                        spiritualGuide.id +
+                        "&filter[where][and][1][role]=7"
+                    )
+                    .then((resp) => {
+                      const account = {
+                        userId: resp.data[0].userId,
+                        username: resp.data[0].username,
+                        password: resp.data[0].password,
+                        role: resp.data[0].role,
+                        status: 2,
+                        idTable: resp.data[0].idTable,
+                        id: resp.data[0].id,
+                      };
+                      const url_5 =
+                        "http://localhost:3000/api/accounts/" +
+                        account.id +
+                        "/replace";
+                      axios.post(url_5, account);
+                    });
+                }
+              }
               const url =
                 "http://localhost:3000/api/spiritualGuides/" +
                 spiritualGuide.id +
@@ -8148,6 +9497,55 @@ const EditSpiritualGuide = {
                       status: this.status,
                       id: this.$route.params.id,
                     };
+                    if (spiritualGuide.status == 2) {
+                      if (spiritualGuide.position == 8) {
+                        axios
+                          .get(
+                            "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                              spiritualGuide.id +
+                              "&filter[where][and][1][role]=6"
+                          )
+                          .then((resp) => {
+                            const account = {
+                              userId: resp.data[0].userId,
+                              username: resp.data[0].username,
+                              password: resp.data[0].password,
+                              role: resp.data[0].role,
+                              status: 2,
+                              idTable: resp.data[0].idTable,
+                              id: resp.data[0].id,
+                            };
+                            const url_5 =
+                              "http://localhost:3000/api/accounts/" +
+                              account.id +
+                              "/replace";
+                            axios.post(url_5, account);
+                          });
+                      } else if (spiritualGuide.position == 9) {
+                        axios
+                          .get(
+                            "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                              spiritualGuide.id +
+                              "&filter[where][and][1][role]=7"
+                          )
+                          .then((resp) => {
+                            const account = {
+                              userId: resp.data[0].userId,
+                              username: resp.data[0].username,
+                              password: resp.data[0].password,
+                              role: resp.data[0].role,
+                              status: 2,
+                              idTable: resp.data[0].idTable,
+                              id: resp.data[0].id,
+                            };
+                            const url_5 =
+                              "http://localhost:3000/api/accounts/" +
+                              account.id +
+                              "/replace";
+                            axios.post(url_5, account);
+                          });
+                      }
+                    }
                     const url =
                       "http://localhost:3000/api/spiritualGuides/" +
                       spiritualGuide.id +
@@ -8186,6 +9584,55 @@ const EditSpiritualGuide = {
                       status: this.status,
                       id: this.$route.params.id,
                     };
+                    if (spiritualGuide.status == 2) {
+                      if (spiritualGuide.position == 8) {
+                        axios
+                          .get(
+                            "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                              spiritualGuide.id +
+                              "&filter[where][and][1][role]=6"
+                          )
+                          .then((resp) => {
+                            const account = {
+                              userId: resp.data[0].userId,
+                              username: resp.data[0].username,
+                              password: resp.data[0].password,
+                              role: resp.data[0].role,
+                              status: 2,
+                              idTable: resp.data[0].idTable,
+                              id: resp.data[0].id,
+                            };
+                            const url_5 =
+                              "http://localhost:3000/api/accounts/" +
+                              account.id +
+                              "/replace";
+                            axios.post(url_5, account);
+                          });
+                      } else if (spiritualGuide.position == 9) {
+                        axios
+                          .get(
+                            "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                              spiritualGuide.id +
+                              "&filter[where][and][1][role]=7"
+                          )
+                          .then((resp) => {
+                            const account = {
+                              userId: resp.data[0].userId,
+                              username: resp.data[0].username,
+                              password: resp.data[0].password,
+                              role: resp.data[0].role,
+                              status: 2,
+                              idTable: resp.data[0].idTable,
+                              id: resp.data[0].id,
+                            };
+                            const url_5 =
+                              "http://localhost:3000/api/accounts/" +
+                              account.id +
+                              "/replace";
+                            axios.post(url_5, account);
+                          });
+                      }
+                    }
                     const url =
                       "http://localhost:3000/api/spiritualGuides/" +
                       spiritualGuide.id +
@@ -8216,6 +9663,55 @@ const EditSpiritualGuide = {
                     status: this.status,
                     id: this.$route.params.id,
                   };
+                  if (spiritualGuide.status == 2) {
+                    if (spiritualGuide.position == 8) {
+                      axios
+                        .get(
+                          "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                            spiritualGuide.id +
+                            "&filter[where][and][1][role]=6"
+                        )
+                        .then((resp) => {
+                          const account = {
+                            userId: resp.data[0].userId,
+                            username: resp.data[0].username,
+                            password: resp.data[0].password,
+                            role: resp.data[0].role,
+                            status: 2,
+                            idTable: resp.data[0].idTable,
+                            id: resp.data[0].id,
+                          };
+                          const url_5 =
+                            "http://localhost:3000/api/accounts/" +
+                            account.id +
+                            "/replace";
+                          axios.post(url_5, account);
+                        });
+                    } else if (spiritualGuide.position == 9) {
+                      axios
+                        .get(
+                          "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                            spiritualGuide.id +
+                            "&filter[where][and][1][role]=7"
+                        )
+                        .then((resp) => {
+                          const account = {
+                            userId: resp.data[0].userId,
+                            username: resp.data[0].username,
+                            password: resp.data[0].password,
+                            role: resp.data[0].role,
+                            status: 2,
+                            idTable: resp.data[0].idTable,
+                            id: resp.data[0].id,
+                          };
+                          const url_5 =
+                            "http://localhost:3000/api/accounts/" +
+                            account.id +
+                            "/replace";
+                          axios.post(url_5, account);
+                        });
+                    }
+                  }
                   const url =
                     "http://localhost:3000/api/spiritualGuides/" +
                     spiritualGuide.id +
@@ -8286,6 +9782,55 @@ const EditSpiritualGuide = {
                       status: this.status,
                       id: this.$route.params.id,
                     };
+                    if (spiritualGuide.status == 2) {
+                      if (spiritualGuide.position == 8) {
+                        axios
+                          .get(
+                            "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                              spiritualGuide.id +
+                              "&filter[where][and][1][role]=6"
+                          )
+                          .then((resp) => {
+                            const account = {
+                              userId: resp.data[0].userId,
+                              username: resp.data[0].username,
+                              password: resp.data[0].password,
+                              role: resp.data[0].role,
+                              status: 2,
+                              idTable: resp.data[0].idTable,
+                              id: resp.data[0].id,
+                            };
+                            const url_5 =
+                              "http://localhost:3000/api/accounts/" +
+                              account.id +
+                              "/replace";
+                            axios.post(url_5, account);
+                          });
+                      } else if (spiritualGuide.position == 9) {
+                        axios
+                          .get(
+                            "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                              spiritualGuide.id +
+                              "&filter[where][and][1][role]=7"
+                          )
+                          .then((resp) => {
+                            const account = {
+                              userId: resp.data[0].userId,
+                              username: resp.data[0].username,
+                              password: resp.data[0].password,
+                              role: resp.data[0].role,
+                              status: 2,
+                              idTable: resp.data[0].idTable,
+                              id: resp.data[0].id,
+                            };
+                            const url_5 =
+                              "http://localhost:3000/api/accounts/" +
+                              account.id +
+                              "/replace";
+                            axios.post(url_5, account);
+                          });
+                      }
+                    }
                     const url =
                       "http://localhost:3000/api/spiritualGuides/" +
                       spiritualGuide.id +
@@ -8324,6 +9869,55 @@ const EditSpiritualGuide = {
                       status: this.status,
                       id: this.$route.params.id,
                     };
+                    if (spiritualGuide.status == 2) {
+                      if (spiritualGuide.position == 8) {
+                        axios
+                          .get(
+                            "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                              spiritualGuide.id +
+                              "&filter[where][and][1][role]=6"
+                          )
+                          .then((resp) => {
+                            const account = {
+                              userId: resp.data[0].userId,
+                              username: resp.data[0].username,
+                              password: resp.data[0].password,
+                              role: resp.data[0].role,
+                              status: 2,
+                              idTable: resp.data[0].idTable,
+                              id: resp.data[0].id,
+                            };
+                            const url_5 =
+                              "http://localhost:3000/api/accounts/" +
+                              account.id +
+                              "/replace";
+                            axios.post(url_5, account);
+                          });
+                      } else if (spiritualGuide.position == 9) {
+                        axios
+                          .get(
+                            "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                              spiritualGuide.id +
+                              "&filter[where][and][1][role]=7"
+                          )
+                          .then((resp) => {
+                            const account = {
+                              userId: resp.data[0].userId,
+                              username: resp.data[0].username,
+                              password: resp.data[0].password,
+                              role: resp.data[0].role,
+                              status: 2,
+                              idTable: resp.data[0].idTable,
+                              id: resp.data[0].id,
+                            };
+                            const url_5 =
+                              "http://localhost:3000/api/accounts/" +
+                              account.id +
+                              "/replace";
+                            axios.post(url_5, account);
+                          });
+                      }
+                    }
                     const url =
                       "http://localhost:3000/api/spiritualGuides/" +
                       spiritualGuide.id +
@@ -8354,6 +9948,55 @@ const EditSpiritualGuide = {
                     status: this.status,
                     id: this.$route.params.id,
                   };
+                  if (spiritualGuide.status == 2) {
+                    if (spiritualGuide.position == 8) {
+                      axios
+                        .get(
+                          "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                            spiritualGuide.id +
+                            "&filter[where][and][1][role]=6"
+                        )
+                        .then((resp) => {
+                          const account = {
+                            userId: resp.data[0].userId,
+                            username: resp.data[0].username,
+                            password: resp.data[0].password,
+                            role: resp.data[0].role,
+                            status: 2,
+                            idTable: resp.data[0].idTable,
+                            id: resp.data[0].id,
+                          };
+                          const url_5 =
+                            "http://localhost:3000/api/accounts/" +
+                            account.id +
+                            "/replace";
+                          axios.post(url_5, account);
+                        });
+                    } else if (spiritualGuide.position == 9) {
+                      axios
+                        .get(
+                          "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                            spiritualGuide.id +
+                            "&filter[where][and][1][role]=7"
+                        )
+                        .then((resp) => {
+                          const account = {
+                            userId: resp.data[0].userId,
+                            username: resp.data[0].username,
+                            password: resp.data[0].password,
+                            role: resp.data[0].role,
+                            status: 2,
+                            idTable: resp.data[0].idTable,
+                            id: resp.data[0].id,
+                          };
+                          const url_5 =
+                            "http://localhost:3000/api/accounts/" +
+                            account.id +
+                            "/replace";
+                          axios.post(url_5, account);
+                        });
+                    }
+                  }
                   const url =
                     "http://localhost:3000/api/spiritualGuides/" +
                     spiritualGuide.id +
@@ -8436,6 +10079,55 @@ const EditSpiritualGuide = {
                             status: this.status,
                             id: this.$route.params.id,
                           };
+                          if (spiritualGuide.status == 2) {
+                            if (spiritualGuide.position == 8) {
+                              axios
+                                .get(
+                                  "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                                    spiritualGuide.id +
+                                    "&filter[where][and][1][role]=6"
+                                )
+                                .then((resp) => {
+                                  const account = {
+                                    userId: resp.data[0].userId,
+                                    username: resp.data[0].username,
+                                    password: resp.data[0].password,
+                                    role: resp.data[0].role,
+                                    status: 2,
+                                    idTable: resp.data[0].idTable,
+                                    id: resp.data[0].id,
+                                  };
+                                  const url_5 =
+                                    "http://localhost:3000/api/accounts/" +
+                                    account.id +
+                                    "/replace";
+                                  axios.post(url_5, account);
+                                });
+                            } else if (spiritualGuide.position == 9) {
+                              axios
+                                .get(
+                                  "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                                    spiritualGuide.id +
+                                    "&filter[where][and][1][role]=7"
+                                )
+                                .then((resp) => {
+                                  const account = {
+                                    userId: resp.data[0].userId,
+                                    username: resp.data[0].username,
+                                    password: resp.data[0].password,
+                                    role: resp.data[0].role,
+                                    status: 2,
+                                    idTable: resp.data[0].idTable,
+                                    id: resp.data[0].id,
+                                  };
+                                  const url_5 =
+                                    "http://localhost:3000/api/accounts/" +
+                                    account.id +
+                                    "/replace";
+                                  axios.post(url_5, account);
+                                });
+                            }
+                          }
                           const url =
                             "http://localhost:3000/api/spiritualGuides/" +
                             spiritualGuide.id +
@@ -8474,6 +10166,55 @@ const EditSpiritualGuide = {
                             status: this.status,
                             id: this.$route.params.id,
                           };
+                          if (spiritualGuide.status == 2) {
+                            if (spiritualGuide.position == 8) {
+                              axios
+                                .get(
+                                  "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                                    spiritualGuide.id +
+                                    "&filter[where][and][1][role]=6"
+                                )
+                                .then((resp) => {
+                                  const account = {
+                                    userId: resp.data[0].userId,
+                                    username: resp.data[0].username,
+                                    password: resp.data[0].password,
+                                    role: resp.data[0].role,
+                                    status: 2,
+                                    idTable: resp.data[0].idTable,
+                                    id: resp.data[0].id,
+                                  };
+                                  const url_5 =
+                                    "http://localhost:3000/api/accounts/" +
+                                    account.id +
+                                    "/replace";
+                                  axios.post(url_5, account);
+                                });
+                            } else if (spiritualGuide.position == 9) {
+                              axios
+                                .get(
+                                  "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                                    spiritualGuide.id +
+                                    "&filter[where][and][1][role]=7"
+                                )
+                                .then((resp) => {
+                                  const account = {
+                                    userId: resp.data[0].userId,
+                                    username: resp.data[0].username,
+                                    password: resp.data[0].password,
+                                    role: resp.data[0].role,
+                                    status: 2,
+                                    idTable: resp.data[0].idTable,
+                                    id: resp.data[0].id,
+                                  };
+                                  const url_5 =
+                                    "http://localhost:3000/api/accounts/" +
+                                    account.id +
+                                    "/replace";
+                                  axios.post(url_5, account);
+                                });
+                            }
+                          }
                           const url =
                             "http://localhost:3000/api/spiritualGuides/" +
                             spiritualGuide.id +
@@ -8504,6 +10245,55 @@ const EditSpiritualGuide = {
                           status: this.status,
                           id: this.$route.params.id,
                         };
+                        if (spiritualGuide.status == 2) {
+                          if (spiritualGuide.position == 8) {
+                            axios
+                              .get(
+                                "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                                  spiritualGuide.id +
+                                  "&filter[where][and][1][role]=6"
+                              )
+                              .then((resp) => {
+                                const account = {
+                                  userId: resp.data[0].userId,
+                                  username: resp.data[0].username,
+                                  password: resp.data[0].password,
+                                  role: resp.data[0].role,
+                                  status: 2,
+                                  idTable: resp.data[0].idTable,
+                                  id: resp.data[0].id,
+                                };
+                                const url_5 =
+                                  "http://localhost:3000/api/accounts/" +
+                                  account.id +
+                                  "/replace";
+                                axios.post(url_5, account);
+                              });
+                          } else if (spiritualGuide.position == 9) {
+                            axios
+                              .get(
+                                "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                                  spiritualGuide.id +
+                                  "&filter[where][and][1][role]=7"
+                              )
+                              .then((resp) => {
+                                const account = {
+                                  userId: resp.data[0].userId,
+                                  username: resp.data[0].username,
+                                  password: resp.data[0].password,
+                                  role: resp.data[0].role,
+                                  status: 2,
+                                  idTable: resp.data[0].idTable,
+                                  id: resp.data[0].id,
+                                };
+                                const url_5 =
+                                  "http://localhost:3000/api/accounts/" +
+                                  account.id +
+                                  "/replace";
+                                axios.post(url_5, account);
+                              });
+                          }
+                        }
                         const url =
                           "http://localhost:3000/api/spiritualGuides/" +
                           spiritualGuide.id +
@@ -9373,17 +11163,27 @@ const ListTeacher = {
       this.$router.push({ name: "editTeacher", params: { id: teacher.id } });
     },
 
-    deleteDataTeacher(id) {
+    deleteDataTeacher(teacher) {
       axios
-        .delete("http://localhost:3000/api/teachers/" + id)
+        .delete("http://localhost:3000/api/teachers/" + teacher.id)
         .then((response) => {
           console.log(response);
           this.teachers.splice(id, 1);
-          this.$router.push("/");
-          setTimeout(() => {
-            this.$router.push("/teachers");
-            location.reload();
-          }, 5);
+        });
+      axios
+        .get(
+          "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+            teacher.id +
+            "&filter[where][and][1][role]=10"
+        )
+        .then((resp) => {
+          axios
+            .delete("http://localhost:3000/api/accounts/" + resp.data[0].id)
+            .then((respTeacher) => {
+              setTimeout(() => {
+                location.reload();
+              }, 10);
+            });
         });
     },
   },
@@ -9494,7 +11294,7 @@ const ListTeacher = {
             <button class="btn btn-danger rounded" data-dismiss="modal">
               Hủy
             </button>
-            <button class="btn rounded text-white btn-hover-blue" style="background-color: #056299;" @click="deleteDataTeacher(teacher.id)">
+            <button class="btn rounded text-white btn-hover-blue" style="background-color: #056299;" @click="deleteDataTeacher(teacher)">
               Xác Nhận
             </button>
           </div>
@@ -10127,6 +11927,30 @@ const EditTeacher = {
                   status: this.status,
                   id: this.$route.params.id,
                 };
+                if (teacher.status == 2) {
+                  axios
+                    .get(
+                      "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                        teacher.id +
+                        "&filter[where][and][1][role]=10"
+                    )
+                    .then((resp) => {
+                      const account = {
+                        userId: resp.data[0].userId,
+                        username: resp.data[0].username,
+                        password: resp.data[0].password,
+                        role: resp.data[0].role,
+                        status: 2,
+                        idTable: resp.data[0].idTable,
+                        id: resp.data[0].id,
+                      };
+                      const url_5 =
+                        "http://localhost:3000/api/accounts/" +
+                        account.id +
+                        "/replace";
+                      axios.post(url_5, account);
+                    });
+                }
                 const url =
                   "http://localhost:3000/api/teachers/" +
                   teacher.id +
@@ -10164,6 +11988,30 @@ const EditTeacher = {
                   status: this.status,
                   id: this.$route.params.id,
                 };
+                if (teacher.status == 2) {
+                  axios
+                    .get(
+                      "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                        teacher.id +
+                        "&filter[where][and][1][role]=10"
+                    )
+                    .then((resp) => {
+                      const account = {
+                        userId: resp.data[0].userId,
+                        username: resp.data[0].username,
+                        password: resp.data[0].password,
+                        role: resp.data[0].role,
+                        status: 2,
+                        idTable: resp.data[0].idTable,
+                        id: resp.data[0].id,
+                      };
+                      const url_5 =
+                        "http://localhost:3000/api/accounts/" +
+                        account.id +
+                        "/replace";
+                      axios.post(url_5, account);
+                    });
+                }
                 const url =
                   "http://localhost:3000/api/teachers/" +
                   teacher.id +
@@ -10193,6 +12041,30 @@ const EditTeacher = {
                 status: this.status,
                 id: this.$route.params.id,
               };
+              if (teacher.status == 2) {
+                axios
+                  .get(
+                    "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                      teacher.id +
+                      "&filter[where][and][1][role]=10"
+                  )
+                  .then((resp) => {
+                    const account = {
+                      userId: resp.data[0].userId,
+                      username: resp.data[0].username,
+                      password: resp.data[0].password,
+                      role: resp.data[0].role,
+                      status: 2,
+                      idTable: resp.data[0].idTable,
+                      id: resp.data[0].id,
+                    };
+                    const url_5 =
+                      "http://localhost:3000/api/accounts/" +
+                      account.id +
+                      "/replace";
+                    axios.post(url_5, account);
+                  });
+              }
               const url =
                 "http://localhost:3000/api/teachers/" + teacher.id + "/replace";
               axios.post(url, teacher);
@@ -10259,6 +12131,30 @@ const EditTeacher = {
                         status: this.status,
                         id: this.$route.params.id,
                       };
+                      if (teacher.status == 2) {
+                        axios
+                          .get(
+                            "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                              teacher.id +
+                              "&filter[where][and][1][role]=10"
+                          )
+                          .then((resp) => {
+                            const account = {
+                              userId: resp.data[0].userId,
+                              username: resp.data[0].username,
+                              password: resp.data[0].password,
+                              role: resp.data[0].role,
+                              status: 2,
+                              idTable: resp.data[0].idTable,
+                              id: resp.data[0].id,
+                            };
+                            const url_5 =
+                              "http://localhost:3000/api/accounts/" +
+                              account.id +
+                              "/replace";
+                            axios.post(url_5, account);
+                          });
+                      }
                       const url =
                         "http://localhost:3000/api/teachers/" +
                         teacher.id +
@@ -10296,6 +12192,30 @@ const EditTeacher = {
                         status: this.status,
                         id: this.$route.params.id,
                       };
+                      if (teacher.status == 2) {
+                        axios
+                          .get(
+                            "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                              teacher.id +
+                              "&filter[where][and][1][role]=10"
+                          )
+                          .then((resp) => {
+                            const account = {
+                              userId: resp.data[0].userId,
+                              username: resp.data[0].username,
+                              password: resp.data[0].password,
+                              role: resp.data[0].role,
+                              status: 2,
+                              idTable: resp.data[0].idTable,
+                              id: resp.data[0].id,
+                            };
+                            const url_5 =
+                              "http://localhost:3000/api/accounts/" +
+                              account.id +
+                              "/replace";
+                            axios.post(url_5, account);
+                          });
+                      }
                       const url =
                         "http://localhost:3000/api/teachers/" +
                         teacher.id +
@@ -10325,6 +12245,30 @@ const EditTeacher = {
                       status: this.status,
                       id: this.$route.params.id,
                     };
+                    if (teacher.status == 2) {
+                      axios
+                        .get(
+                          "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                            teacher.id +
+                            "&filter[where][and][1][role]=10"
+                        )
+                        .then((resp) => {
+                          const account = {
+                            userId: resp.data[0].userId,
+                            username: resp.data[0].username,
+                            password: resp.data[0].password,
+                            role: resp.data[0].role,
+                            status: 2,
+                            idTable: resp.data[0].idTable,
+                            id: resp.data[0].id,
+                          };
+                          const url_5 =
+                            "http://localhost:3000/api/accounts/" +
+                            account.id +
+                            "/replace";
+                          axios.post(url_5, account);
+                        });
+                    }
                     const url =
                       "http://localhost:3000/api/teachers/" +
                       teacher.id +
@@ -10399,6 +12343,30 @@ const EditTeacher = {
                         status: this.status,
                         id: this.$route.params.id,
                       };
+                      if (teacher.status == 2) {
+                        axios
+                          .get(
+                            "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                              teacher.id +
+                              "&filter[where][and][1][role]=10"
+                          )
+                          .then((resp) => {
+                            const account = {
+                              userId: resp.data[0].userId,
+                              username: resp.data[0].username,
+                              password: resp.data[0].password,
+                              role: resp.data[0].role,
+                              status: 2,
+                              idTable: resp.data[0].idTable,
+                              id: resp.data[0].id,
+                            };
+                            const url_5 =
+                              "http://localhost:3000/api/accounts/" +
+                              account.id +
+                              "/replace";
+                            axios.post(url_5, account);
+                          });
+                      }
                       const url =
                         "http://localhost:3000/api/teachers/" +
                         teacher.id +
@@ -10436,6 +12404,30 @@ const EditTeacher = {
                         status: this.status,
                         id: this.$route.params.id,
                       };
+                      if (teacher.status == 2) {
+                        axios
+                          .get(
+                            "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                              teacher.id +
+                              "&filter[where][and][1][role]=10"
+                          )
+                          .then((resp) => {
+                            const account = {
+                              userId: resp.data[0].userId,
+                              username: resp.data[0].username,
+                              password: resp.data[0].password,
+                              role: resp.data[0].role,
+                              status: 2,
+                              idTable: resp.data[0].idTable,
+                              id: resp.data[0].id,
+                            };
+                            const url_5 =
+                              "http://localhost:3000/api/accounts/" +
+                              account.id +
+                              "/replace";
+                            axios.post(url_5, account);
+                          });
+                      }
                       const url =
                         "http://localhost:3000/api/teachers/" +
                         teacher.id +
@@ -10465,6 +12457,30 @@ const EditTeacher = {
                       status: this.status,
                       id: this.$route.params.id,
                     };
+                    if (teacher.status == 2) {
+                      axios
+                        .get(
+                          "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                            teacher.id +
+                            "&filter[where][and][1][role]=10"
+                        )
+                        .then((resp) => {
+                          const account = {
+                            userId: resp.data[0].userId,
+                            username: resp.data[0].username,
+                            password: resp.data[0].password,
+                            role: resp.data[0].role,
+                            status: 2,
+                            idTable: resp.data[0].idTable,
+                            id: resp.data[0].id,
+                          };
+                          const url_5 =
+                            "http://localhost:3000/api/accounts/" +
+                            account.id +
+                            "/replace";
+                          axios.post(url_5, account);
+                        });
+                    }
                     const url =
                       "http://localhost:3000/api/teachers/" +
                       teacher.id +
@@ -10548,6 +12564,30 @@ const EditTeacher = {
                               status: this.status,
                               id: this.$route.params.id,
                             };
+                            if (teacher.status == 2) {
+                              axios
+                                .get(
+                                  "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                                    teacher.id +
+                                    "&filter[where][and][1][role]=10"
+                                )
+                                .then((resp) => {
+                                  const account = {
+                                    userId: resp.data[0].userId,
+                                    username: resp.data[0].username,
+                                    password: resp.data[0].password,
+                                    role: resp.data[0].role,
+                                    status: 2,
+                                    idTable: resp.data[0].idTable,
+                                    id: resp.data[0].id,
+                                  };
+                                  const url_5 =
+                                    "http://localhost:3000/api/accounts/" +
+                                    account.id +
+                                    "/replace";
+                                  axios.post(url_5, account);
+                                });
+                            }
                             const url =
                               "http://localhost:3000/api/teachers/" +
                               teacher.id +
@@ -10585,6 +12625,30 @@ const EditTeacher = {
                               status: this.status,
                               id: this.$route.params.id,
                             };
+                            if (teacher.status == 2) {
+                              axios
+                                .get(
+                                  "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                                    teacher.id +
+                                    "&filter[where][and][1][role]=10"
+                                )
+                                .then((resp) => {
+                                  const account = {
+                                    userId: resp.data[0].userId,
+                                    username: resp.data[0].username,
+                                    password: resp.data[0].password,
+                                    role: resp.data[0].role,
+                                    status: 2,
+                                    idTable: resp.data[0].idTable,
+                                    id: resp.data[0].id,
+                                  };
+                                  const url_5 =
+                                    "http://localhost:3000/api/accounts/" +
+                                    account.id +
+                                    "/replace";
+                                  axios.post(url_5, account);
+                                });
+                            }
                             const url =
                               "http://localhost:3000/api/teachers/" +
                               teacher.id +
@@ -10614,6 +12678,30 @@ const EditTeacher = {
                             status: this.status,
                             id: this.$route.params.id,
                           };
+                          if (teacher.status == 2) {
+                            axios
+                              .get(
+                                "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                                  teacher.id +
+                                  "&filter[where][and][1][role]=10"
+                              )
+                              .then((resp) => {
+                                const account = {
+                                  userId: resp.data[0].userId,
+                                  username: resp.data[0].username,
+                                  password: resp.data[0].password,
+                                  role: resp.data[0].role,
+                                  status: 2,
+                                  idTable: resp.data[0].idTable,
+                                  id: resp.data[0].id,
+                                };
+                                const url_5 =
+                                  "http://localhost:3000/api/accounts/" +
+                                  account.id +
+                                  "/replace";
+                                axios.post(url_5, account);
+                              });
+                          }
                           const url =
                             "http://localhost:3000/api/teachers/" +
                             teacher.id +
@@ -10819,6 +12907,8 @@ const ListSchedule = {
       schedule: {},
       subjects: [],
       teachers: [],
+      idTable: 0,
+      role: 0,
     };
   },
   mounted() {
@@ -10831,6 +12921,14 @@ const ListSchedule = {
     axios.get("http://localhost:3000/api/teachers").then((response) => {
       this.teachers = response.data;
     });
+    axios
+      .get(
+        "http://localhost:3000/api/logins/findOne?filter[where][token]=token"
+      )
+      .then((resp) => {
+        this.idTable = resp.data.idTable;
+        this.role = resp.data.role;
+      });
   },
   computed: {},
   methods: {
@@ -10896,7 +12994,7 @@ const ListSchedule = {
               <th>Ngày Trong Tuần</th>
               <th>Ngày Bắt Đầu</th>
               <th>Ngày Kết Thúc</th>
-              <th>Action</th>
+              <th v-show="role == 1 || role == 4">Action</th>
             </tr>
           </thead>
           <tfoot>
@@ -10907,7 +13005,7 @@ const ListSchedule = {
               <th>Ngày Trong Tuần</th>
               <th>Ngày Bắt Đầu</th>
               <th>Ngày Kết Thúc</th>
-              <th>Action</th>
+              <th v-show="role == 1 || role == 4">Action</th>
             </tr>
           </tfoot>
           <tbody>
@@ -10916,9 +13014,9 @@ const ListSchedule = {
               <td v-for="subject in subjects" v-if="subject.id == schedule.subject">{{ subject.name }}</td>
               <td v-for="teacher in teachers" v-if="teacher.id == schedule.teacher">{{ teacher.fullName }}</td>
               <td v-for="dayOfWeek in dayOfWeeks" v-if="dayOfWeek.id == schedule.dayOfWeek">{{ dayOfWeek.name }}</td>
-              <td>{{ crypt.formatDate(schedule.dateStart) }}</td>
-              <td>{{ crypt.formatDate(schedule.dateEnd) }}</td>
-              <td>
+              <td>{{ crypt.formatDateDisplay(schedule.dateStart) }}</td>
+              <td>{{ crypt.formatDateDisplay(schedule.dateEnd) }}</td>
+              <td v-show="role == 1 || role == 4">
                 <div class="row" style="margin-left:-10px;">
                   <div class="col-lg-4">
                     <button :title="titleButtonEdit" @click="getDataScheduleUpdate(schedule)"
@@ -11911,6 +14009,9 @@ const RegisteringScheduleCompanion = {
       role: 0,
       idTable: 0,
       metCompanions: [],
+      checkRegister: 0,
+      checkAdd: 0,
+      checkDelete: 0,
     };
   },
   mounted() {
@@ -11923,51 +14024,29 @@ const RegisteringScheduleCompanion = {
     //   this.data().idTable = jsonResults.idTable;
     //   console.log(this.idTable);
     // })
-    var path =
-      "http://localhost:3000/api/logins/findOne?filter[where][token]=token";
-    function loadDataPromise(path) {
-      return new Promise(function (res, rej) {
-        axios
-          .get(path)
-          .then(function (response) {
-            res(response.data);
-          })
-          .catch(function (err) {
-            rej(err);
-          });
-      });
-    }
-    async function Loaddata() {
-      let c = await loadDataPromise(path);
-      return c;
-    }
-    Loaddata().then((data) => {
-      console.log(data.idTable);
-    });
+    // var path =
+    //   "http://localhost:3000/api/logins/findOne?filter[where][token]=token";
+    // function loadDataPromise(path) {
+    //   return new Promise(function (res, rej) {
+    //     axios
+    //       .get(path)
+    //       .then(function (response) {
+    //         res(response.data);
+    //       })
+    //       .catch(function (err) {
+    //         rej(err);
+    //       });
+    //   });
+    // }
+    // async function Loaddata() {
+    //   let c = await loadDataPromise(path);
+    //   return await c;
+    // }
 
     // var obj = loadDataPromise(path).then((resp) => {
     //   return resp.json();
     // });
     // console.log(obj);
-    axios
-      .get(
-        "http://localhost:3000/api/logins/findOne?filter[where][token]=token"
-      )
-      .then((resp) => {
-        this.idTable = resp.data.idTable;
-        this.role = resp.data.role;
-      });
-    axios
-      .get(
-        "http://localhost:3000/api/scheduleCompanions?filter[where][companion]=12"
-      )
-      .then((response) => {
-        this.scheduleCompanions = response.data;
-      });
-    axios.get("http://localhost:3000/api/candidates").then((resp) => {
-      this.candidates = resp.data;
-    });
-
     // axios
     //   .get(
     //     "http://localhost:3000/api/logins/findOne?filter[where][token]=token"
@@ -11975,162 +14054,223 @@ const RegisteringScheduleCompanion = {
     //   .then((resp) => {
     //     this.idTable = resp.data.idTable;
     //     this.role = resp.data.role;
-    //     if (this.role == 8 || this.role == 9) {
-    //       axios
-    //         .get(
-    //           "http://localhost:3000/api/scheduleCompanions?filter[where][companion]=" +
-    //             this.idTable
-    //         )
-    //         .then((response) => {
-    //           this.scheduleCompanions = response.data;
-    //           console.log(this.scheduleCompanions);
-    //         });
-    //     }
-    //     else if (this.role == 5) {
-    //       axios
-    //         .get(
-    //           "http://localhost:3000/api/candidates?filter[where][id]=" +
-    //             this.idTable
-    //         )
-    //         .then((respCan) => {
-    //           var community = respCan.data[0].community;
-    //           axios
-    //             .get(
-    //               "http://localhost:3000/api/groupCommunities?filter[where][firstCom]=" + community)
-    //             .then((respGroupCom) => {
-    //               var groupCommunity = {};
-    //               groupCommunity = respGroupCom.data;
-    //               if(groupCommunity != null){
-    //                 var idGroup = respGroupCom.data[0].id;
-    //                 axios
-    //                   .get(
-    //                     "http://localhost:3000/api/companions?filter[where][groupCommunity]=" +
-    //                       idGroup
-    //                   )
-    //                   .then((respCom) => {
-    //                     var companion = respCom.data[0].id;
-    //                     axios
-    //                       .get(
-    //                         "http://localhost:3000/api/scheduleCompanions?filter[where][companion]=" +
-    //                           companion
-    //                       )
-    //                       .then((respSchedule) => {
-    //                         this.scheduleCompanions = respSchedule.data;
-    //                       });
-    //                   });
-    //               } else{
-    //                 axios
-    //                   .get(
-    //                     "http://localhost:3000/api/groupCommunities?filter[where][secondCom]=" + community)
-    //                   .then((respGroupCom) => {
-    //                     var groupCommunity = {};
-    //                     groupCommunity = respGroupCom.data;
-    //                     if(groupCommunity != null){
-    //                       var idGroup = respGroupCom.data[0].id;
-    //                     axios
-    //                       .get(
-    //                         "http://localhost:3000/api/companions?filter[where][groupCommunity]=" +
-    //                           idGroup
-    //                       )
-    //                       .then((respCom) => {
-    //                         var companion = respCom.data[0].id;
-    //                         axios
-    //                           .get(
-    //                             "http://localhost:3000/api/scheduleCompanions?filter[where][companion]=" +
-    //                               companion
-    //                           )
-    //                           .then((resp) => {
-    //                             this.scheduleCompanions = resp.data;
-    //                           });
-    //                       });
-    //                     } else{
-    //                       axios
-    //                         .get(
-    //                           "http://localhost:3000/api/groupCommunities?filter[where][thirdCom]=" + community)
-    //                         .then((respGroupCom) => {
-    //                           var groupCommunity = {};
-    //                           groupCommunity = respGroupCom.data;
-    //                           if(groupCommunity != null){
-    //                             var idGroup = respGroupCom.data[0].id;
-    //                           axios
-    //                             .get(
-    //                               "http://localhost:3000/api/companions?filter[where][groupCommunity]=" +
-    //                                 idGroup
-    //                             )
-    //                             .then((respCom) => {
-    //                               var companion = respCom.data[0].id;
-    //                               axios
-    //                                 .get(
-    //                                   "http://localhost:3000/api/scheduleCompanions?filter[where][companion]=" +
-    //                                     companion
-    //                                 )
-    //                                 .then((respSchedule) => {
-    //                                   this.scheduleCompanions = respSchedule.data;
-    //                                 });
-    //                             });
-    //                           } else {
-    //                             axios
-    //                               .get(
-    //                                 "http://localhost:3000/api/groupCommunities?filter[where][fourthCom]=" + community)
-    //                               .then((respGroupCom) => {
-    //                                 var groupCommunity = {};
-    //                                 groupCommunity = respGroupCom.data;
-    //                                 if(groupCommunity != null){
-    //                                   var idGroup = respGroupCom.data[0].id;
-    //                                 axios
-    //                                   .get(
-    //                                     "http://localhost:3000/api/companions?filter[where][groupCommunity]=" +
-    //                                       idGroup
-    //                                   )
-    //                                   .then((respCom) => {
-    //                                     var companion = respCom.data[0].id;
-    //                                     axios
-    //                                       .get(
-    //                                         "http://localhost:3000/api/scheduleCompanions?filter[where][companion]=" +
-    //                                           companion
-    //                                       )
-    //                                       .then((respSchedule) => {
-    //                                         this.scheduleCompanions = respSchedule.data;
-    //                                       });
-    //                                   });
-    //                                 } else{
-    //                                   axios
-    //                                     .get(
-    //                                       "http://localhost:3000/api/groupCommunities?filter[where][fifthCom]=" + community)
-    //                                     .then((respGroupCom) => {
-    //                                       var groupCommunity = {};
-    //                                       groupCommunity = respGroupCom.data;
-    //                                       if(groupCommunity != null){
-    //                                         var idGroup = respGroupCom.data[0].id;
-    //                                       axios
-    //                                         .get(
-    //                                           "http://localhost:3000/api/companions?filter[where][groupCommunity]=" +
-    //                                             idGroup
-    //                                         )
-    //                                         .then((respCom) => {
-    //                                           var companion = respCom.data[0].id;
-    //                                           axios
-    //                                             .get(
-    //                                               "http://localhost:3000/api/scheduleCompanions?filter[where][companion]=" +
-    //                                                 companion
-    //                                             )
-    //                                             .then((respSchedule) => {
-    //                                               this.scheduleCompanions = respSchedule.data;
-    //                                             });
-    //                                         });
-    //                                       }
-    //                                     });
-    //                                 }
-    //                               });
-    //                           }
-    //                         });
-    //                     }
-    //                   });
-    //               }
-    //             });
-    //         });
-    //     }
+    //     axios
+    //       .get("http://localhost:3000/api/scheduleCompanions?filter[where][companion]=" + this.idTable
+    //       )
+    //       .then((response) => {
+    //         console.log(response.data);
+    //         this.scheduleCompanions = response.data;
+    //         if(this.scheduleCompanions.length != 0){
+    //           this.checkDelete = 1;
+    //         } else {
+    //           this.checkAdd = 1;
+    //         }
+    //       });
     //   });
+    // axios
+    //   .get("http://localhost:3000/api/scheduleCompanions?filter[where][companion]=12")
+    //   .then((response) => {
+    //     console.log(response.data);
+    //     // this.scheduleCompanions = response.data;
+    //   });
+    axios
+      .get(
+        "http://localhost:3000/api/scheduleCompanions?filter[where][and][0][candidate]=25&filter[where][and][1][status]=1"
+      )
+      .then((respoSche) => {
+        var schedules = respoSche.data;
+        var lengthSchedule = schedules.length;
+        if (lengthSchedule == 1) {
+          this.checkRegister = 1;
+        }
+      });
+    axios.get("http://localhost:3000/api/candidates").then((resp) => {
+      this.candidates = resp.data;
+    });
+
+    axios
+      .get(
+        "http://localhost:3000/api/logins/findOne?filter[where][token]=token"
+      )
+      .then((resp) => {
+        this.idTable = resp.data.idTable;
+        this.role = resp.data.role;
+        if (this.role == 8 || this.role == 9) {
+          axios
+            .get(
+              "http://localhost:3000/api/scheduleCompanions?filter[where][companion]=" +
+                this.idTable
+            )
+            .then((response) => {
+              var parsedobj = JSON.parse(JSON.stringify(response.data));
+              this.scheduleCompanions = parsedobj;
+              if (response.data.length != 0) {
+                this.checkDelete = 1;
+              } else {
+                this.checkAdd = 1;
+              }
+            });
+        } else if (this.role == 5) {
+          axios
+            .get(
+              "http://localhost:3000/api/candidates?filter[where][id]=" +
+                this.idTable
+            )
+            .then((respCan) => {
+              var community = respCan.data[0].community;
+              axios
+                .get(
+                  "http://localhost:3000/api/groupCommunities?filter[where][firstCom]=" +
+                    community
+                )
+                .then((respGroupCom) => {
+                  var groupCommunity = {};
+                  groupCommunity = respGroupCom.data;
+                  if (groupCommunity != null) {
+                    var idGroup = respGroupCom.data[0].id;
+                    axios
+                      .get(
+                        "http://localhost:3000/api/companions?filter[where][groupCommunity]=" +
+                          idGroup
+                      )
+                      .then((respCom) => {
+                        var companion = respCom.data[0].id;
+                        axios
+                          .get(
+                            "http://localhost:3000/api/scheduleCompanions?filter[where][companion]=" +
+                              companion
+                          )
+                          .then((respSchedule) => {
+                            this.scheduleCompanions = respSchedule.data;
+                          });
+                      });
+                  } else {
+                    axios
+                      .get(
+                        "http://localhost:3000/api/groupCommunities?filter[where][secondCom]=" +
+                          community
+                      )
+                      .then((respGroupCom) => {
+                        var groupCommunity = {};
+                        groupCommunity = respGroupCom.data;
+                        if (groupCommunity != null) {
+                          var idGroup = respGroupCom.data[0].id;
+                          axios
+                            .get(
+                              "http://localhost:3000/api/companions?filter[where][groupCommunity]=" +
+                                idGroup
+                            )
+                            .then((respCom) => {
+                              var companion = respCom.data[0].id;
+                              axios
+                                .get(
+                                  "http://localhost:3000/api/scheduleCompanions?filter[where][companion]=" +
+                                    companion
+                                )
+                                .then((resp) => {
+                                  this.scheduleCompanions = resp.data;
+                                });
+                            });
+                        } else {
+                          axios
+                            .get(
+                              "http://localhost:3000/api/groupCommunities?filter[where][thirdCom]=" +
+                                community
+                            )
+                            .then((respGroupCom) => {
+                              var groupCommunity = {};
+                              groupCommunity = respGroupCom.data;
+                              if (groupCommunity != null) {
+                                var idGroup = respGroupCom.data[0].id;
+                                axios
+                                  .get(
+                                    "http://localhost:3000/api/companions?filter[where][groupCommunity]=" +
+                                      idGroup
+                                  )
+                                  .then((respCom) => {
+                                    var companion = respCom.data[0].id;
+                                    axios
+                                      .get(
+                                        "http://localhost:3000/api/scheduleCompanions?filter[where][companion]=" +
+                                          companion
+                                      )
+                                      .then((respSchedule) => {
+                                        this.scheduleCompanions =
+                                          respSchedule.data;
+                                      });
+                                  });
+                              } else {
+                                axios
+                                  .get(
+                                    "http://localhost:3000/api/groupCommunities?filter[where][fourthCom]=" +
+                                      community
+                                  )
+                                  .then((respGroupCom) => {
+                                    var groupCommunity = {};
+                                    groupCommunity = respGroupCom.data;
+                                    if (groupCommunity != null) {
+                                      var idGroup = respGroupCom.data[0].id;
+                                      axios
+                                        .get(
+                                          "http://localhost:3000/api/companions?filter[where][groupCommunity]=" +
+                                            idGroup
+                                        )
+                                        .then((respCom) => {
+                                          var companion = respCom.data[0].id;
+                                          axios
+                                            .get(
+                                              "http://localhost:3000/api/scheduleCompanions?filter[where][companion]=" +
+                                                companion
+                                            )
+                                            .then((respSchedule) => {
+                                              // var parsedobj = JSON.parse(JSON.stringify(respSchedule.data))
+                                              this.scheduleCompanions =
+                                                respSchedule.data;
+                                            });
+                                        });
+                                    } else {
+                                      axios
+                                        .get(
+                                          "http://localhost:3000/api/groupCommunities?filter[where][fifthCom]=" +
+                                            community
+                                        )
+                                        .then((respGroupCom) => {
+                                          var groupCommunity = {};
+                                          groupCommunity = respGroupCom.data;
+                                          if (groupCommunity != null) {
+                                            var idGroup =
+                                              respGroupCom.data[0].id;
+                                            axios
+                                              .get(
+                                                "http://localhost:3000/api/companions?filter[where][groupCommunity]=" +
+                                                  idGroup
+                                              )
+                                              .then((respCom) => {
+                                                var companion =
+                                                  respCom.data[0].id;
+                                                axios
+                                                  .get(
+                                                    "http://localhost:3000/api/scheduleCompanions?filter[where][companion]=" +
+                                                      companion
+                                                  )
+                                                  .then((respSchedule) => {
+                                                    this.scheduleCompanions =
+                                                      respSchedule.data;
+                                                  });
+                                              });
+                                          }
+                                        });
+                                    }
+                                  });
+                              }
+                            });
+                        }
+                      });
+                  }
+                });
+            });
+        }
+      });
     axios.get("http://localhost:3000/api/metCompanions").then((resp) => {
       this.metCompanions = resp.data;
     });
@@ -12475,9 +14615,60 @@ const RegisteringScheduleCompanion = {
                 companion: scheduleCompanionNew.companion,
                 candidate: this.idTable,
                 registeredDate: currentDate,
+                reportStatus: 1,
                 status: 1,
                 idSchedule: scheduleCompanionEdit.id,
               };
+              axios
+                .get(
+                  "http://localhost:3000/api/countMets?filter[where][candidate]=" +
+                    this.idTable
+                )
+                .then((respCountMet) => {
+                  if (respCountMet.data.length === 0) {
+                    const countMet = {
+                      candidate: this.idTable,
+                      countMetCompanion: 0,
+                      countMetSpiritualGuide: 0,
+                    };
+                    const url_3 = `http://localhost:3000/api/countMets`;
+                    axios.post(url_3, countMet);
+                  }
+                });
+              axios
+                .get(
+                  "http://localhost:3000/api/rateCandidates?filter[where][candidate]=" +
+                    this.idTable
+                )
+                .then((respRate) => {
+                  var currentDate = new Date();
+                  var month = currentDate.getMonth() + 1;
+                  var year = currentDate.getFullYear();
+                  if (respRate.data.length == 1) {
+                    const rateCandidate = {
+                      candidate: respRate.data[0].candidate,
+                      month: month,
+                      year: year,
+                      score: 0,
+                      idSchedule: scheduleCompanionEdit.id,
+                    };
+                    const url_2 =
+                      "http://localhost:3000/api/rateCandidates/" +
+                      respRate.data[0].id +
+                      "/replace";
+                    axios.post(url_2, rateCandidate);
+                  } else {
+                    const rateCandidate = {
+                      candidate: scheduleCompanionEdit.candidate,
+                      month: month,
+                      year: year,
+                      score: 0,
+                      idSchedule: scheduleCompanionEdit.id,
+                    };
+                    const url_2 = `http://localhost:3000/api/rateCandidates`;
+                    axios.post(url_2, rateCandidate);
+                  }
+                });
               const url_1 = `http://localhost:3000/api/metCompanions`;
               axios.post(url_1, metCompanion);
               const url =
@@ -12564,7 +14755,6 @@ const RegisteringScheduleCompanion = {
                         // message => alert(message)
                         ();
                     });
-                  //Gửi mail báo bận.
                 });
               const scheduleCompanionNew = {
                 companion: scheduleCompanionOld.companion,
@@ -12610,6 +14800,21 @@ const RegisteringScheduleCompanion = {
                 status: 1,
                 groupSession: scheduleCompanionOld.groupSession,
               };
+              axios
+                .get(
+                  "http://localhost:3000/api/rateCandidates?filter[where][idSchedule]=" +
+                    scheduleCompanionEdit.id
+                )
+                .then((respRate) => {
+                  axios
+                    .delete(
+                      "http://localhost:3000/api/rateCandidates/" +
+                        respRate.data[0].id
+                    )
+                    .then((resp) => {
+                      // this.rateCandidates.splice(respRate.data[0].id, 1);
+                    });
+                });
               const url =
                 "http://localhost:3000/api/scheduleCompanions/" +
                 scheduleCompanionEdit.id +
@@ -12637,6 +14842,12 @@ const RegisteringScheduleCompanion = {
           }
         });
     },
+
+    CreateReportCompanion() {
+      this.$router.push({
+        name: "addReportCompanion",
+      });
+    },
   },
   template: `
   <div class="card shadow mb-4" style="margin-top: -5px;">
@@ -12645,19 +14856,26 @@ const RegisteringScheduleCompanion = {
         <div class="col-md-4">
           <h6 class="m-0 font-weight-bold text-dark">Đăng ký Lịch đồng hành</h6>
         </div>
-        <div class="col-md-4"></div>
-        <div class="col-md-2" style="padding-left:110px;" v-show="role == 8 || role == 9">
+        <div class="col-md-2"></div>
+        <div class="col-md-2" style="padding-left:390px;" v-show="(role === 8 && checkDelete === 1) || (role === 9 && checkDelete === 1)">
           <button class="btn rounded btn-danger" style="font-size:14px;" 
           data-toggle="modal" data-target="#deleteScheduleCompanionModal">
             <i class="fas fa-trash-alt"></i>
             &nbsp;Xóa lịch
           </button>
         </div>
-        <div class="col-md-2" style="padding-left:50px;" v-show="role == 8 || role == 9">
+        <div class="col-md-2" style="padding-left:400px;" v-show="(role === 8 && checkAdd === 1) || (role == 9 && checkAdd === 1)">
           <button class="btn rounded btn-hover-blue"
             style="background-color: #056299;color: white;font-size:14px;" @click="CreateScheduleCompanion">
             <i class="fas fa-plus"></i>
             &nbsp;Tạo lịch
+          </button>
+        </div>
+        <div class="col-md-2" style="padding-left:355px;" v-show="role == 5 && checkRegister == 1">
+          <button class="btn rounded btn-hover-blue"
+            style="background-color: #056299;color: white;font-size:14px;" @click="CreateReportCompanion">
+            <i class="fas fa-file-signature"></i>
+            &nbsp;Tạo báo cáo
           </button>
         </div>
       </div>
@@ -12681,7 +14899,7 @@ const RegisteringScheduleCompanion = {
           <tbody>
             <tr>
               <th v-if="!scheduleCompanionsIsNull">{{ scheduleCompanions[0].date }}</th>
-              <td class="align-middle text-center" scope="row" v-for="scheduleCompanion in scheduleCompanions"
+              <td class="align-middle text-center" scope="row" v-for="scheduleCompanion in scheduleCompanions.__ob__.value"
                 :key="scheduleCompanion.id" v-if="scheduleCompanion.groupSession == 1">
                 <span class="text-center" v-if="scheduleCompanion.status === 2">Bận Việc</span>
                 <span class="text-center" v-else-if="scheduleCompanion.candidate === null && scheduleCompanion.status === 1">Trống</span>
@@ -13494,12 +15712,1152 @@ const ReportCompanion = {
 };
 
 const ListReportCompanion = {
+  data() {
+    return {
+      titleButtonDisplay: "Xem chi tiết",
+      titleButtonDelete: "Xóa Báo Cáo",
+      titleButtonEdit: "Chỉnh sửa",
+      titleButtonAdd: "Thêm Báo Cáo",
+      titleButtonConfirm: "Duyệt Báo Cáo",
+      titleButtonScore: "Đánh giá",
+      isReads: [
+        { id: 1, name: "Chưa duyệt" },
+        { id: 2, name: "Đã duyệt" },
+      ],
+      reportCompanions: [],
+      reportCompanion: {},
+      companions: [],
+      candidates: [],
+      role: 0,
+      idTable: 0,
+    };
+  },
+  mounted() {
+    axios
+      .get(
+        "http://localhost:3000/api/logins/findOne?filter[where][token]=token"
+      )
+      .then((resp) => {
+        this.idTable = resp.data.idTable;
+        this.role = resp.data.role;
+        if (this.role === 8 || this.role === 9) {
+          axios
+            .get(
+              "http://localhost:3000/api/reportCompanions?filter[where][companion]=" +
+                this.idTable
+            )
+            .then((response) => {
+              this.reportCompanions = response.data;
+            });
+        } else if (this.role === 1 || this.role === 2) {
+          axios
+            .get("http://localhost:3000/api/reportCompanions")
+            .then((response) => {
+              this.reportCompanions = response.data;
+            });
+        } else if (this.role == 5) {
+          axios
+            .get(
+              "http://localhost:3000/api/reportCompanions?filter[where][candidate]=" +
+                this.idTable
+            )
+            .then((response) => {
+              this.reportCompanions = response.data;
+            });
+        }
+      });
 
-},
+    axios.get("http://localhost:3000/api/candidates").then((respCan) => {
+      this.candidates = respCan.data;
+    });
+    axios.get("http://localhost:3000/api/companions").then((respCom) => {
+      this.companions = respCom.data;
+    });
+  },
+  computed: {},
+  methods: {
+    getDetailReportCompanion(reportCompanion) {
+      this.reportCompanion = reportCompanion;
+    },
+
+    getDataReportCompanionUpdate(reportCompanion) {
+      this.$router.push({
+        name: "editReportCompanion",
+        params: { id: reportCompanion.id },
+      });
+    },
+
+    EvaluateCandidate(reportCompanion) {
+      axios
+        .get(
+          "http://localhost:3000/api/rateCandidates?where[idSchedule]=" +
+            reportCompanion.idSchedule
+        )
+        .then((resp) => {
+          var idRateCandidate = resp.data[0].id;
+          this.$router.push({
+            name: "editRateCandidate",
+            params: { id: idRateCandidate },
+          });
+        });
+    },
+
+    ConfirmReportCompanion(reportCompanion) {
+      if (reportCompanion.status == 1) {
+        const newReportCompanion = {
+          companion: reportCompanion.companion,
+          candidate: reportCompanion.candidate,
+          reportDate: reportCompanion.reportDate,
+          brightTL: reportCompanion.brightTL,
+          brightNB: reportCompanion.brightNB,
+          brightTT: reportCompanion.brightTT,
+          brightCD: reportCompanion.brightCD,
+          brightTD: reportCompanion.brightTD,
+          darkTL: reportCompanion.darkTL,
+          darkNB: reportCompanion.darkNB,
+          darkTT: reportCompanion.darkTT,
+          darkCD: reportCompanion.darkCD,
+          darkTD: reportCompanion.darkTD,
+          targetNextMonth: reportCompanion.targetNextMonth,
+          idSchedule: reportCompanion.idSchedule,
+          isRead: 2,
+        };
+        const url =
+          "http://localhost:3000/api/reportCompanions/" +
+          reportCompanion.id +
+          "/replace";
+        axios.post(url, newReportCompanion);
+        setTimeout(() => {
+          location.reload();
+        }, 50);
+      } else if (reportCompanion.status == 2) {
+        const newReportCompanion = {
+          companion: reportCompanion.companion,
+          candidate: reportCompanion.candidate,
+          reportDate: reportCompanion.reportDate,
+          brightTL: reportCompanion.brightTL,
+          brightNB: reportCompanion.brightNB,
+          brightTT: reportCompanion.brightTT,
+          brightCD: reportCompanion.brightCD,
+          brightTD: reportCompanion.brightTD,
+          darkTL: reportCompanion.darkTL,
+          darkNB: reportCompanion.darkNB,
+          darkTT: reportCompanion.darkTT,
+          darkCD: reportCompanion.darkCD,
+          darkTD: reportCompanion.darkTD,
+          targetNextMonth: reportCompanion.targetNextMonth,
+          idSchedule: reportCompanion.idSchedule,
+          isRead: 1,
+        };
+        const url =
+          "http://localhost:3000/api/reportCompanions/" +
+          reportCompanion.id +
+          "/replace";
+        axios.post(url, newReportCompanion);
+        setTimeout(() => {
+          location.reload();
+        }, 50);
+      }
+    },
+  },
+  template: `
+  <div class="card shadow mb-4" style="margin-top: -5px;">
+    <div class="card-header py-3" style="margin-bottom:-40px">
+      <div class="row">
+        <div class="col-md-4">
+          <h6 class="m-0 font-weight-bold text-dark">Danh sách Báo Cáo</h6>
+        </div>
+        <div class="col-md-6"></div>
+        <div class="col-md-2" style="padding-left:68px;">
+          <router-link :to="{ name: 'addReportCompanion' }">
+            <button :title="titleButtonAdd" class="btn  rounded btn-hover-blue"
+              style="background-color: #056299;color: white;font-size:14px;">
+              <i class="fas fa-plus"></i>
+              &nbsp;Thêm
+            </button>
+          </router-link>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <hr style="height:1px;color:lightgray;background-color:lightgray">
+      <div class="table-responsive" style="margin-top:-8px">
+        <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+          <thead>
+            <tr>
+              <th>STT</th>
+              <th>Ứng Sinh</th>
+              <th>Người Đồng Hành</th>
+              <th>Ngày Báo Cáo</th>
+              <th>Trạng Thái</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tfoot>
+            <tr>
+              <th>STT</th>
+              <th>Ứng Sinh</th>
+              <th>Người Đồng Hành</th>
+              <th>Ngày Báo Cáo</th>
+              <th>Trạng Thái</th>
+              <th>Action</th>
+            </tr>
+          </tfoot>
+          <tbody>
+            <tr v-for="(reportCompanion, index) in reportCompanions" :key="reportCompanion.id">
+              <th>{{ index + 1 }}</th>
+              <td v-for="candidate in candidates" v-if="candidate.id == reportCompanion.candidate">{{ candidate.fullName }}</td>
+              <td v-for="companion in companions" v-if="companion.id == reportCompanion.companion">{{ companion.fullName }}</td>
+              <td>{{ crypt.formatDateDisplay(reportCompanion.reportDate) }}</td>
+              <td v-for="isRead in isReads" v-if="isRead.id == reportCompanion.isRead">{{ isRead.name }}</td>
+              <td>
+                <div class="row" style="margin-left:-15px;">
+                  <div class="col-lg-4">
+                    <button :title="titleButtonDisplay" data-toggle="modal" @click="getDetailReportCompanion(reportCompanion)"
+                      data-target="#detailReportCompanionModal"
+                      class="btn btn-primary btn-sm align-middle h-28px w-28px rounded" type="submit">
+                      <i class="far fa-eye fa-md ml--3px"></i>
+                    </button>
+                  </div>
+                  <div class="col-lg-4" v-show="role === 5">
+                    <button :title="titleButtonEdit" @click="getDataReportCompanionUpdate(reportCompanion)"
+                      class="btn btn-warning btn-sm h-28px w-28px rounded" type="submit"
+                      style="margin-left: -12.5px;">
+                      <i class="fas fa-edit fa-md ml--2px"></i>
+                    </button>
+                  </div>
+                  <div class="col-lg-4" v-show="role === 1 || role === 2 || role === 8 || role === 9">
+                    <button :title="titleButtonConfirm" @click="ConfirmReportCompanion(reportCompanion)"
+                       class="btn btn-info btn-sm h-28px w-28px rounded"
+                      style="margin-left: -25.5px;">
+                      <i class="far fa-check-circle fa-md ml--1px"></i>
+                    </button>
+                  </div>
+                  <div class="col-lg-4" v-show="role === 1 || role === 2 || role === 8 || role === 9">
+                    <button :title="titleButtonScore" @click="EvaluateCandidate(reportCompanion)"
+                       class="btn btn-info btn-sm h-28px w-28px rounded"
+                      style="margin-left: -25.5px;">
+                      <i class="fas fa-star-half-alt fa-md ml--1px"></i>
+                    </button>
+                  </div>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div id="detailReportCompanionModal" class="modal modal-edu-general default-popup-PrimaryModal fade rounded"
+      role="dialog">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header header-color-modal bg-color-1">
+            <h4 class="modal-title" style="margin-left: -30px;">Bản Báo Cáo Đồng Hành</h4>
+            <div class="modal-close-area modal-close-df bg-danger"
+              style="padding-left: -200px;padding-bottom:-200px;">
+              <a class="close" data-dismiss="modal" href="#"><i class="fas fa-times"></i></a>
+            </div>
+          </div>
+          <div class="modal-body">
+            
+          </div>
+          <div class="modal-footer">
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  `,
+};
 
 const AddReportCompanion = {
+  data() {
+    return {
+      id: 0,
+      companion: 0,
+      candidate: 0,
+      brightTL: null,
+      brightNB: null,
+      brightTT: null,
+      brightCD: null,
+      brightTD: null,
+      darkTL: null,
+      darkNB: null,
+      darkTT: null,
+      darkCD: null,
+      darkTD: null,
+      targetNextMonth: null,
+      idSchedule: 0,
+      isRead: 1,
+      isReads: [
+        { id: 1, name: "Chưa duyệt" },
+        { id: 2, name: "Đã duyệt" },
+      ],
+      titleBrightTL: "Nhập điểm sáng về phương diện thiêng liêng",
+      titleBrightNB: "Nhập điểm sáng về phương diện nhân bản",
+      titleBrightTT: "Nhập điểm sáng về phương diện tri thức",
+      titleBrightCD: "Nhập điểm sáng về phương diện cộng đoàn",
+      titleBrightTD: "Nhập điểm sáng về phương diện tông đồ",
+      titleDarkTL: "Nhập điểm tối về phương diện thiêng liêng",
+      titleDarkNB: "Nhập điểm tối về phương diện nhân bản",
+      titleDarkTT: "Nhập điểm tối về phương diện tri thức",
+      titleDarkCD: "Nhập điểm tối về phương diện cộng đoàn",
+      titleDarkTD: "Nhập điểm tối về phương diện tông đồ",
+      titleTargetNextMonth: "Nhập mục tiêu cho tháng tới",
+      companions: [],
+      candidates: [],
+      scheduleCompanions: [],
+      reportCompanions: [],
+      idTable: 0,
+      role: 0,
+    };
+  },
+  mounted() {
+    axios
+      .get(
+        "http://localhost:3000/api/logins/findOne?filter[where][token]=token"
+      )
+      .then((resp) => {
+        this.idTable = resp.data.idTable;
+        this.role = resp.data.role;
+        axios
+          .get(
+            "http://localhost:3000/api/scheduleCompanions?filter[where][and][0][status]=1&filter[where][and][1][candidate]=" +
+              this.idTable
+          )
+          .then((respSche) => {
+            this.scheduleCompanions = respSche.data;
+            console.log(this.scheduleCompanions);
+            this.companion = respSche.data[0].companion;
+            this.candidate = respSche.data[0].candidate;
+            console.log(this.companion);
+            console.log(this.candidate);
+          });
+      });
+    axios.get("http://localhost:3000/api/companions").then((response) => {
+      this.companions = response.data;
+      console.log(this.companions);
+    });
+    axios.get("http://localhost:3000/api/candidates").then((respCan) => {
+      this.candidates = respCan.data;
+      console.log(this.candidates);
+    });
+    // axios
+    //   .get("http://localhost:3000/api/scheduleCompanions?filter[where][candidate]=25")
+    //   .then((respSche) => {
+    //     this.scheduleCompanions = respSche.data;
+    //     console.log(this.scheduleCompanions)
+    //     this.companion = respSche.data[0].companion;
 
+    // });
+    // axios.get("http://localhost:3000/api/reportCompanions").then((respRe) => {
+    //   this.reportCompanions = respRe.data;
+    // });
+  },
+  computed: {
+    refreshFormReportCompanion() {
+      return (
+        this.brightTL != null ||
+        this.brightNB != null ||
+        this.brightTT != null ||
+        this.brightCD != null ||
+        this.brightTD != null ||
+        this.darkTL != null ||
+        this.darkNB != null ||
+        this.darkTT != null ||
+        this.darkCD != null ||
+        this.darkTD != null ||
+        this.targetNextMonth != null
+      );
+    },
+  },
+  methods: {
+    submitAddReportCompanionForm() {
+      var currentDate = new Date();
+      if (this.scheduleCompanion != null) {
+        const reportCompanion = {
+          candidate: this.idTable,
+          companion: this.scheduleCompanion.companion,
+          reportDate: currentDate,
+          brightTL: this.brightTL,
+          brightNB: this.brightNB,
+          brightTT: this.brightTT,
+          brightCD: this.brightCD,
+          brightTD: this.brightTD,
+          darkTL: this.darkTL,
+          darkNB: this.darkNB,
+          darkTT: this.darkTT,
+          darkCD: this.darkCD,
+          darkTD: this.darkTD,
+          idSchedule: this.scheduleCompanion.id,
+          isRead: 1,
+        };
+        const url = `http://localhost:3000/api/reportCompanions`;
+        axios.post(url, reportCompanion);
+        this.$router.push("/");
+        return 0;
+      }
+    },
+
+    clearInputReportCompanionForm() {
+      if (this.brightTL != null) {
+        this.brightTL = null;
+      }
+      if (this.brightNB != null) {
+        this.brightNB = null;
+      }
+      if (this.brightTT != null) {
+        this.brightTT = null;
+      }
+      if (this.brightCD != null) {
+        this.brightCD = null;
+      }
+      if (this.brightTD != null) {
+        this.brightTD = null;
+      }
+      if (this.darkTL != null) {
+        this.darkTL = null;
+      }
+      if (this.darkNB != null) {
+        this.darkNB = null;
+      }
+      if (this.darkTT != null) {
+        this.darkTT = null;
+      }
+      if (this.darkCD != null) {
+        this.darkCD = null;
+      }
+      if (this.darkTD != null) {
+        this.darkTD = null;
+      }
+      if (this.targetNextMonth != null) {
+        this.targetNextMonth = null;
+      }
+    },
+  },
+  template: `
+  <div class="card shadow mb-4" style="margin-top: -5px;">
+    <div class="card-header py-3">
+      <h6 class="m-0 font-weight-bold text-dark">Thêm Báo Cáo</h6>
+    </div>
+    <div class="card-body">
+      <form @submit.prevent="submitAddReportCompanionForm" action="POST" method="" autocomplete="off">
+        <div class="row mt-2">
+          <div class="col-lg-4">
+            <label class="font-weight-bold" style="font-size:15px;">Thông Tin Báo Cáo:</label>
+            <p style="font-size: 12px;">Thông tin phục vụ cho việc xếp hạng ứng sinh hàng tháng</p>
+          </div>
+          <div class="col-lg-4">
+            <label class=" font-weight-bold col-form-label" for="candidate">Ứng Sinh</label>
+            <select class="custom-select  text-size-13px  h-32px" v-model="candidate" name="candidate" id="candidate"
+              style="margin-top: -5px;" disabled>
+              <option v-for="candidate in candidates" :value="candidate.id" :selected="candidate.id == candidate">
+                {{ candidate.fullName }}</option>
+            </select>
+          </div>
+          <div class="col-lg-4">
+            <label class=" font-weight-bold col-form-label" for="companion">Người Đồng Hành</label>
+            <select class="custom-select  text-size-13px  h-32px" v-model="companion" name="companion" id="companion"
+              style="margin-top: -5px;" disabled>
+              <option v-for="companion in companions" v-bind:value="companion.id"
+                :selected="companion.id == companion">{{ companion.fullName }}</option>
+            </select>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-12">
+            <strong style="font-size:17px;">1. Những kinh nghiệm giúp tôi lớn lên hơn, dấn thân hơn trong đời sống ơn gọi.</strong>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-lg-6">
+            <label class=" font-weight-bold col-form-label" for="brightTL">Thiêng Liêng</label>
+            <textarea class="form-control text-size-13px" :title="titleBrightTL" id="brightTL" v-model="brightTL"
+              name="brightTL" rows="4" style="margin-top: -5px;"></textarea>
+          </div>
+          <div class="col-lg-6">
+            <label class=" font-weight-bold col-form-label" for="brightNB">Nhân Bản</label>
+            <textarea class="form-control text-size-13px" :title="titleBrightNB" id="brightNB" v-model="brightNB"
+              name="brightNB" rows="4" style="margin-top: -5px;"></textarea>
+          </div>
+        </div>
+        <div class="row mt-1">
+          <div class="col-lg-6">
+            <label class=" font-weight-bold col-form-label" for="brightTT">Tri Thức</label>
+            <textarea class="form-control text-size-13px" :title="titleBrightTT" id="brightTT" v-model="brightTT"
+              name="brightTT" rows="4" style="margin-top: -5px;"></textarea>
+          </div>
+          <div class="col-lg-6">
+            <label class=" font-weight-bold col-form-label" for="brightCD">Cộng Đoàn</label>
+            <textarea class="form-control text-size-13px" :title="titleBrightCD" id="brightCD" v-model="brightCD"
+              name="brightCD" rows="4" style="margin-top: -5px;"></textarea>
+          </div>
+        </div>
+        <div class="row mt-1">
+          <div class="col-lg-6">
+            <label class=" font-weight-bold col-form-label" for="brightTD">Tông Đồ</label>
+            <textarea class="form-control text-size-13px" :title="titleBrightTD" id="brightTD" v-model="brightTD"
+              name="brightTD" rows="4" style="margin-top: -5px;"></textarea>
+          </div>
+          <div class="col-lg-6"></div>
+        </div>
+        <div class="row mt-3">
+          <div class="col-md-12">
+            <strong style="font-size:17px;">2. Những kinh nghiệm khiến đời sống tôi bị trì trệ, cản trở tôi dấn thân trong đời sống ơn
+                gọi.</strong>
+          </div>
+        </div>
+        <div class="row mt-1">
+          <div class="col-lg-6">
+            <label class=" font-weight-bold col-form-label" for="darkTL">Thiêng Liêng</label>
+            <textarea class="form-control text-size-13px" :title="titleDarkTL" id="darkTL" v-model="darkTL"
+              name="darkTL" rows="4" style="margin-top: -5px;"></textarea>
+          </div>
+          <div class="col-lg-6">
+            <label class=" font-weight-bold col-form-label" for="darkNB">Nhân Bản</label>
+            <textarea class="form-control text-size-13px" :title="titleDarkNB" id="darkNB" v-model="darkNB"
+              name="darkNB" rows="4" style="margin-top: -5px;"></textarea>
+          </div>
+        </div>
+        <div class="row mt-1">
+          <div class="col-lg-6">
+            <label class=" font-weight-bold col-form-label" for="darkTT">Tri Thức</label>
+            <textarea class="form-control text-size-13px" :title="titleDarkTT" id="darkTT" v-model="darkTT"
+              name="darkTT" rows="4" style="margin-top: -5px;"></textarea>
+          </div>
+          <div class="col-lg-6">
+            <label class=" font-weight-bold col-form-label" for="darkCD">Cộng Đoàn</label>
+            <textarea class="form-control text-size-13px" :title="titleDarkCD" id="darkCD" v-model="darkCD"
+              name="darkCD" rows="4" style="margin-top: -5px;"></textarea>
+          </div>
+        </div>
+        <div class="row mt-1">
+          <div class="col-lg-6">
+            <label class=" font-weight-bold col-form-label" for="darkTD">Tông Đồ</label>
+            <textarea class="form-control text-size-13px" :title="titleDarkTD" id="darkTD" v-model="darkTD"
+              name="darkTD" rows="4" style="margin-top: -5px;"></textarea>
+          </div>
+          <div class="col-lg-6"></div>
+        </div>
+        <div class="row mt-3">
+          <div class="col-md-12">
+            <strong style="font-size:17px;">3. Dựa trên nhận định tháng vừa qua, tôi có những ước ao hay quyết tâm gì cho tháng sắp tới.</strong>
+          </div>
+        </div>
+        <div class="row mt-1">
+          <div class="col-lg-6">
+            <label class=" font-weight-bold col-form-label" for="targetNextMonth">Mục Tiêu</label>
+            <textarea class="form-control text-size-13px" :title="titleTargetNextMonth" id="targetNextMonth" v-model="targetNextMonth"
+              name="targetNextMonth" rows="4" style="margin-top: -5px;"></textarea>
+          </div>
+          <div class="col-lg-4"></div>
+        </div>
+        <div class="row" style="margin-top: 30px;">
+          <div class="col-12">
+            <div style="float:right">
+              <button type="submit" class="btn  rounded btn-hover-blue"
+                style="background-color: #056299;color: white;font-size:13px;">
+                <i class="far fa-save fa-lg"></i>
+                &nbsp;Lưu
+              </button>
+            </div>
+            <div style="float:right; margin-right: 10px;">
+              <button :disabled="!refreshFormReportCompanion" @click="clearInputReportCompanionForm"
+                class="btn btn-success  rounded" style="font-size:13px;">
+                <i class="fas fa-sync-alt"></i>
+                &nbsp;Làm mới
+              </button>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+  `,
 };
+
+const EditReportCompanion = {
+  data() {
+    return {
+      id: 0,
+      companion: 0,
+      candidate: 0,
+      brightTL: null,
+      brightNB: null,
+      brightTT: null,
+      brightCD: null,
+      brightTD: null,
+      darkTL: null,
+      darkNB: null,
+      darkTT: null,
+      darkCD: null,
+      darkTD: null,
+      targetNextMonth: null,
+      idSchedule: 0,
+      isRead: 1,
+      isReads: [
+        { id: 1, name: "Chưa duyệt" },
+        { id: 2, name: "Đã duyệt" },
+      ],
+      titleBrightTL: "Nhập điểm sáng về phương diện thiêng liêng",
+      titleBrightNB: "Nhập điểm sáng về phương diện nhân bản",
+      titleBrightTT: "Nhập điểm sáng về phương diện tri thức",
+      titleBrightCD: "Nhập điểm sáng về phương diện cộng đoàn",
+      titleBrightTD: "Nhập điểm sáng về phương diện tông đồ",
+      titleDarkTL: "Nhập điểm tối về phương diện thiêng liêng",
+      titleDarkNB: "Nhập điểm tối về phương diện nhân bản",
+      titleDarkTT: "Nhập điểm tối về phương diện tri thức",
+      titleDarkCD: "Nhập điểm tối về phương diện cộng đoàn",
+      titleDarkTD: "Nhập điểm tối về phương diện tông đồ",
+      titleTargetNextMonth: "Nhập mục tiêu cho tháng tới",
+      companions: [],
+      candidates: [],
+      scheduleCompanion: {},
+      scheduleCompanions: [],
+      reportCompanions: [],
+      idTable: 0,
+      role: 0,
+      reportCompanion: {},
+    };
+  },
+  mounted() {
+    axios
+      .get(
+        "http://localhost:3000/api/logins/findOne?filter[where][token]=token"
+      )
+      .then((resp) => {
+        this.idTable = resp.data.idTable;
+        this.role = resp.data.role;
+      });
+    axios.get("http://localhost:3000/api/candidates").then((respCan) => {
+      this.candidates = respCan.data;
+    });
+    axios.get("http://localhost:3000/api/companions").then((respCom) => {
+      this.companions = respCom.data;
+    });
+    axios
+      .get(
+        "http://localhost:3000/api/reportCompanions?filter[where][id]=" +
+          this.$route.params.id
+      )
+      .then((response) => {
+        this.candidate = response.data[0].candidate;
+        this.companion = response.data[0].companion;
+        this.reportDate = response.data[0].reportDate;
+        this.brightTL = response.data[0].brightTL;
+        this.brightNB = response.data[0].brightNB;
+        this.brightTT = response.data[0].brightTT;
+        this.brightCD = response.data[0].brightCD;
+        this.brightTD = response.data[0].brightTD;
+        this.darkTL = response.data[0].darkTL;
+        this.darkNB = response.data[0].darkNB;
+        this.darkTT = response.data[0].darkTT;
+        this.darkCD = response.data[0].darkCD;
+        this.darkTD = response.data[0].darkTD;
+        this.targetNextMonth = response.data[0].targetNextMonth;
+        this.idSchedule = response.data[0].idSchedule;
+        this.isRead = response.data[0].isRead;
+      });
+  },
+  computed: {
+    refreshFormReportCompanion() {
+      return (
+        this.brightTL != null ||
+        this.brightNB != null ||
+        this.brightTT != null ||
+        this.brightCD != null ||
+        this.brightTD != null ||
+        this.darkTL != null ||
+        this.darkNB != null ||
+        this.darkTT != null ||
+        this.darkCD != null ||
+        this.darkTD != null ||
+        this.targetNextMonth != null
+      );
+    },
+  },
+  methods: {
+    submitEditReportCompanionForm() {
+      if (this.scheduleCompanion != null) {
+        const reportCompanion = {
+          candidate: this.candidate,
+          companion: this.companion,
+          reportDate: currentDate,
+          brightTL: this.brightTL,
+          brightNB: this.brightNB,
+          brightTT: this.brightTT,
+          brightCD: this.brightCD,
+          brightTD: this.brightTD,
+          darkTL: this.darkTL,
+          darkNB: this.darkNB,
+          darkTT: this.darkTT,
+          darkCD: this.darkCD,
+          darkTD: this.darkTD,
+          idSchedule: this.idSchedule,
+          isRead: 1,
+          id: this.$route.params.id,
+        };
+        const url =
+          "http://localhost:3000/api/reportCompanions/" +
+          reportCompanion.id +
+          "/replace";
+        axios.post(url, reportCompanion);
+        this.$router.push("/");
+        location.reload();
+        return 0;
+      }
+    },
+
+    clearInputReportCompanionForm() {
+      if (this.brightTL != null) {
+        this.brightTL = null;
+      }
+      if (this.brightNB != null) {
+        this.brightNB = null;
+      }
+      if (this.brightTT != null) {
+        this.brightTT = null;
+      }
+      if (this.brightCD != null) {
+        this.brightCD = null;
+      }
+      if (this.brightTD != null) {
+        this.brightTD = null;
+      }
+      if (this.darkTL != null) {
+        this.darkTL = null;
+      }
+      if (this.darkNB != null) {
+        this.darkNB = null;
+      }
+      if (this.darkTT != null) {
+        this.darkTT = null;
+      }
+      if (this.darkCD != null) {
+        this.darkCD = null;
+      }
+      if (this.darkTD != null) {
+        this.darkTD = null;
+      }
+      if (this.targetNextMonth != null) {
+        this.targetNextMonth = null;
+      }
+    },
+  },
+  template: `
+  <div class="card shadow mb-4" style="margin-top: -5px;">
+    <div class="card-header py-3">
+      <h6 class="m-0 font-weight-bold text-dark">Chỉnh sửa Báo Cáo Đồng Hành</h6>
+    </div>
+    <div class="card-body">
+      <form @submit.prevent="submitEditReportCompanionForm" action="POST" method="" autocomplete="off">
+        <div class="row mt-2">
+          <div class="col-lg-4">
+            <label class="font-weight-bold" style="font-size:15px;">Thông Tin Báo Cáo:</label>
+            <p style="font-size: 12px;">Thông tin phục vụ cho việc xếp hạng ứng sinh hàng tháng</p>
+          </div>
+          <div class="col-lg-4">
+            <label class=" font-weight-bold col-form-label" for="candidate">Ứng Sinh</label>
+            <select class="custom-select  text-size-13px  h-32px" v-model="candidate" name="candidate" id="candidate"
+              style="margin-top: -5px;" disabled>
+              <option v-for="candidate in candidates" v-bind:value="candidate.id" :selected="candidate.id == candidate">
+                {{ candidate.fullName }}</option>
+            </select>
+          </div>
+          <div class="col-lg-4">
+            <label class=" font-weight-bold col-form-label" for="companion">Người Đồng Hành</label>
+            <select class="custom-select  text-size-13px  h-32px" v-model="companion" name="companion" id="companion"
+              style="margin-top: -5px;" disabled>
+              <option v-for="companion in companions" v-bind:value="companion.id"
+                :selected="companion.id == companion">{{ companion.fullName }}</option>
+            </select>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-4"></div>
+          <div class="col-md-8">
+            <strong>1. <u>Những kinh nghiệm giúp tôi lớn lên hơn, dấn thân hơn trong đời sống ơn gọi.</u></strong>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-lg-4"></div>
+          <div class="col-lg-4">
+            <label class=" font-weight-bold col-form-label" for="brightTL">Thiêng Liêng</label>
+            <textarea class="form-control text-size-13px" :title="titleBrightTL" id="brightTL" v-model="brightTL"
+              name="brightTL" rows="4" :value="brightTL" v-on:keyup="brightTL = $event.target.value" style="margin-top: -5px;"></textarea>
+          </div>
+          <div class="col-lg-4">
+            <label class=" font-weight-bold col-form-label" for="brightNB">Nhân Bản</label>
+            <textarea class="form-control text-size-13px" :title="titleBrightNB" id="brightNB" v-model="brightNB"
+              name="brightNB" rows="4" :value="brightNB" v-on:keyup="brightNB = $event.target.value" style="margin-top: -5px;"></textarea>
+          </div>
+        </div>
+        <div class="row mt-1">
+          <div class="col-lg-4"></div>
+          <div class="col-lg-4">
+            <label class=" font-weight-bold col-form-label" for="brightTT">Tri Thức</label>
+            <textarea class="form-control text-size-13px" :title="titleBrightTT" id="brightTT" v-model="brightTT"
+              name="brightTT" rows="4" :value="brightTT" v-on:keyup="brightTT = $event.target.value" style="margin-top: -5px;"></textarea>
+          </div>
+          <div class="col-lg-4">
+            <label class=" font-weight-bold col-form-label" for="brightCD">Cộng Đoàn</label>
+            <textarea class="form-control text-size-13px" :title="titleBrightCD" id="brightCD" v-model="brightCD"
+              name="brightCD" rows="4" :value="brightCD" v-on:keyup="brightCD = $event.target.value" style="margin-top: -5px;"></textarea>
+          </div>
+        </div>
+        <div class="row mt-1">
+          <div class="col-lg-4"></div>
+          <div class="col-lg-4">
+            <label class=" font-weight-bold col-form-label" for="brightTD">Tông Đồ</label>
+            <textarea class="form-control text-size-13px" :title="titleBrightTD" id="brightTD" v-model="brightTD"
+              name="brightTD" rows="4" :value="brightTD" v-on:keyup="brightTD = $event.target.value" style="margin-top: -5px;"></textarea>
+          </div>
+          <div class="col-lg-4"></div>
+        </div>
+        <div class="row">
+          <div class="col-md-4"></div>
+          <div class="col-md-8">
+            <strong>2. <u>Những kinh nghiệm khiến đời sống tôi bị trì trệ, cản trở tôi dấn thân trong đời sống ơn
+                gọi.</u></strong>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-lg-4"></div>
+          <div class="col-lg-4">
+            <label class=" font-weight-bold col-form-label" for="darkTL">Thiêng Liêng</label>
+            <textarea class="form-control text-size-13px" :title="titleDarkTL" id="darkTL" v-model="darkTL"
+              name="darkTL" rows="4" :value="darkTL" v-on:keyup="darkTL = $event.target.value" style="margin-top: -5px;"></textarea>
+          </div>
+          <div class="col-lg-4">
+            <label class=" font-weight-bold col-form-label" for="darkNB">Nhân Bản</label>
+            <textarea class="form-control text-size-13px" :title="titleDarkNB" id="darkNB" v-model="darkNB"
+              name="darkNB" rows="4" :value="darkNB" v-on:keyup="darkNB = $event.target.value" style="margin-top: -5px;"></textarea>
+          </div>
+        </div>
+        <div class="row mt-1">
+          <div class="col-lg-4"></div>
+          <div class="col-lg-4">
+            <label class=" font-weight-bold col-form-label" for="darkTT">Tri Thức</label>
+            <textarea class="form-control text-size-13px" :title="titleDarkTT" id="darkTT" v-model="darkTT"
+              name="darkTT" rows="4" :value="darkTT" v-on:keyup="darkTT = $event.target.value" style="margin-top: -5px;"></textarea>
+          </div>
+          <div class="col-lg-4">
+            <label class=" font-weight-bold col-form-label" for="darkCD">Cộng Đoàn</label>
+            <textarea class="form-control text-size-13px" :title="titleDarkCD" id="darkCD" v-model="darkCD"
+              name="darkCD" rows="4" :value="darkCD" v-on:keyup="darkCD = $event.target.value" style="margin-top: -5px;"></textarea>
+          </div>
+        </div>
+        <div class="row mt-1">
+          <div class="col-lg-4"></div>
+          <div class="col-lg-4">
+            <label class=" font-weight-bold col-form-label" for="darkTD">Tông Đồ</label>
+            <textarea class="form-control text-size-13px" :title="titleDarkTD" id="darkTD" v-model="darkTD"
+              name="darkTD" rows="4" :value="darkTD" v-on:keyup="darkTD = $event.target.value" style="margin-top: -5px;"></textarea>
+          </div>
+          <div class="col-lg-4"></div>
+        </div>
+        <div class="row">
+          <div class="col-md-4"></div>
+          <div class="col-md-8">
+            <strong>3. <u>Dựa trên nhận định tháng vừa qua, tôi có những ước ao hay quyết tâm gì cho tháng sắp tới.</u></strong>
+          </div>
+        </div>
+        <div class="row mt-1">
+          <div class="col-lg-4"></div>
+          <div class="col-lg-4">
+            <label class=" font-weight-bold col-form-label" for="targetNextMonth">Mục Tiêu</label>
+            <textarea class="form-control text-size-13px" :title="titleTargetNextMonth" id="targetNextMonth" v-model="targetNextMonth"
+              name="targetNextMonth" rows="4"
+              :value="targetNextMonth" v-on:keyup="targetNextMonth = $event.target.value"
+              style="margin-top: -5px;"></textarea>
+          </div>
+          <div class="col-lg-4"></div>
+        </div>
+        <div class="row" style="margin-top: 30px;">
+          <div class="col-12">
+            <div style="float:right">
+              <button type="submit"
+                class="btn  rounded btn-hover-blue"
+                style="background-color: #056299;color: white;font-size:13px;">
+                <i class="far fa-save fa-lg"></i>
+                &nbsp;Lưu
+              </button>
+            </div>
+            <div style="float:right; margin-right: 10px;">
+              <button :disabled="!refreshFormReportCompanion" @click="clearInputReportCompanionForm"
+                class="btn btn-success  rounded" style="font-size:13px;">
+                <i class="fas fa-sync-alt"></i>
+                &nbsp;Làm mới
+              </button>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+  `,
+};
+
+const RateCandidate = {
+  template: `
+  <div>
+    <router-view />
+  </div>
+  `,
+};
+
+const ListRateCandidate = {
+  data() {
+    return {
+      rateCandidate: {},
+      countMetCompanion: 0,
+      countSpiritualGuide: 0,
+      rateCandidates: [],
+      candidates: [],
+      countMets: [],
+      titleButtonDisplay: "Xem thống kê",
+    };
+  },
+  mounted() {
+    axios.get("http://localhost:3000/api/rateCandidates").then((response) => {
+      this.rateCandidates = response.data;
+    });
+    axios.get("http://localhost:3000/api/candidates").then((respCan) => {
+      this.candidates = respCan.data;
+    });
+    axios.get("http://localhost:3000/api/countMets").then((respCountMet) => {
+      this.countMets = respCountMet.data;
+    });
+    
+  },
+  computed: {},
+  methods: {
+    goToRateCandidate(candidate) {},
+  },
+  template: `
+  <div class="card shadow mb-4" style="margin-top: -5px;">
+    <div class="card-header py-3" style="margin-bottom:-40px">
+      <div class="row">
+        <div class="col-md-4">
+          <h6 class="m-0 font-weight-bold text-dark">Thống kê thông số Ứng Sinh</h6>
+        </div>
+        <div class="col-md-6"></div>
+        <div class="col-md-2" style="padding-left:68px;">
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <hr style="height:1px;color:lightgray;background-color:lightgray">
+      <div class="table-responsive" style="margin-top:-8px">
+        <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+          <thead>
+            <tr>
+              <th scope="col">STT</th>
+              <th scope="col">Ứng Sinh</th>
+              <th scope="col">Số Lấn Gặp Đồng Hành</th>
+              <th scope="col">Số Lấn Gặp Linh Hướng</th>
+              <th scope="col">Trạng Thái</th>
+              <th scope="col">Action</th>
+            </tr>
+          </thead>
+          <tfoot>
+            <tr>
+              <th scope="col">STT</th>
+              <th scope="col">Ứng Sinh</th>
+              <th scope="col">Số Lấn Gặp Đồng Hành</th>
+              <th scope="col">Số Lấn Gặp Linh Hướng</th>
+              <th scope="col">Trạng Thái</th>
+              <th scope="col">Action</th>
+            </tr>
+          </tfoot>
+          <tbody>
+            <tr v-for="(countMet, index) in countMets" :key="countMet.id">
+              <th class="align-middle" scope="row">{{ index + 1 }}</th>
+              <td v-for="candidate in candidates" v-if="candidate.id == countMet.candidate">{{ candidate.fullName }}</td>
+              <td>
+                {{ countMet.countMetCompanion }}
+              </td>
+              <td>
+                {{ countMet.countMetSpiritualGuide }}
+              </td>
+              <td v-for="candidate in candidates" v-if="candidate.id == countMet.candidate && candidate.status == 1">
+                <i class="fas fa-toggle-on fa-lg text-success"></i>
+              </td>
+              <td v-for="candidate in candidates" v-else>
+                <i class="fas fa-toggle-off fa-lg text-danger"></i>
+              </td>
+              <td class="align-middle">
+                <div class="row">
+                  <div class="col-4">
+                    <button :title="titleButtonDisplay" @click="goToRateCandidate(candidate)" class="btn btn-primary btn-sm h-28px w-28px rounded"
+                      type="submit">
+                      <i class="far fa-eye fa-md ml--2px"></i>
+                    </button>
+                  </div>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  `,
+};
+
+const EditRateCandidate = {
+  data() {
+    return {
+      candidate: null,
+      month: 0,
+      year: 0,
+      score: 0,
+      idSchedule: 0,
+      titleScore: "Nhập điểm đánh giá cho ứng sinh",
+      rateCandidates: [],
+      candidates: [],
+      rateCandidate: {},
+    };
+  },
+  mounted() {
+    axios.get("http://localhost:3000/api/candidates").then((response) => {
+      this.candidates = response.data;
+    });
+    axios.get("http://localhost:3000/api/rateCandidates").then((response) => {
+      this.rateCandidates = response.data;
+    });
+    axios
+      .get(
+        "http://localhost:3000/api/rateCandidates?filter[where][id]=" +
+          this.$route.params.id
+      )
+      .then((respRate) => {
+        this.candidate = respRate.data[0].candidate;
+        this.month = respRate.data[0].month;
+        this.year = respRate.data[0].year;
+        this.year = respRate.data[0].score;
+        this.idSchedule = respRate.data[0].idSchedule;
+      });
+  },
+
+  computed: {
+    refreshForm() {
+      return this.score != 0;
+    },
+  },
+  methods: {
+    submitEditRateCandidateForm() {
+      if (this.score < 0 || this.score > 100) {
+        alertify.alert(
+          "Thông báo",
+          "Số điểm không hợp lệ! Vui lòng nhập lại. (0 -> 100)",
+          function () {
+            alertify.success("Ok");
+          }
+        );
+      } else {
+        const rateCandidate = {
+          candidate: this.candidate,
+          month: this.month,
+          year: this.year,
+          score: this.score,
+          idSchedule: this.idSchedule,
+          id: this.$route.params.id,
+        };
+        const url =
+          "http://localhost:3000/api/rateCandidates/" +
+          rateCandidate.id +
+          "/replace";
+        axios.post(url, rateCandidate);
+        this.$router.push("/reportCompanions");
+        location.reload();
+        return 0;
+      }
+    },
+
+    clearInput() {
+      if (this.score != 0) {
+        this.score = 0;
+      }
+    },
+
+    toListReportCompanion() {
+      this.$router.push("/reportCompanions");
+      location.reload();
+    },
+  },
+  template: `
+  <div class="card shadow mb-4" style="margin-top: -5px;">
+  <div class="card-header py-3">
+    <h6 class="m-0 font-weight-bold text-dark">Đánh Giá Ứng Sinh Tháng {{ month }}</h6>
+  </div>
+  <div class="card-body">
+    <form @submit.prevent="submitEditRateCandidateForm" action="POST" method="" autocomplete="off">
+      <div class="row mt-2">
+        <div class="col-lg-4">
+          <label class="font-weight-bold text-size-15px">Thông Tin Đánh Giá:</label>
+        </div>
+        <div class="col-lg-4">
+          <label class="font-weight-bold col-form-label" for="candidate">Ứng Sinh</label>
+          <select class="custom-select  text-size-13px  h-32px" v-model="candidate" id="candidate" name="candidate"
+            style="margin-top: -5px;" disabled>
+            <option v-for="candidate in candidates" v-bind:value ="candidate.id" :selected="candidate.id == candidate">{{ candidate.fullName }}</option>
+          </select>
+        </div>
+        <div class="col-lg-4">
+          <label class="font-weight-bold col-form-label" for="score">Điểm Số</label>
+          <input v-bind:title="titleScore" v-model="score" id="score" name="score"
+            type="number" class="form-control  text-size-13px " placeholder="Nhập Điểm Số Đánh Giá..."
+            :value="score" v-on:keyup="score = $event.target.value" style="margin-top: -5px;">
+        </div>
+      </div>
+      <div class="row mt-1">
+        <div class="col-lg-4"></div>
+        <div class="col-lg-4">
+          <label class="font-weight-bold col-form-label" for="month">Tháng</label>
+          <input v-model="month" id="month" name="month"
+            type="number" class="form-control  text-size-13px "
+            :value="month" v-on:keyup="month = $event.target.value" style="margin-top: -5px;" disabled>
+        </div>
+        <div class="col-lg-4">
+          <label class="font-weight-bold col-form-label" for="year">Năm</label>
+          <input v-model="year" id="year" name="year"
+            type="number" class="form-control  text-size-13px "
+            :value="year" v-on:keyup="year = $event.target.value" style="margin-top: -5px;" disabled>
+        </div>
+      </div>
+      <div class="row" style="margin-top: 30px;">
+        <div class="col-12">
+          <div style="float:right">
+            <button type="submit"
+              class="btn rounded btn-hover-blue"
+              style="background-color: #056299;color: white;font-size:13px;">
+              <i class="far fa-save fa-lg"></i>
+              &nbsp;Lưu
+            </button>
+          </div>
+          <div style="float:right; margin-right: 10px;">
+            <button :disabled="!refreshForm" @click="clearInput"
+              class="btn btn-success rounded" style="font-size:13px;">
+              <i class="fas fa-sync-alt"></i>
+              &nbsp;Làm mới
+            </button>
+          </div>
+          <div style="float:right; margin-right: 360px;">
+            <button class="btn rounded btn-hover-blue"
+              style="background-color: #056299;color: white;font-size:13px;" @click="toListReportCompanion">
+              <i class="fas fa-fast-backward"></i>
+              &nbsp;Quay lại
+            </button>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+  `,
+};
+
 // Schedule Spiritual Guide
 const ScheduleSpiritualGuide = {
   template: `
@@ -13536,6 +16894,8 @@ const RegisteringScheduleSpiritualGuide = {
       role: 0,
       idTable: 0,
       metSpiritualGuides: [],
+      checkAdd: 0,
+      checkDelete: 0,
     };
   },
   mounted() {
@@ -13547,25 +16907,6 @@ const RegisteringScheduleSpiritualGuide = {
     //   this.idTable = jsonResults.idTable;
     //   console.log(this.idTable);
     // })
-    axios
-      .get(
-        "http://localhost:3000/api/logins/findOne?filter[where][token]=token"
-      )
-      .then((resp) => {
-        this.idTable = resp.data.idTable;
-        this.role = resp.data.role;
-      });
-    axios
-      .get(
-        "http://localhost:3000/api/scheduleSpiritualGuides?filter[where][spiritualGuide]=8"
-      )
-      .then((response) => {
-        this.scheduleSpiritualGuides = response.data;
-      });
-    axios.get("http://localhost:3000/api/candidates").then((resp) => {
-      this.candidates = resp.data;
-    });
-
     // axios
     //   .get(
     //     "http://localhost:3000/api/logins/findOne?filter[where][token]=token"
@@ -13573,162 +16914,200 @@ const RegisteringScheduleSpiritualGuide = {
     //   .then((resp) => {
     //     this.idTable = resp.data.idTable;
     //     this.role = resp.data.role;
-    //     if (this.role == 8 || this.role == 9) {
-    //       axios
-    //         .get(
-    //           "http://localhost:3000/api/scheduleSpiritualGuides?filter[where][spiritualGuide]=" +
-    //             this.idTable
-    //         )
-    //         .then((response) => {
-    //           this.scheduleSpiritualGuides = response.data;
-    //           console.log(this.scheduleSpiritualGuides);
-    //         });
-    //     }
-    //     else if (this.role == 5) {
-    //       axios
-    //         .get(
-    //           "http://localhost:3000/api/candidates?filter[where][id]=" +
-    //             this.idTable
-    //         )
-    //         .then((respCan) => {
-    //           var community = respCan.data[0].community;
-    //           axios
-    //             .get(
-    //               "http://localhost:3000/api/groupCommunities?filter[where][firstCom]=" + community)
-    //             .then((respGroupCom) => {
-    //               var groupCommunity = {};
-    //               groupCommunity = respGroupCom.data;
-    //               if(groupCommunity != null){
-    //                 var idGroup = respGroupCom.data[0].id;
-    //                 axios
-    //                   .get(
-    //                     "http://localhost:3000/api/spiritualGuides?filter[where][groupCommunity]=" +
-    //                       idGroup
-    //                   )
-    //                   .then((respCom) => {
-    //                     var spiritualGuide = respCom.data[0].id;
-    //                     axios
-    //                       .get(
-    //                         "http://localhost:3000/api/scheduleSpiritualGuides?filter[where][spiritualGuide]=" +
-    //                           spiritualGuide
-    //                       )
-    //                       .then((respSchedule) => {
-    //                         this.scheduleSpiritualGuides = respSchedule.data;
-    //                       });
-    //                   });
-    //               } else{
-    //                 axios
-    //                   .get(
-    //                     "http://localhost:3000/api/groupCommunities?filter[where][secondCom]=" + community)
-    //                   .then((respGroupCom) => {
-    //                     var groupCommunity = {};
-    //                     groupCommunity = respGroupCom.data;
-    //                     if(groupCommunity != null){
-    //                       var idGroup = respGroupCom.data[0].id;
-    //                     axios
-    //                       .get(
-    //                         "http://localhost:3000/api/spiritualGuides?filter[where][groupCommunity]=" +
-    //                           idGroup
-    //                       )
-    //                       .then((respCom) => {
-    //                         var spiritualGuide = respCom.data[0].id;
-    //                         axios
-    //                           .get(
-    //                             "http://localhost:3000/api/scheduleSpiritualGuides?filter[where][spiritualGuide]=" +
-    //                               spiritualGuide
-    //                           )
-    //                           .then((resp) => {
-    //                             this.scheduleSpiritualGuides = resp.data;
-    //                           });
-    //                       });
-    //                     } else{
-    //                       axios
-    //                         .get(
-    //                           "http://localhost:3000/api/groupCommunities?filter[where][thirdCom]=" + community)
-    //                         .then((respGroupCom) => {
-    //                           var groupCommunity = {};
-    //                           groupCommunity = respGroupCom.data;
-    //                           if(groupCommunity != null){
-    //                             var idGroup = respGroupCom.data[0].id;
-    //                           axios
-    //                             .get(
-    //                               "http://localhost:3000/api/spiritualGuides?filter[where][groupCommunity]=" +
-    //                                 idGroup
-    //                             )
-    //                             .then((respCom) => {
-    //                               var spiritualGuide = respCom.data[0].id;
-    //                               axios
-    //                                 .get(
-    //                                   "http://localhost:3000/api/scheduleSpiritualGuides?filter[where][spiritualGuide]=" +
-    //                                     spiritualGuide
-    //                                 )
-    //                                 .then((respSchedule) => {
-    //                                   this.scheduleSpiritualGuides = respSchedule.data;
-    //                                 });
-    //                             });
-    //                           } else {
-    //                             axios
-    //                               .get(
-    //                                 "http://localhost:3000/api/groupCommunities?filter[where][fourthCom]=" + community)
-    //                               .then((respGroupCom) => {
-    //                                 var groupCommunity = {};
-    //                                 groupCommunity = respGroupCom.data;
-    //                                 if(groupCommunity != null){
-    //                                   var idGroup = respGroupCom.data[0].id;
-    //                                 axios
-    //                                   .get(
-    //                                     "http://localhost:3000/api/spiritualGuides?filter[where][groupCommunity]=" +
-    //                                       idGroup
-    //                                   )
-    //                                   .then((respCom) => {
-    //                                     var spiritualGuide = respCom.data[0].id;
-    //                                     axios
-    //                                       .get(
-    //                                         "http://localhost:3000/api/scheduleSpiritualGuides?filter[where][spiritualGuide]=" +
-    //                                           spiritualGuide
-    //                                       )
-    //                                       .then((respSchedule) => {
-    //                                         this.scheduleSpiritualGuides = respSchedule.data;
-    //                                       });
-    //                                   });
-    //                                 } else{
-    //                                   axios
-    //                                     .get(
-    //                                       "http://localhost:3000/api/groupCommunities?filter[where][fifthCom]=" + community)
-    //                                     .then((respGroupCom) => {
-    //                                       var groupCommunity = {};
-    //                                       groupCommunity = respGroupCom.data;
-    //                                       if(groupCommunity != null){
-    //                                         var idGroup = respGroupCom.data[0].id;
-    //                                       axios
-    //                                         .get(
-    //                                           "http://localhost:3000/api/spiritualGuides?filter[where][groupCommunity]=" +
-    //                                             idGroup
-    //                                         )
-    //                                         .then((respCom) => {
-    //                                           var spiritualGuide = respCom.data[0].id;
-    //                                           axios
-    //                                             .get(
-    //                                               "http://localhost:3000/api/scheduleSpiritualGuides?filter[where][spiritualGuide]=" +
-    //                                                 spiritualGuide
-    //                                             )
-    //                                             .then((respSchedule) => {
-    //                                               this.scheduleSpiritualGuides = respSchedule.data;
-    //                                             });
-    //                                         });
-    //                                       }
-    //                                     });
-    //                                 }
-    //                               });
-    //                           }
-    //                         });
-    //                     }
-    //                   });
-    //               }
-    //             });
-    //         });
-    //     }
     //   });
+    // axios
+    //   .get(
+    //     "http://localhost:3000/api/scheduleSpiritualGuides?filter[where][spiritualGuide]=8"
+    //   )
+    //   .then((response) => {
+    //     this.scheduleSpiritualGuides = response.data;
+    //   });
+    axios.get("http://localhost:3000/api/candidates").then((resp) => {
+      this.candidates = resp.data;
+    });
+
+    axios
+      .get(
+        "http://localhost:3000/api/logins/findOne?filter[where][token]=token"
+      )
+      .then((resp) => {
+        this.idTable = resp.data.idTable;
+        this.role = resp.data.role;
+        if (this.role == 6 || this.role == 7) {
+          axios
+            .get(
+              "http://localhost:3000/api/scheduleSpiritualGuides?filter[where][spiritualGuide]=" +
+                this.idTable
+            )
+            .then((response) => {
+              this.scheduleSpiritualGuides = response.data;
+              if (response.data.length == 0) {
+                this.checkAdd = 1;
+              } else {
+                this.checkDelete = 1;
+              }
+            });
+        } else if (this.role == 5) {
+          axios
+            .get(
+              "http://localhost:3000/api/candidates?filter[where][id]=" +
+                this.idTable
+            )
+            .then((respCan) => {
+              var community = respCan.data[0].community;
+              axios
+                .get(
+                  "http://localhost:3000/api/groupCommunities?filter[where][firstCom]=" +
+                    community
+                )
+                .then((respGroupCom) => {
+                  var groupCommunity = {};
+                  groupCommunity = respGroupCom.data;
+                  if (groupCommunity != null) {
+                    var idGroup = respGroupCom.data[0].id;
+                    axios
+                      .get(
+                        "http://localhost:3000/api/spiritualGuides?filter[where][groupCommunity]=" +
+                          idGroup
+                      )
+                      .then((respCom) => {
+                        var spiritualGuide = respCom.data[0].id;
+                        axios
+                          .get(
+                            "http://localhost:3000/api/scheduleSpiritualGuides?filter[where][spiritualGuide]=" +
+                              spiritualGuide
+                          )
+                          .then((respSchedule) => {
+                            this.scheduleSpiritualGuides = respSchedule.data;
+                          });
+                      });
+                  } else {
+                    axios
+                      .get(
+                        "http://localhost:3000/api/groupCommunities?filter[where][secondCom]=" +
+                          community
+                      )
+                      .then((respGroupCom) => {
+                        var groupCommunity = {};
+                        groupCommunity = respGroupCom.data;
+                        if (groupCommunity != null) {
+                          var idGroup = respGroupCom.data[0].id;
+                          axios
+                            .get(
+                              "http://localhost:3000/api/spiritualGuides?filter[where][groupCommunity]=" +
+                                idGroup
+                            )
+                            .then((respCom) => {
+                              var spiritualGuide = respCom.data[0].id;
+                              axios
+                                .get(
+                                  "http://localhost:3000/api/scheduleSpiritualGuides?filter[where][spiritualGuide]=" +
+                                    spiritualGuide
+                                )
+                                .then((resp) => {
+                                  this.scheduleSpiritualGuides = resp.data;
+                                });
+                            });
+                        } else {
+                          axios
+                            .get(
+                              "http://localhost:3000/api/groupCommunities?filter[where][thirdCom]=" +
+                                community
+                            )
+                            .then((respGroupCom) => {
+                              var groupCommunity = {};
+                              groupCommunity = respGroupCom.data;
+                              if (groupCommunity != null) {
+                                var idGroup = respGroupCom.data[0].id;
+                                axios
+                                  .get(
+                                    "http://localhost:3000/api/spiritualGuides?filter[where][groupCommunity]=" +
+                                      idGroup
+                                  )
+                                  .then((respCom) => {
+                                    var spiritualGuide = respCom.data[0].id;
+                                    axios
+                                      .get(
+                                        "http://localhost:3000/api/scheduleSpiritualGuides?filter[where][spiritualGuide]=" +
+                                          spiritualGuide
+                                      )
+                                      .then((respSchedule) => {
+                                        this.scheduleSpiritualGuides =
+                                          respSchedule.data;
+                                      });
+                                  });
+                              } else {
+                                axios
+                                  .get(
+                                    "http://localhost:3000/api/groupCommunities?filter[where][fourthCom]=" +
+                                      community
+                                  )
+                                  .then((respGroupCom) => {
+                                    var groupCommunity = {};
+                                    groupCommunity = respGroupCom.data;
+                                    if (groupCommunity != null) {
+                                      var idGroup = respGroupCom.data[0].id;
+                                      axios
+                                        .get(
+                                          "http://localhost:3000/api/spiritualGuides?filter[where][groupCommunity]=" +
+                                            idGroup
+                                        )
+                                        .then((respCom) => {
+                                          var spiritualGuide =
+                                            respCom.data[0].id;
+                                          axios
+                                            .get(
+                                              "http://localhost:3000/api/scheduleSpiritualGuides?filter[where][spiritualGuide]=" +
+                                                spiritualGuide
+                                            )
+                                            .then((respSchedule) => {
+                                              this.scheduleSpiritualGuides =
+                                                respSchedule.data;
+                                            });
+                                        });
+                                    } else {
+                                      axios
+                                        .get(
+                                          "http://localhost:3000/api/groupCommunities?filter[where][fifthCom]=" +
+                                            community
+                                        )
+                                        .then((respGroupCom) => {
+                                          var groupCommunity = {};
+                                          groupCommunity = respGroupCom.data;
+                                          if (groupCommunity != null) {
+                                            var idGroup =
+                                              respGroupCom.data[0].id;
+                                            axios
+                                              .get(
+                                                "http://localhost:3000/api/spiritualGuides?filter[where][groupCommunity]=" +
+                                                  idGroup
+                                              )
+                                              .then((respCom) => {
+                                                var spiritualGuide =
+                                                  respCom.data[0].id;
+                                                axios
+                                                  .get(
+                                                    "http://localhost:3000/api/scheduleSpiritualGuides?filter[where][spiritualGuide]=" +
+                                                      spiritualGuide
+                                                  )
+                                                  .then((respSchedule) => {
+                                                    this.scheduleSpiritualGuides =
+                                                      respSchedule.data;
+                                                  });
+                                              });
+                                          }
+                                        });
+                                    }
+                                  });
+                              }
+                            });
+                        }
+                      });
+                  }
+                });
+            });
+        }
+      });
     axios.get("http://localhost:3000/api/metSpiritualGuides").then((resp) => {
       this.metSpiritualGuides = resp.data;
     });
@@ -14093,8 +17472,25 @@ const RegisteringScheduleSpiritualGuide = {
                 candidate: this.idTable,
                 registeredDate: currentDate,
                 status: 1,
+                reportStatus: 1,
                 idSchedule: scheduleSpiritualGuideEdit.id,
               };
+              axios
+                .get(
+                  "http://localhost:3000/api/countMets?filter[where][candidate]=" +
+                    this.idTable
+                )
+                .then((respCountMet) => {
+                  if (respCountMet.data.length === 0) {
+                    const countMet = {
+                      candidate: this.idTable,
+                      countMetCompanion: 0,
+                      countMetSpiritualGuide: 0,
+                    };
+                    const url_3 = `http://localhost:3000/api/countMets`;
+                    axios.post(url_3, countMet);
+                  }
+                });
               const url_1 = `http://localhost:3000/api/metSpiritualGuides`;
               axios.post(url_1, metSpiritualGuide);
               const url =
@@ -14267,14 +17663,14 @@ const RegisteringScheduleSpiritualGuide = {
           <h6 class="m-0 font-weight-bold text-dark">Đăng ký Lịch linh hướng</h6>
         </div>
         <div class="col-md-4"></div>
-        <div class="col-md-2" style="padding-left:110px;" v-show="role == 6 || role == 7">
+        <div class="col-md-2" style="padding-left:110px;" v-show="(role === 6 && checkDelete === 1) || (role == 7 && checkDelete === 1)">
           <button class="btn rounded btn-danger" style="font-size:14px;" 
           data-toggle="modal" data-target="#deleteScheduleSpiritualGuideModal">
             <i class="fas fa-trash-alt"></i>
             &nbsp;Xóa lịch
           </button>
         </div>
-        <div class="col-md-2" style="padding-left:50px;" v-show="role == 6 || role == 7">
+        <div class="col-md-2" style="padding-left:50px;" v-show="(role === 6 && checkAdd === 1) || (role == 7 && checkAdd === 1)">
           <button class="btn rounded btn-hover-blue"
             style="background-color: #056299;color: white;font-size:14px;" @click="CreateScheduleSpiritualGuide">
             <i class="fas fa-plus"></i>
@@ -18764,32 +22160,33 @@ const ListMetCompanion = {
     };
   },
   mounted() {
-    // axios
-    //   .get(
-    //     "http://localhost:3000/api/logins/findOne?filter[where][token]=token"
-    //   )
-    //   .then((resp) => {
-    //     this.idTable = resp.data.idTable;
-    //     this.role = resp.data.role;
-    //   });
-    // if (this.role === 8 || this.role === 9) {
-    //   axios
-    //     .get(
-    //       "http://localhost:3000/api/metCompanions?filter[where][companion]=" +
-    //         this.idTable
-    //     )
-    //     .then((response) => {
-    //       this.metCompanions = response.data;
-    //     });
-    // } else if (this.role === 1 || this.role === 2) {
-    //   axios.get("http://localhost:3000/api/metCompanions").then((response) => {
-    //     this.metCompanions = response.data;
-    //   });
-    // }
-
-    axios.get("http://localhost:3000/api/metCompanions").then((response) => {
-      this.metCompanions = response.data;
-    });
+    axios
+      .get(
+        "http://localhost:3000/api/logins/findOne?filter[where][token]=token"
+      )
+      .then((resp) => {
+        this.idTable = resp.data.idTable;
+        this.role = resp.data.role;
+        if (this.role == 8 || this.role == 9) {
+          axios
+            .get(
+              "http://localhost:3000/api/metCompanions?filter[where][companion]=" +
+                this.idTable
+            )
+            .then((response) => {
+              this.metCompanions = response.data;
+            });
+        } else if (this.role == 1 || this.role == 2) {
+          axios
+            .get("http://localhost:3000/api/metCompanions")
+            .then((response) => {
+              this.metCompanions = response.data;
+            });
+        }
+      });
+    // axios.get("http://localhost:3000/api/metCompanions").then((response) => {
+    //   this.metCompanions = response.data;
+    // });
     axios.get("http://localhost:3000/api/companions").then((respCom) => {
       this.companions = respCom.data;
     });
@@ -18809,6 +22206,24 @@ const ListMetCompanion = {
           reportStatus: metCompanion.reportStatus,
           idSchedule: metCompanion.idSchedule,
         };
+        axios
+          .get(
+            "http://localhost:3000/api/countMets?filter[where][candidate]=" +
+            metCompanion.candidate
+          )
+          .then((respCountMet) => {
+            const countMet = {
+              candidate: this.idTable,
+              countMetCompanion: respCountMet.data[0].countMetCompanion + 1,
+              countMetSpiritualGuide: respCountMet.data[0].countMetSpiritualGuide,
+              id: respCountMet.data[0].id
+            };
+            const url_3 =
+              "http://localhost:3000/api/countMets/" +
+              countMet.id +
+              "/replace";
+            axios.post(url_3 , countMet);
+          });
         const url =
           "http://localhost:3000/api/metCompanions/" +
           metCompanion.id +
@@ -18826,6 +22241,24 @@ const ListMetCompanion = {
           reportStatus: metCompanion.reportStatus,
           idSchedule: metCompanion.idSchedule,
         };
+        axios
+          .get(
+            "http://localhost:3000/api/countMets?filter[where][candidate]=" +
+            metCompanion.candidate
+          )
+          .then((respCountMet) => {
+            const countMet = {
+              candidate: this.idTable,
+              countMetCompanion: respCountMet.data[0].countMetCompanion - 1,
+              countMetSpiritualGuide: respCountMet.data[0].countMetSpiritualGuide,
+              id: respCountMet.data[0].id
+            };
+            const url_3 =
+              "http://localhost:3000/api/countMets/" +
+              countMet.id +
+              "/replace";
+            axios.post(url_3 , countMet);
+          });
         const url =
           "http://localhost:3000/api/metCompanions/" +
           metCompanion.id +
@@ -18879,7 +22312,7 @@ const ListMetCompanion = {
               <th class="align-middle" scope="row">{{ index + 1 }}</th>
               <td v-for="companion in companions" v-if="companion.id == metCompanion.companion">{{ companion.fullName }}</td>
               <td v-for="candidate in candidates" v-if="candidate.id == metCompanion.candidate">{{ candidate.fullName }}</td>
-              <td>{{ crypt.formatDate(metCompanion.registeredDate) }}</td>
+              <td>{{ crypt.formatDateDisplay(metCompanion.registeredDate) }}</td>
               <td v-for="status in statuses" v-if="metCompanion.status == status.id">{{ status.name }}</td>
               <td v-for="reportStatus in reportStatuses" v-if="metCompanion.reportStatus == reportStatus.id">{{ reportStatus.name }}</td>
               <td class="align-middle">
@@ -18928,33 +22361,35 @@ const ListMetSpiritualGuide = {
     };
   },
   mounted() {
+    axios
+      .get(
+        "http://localhost:3000/api/logins/findOne?filter[where][token]=token"
+      )
+      .then((resp) => {
+        this.idTable = resp.data.idTable;
+        this.role = resp.data.role;
+      });
+    if (this.role == 6 || this.role == 7) {
+      axios
+        .get(
+          "http://localhost:3000/api/metSpiritualGuides?filter[where][spiritualGuide]=" +
+            this.idTable
+        )
+        .then((response) => {
+          this.metSpiritualGuides = response.data;
+        });
+    } else if (this.role === 1 || this.role === 2) {
+      axios
+        .get("http://localhost:3000/api/metSpiritualGuides")
+        .then((response) => {
+          this.metSpiritualGuides = response.data;
+        });
+    }
     // axios
-    //   .get(
-    //     "http://localhost:3000/api/logins/findOne?filter[where][token]=token"
-    //   )
-    //   .then((resp) => {
-    //     this.idTable = resp.data.idTable;
-    //     this.role = resp.data.role;
-    //   });
-    // if (this.role === 8 || this.role === 9) {
-    //   axios
-    //     .get(
-    //       "http://localhost:3000/api/metSpiritualGuides?filter[where][spiritualGuide]=" +
-    //         this.idTable
-    //     )
-    //     .then((response) => {
-    //       this.metSpiritualGuides = response.data;
-    //     });
-    // } else if (this.role === 1 || this.role === 2) {
-    //   axios.get("http://localhost:3000/api/metSpiritualGuides").then((response) => {
+    //   .get("http://localhost:3000/api/metSpiritualGuides")
+    //   .then((response) => {
     //     this.metSpiritualGuides = response.data;
     //   });
-    // }
-    axios
-      .get("http://localhost:3000/api/metSpiritualGuides")
-      .then((response) => {
-        this.metSpiritualGuides = response.data;
-      });
     axios
       .get("http://localhost:3000/api/spiritualGuides")
       .then((respSpirit) => {
@@ -18976,6 +22411,24 @@ const ListMetSpiritualGuide = {
           reportStatus: metSpiritualGuide.reportStatus,
           idSchedule: metSpiritualGuide.idSchedule,
         };
+        axios
+          .get(
+            "http://localhost:3000/api/countMets?filter[where][candidate]=" +
+            metSpiritualGuide.candidate
+          )
+          .then((respCountMet) => {
+            const countMet = {
+              candidate: this.idTable,
+              countMetCompanion: respCountMet.data[0].countMetCompanion,
+              countMetSpiritualGuide: respCountMet.data[0].countMetSpiritualGuide + 1,
+              id: respCountMet.data[0].id
+            };
+            const url_3 =
+              "http://localhost:3000/api/countMets/" +
+              countMet.id +
+              "/replace";
+            axios.post(url_3 , countMet);
+          });
         const url =
           "http://localhost:3000/api/metSpiritualGuides/" +
           metSpiritualGuide.id +
@@ -18993,6 +22446,24 @@ const ListMetSpiritualGuide = {
           reportStatus: metSpiritualGuide.reportStatus,
           idSchedule: metSpiritualGuide.idSchedule,
         };
+        axios
+          .get(
+            "http://localhost:3000/api/countMets?filter[where][candidate]=" +
+            metSpiritualGuide.candidate
+          )
+          .then((respCountMet) => {
+            const countMet = {
+              candidate: this.idTable,
+              countMetCompanion: respCountMet.data[0].countMetCompanion,
+              countMetSpiritualGuide: respCountMet.data[0].countMetSpiritualGuide - 1,
+              id: respCountMet.data[0].id
+            };
+            const url_3 =
+              "http://localhost:3000/api/countMets/" +
+              countMet.id +
+              "/replace";
+            axios.post(url_3 , countMet);
+          });
         const url =
           "http://localhost:3000/api/metSpiritualGuides/" +
           metSpiritualGuide.id +
@@ -19227,9 +22698,34 @@ const routes = [
         name: "reportCompanions",
         component: ReportCompanion,
         children: [
-          { path: "", name: "listReportCompanion", component: ListReportCompanion },
-          { path: "add", name: "addReportCompanion", component: AddReportCompanion },
-          { path: ":id/edit", name: "editReportCompanion", component: EditReportCompanion },
+          {
+            path: "",
+            name: "listReportCompanion",
+            component: ListReportCompanion,
+          },
+          {
+            path: "add",
+            name: "addReportCompanion",
+            component: AddReportCompanion,
+          },
+          {
+            path: ":id/edit",
+            name: "editReportCompanion",
+            component: EditReportCompanion,
+          },
+        ],
+      },
+      {
+        path: "/rateCandidates",
+        name: "rateCandidates",
+        component: RateCandidate,
+        children: [
+          { path: "", name: "listRateCandidate", component: ListRateCandidate },
+          {
+            path: ":id/edit",
+            name: "editRateCandidate",
+            component: EditRateCandidate,
+          },
         ],
       },
       {
@@ -19244,16 +22740,16 @@ const routes = [
           },
         ],
       },
-      {
-        path: "/reportSpiritualGuides",
-        name: "reportSpiritualGuides",
-        component: ReportSpiritualGuide,
-        children: [
-          { path: "", name: "listReportSpiritualGuide", component: ListReportSpiritualGuide },
-          { path: "add", name: "addReportSpiritualGuide", component: AddReportSpiritualGuide },
-          { path: ":id/edit", name: "editReportSpiritualGuide", component: EditReportSpiritualGuide },
-        ],
-      },
+      // {
+      //   path: "/reportSpiritualGuides",
+      //   name: "reportSpiritualGuides",
+      //   component: ReportSpiritualGuide,
+      //   children: [
+      //     { path: "", name: "listReportSpiritualGuide", component: ListReportSpiritualGuide },
+      //     { path: "add", name: "addReportSpiritualGuide", component: AddReportSpiritualGuide },
+      //     { path: ":id/edit", name: "editReportSpiritualGuide", component: EditReportSpiritualGuide },
+      //   ],
+      // },
       {
         path: "/roles",
         name: "roles",
@@ -19330,11 +22826,26 @@ var crypt = {
   formatDate: function (dateFormat) {
     var date = new Date(dateFormat);
     return (
-      (date.getDate() > 9 ? date.getDate() : "0" + date.getDate()) + "/" +
+      date.getFullYear() +
+      "-" +
       (date.getMonth() > 8
         ? date.getMonth() + 1
         : "0" + (date.getMonth() + 1)) +
-      "/" + date.getFullYear()
+      "-" +
+      (date.getDate() > 9 ? date.getDate() : "0" + date.getDate())
+    );
+  },
+
+  formatDateDisplay: function (dateFormat) {
+    var date = new Date(dateFormat);
+    return (
+      (date.getDate() > 9 ? date.getDate() : "0" + date.getDate()) +
+      "/" +
+      (date.getMonth() > 8
+        ? date.getMonth() + 1
+        : "0" + (date.getMonth() + 1)) +
+      "/" +
+      date.getFullYear()
       //  +
       // "-" +
       // (date.getMonth() > 8
@@ -19344,6 +22855,7 @@ var crypt = {
       // (date.getDate() > 9 ? date.getDate() : "0" + date.getDate())
     );
   },
+
   getAge: function (birthday) {
     return Math.floor((new Date() - new Date(birthday).getTime()) / 3.15576e10);
   },
@@ -19358,6 +22870,10 @@ var crypt = {
 //VUE
 /*******************************************/ new Vue({
   el: "#myApp",
-  store,
+  // store,
   router,
 });
+
+// var abc = require('./math');
+
+// console.log(abc.add(2,3));
