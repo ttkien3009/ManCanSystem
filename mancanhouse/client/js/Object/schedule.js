@@ -26,6 +26,9 @@ const ListSchedule = {
       schedule: {},
       subjects: [],
       teachers: [],
+      idTable: 0,
+      role: 0,
+      roelName: null,
     };
   },
   mounted() {
@@ -38,6 +41,42 @@ const ListSchedule = {
     axios.get("http://localhost:3000/api/teachers").then((response) => {
       this.teachers = response.data;
     });
+    axios
+      .get(
+        "http://localhost:3000/api/logins/findOne?filter[where][token]=token"
+      )
+      .then((resp) => {
+        this.idTable = resp.data.idTable;
+        axios
+          .get(
+            "http://localhost:3000/api/roles?filter[where][id]=" +
+              resp.data.role
+          )
+          .then((respRole) => {
+            this.roleName = respRole.data[0].roleName;
+            if (this.roleName == "Quản trị viên") {
+              this.role = 1;
+            } else if (this.roleName == "Giám đốc") {
+              this.role = 2;
+            } else if (this.roleName == "Quản lý") {
+              this.role = 3;
+            } else if (this.roleName == "Giám học") {
+              this.role = 4;
+            } else if (this.roleName == "Ứng sinh") {
+              this.role = 5;
+            } else if (this.roleName == "Trưởng linh hướng") {
+              this.role = 6;
+            } else if (this.roleName == "Linh hướng") {
+              this.role = 7;
+            } else if (this.roleName == "Trưởng đồng hành") {
+              this.role = 8;
+            } else if (this.roleName == "Đồng hành") {
+              this.role = 9;
+            } else if (this.roleName == "Giảng viên") {
+              this.role = 10;
+            }
+          });
+      });
   },
   computed: {},
   methods: {
@@ -80,7 +119,7 @@ const ListSchedule = {
           <h6 class="m-0 font-weight-bold text-dark">Danh sách Lịch Học</h6>
         </div>
         <div class="col-md-6"></div>
-        <div class="col-md-2" style="padding-left:68px;">
+        <div class="col-md-2" style="padding-left:68px;" v-show="role === 1 || role === 4">
           <router-link :to="{ name: 'addSchedule' }">
             <button :title="titleButtonAdd" class="btn rounded btn-hover-blue"
               style="background-color: #056299;color: white;font-size:14px;">
@@ -103,7 +142,7 @@ const ListSchedule = {
               <th>Ngày Trong Tuần</th>
               <th>Ngày Bắt Đầu</th>
               <th>Ngày Kết Thúc</th>
-              <th>Action</th>
+              <th v-show="role == 1 || role == 4">Action</th>
             </tr>
           </thead>
           <tfoot>
@@ -114,7 +153,7 @@ const ListSchedule = {
               <th>Ngày Trong Tuần</th>
               <th>Ngày Bắt Đầu</th>
               <th>Ngày Kết Thúc</th>
-              <th>Action</th>
+              <th v-show="role == 1 || role == 4">Action</th>
             </tr>
           </tfoot>
           <tbody>
@@ -123,9 +162,9 @@ const ListSchedule = {
               <td v-for="subject in subjects" v-if="subject.id == schedule.subject">{{ subject.name }}</td>
               <td v-for="teacher in teachers" v-if="teacher.id == schedule.teacher">{{ teacher.fullName }}</td>
               <td v-for="dayOfWeek in dayOfWeeks" v-if="dayOfWeek.id == schedule.dayOfWeek">{{ dayOfWeek.name }}</td>
-              <td>{{ crypt.formatDate(schedule.dateStart) }}</td>
-              <td>{{ crypt.formatDate(schedule.dateEnd) }}</td>
-              <td>
+              <td>{{ crypt.formatDateDisplay(schedule.dateStart) }}</td>
+              <td>{{ crypt.formatDateDisplay(schedule.dateEnd) }}</td>
+              <td v-show="role == 1 || role == 4">
                 <div class="row" style="margin-left:-10px;">
                   <div class="col-lg-4">
                     <button :title="titleButtonEdit" @click="getDataScheduleUpdate(schedule)"
@@ -137,7 +176,7 @@ const ListSchedule = {
                   <div class="col-lg-4">
                     <button :title="titleButtonDelete" data-toggle="modal" @click="getDetailSchedule(schedule)"
                       data-target="#deleteScheduleModal" class="btn btn-danger btn-sm h-28px w-28px rounded"
-                      style="margin-left: -13px;">
+                      style="margin-left: -7px;">
                       <i class="far fa-trash-alt fa-md ml--1px"></i>
                     </button>
                   </div>

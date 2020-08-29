@@ -130,6 +130,9 @@ Vue.component("page-header", {
       id: 0,
       imageEdit: null,
       htmlImage: null,
+      roleName: null,
+      role: 0,
+      idTable: 0,
     };
   },
   mounted() {
@@ -139,105 +142,121 @@ Vue.component("page-header", {
       )
       .then((resp) => {
         this.id = resp.data.id;
-      });
-    axios
-      .get(
-        "http://localhost:3000/api/logins/findOne?filter[where][token]=token"
-      )
-      .then((resp) => {
-        const userInfo = {
-          id: resp.data.id,
-          userId: resp.data.userId,
-          username: resp.data.username,
-          password: crypt.decrypt(resp.data.password),
-          role: resp.data.role,
-          idTable: resp.data.idTable,
-        };
-        this.role = resp.data.role;
         this.idTable = resp.data.idTable;
-        if (
-          this.role == 1 ||
-          this.role == 2 ||
-          this.role == 3 ||
-          this.role == 4
-        ) {
-          axios
-            .get(
-              "http://localhost:3000/api/managers/getManager?id=" + this.idTable
-            )
-            .then((response) => {
-              this.imageEdit = response.data.manager.image;
-              this.htmlImage =
-                `
-                  <img class="user-avatar rounded-circle" src="../api/Photos/manager/download/` +
-                this.imageEdit +
-                `" alt="User Avatar">
-                `;
-            });
-        }
-        if (this.role == 5) {
-          axios
-            .get(
-              "http://localhost:3000/api/candidates/getCandidate?id=" +
-                this.idTable
-            )
-            .then((response) => {
-              this.imageEdit = response.data.candidate.image;
-              this.htmlImage =
-                `
-                  <img class="user-avatar rounded-circle" src="../api/Photos/candidate/download/` +
-                this.imageEdit +
-                `" alt="User Avatar">
-                `;
-            });
-        }
-        if (this.role == 6 || this.role == 7) {
-          axios
-            .get(
-              "http://localhost:3000/api/spiritualGuides/getSpiritualGuide?id=" +
-                this.idTable
-            )
-            .then((response) => {
-              this.imageEdit = response.data.spiritualGuide.image;
-              this.htmlImage =
-                `
-                  <img class="user-avatar rounded-circle" src="../api/Photos/spiritualGuide/download/` +
-                this.imageEdit +
-                `" alt="User Avatar">
-                `;
-            });
-        }
-        if (this.role == 8 || this.role == 9) {
-          axios
-            .get(
-              "http://localhost:3000/api/companions/getCompanion?id=" +
-                this.idTable
-            )
-            .then((response) => {
-              this.imageEdit = response.data.companion.image;
-              this.htmlImage =
-                `
-                  <img class="user-avatar rounded-circle" src="../api/Photos/companion/download/` +
-                this.imageEdit +
-                `" alt="User Avatar">
-                `;
-            });
-        }
-        if (this.role == 10) {
-          axios
-            .get(
-              "http://localhost:3000/api/teachers/getTeacher?id=" + this.idTable
-            )
-            .then((response) => {
-              this.imageEdit = response.data.teacher.image;
-              this.htmlImage =
-                `
-                <img class="user-avatar rounded-circle" src="../api/Photos/teacher/download/` +
-                this.imageEdit +
-                `" alt="User Avatar">
-                `;
-            });
-        }
+        axios
+          .get(
+            "http://localhost:3000/api/roles?filter[where][id]=" +
+              resp.data.role
+          )
+          .then((respRole) => {
+            this.roleName = respRole.data[0].roleName;
+            if (this.roleName == "Quản trị viên") {
+              this.role = 1;
+            } else if (this.roleName == "Giám đốc") {
+              this.role = 2;
+            } else if (this.roleName == "Quản lý") {
+              this.role = 3;
+            } else if (this.roleName == "Giám học") {
+              this.role = 4;
+            } else if (this.roleName == "Ứng sinh") {
+              this.role = 5;
+            } else if (this.roleName == "Trưởng linh hướng") {
+              this.role = 6;
+            } else if (this.roleName == "Linh hướng") {
+              this.role = 7;
+            } else if (this.roleName == "Trưởng đồng hành") {
+              this.role = 8;
+            } else if (this.roleName == "Đồng hành") {
+              this.role = 9;
+            } else if (this.roleName == "Giảng viên") {
+              this.role = 10;
+            }
+            if (
+              this.role == 1 ||
+              this.role == 2 ||
+              this.role == 3 ||
+              this.role == 4
+            ) {
+              axios
+                .get(
+                  "http://localhost:3000/api/managers?filter[where][id]=" +
+                    this.idTable
+                )
+                .then((response) => {
+                  this.imageEdit = response.data[0].image;
+                  this.htmlImage =
+                    `
+                      <img class="user-avatar rounded-circle" src="../api/Photos/manager/download/` +
+                    this.imageEdit +
+                    `" alt="User Avatar">
+                    `;
+                });
+            }
+            if (this.role == 5) {
+              axios
+                .get(
+                  "http://localhost:3000/api/candidates/getCandidate?id=" +
+                    this.idTable
+                )
+                .then((response) => {
+                  this.imageEdit = response.data.candidate.image;
+                  this.htmlImage =
+                    `
+                      <img class="user-avatar rounded-circle" src="../api/Photos/candidate/download/` +
+                    this.imageEdit +
+                    `" alt="User Avatar">
+                    `;
+                });
+            }
+            if (this.role == 6 || this.role == 7) {
+              axios
+                .get(
+                  "http://localhost:3000/api/spiritualGuides/getSpiritualGuide?id=" +
+                    this.idTable
+                )
+                .then((response) => {
+                  this.imageEdit = response.data.spiritualGuide.image;
+                  this.htmlImage =
+                    `
+                      <img class="user-avatar rounded-circle" src="../api/Photos/spiritualGuide/download/` +
+                    this.imageEdit +
+                    `" alt="User Avatar">
+                    `;
+                });
+            }
+            if (this.role == 8 || this.role == 9) {
+              axios
+                .get(
+                  "http://localhost:3000/api/companions/getCompanion?id=" +
+                    this.idTable
+                )
+                .then((response) => {
+                  this.imageEdit = response.data.companion.image;
+                  this.htmlImage =
+                    `
+                      <img class="user-avatar rounded-circle" src="../api/Photos/companion/download/` +
+                    this.imageEdit +
+                    `" alt="User Avatar">
+                    `;
+                });
+            }
+            if (this.role == 10) {
+              axios
+                .get(
+                  "http://localhost:3000/api/teachers/getTeacher?id=" +
+                    this.idTable
+                )
+                .then((response) => {
+                  this.imageEdit = response.data.teacher.image;
+                  this.htmlImage =
+                    `
+                    <img class="user-avatar rounded-circle" src="../api/Photos/teacher/download/` +
+                    this.imageEdit +
+                    `" alt="User Avatar">
+                    `;
+                });
+            }
+          });
       });
   },
   methods: {
@@ -289,6 +308,7 @@ Vue.component("page-menu", {
   data() {
     return {
       role: 0,
+      roleName: null,
     };
   },
   mounted() {
@@ -297,13 +317,41 @@ Vue.component("page-menu", {
         "http://localhost:3000/api/logins/findOne?filter[where][token]=token"
       )
       .then((resp) => {
-        this.role = resp.data.role;
+        axios
+          .get(
+            "http://localhost:3000/api/roles?filter[where][id]=" +
+              resp.data.role
+          )
+          .then((response) => {
+            this.roleName = response.data[0].roleName;
+            if (this.roleName == "Quản trị viên") {
+              this.role = 1;
+            } else if (this.roleName == "Giám đốc") {
+              this.role = 2;
+            } else if (this.roleName == "Quản lý") {
+              this.role = 3;
+            } else if (this.roleName == "Giám học") {
+              this.role = 4;
+            } else if (this.roleName == "Ứng sinh") {
+              this.role = 5;
+            } else if (this.roleName == "Trưởng linh hướng") {
+              this.role = 6;
+            } else if (this.roleName == "Linh hướng") {
+              this.role = 7;
+            } else if (this.roleName == "Trưởng đồng hành") {
+              this.role = 8;
+            } else if (this.roleName == "Đồng hành") {
+              this.role = 9;
+            } else if (this.roleName == "Giảng viên") {
+              this.role = 10;
+            }
+          });
       });
   },
   template: `
   <aside id="left-panel" class="left-panel">
   <nav class="navbar navbar-expand-sm navbar-default">
-
+  
     <div class="navbar-header">
       <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#main-menu"
         aria-controls="main-menu" aria-expanded="false" aria-label="Toggle navigation">
@@ -313,36 +361,36 @@ Vue.component("page-menu", {
           height="50px"></a>
       <a class="navbar-brand hidden" href="#"><img src="../images/logoungsinh.png" alt="Logo"></a>
     </div>
-
+  
     <div id="main-menu" class="main-menu collapse navbar-collapse">
       <ul class="nav navbar-nav" style="cursor: pointer;">
-        <router-link v-show="role == 1" style="text-decoration: none; color: inherit;" :to="{ name: 'homePage'}">
+        <router-link v-show="role === 1" style="text-decoration: none; color: inherit;" :to="{ name: 'homePage'}">
           <li>
             <a><i class="menu-icon fas fa-tachometer-alt fa-lg"></i>Dashboard </a>
           </li>
         </router-link>
-        <router-link v-show="role == 1" style="text-decoration: none; color: inherit;" :to="{ name: 'listManager'}">
+        <router-link v-show="role === 1" style="text-decoration: none; color: inherit;" :to="{ name: 'listManager'}">
           <li>
             <a><i class="menu-icon fas fa-user-tie fa-lg"></i>Người Điều Hành</a>
           </li>
         </router-link>
-        <router-link v-show="role == 1 || role == 2" style="text-decoration: none; color: inherit;" :to="{ name: 'listCandidate'}">
+        <router-link v-show="role === 1 || role == 2" style="text-decoration: none; color: inherit;" :to="{ name: 'listCandidate'}">
           <li>
             <a><i class="menu-icon fas fa-users fa-lg"></i>Ứng Sinh </a>
           </li>
         </router-link>
-        <router-link v-show="role == 1 || role == 2" style="text-decoration: none; color: inherit;" :to="{ name: 'listCommunity'}">
+        <router-link v-show="role === 1 || role == 2" style="text-decoration: none; color: inherit;" :to="{ name: 'listCommunity'}">
           <li>
             <a><i class="menu-icon fas fa-church fa-lg"></i>Cộng Đoàn </a>
           </li>
         </router-link>
-        <li class="menu-item-has-children dropdown" v-show="role == 1 || role == 8 || role == 9 || role == 5">
+        <li class="menu-item-has-children dropdown" v-show="role === 1 || role == 8 || role == 9 || role == 5">
             <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> <i class="menu-icon fas fa-user-friends fa-lg"></i>Đồng Hành</a>
             <ul class="sub-menu children dropdown-menu">
-              <router-link tag="li" :to="{ name: 'listCompanion'}" v-show="role == 1 || role == 8">
+              <router-link tag="li" :to="{ name: 'listCompanion'}" v-show="role === 1  || role == 8">
                 <i class="menu-icon fas fa-user-check fa-lg"></i><a href="#">Người Đồng Hành</a>
               </router-link>
-              <router-link tag="li" :to="{ name: 'listGroupCommunity'}" v-show="role == 1 || role == 8">
+              <router-link tag="li" :to="{ name: 'listGroupCommunity'}" v-show="role === 1 || role == 8">
                 <i class="menu-icon fas fa-house-damage fa-lg"></i><a href="#">Nhóm Cộng Đoàn</a>
               </router-link>
               <router-link tag="li" :to="{ name: 'listScheduleCompanions'}" v-show="role == 8 || role == 9 || role == 5">
@@ -353,13 +401,13 @@ Vue.component("page-menu", {
               </router-link>
             </ul>
         </li>
-        <li class="menu-item-has-children dropdown" v-show="role == 1 || role == 6 || role == 7 || role == 5">
+        <li class="menu-item-has-children dropdown" v-show="role === 1 || role == 6 || role == 7 || role == 5">
             <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> <i class="menu-icon fas fa-user-nurse fa-lg"></i>Linh Hướng</a>
             <ul class="sub-menu children dropdown-menu">
-              <router-link tag="li" :to="{ name: 'listSpiritualGuide'}" v-show="role == 1 || role == 6">
+              <router-link tag="li" :to="{ name: 'listSpiritualGuide'}" v-show="role === 1 || role == 6">
                 <i class="menu-icon fas fa-user-check fa-lg"></i><a href="#">Người Linh Hướng</a>
               </router-link>
-              <router-link tag="li" :to="{ name: 'listGroupCommunity'}" v-show="role == 1 || role == 6">
+              <router-link tag="li" :to="{ name: 'listGroupCommunity'}" v-show="role === 1 || role == 6">
                 <i class="menu-icon fas fa-house-damage fa-lg"></i><a href="#">Nhóm Cộng Đoàn</a>
               </router-link>
               <router-link tag="li" :to="{ name: 'listScheduleSpiritualGuides'}" v-show="role == 6 || role == 7 || role == 5">
@@ -367,40 +415,40 @@ Vue.component("page-menu", {
               </router-link>
             </ul>
         </li>
-        <li class="menu-item-has-children dropdown" v-show="role == 1 || role == 4 || role == 5 || role == 10">
+        <li class="menu-item-has-children dropdown" v-show="role === 1 || role == 4 || role == 5 || role == 10">
             <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> <i class="menu-icon fas fa-graduation-cap fa-lg"></i>Giảng Dạy</a>
             <ul class="sub-menu children dropdown-menu">
-              <router-link tag="li" :to="{ name: 'listTeacher'}" v-show="role == 1 || role == 4">
+              <router-link tag="li" :to="{ name: 'listTeacher'}" v-show="role === 1 || role == 4">
                 <i class="menu-icon fas fa-chalkboard-teacher fa-lg"></i><a href="#">Giảng Viên</a>
               </router-link>
-              <router-link tag="li" :to="{ name: 'listSchedule'}" v-show="role == 1 || role == 4 || role == 5 || role == 10">
+              <router-link tag="li" :to="{ name: 'listSchedule'}" v-show="role === 1 || role == 4 || role == 5 || role == 10">
                 <i class="menu-icon far fa-calendar-alt fa-lg"></i><a href="#">Lịch Học</a>
               </router-link>
             </ul>
         </li>
-        <router-link v-show="role == 1 || role == 3" style="text-decoration: none; color: inherit;" :to="{ name: 'listDepartment'}">
+        <router-link v-show="role === 1 || role == 3" style="text-decoration: none; color: inherit;" :to="{ name: 'listDepartment'}">
           <li>
             <a><i class="menu-icon fas fa-boxes fa-lg"></i>Phòng Ban </a>
           </li>
         </router-link>
-        <li class="menu-item-has-children dropdown" v-show="role == 1 || role == 6 || role == 7 || role == 8 || role == 9">
+        <li class="menu-item-has-children dropdown" v-show="role === 1 || role == 6 || role == 7 || role == 8 || role == 9">
             <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> <i class="menu-icon fas fa-chart-line fa-lg"></i>Thống Kê</a>
             <ul class="sub-menu children dropdown-menu">
-              <router-link tag="li" :to="{ name: 'listMetCompanion'}" v-show="role == 1 || role == 8|| role == 9">
+              <router-link tag="li" :to="{ name: 'listMetCompanion'}" v-show="role === 1 || role == 8|| role == 9">
                 <i class="menu-icon far fa-handshake fa-lg"></i><a href="#">Gặp Đồng Hành</a>
               </router-link>
-              <router-link tag="li" :to="{ name: 'listMetSpiritualGuide'}" v-show="role == 1 || role == 6 || role == 7">
+              <router-link tag="li" :to="{ name: 'listMetSpiritualGuide'}" v-show="role === 1 || role == 6 || role == 7">
                 <i class="menu-icon fas fa-handshake fa-lg"></i><a href="#">Gặp Linh Hướng</a>
               </router-link>
-              <router-link tag="li" :to="{ name: 'listReportCompanion'}" v-show="role == 1 || role == 2 || role == 8 || role == 9">
+              <router-link tag="li" :to="{ name: 'listReportCompanion'}" v-show="role === 1 || role == 2 || role == 8 || role == 9">
                 <i class="menu-icon fas fa-file-signature fa-lg"></i><a href="#">Báo Cáo Đồng Hành</a>
               </router-link>
-              <router-link tag="li" :to="{ name: 'listRateCandidate'}" v-show="role == 1 || role == 2">
+              <router-link tag="li" :to="{ name: 'listRateCandidate'}" v-show="role === 1 || role == 2">
                 <i class="menu-icon far fa-chart-bar fa-lg"></i><a href="#">Theo Dõi Ứng Sinh</a>
               </router-link>
             </ul>
         </li>
-        <li class="menu-item-has-children dropdown" v-show="role == 1">
+        <li class="menu-item-has-children dropdown" v-show="role === 1">
             <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> <i class="menu-icon fab fa-windows fa-lg"></i>Hệ Thống</a>
             <ul class="sub-menu children dropdown-menu">
               <router-link tag="li" :to="{ name: 'listAccount'}">
@@ -414,7 +462,7 @@ Vue.component("page-menu", {
       </ul>
     </div>
   </nav>
-</aside>
+  </aside>
     `,
 });
 
@@ -548,44 +596,71 @@ const Home = {
     });
     axios
       .get(
-        "http://localhost:3000/api/managers?filter[where][and][0][position]=1&filter[where][and][1][status]=1"
+        "http://localhost:3000/api/departments?filter[where][positionType]=" +
+          "Giám đốc"
       )
-      .then((respGD) => {
-        this.imageGD =
-          `<img class="profile-user-img img-fluid rounded-circle img-thumbnail" id="image" src="../api/Photos/manager/download/` +
-          respGD.data[0].image +
-          `" alt="GD Image" style="margin-top: -70px;margin-left:85px;">`;
-        this.fullNameGD = respGD.data[0].fullName;
-        this.phoneGD = respGD.data[0].phone;
-        this.emailGD = respGD.data[0].email;
+      .then((resp) => {
+        axios
+          .get(
+            "http://localhost:3000/api/managers?filter[where][and][0][position]=" +
+              resp.data[0].id +
+              "&filter[where][and][1][status]=1"
+          )
+          .then((respGD) => {
+            this.imageGD =
+              `<img class="profile-user-img img-fluid rounded-circle img-thumbnail" id="image" src="../api/Photos/manager/download/` +
+              respGD.data[0].image +
+              `" alt="GD Image" style="margin-top: -70px;margin-left:85px;">`;
+            this.fullNameGD = respGD.data[0].fullName;
+            this.phoneGD = respGD.data[0].phone;
+            this.emailGD = respGD.data[0].email;
+          });
       });
     axios
       .get(
-        "http://localhost:3000/api/managers?filter[where][and][0][position]=4&filter[where][and][1][status]=1"
+        "http://localhost:3000/api/departments?filter[where][positionType]=" +
+          "Quản lý"
       )
-      .then((respQL) => {
-        this.imageQL =
-          `<img class="profile-user-img img-fluid rounded-circle img-thumbnail" id="image" src="../api/Photos/manager/download/` +
-          respQL.data[0].image +
-          `" alt="QL Image" style="margin-top: -70px;margin-left:85px;">
-      `;
-        this.fullNameQL = respQL.data[0].fullName;
-        this.phoneQL = respQL.data[0].phone;
-        this.emailQL = respQL.data[0].email;
+      .then((resp) => {
+        axios
+          .get(
+            "http://localhost:3000/api/managers?filter[where][and][0][position]=" +
+              resp.data[0].id +
+              "&filter[where][and][1][status]=1"
+          )
+          .then((respQL) => {
+            this.imageQL =
+              `<img class="profile-user-img img-fluid rounded-circle img-thumbnail" id="image" src="../api/Photos/manager/download/` +
+              respQL.data[0].image +
+              `" alt="QL Image" style="margin-top: -70px;margin-left:85px;">
+          `;
+            this.fullNameQL = respQL.data[0].fullName;
+            this.phoneQL = respQL.data[0].phone;
+            this.emailQL = respQL.data[0].email;
+          });
       });
     axios
       .get(
-        "http://localhost:3000/api/managers?filter[where][and][0][position]=5&filter[where][and][1][status]=1"
+        "http://localhost:3000/api/departments?filter[where][positionType]=" +
+          "Giám học"
       )
-      .then((respGH) => {
-        this.imageGH =
-          `<img class="profile-user-img img-fluid rounded-circle img-thumbnail" id="image" src="../api/Photos/manager/download/` +
-          respGH.data[0].image +
-          `" alt="GH Image" style="margin-top: -70px;margin-left:85px;">
-      `;
-        this.fullNameGH = respGH.data[0].fullName;
-        this.phoneGH = respGH.data[0].phone;
-        this.emailGH = respGH.data[0].email;
+      .then((resp) => {
+        axios
+          .get(
+            "http://localhost:3000/api/managers?filter[where][and][0][position]=" +
+              resp.data[0].id +
+              "&filter[where][and][1][status]=1"
+          )
+          .then((respGH) => {
+            this.imageGH =
+              `<img class="profile-user-img img-fluid rounded-circle img-thumbnail" id="image" src="../api/Photos/manager/download/` +
+              respGH.data[0].image +
+              `" alt="GH Image" style="margin-top: -70px;margin-left:85px;">
+          `;
+            this.fullNameGH = respGH.data[0].fullName;
+            this.phoneGH = respGH.data[0].phone;
+            this.emailGH = respGH.data[0].email;
+          });
       });
   },
   computed: {},
@@ -821,7 +896,7 @@ const ListAccount = {
               <td class="align-middle">
                 <div class="row" style="margin-left:-15px;">
                   <div class="col-4" style="margin-left:-6px;">
-                    <button :title="titleButtonEdit" @click="getDataAccountUpdate(account)" class="btn btn-warning btn-sm h-28px w-28px rounded"
+                    <button v-show="account.status == 1" :title="titleButtonEdit" @click="getDataAccountUpdate(account)" class="btn btn-warning btn-sm h-28px w-28px rounded"
                       type="submit">
                       <i class="fas fa-edit fa-md ml--2px"></i>
                     </button>
@@ -1168,19 +1243,34 @@ const EditAccount = {
     axios.get("http://localhost:3000/api/accounts").then((response) => {
       this.accounts = response.data;
     });
+    // axios
+    //   .get(
+    //     "http://localhost:3000/api/accounts/getAccount?id=" +
+    //       this.$route.params.id
+    //   )
+    //   .then((response) => {
+    //     this.userIdEdit = response.data.account.userId;
+    //     this.username = response.data.account.username;
+    //     this.usernameEdit = response.data.account.username;
+    //     this.passwordEdit = crypt.decrypt(response.data.account.password);
+    //     this.roleEdit = response.data.account.role;
+    //     this.statusEdit = response.data.account.status;
+    //     this.idTableEdit = response.data.account.idTable;
+    //   });
     axios
       .get(
-        "http://localhost:3000/api/accounts/getAccount?id=" +
+        "http://localhost:3000/api/accounts?filter[where][id]=" +
           this.$route.params.id
       )
       .then((response) => {
-        this.userIdEdit = response.data.account.userId;
-        this.username = response.data.account.username;
-        this.usernameEdit = response.data.account.username;
-        this.passwordEdit = crypt.decrypt(response.data.account.password);
-        this.roleEdit = response.data.account.role;
-        this.statusEdit = response.data.account.status;
-        this.idTableEdit = response.data.account.idTable;
+        console.log(response.data);
+        this.userIdEdit = response.data[0].userId;
+        this.username = response.data[0].username;
+        this.usernameEdit = response.data[0].username;
+        this.passwordEdit = crypt.decrypt(response.data[0].password);
+        this.roleEdit = response.data[0].role;
+        this.statusEdit = response.data[0].status;
+        this.idTableEdit = response.data[0].idTable;
       });
   },
 
@@ -1272,10 +1362,11 @@ const EditAccount = {
           role: this.roleEdit,
           status: this.statusEdit,
           idTable: this.idTableEdit,
-          id: this.$route.params.id,
         };
         const url =
-          "http://localhost:3000/api/accounts/" + account.id + "/replace";
+          "http://localhost:3000/api/accounts/" +
+          this.$route.params.id +
+          "/replace";
         axios.post(url, account);
         this.$router.push("/accounts");
         location.reload();
@@ -1456,29 +1547,115 @@ const ListManager = {
     },
 
     deleteDataManager(manager) {
-      axios
-        .delete("http://localhost:3000/api/managers/" + manager.id)
-        .then((response) => {
-          console.log(response);
-          this.managers.splice(id, 1);
-        });
+      var managerId = manager.id;
       axios
         .get(
-          "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
-            manager.id +
-            "&filter[where][and][1][role]=" +
-            manager.position +
-            1
+          "http://localhost:3000/api/managers?filter[where][id]=" + managerId
         )
-        .then((resp) => {
+        .then((respMan) => {
+          console.log(respMan.data)
           axios
-            .delete("http://localhost:3000/api/accounts/" + resp.data[0].id)
-            .then((respMan) => {
-              setTimeout(() => {
-                location.reload();
-              }, 10);
+            .get(
+              "http://localhost:3000/api/departments?filter[where][id]=" +
+              respMan.data[0].position
+            )
+            .then((respPos) => {
+              
+              if (respPos.data[0].positionType == "Giám đốc") {
+                axios
+                  .get(
+                    "http://localhost:3000/api/roles?filter[where][roleName]=" +
+                      "Giám đốc"
+                  )
+                  .then((respRole) => {
+                    axios
+                      .get(
+                        "http://localhost:3000/api/accounts?filter[where][role]=" +
+                          respRole.data[0].id
+                      )
+                      .then((respAcc) => {
+                        axios
+                          .delete("http://localhost:3000/api/accounts/" + respAcc.data[0].id)
+                          .then((respMan) => {
+                            axios
+                              .delete("http://localhost:3000/api/managers/" + manager.id)
+                              .then((response) => {
+                                this.managers.splice(manager.id, 1);
+                                setTimeout(() => {
+                                  this.$router.push("/managers");
+                                  location.reload();
+                                }, 100);
+                                return 0;
+                              });
+                          });
+                      });
+                  });
+              } else if (
+                respPos.data[0].positionType == "Quản lý"
+              ) {
+                axios
+                  .get(
+                    "http://localhost:3000/api/roles?filter[where][roleName]=" +
+                      "Quản lý"
+                  )
+                  .then((respRole) => {
+                    axios
+                      .get(
+                        "http://localhost:3000/api/accounts?filter[where][role]=" +
+                          respRole.data[0].id
+                      )
+                      .then((respAcc) => {
+                        axios
+                          .delete("http://localhost:3000/api/accounts/" + respAcc.data[0].id)
+                          .then((respMan) => {
+                            axios
+                              .delete("http://localhost:3000/api/managers/" + manager.id)
+                              .then((response) => {
+                                this.managers.splice(manager.id, 1);
+                                setTimeout(() => {
+                                  this.$router.push("/managers");
+                                  location.reload();
+                                }, 100);
+                                return 0;
+                              });
+                          });
+                      });
+                  });
+              } else if (
+                respPos.data[0].positionType == "Giám học"
+              ) {
+                axios
+                  .get(
+                    "http://localhost:3000/api/roles?filter[where][roleName]=" +
+                      "Giám học"
+                  )
+                  .then((respRole) => {
+                    axios
+                      .get(
+                        "http://localhost:3000/api/accounts?filter[where][role]=" +
+                          respRole.data[0].id
+                      )
+                      .then((respAcc) => {
+                        axios
+                          .delete("http://localhost:3000/api/accounts/" + respAcc.data[0].id)
+                          .then((respMan) => {
+                            axios
+                              .delete("http://localhost:3000/api/managers/" + manager.id)
+                              .then((response) => {
+                                this.managers.splice(manager.id, 1);
+                                setTimeout(() => {
+                                  this.$router.push("/managers");
+                                  location.reload();
+                                }, 100);
+                                return 0;
+                              });
+                          });
+                      });
+                  });
+              }
             });
         });
+      
     },
   },
   template: `
@@ -1552,7 +1729,7 @@ const ListManager = {
                     </button>
                   </div>
                   <div class="col-lg-4">
-                    <button :title="titleButtonEdit" @click="getDataManagerUpdate(manager)"
+                    <button v-show="manager.status == 1" :title="titleButtonEdit" @click="getDataManagerUpdate(manager)"
                       class="btn btn-warning btn-sm h-28px w-28px rounded" type="submit"
                       style="margin-left: -14px;">
                       <i class="fas fa-edit fa-md ml--2px"></i>
@@ -1912,14 +2089,20 @@ const AddManager = {
                                   console.log(res);
                                 })
                                 .catch((err) => console.log(err));
+                                setTimeout(() => {
+                                  this.$router.push("/managers");
+                                  location.reload();
+                                }, 100);
+                                return 0;
+                            } else {
+                              setTimeout(() => {
+                                this.$router.push("/managers");
+                                location.reload();
+                              }, 100);
+                              return 0;
                             }
                           });
                       });
-                    setTimeout(() => {
-                      this.$router.push("/managers");
-                      location.reload();
-                    }, 100);
-                    return 0;
                   }
                 });
             }
@@ -2272,53 +2455,228 @@ const EditManager = {
                 if (manager.status == 2) {
                   axios
                     .get(
-                      "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
-                        manager.id +
-                        "&filter[where][and][1][role]=" +
-                        manager.position +
-                        1
+                      "http://localhost:3000/api/managers?filter[where][id]=" +
+                        this.$route.params.id
+                    )
+                    .then((respMan) => {
+                      axios
+                        .get(
+                          "http://localhost:3000/api/departments?filter[where][id]=" +
+                            respMan.data[0].position
+                        )
+                        .then((respPos) => {
+                          if (respPos.data[0].positionType == "Giám đốc") {
+                            axios
+                              .get(
+                                "http://localhost:3000/api/roles?filter[where][roleName]=" +
+                                  "Giám đốc"
+                              )
+                              .then((respRole) => {
+                                axios
+                                  .get(
+                                    "http://localhost:3000/api/accounts?filter[where][role]=" +
+                                      respRole.data[0].id
+                                  )
+                                  .then((respAcc) => {
+                                    const account = {
+                                      userId: respAcc.data[0].userId,
+                                      username: respAcc.data[0].username,
+                                      password: respAcc.data[0].password,
+                                      role: respAcc.data[0].role,
+                                      status: 2,
+                                      idTable: respAcc.data[0].idTable,
+                                      id: respAcc.data[0].id,
+                                    };
+                                    const url_5 =
+                                      "http://localhost:3000/api/accounts/" +
+                                      account.id +
+                                      "/replace";
+                                    axios.post(url_5, account);
+                                    const url =
+                                      "http://localhost:3000/api/managers/" +
+                                      manager.id +
+                                      "/replace";
+                                    axios.post(url, manager);
+                                    axios
+                                      .delete(
+                                        "http://localhost:3000/api/Photos/manager/files/" +
+                                          this.imageEdit
+                                      )
+                                      .then((resp) => {
+                                        console.log(resp);
+                                      })
+                                      .catch((err) => console.log(err));
+                                    axios
+                                      .post(
+                                        "http://localhost:3000/api/Photos/manager/upload?filename=" +
+                                          fileName,
+                                        fd
+                                      )
+                                      .then((res) => {
+                                        console.log(res);
+                                      })
+                                      .catch((err) => console.log(err));
+                                    setTimeout(() => {
+                                      this.$router.push("/managers");
+                                      location.reload();
+                                    }, 100);
+                                    return 0;
+                                  });
+                              });
+                          } else if (
+                            respPos.data[0].positionType == "Quản lý"
+                          ) {
+                            axios
+                              .get(
+                                "http://localhost:3000/api/roles?filter[where][roleName]=" +
+                                  "Quản lý"
+                              )
+                              .then((respRole) => {
+                                axios
+                                  .get(
+                                    "http://localhost:3000/api/accounts?filter[where][role]=" +
+                                      respRole.data[0].id
+                                  )
+                                  .then((respAcc) => {
+                                    const account = {
+                                      userId: respAcc.data[0].userId,
+                                      username: respAcc.data[0].username,
+                                      password: respAcc.data[0].password,
+                                      role: respAcc.data[0].role,
+                                      status: 2,
+                                      idTable: respAcc.data[0].idTable,
+                                      id: respAcc.data[0].id,
+                                    };
+                                    const url_5 =
+                                      "http://localhost:3000/api/accounts/" +
+                                      account.id +
+                                      "/replace";
+                                    axios.post(url_5, account);
+                                    const url =
+                                      "http://localhost:3000/api/managers/" +
+                                      manager.id +
+                                      "/replace";
+                                    axios.post(url, manager);
+                                    axios
+                                      .delete(
+                                        "http://localhost:3000/api/Photos/manager/files/" +
+                                          this.imageEdit
+                                      )
+                                      .then((resp) => {
+                                        console.log(resp);
+                                      })
+                                      .catch((err) => console.log(err));
+                                    axios
+                                      .post(
+                                        "http://localhost:3000/api/Photos/manager/upload?filename=" +
+                                          fileName,
+                                        fd
+                                      )
+                                      .then((res) => {
+                                        console.log(res);
+                                      })
+                                      .catch((err) => console.log(err));
+                                    setTimeout(() => {
+                                      this.$router.push("/managers");
+                                      location.reload();
+                                    }, 100);
+                                    return 0;
+                                  });
+                              });
+                          } else if (
+                            respPos.data[0].positionType == "Giám học"
+                          ) {
+                            axios
+                              .get(
+                                "http://localhost:3000/api/roles?filter[where][roleName]=" +
+                                  "Giám học"
+                              )
+                              .then((respRole) => {
+                                axios
+                                  .get(
+                                    "http://localhost:3000/api/accounts?filter[where][role]=" +
+                                      respRole.data[0].id
+                                  )
+                                  .then((respAcc) => {
+                                    const account = {
+                                      userId: respAcc.data[0].userId,
+                                      username: respAcc.data[0].username,
+                                      password: respAcc.data[0].password,
+                                      role: respAcc.data[0].role,
+                                      status: 2,
+                                      idTable: respAcc.data[0].idTable,
+                                      id: respAcc.data[0].id,
+                                    };
+                                    const url_5 =
+                                      "http://localhost:3000/api/accounts/" +
+                                      account.id +
+                                      "/replace";
+                                    axios.post(url_5, account);
+                                    const url =
+                                      "http://localhost:3000/api/managers/" +
+                                      manager.id +
+                                      "/replace";
+                                    axios.post(url, manager);
+                                    axios
+                                      .delete(
+                                        "http://localhost:3000/api/Photos/manager/files/" +
+                                          this.imageEdit
+                                      )
+                                      .then((resp) => {
+                                        console.log(resp);
+                                      })
+                                      .catch((err) => console.log(err));
+                                    axios
+                                      .post(
+                                        "http://localhost:3000/api/Photos/manager/upload?filename=" +
+                                          fileName,
+                                        fd
+                                      )
+                                      .then((res) => {
+                                        console.log(res);
+                                      })
+                                      .catch((err) => console.log(err));
+                                    setTimeout(() => {
+                                      this.$router.push("/managers");
+                                      location.reload();
+                                    }, 100);
+                                    return 0;
+                                  });
+                              });
+                          }
+                        });
+                    });
+                } else {
+                  const url =
+                    "http://localhost:3000/api/managers/" +
+                    manager.id +
+                    "/replace";
+                  axios.post(url, manager);
+                  axios
+                    .delete(
+                      "http://localhost:3000/api/Photos/manager/files/" +
+                        this.imageEdit
                     )
                     .then((resp) => {
-                      const account = {
-                        userId: resp.data[0].userId,
-                        username: resp.data[0].username,
-                        password: resp.data[0].password,
-                        role: resp.data[0].role,
-                        status: 2,
-                        idTable: resp.data[0].idTable,
-                        id: resp.data[0].id,
-                      };
-                      const url_5 =
-                        "http://localhost:3000/api/accounts/" +
-                        account.id +
-                        "/replace";
-                      axios.post(url_5, account);
-                    });
+                      console.log(resp);
+                    })
+                    .catch((err) => console.log(err));
+                  axios
+                    .post(
+                      "http://localhost:3000/api/Photos/manager/upload?filename=" +
+                        fileName,
+                      fd
+                    )
+                    .then((res) => {
+                      console.log(res);
+                    })
+                    .catch((err) => console.log(err));
+                  setTimeout(() => {
+                    this.$router.push("/managers");
+                    location.reload();
+                  }, 100);
+                  return 0;
                 }
-                const url =
-                  "http://localhost:3000/api/managers/" +
-                  manager.id +
-                  "/replace";
-                axios.post(url, manager);
-                axios
-                  .delete(
-                    "http://localhost:3000/api/Photos/manager/files/" +
-                      this.imageEdit
-                  )
-                  .then((resp) => {
-                    console.log(resp);
-                  })
-                  .catch((err) => console.log(err));
-                axios
-                  .post(
-                    "http://localhost:3000/api/Photos/manager/upload?filename=" +
-                      fileName,
-                    fd
-                  )
-                  .then((res) => {
-                    console.log(res);
-                  })
-                  .catch((err) => console.log(err));
               } else {
                 const manager = {
                   managerId: this.managerId,
@@ -2336,44 +2694,210 @@ const EditManager = {
                 if (manager.status == 2) {
                   axios
                     .get(
-                      "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
-                        manager.id +
-                        "&filter[where][and][1][role]=" +
-                        manager.position +
-                        1
+                      "http://localhost:3000/api/managers?filter[where][id]=" +
+                        this.$route.params.id
                     )
-                    .then((resp) => {
-                      const account = {
-                        userId: resp.data[0].userId,
-                        username: resp.data[0].username,
-                        password: resp.data[0].password,
-                        role: resp.data[0].role,
-                        status: 2,
-                        idTable: resp.data[0].idTable,
-                        id: resp.data[0].id,
-                      };
-                      const url_5 =
-                        "http://localhost:3000/api/accounts/" +
-                        account.id +
-                        "/replace";
-                      axios.post(url_5, account);
+                    .then((respMan) => {
+                      axios
+                        .get(
+                          "http://localhost:3000/api/departments?filter[where][id]=" +
+                            respMan.data[0].position
+                        )
+                        .then((respPos) => {
+                          if (respPos.data[0].positionType == "Giám đốc") {
+                            axios
+                              .get(
+                                "http://localhost:3000/api/roles?filter[where][roleName]=" +
+                                  "Giám đốc"
+                              )
+                              .then((respRole) => {
+                                axios
+                                  .get(
+                                    "http://localhost:3000/api/accounts?filter[where][role]=" +
+                                      respRole.data[0].id
+                                  )
+                                  .then((respAcc) => {
+                                    const account = {
+                                      userId: respAcc.data[0].userId,
+                                      username: respAcc.data[0].username,
+                                      password: respAcc.data[0].password,
+                                      role: respAcc.data[0].role,
+                                      status: 2,
+                                      idTable: respAcc.data[0].idTable,
+                                      id: respAcc.data[0].id,
+                                    };
+                                    const url_5 =
+                                      "http://localhost:3000/api/accounts/" +
+                                      account.id +
+                                      "/replace";
+                                    axios.post(url_5, account);
+                                    const url =
+                                      "http://localhost:3000/api/managers/" +
+                                      manager.id +
+                                      "/replace";
+                                    axios.post(url, manager);
+                                    axios
+                                      .delete(
+                                        "http://localhost:3000/api/Photos/manager/files/" +
+                                          this.imageEdit
+                                      )
+                                      .then((resp) => {
+                                        console.log(resp);
+                                      })
+                                      .catch((err) => console.log(err));
+                                    axios
+                                      .post(
+                                        "http://localhost:3000/api/Photos/manager/upload?filename=" +
+                                          fileName,
+                                        fd
+                                      )
+                                      .then((res) => {
+                                        console.log(res);
+                                      })
+                                      .catch((err) => console.log(err));
+                                    setTimeout(() => {
+                                      this.$router.push("/managers");
+                                      location.reload();
+                                    }, 100);
+                                    return 0;
+                                  });
+                              });
+                          } else if (
+                            respPos.data[0].positionType == "Quản lý"
+                          ) {
+                            axios
+                              .get(
+                                "http://localhost:3000/api/roles?filter[where][roleName]=" +
+                                  "Quản lý"
+                              )
+                              .then((respRole) => {
+                                axios
+                                  .get(
+                                    "http://localhost:3000/api/accounts?filter[where][role]=" +
+                                      respRole.data[0].id
+                                  )
+                                  .then((respAcc) => {
+                                    const account = {
+                                      userId: respAcc.data[0].userId,
+                                      username: respAcc.data[0].username,
+                                      password: respAcc.data[0].password,
+                                      role: respAcc.data[0].role,
+                                      status: 2,
+                                      idTable: respAcc.data[0].idTable,
+                                      id: respAcc.data[0].id,
+                                    };
+                                    const url_5 =
+                                      "http://localhost:3000/api/accounts/" +
+                                      account.id +
+                                      "/replace";
+                                    axios.post(url_5, account);
+                                    const url =
+                                      "http://localhost:3000/api/managers/" +
+                                      manager.id +
+                                      "/replace";
+                                    axios.post(url, manager);
+                                    axios
+                                      .delete(
+                                        "http://localhost:3000/api/Photos/manager/files/" +
+                                          this.imageEdit
+                                      )
+                                      .then((resp) => {
+                                        console.log(resp);
+                                      })
+                                      .catch((err) => console.log(err));
+                                    axios
+                                      .post(
+                                        "http://localhost:3000/api/Photos/manager/upload?filename=" +
+                                          fileName,
+                                        fd
+                                      )
+                                      .then((res) => {
+                                        console.log(res);
+                                      })
+                                      .catch((err) => console.log(err));
+                                    setTimeout(() => {
+                                      this.$router.push("/managers");
+                                      location.reload();
+                                    }, 100);
+                                    return 0;
+                                  });
+                              });
+                          } else if (
+                            respPos.data[0].positionType == "Giám học"
+                          ) {
+                            axios
+                              .get(
+                                "http://localhost:3000/api/roles?filter[where][roleName]=" +
+                                  "Giám học"
+                              )
+                              .then((respRole) => {
+                                axios
+                                  .get(
+                                    "http://localhost:3000/api/accounts?filter[where][role]=" +
+                                      respRole.data[0].id
+                                  )
+                                  .then((respAcc) => {
+                                    const account = {
+                                      userId: respAcc.data[0].userId,
+                                      username: respAcc.data[0].username,
+                                      password: respAcc.data[0].password,
+                                      role: respAcc.data[0].role,
+                                      status: 2,
+                                      idTable: respAcc.data[0].idTable,
+                                      id: respAcc.data[0].id,
+                                    };
+                                    const url_5 =
+                                      "http://localhost:3000/api/accounts/" +
+                                      account.id +
+                                      "/replace";
+                                    axios.post(url_5, account);
+                                    const url =
+                                      "http://localhost:3000/api/managers/" +
+                                      manager.id +
+                                      "/replace";
+                                    axios.post(url, manager);
+                                    axios
+                                      .post(
+                                        "http://localhost:3000/api/Photos/manager/upload?filename=" +
+                                          fileName,
+                                        fd
+                                      )
+                                      .then((res) => {
+                                        console.log(res);
+                                      })
+                                      .catch((err) => console.log(err));
+                                    setTimeout(() => {
+                                      this.$router.push("/managers");
+                                      location.reload();
+                                    }, 100);
+                                    return 0;
+                                  });
+                              });
+                          }
+                        });
                     });
+                } else {
+                  const url =
+                    "http://localhost:3000/api/managers/" +
+                    manager.id +
+                    "/replace";
+                  axios.post(url, manager);
+                  axios
+                    .post(
+                      "http://localhost:3000/api/Photos/manager/upload?filename=" +
+                        fileName,
+                      fd
+                    )
+                    .then((res) => {
+                      console.log(res);
+                    })
+                    .catch((err) => console.log(err));
+                  setTimeout(() => {
+                    this.$router.push("/managers");
+                    location.reload();
+                  }, 100);
+                  return 0;
                 }
-                const url =
-                  "http://localhost:3000/api/managers/" +
-                  manager.id +
-                  "/replace";
-                axios.post(url, manager);
-                axios
-                  .post(
-                    "http://localhost:3000/api/Photos/manager/upload?filename=" +
-                      fileName,
-                    fd
-                  )
-                  .then((res) => {
-                    console.log(res);
-                  })
-                  .catch((err) => console.log(err));
               }
             } else {
               const manager = {
@@ -2392,36 +2916,149 @@ const EditManager = {
               if (manager.status == 2) {
                 axios
                   .get(
-                    "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
-                      manager.id +
-                      "&filter[where][and][1][role]=" +
-                      manager.position +
-                      1
+                    "http://localhost:3000/api/managers?filter[where][id]=" +
+                      this.$route.params.id
                   )
-                  .then((resp) => {
-                    const account = {
-                      userId: resp.data[0].userId,
-                      username: resp.data[0].username,
-                      password: resp.data[0].password,
-                      role: resp.data[0].role,
-                      status: 2,
-                      idTable: resp.data[0].idTable,
-                      id: resp.data[0].id,
-                    };
-                    const url_5 =
-                      "http://localhost:3000/api/accounts/" +
-                      account.id +
-                      "/replace";
-                    axios.post(url_5, account);
+                  .then((respMan) => {
+                    axios
+                      .get(
+                        "http://localhost:3000/api/departments?filter[where][id]=" +
+                          respMan.data[0].position
+                      )
+                      .then((respPos) => {
+                        if (respPos.data[0].positionType == "Giám đốc") {
+                          axios
+                            .get(
+                              "http://localhost:3000/api/roles?filter[where][roleName]=" +
+                                "Giám đốc"
+                            )
+                            .then((respRole) => {
+                              axios
+                                .get(
+                                  "http://localhost:3000/api/accounts?filter[where][role]=" +
+                                    respRole.data[0].id
+                                )
+                                .then((respAcc) => {
+                                  const account = {
+                                    userId: respAcc.data[0].userId,
+                                    username: respAcc.data[0].username,
+                                    password: respAcc.data[0].password,
+                                    role: respAcc.data[0].role,
+                                    status: 2,
+                                    idTable: respAcc.data[0].idTable,
+                                    id: respAcc.data[0].id,
+                                  };
+                                  const url_5 =
+                                    "http://localhost:3000/api/accounts/" +
+                                    account.id +
+                                    "/replace";
+                                  axios.post(url_5, account);
+                                  const url =
+                                    "http://localhost:3000/api/managers/" +
+                                    manager.id +
+                                    "/replace";
+                                  axios.post(url, manager);
+                                  setTimeout(() => {
+                                    this.$router.push("/managers");
+                                    location.reload();
+                                  }, 100);
+                                  return 0;
+                                });
+                            });
+                        } else if (respPos.data[0].positionType == "Quản lý") {
+                          axios
+                            .get(
+                              "http://localhost:3000/api/roles?filter[where][roleName]=" +
+                                "Quản lý"
+                            )
+                            .then((respRole) => {
+                              axios
+                                .get(
+                                  "http://localhost:3000/api/accounts?filter[where][role]=" +
+                                    respRole.data[0].id
+                                )
+                                .then((respAcc) => {
+                                  const account = {
+                                    userId: respAcc.data[0].userId,
+                                    username: respAcc.data[0].username,
+                                    password: respAcc.data[0].password,
+                                    role: respAcc.data[0].role,
+                                    status: 2,
+                                    idTable: respAcc.data[0].idTable,
+                                    id: respAcc.data[0].id,
+                                  };
+                                  const url_5 =
+                                    "http://localhost:3000/api/accounts/" +
+                                    account.id +
+                                    "/replace";
+                                  axios.post(url_5, account);
+                                  const url =
+                                    "http://localhost:3000/api/managers/" +
+                                    manager.id +
+                                    "/replace";
+                                  axios.post(url, manager);
+                                  setTimeout(() => {
+                                    this.$router.push("/managers");
+                                    location.reload();
+                                  }, 100);
+                                  return 0;
+                                });
+                            });
+                        } else if (respPos.data[0].positionType == "Giám học") {
+                          axios
+                            .get(
+                              "http://localhost:3000/api/roles?filter[where][roleName]=" +
+                                "Giám học"
+                            )
+                            .then((respRole) => {
+                              axios
+                                .get(
+                                  "http://localhost:3000/api/accounts?filter[where][role]=" +
+                                    respRole.data[0].id
+                                )
+                                .then((respAcc) => {
+                                  const account = {
+                                    userId: respAcc.data[0].userId,
+                                    username: respAcc.data[0].username,
+                                    password: respAcc.data[0].password,
+                                    role: respAcc.data[0].role,
+                                    status: 2,
+                                    idTable: respAcc.data[0].idTable,
+                                    id: respAcc.data[0].id,
+                                  };
+                                  const url_5 =
+                                    "http://localhost:3000/api/accounts/" +
+                                    account.id +
+                                    "/replace";
+                                  axios.post(url_5, account);
+                                  const url =
+                                    "http://localhost:3000/api/managers/" +
+                                    manager.id +
+                                    "/replace";
+                                  axios.post(url, manager);
+                                  setTimeout(() => {
+                                    this.$router.push("/managers");
+                                    location.reload();
+                                  }, 100);
+                                  return 0;
+                                });
+                            });
+                        }
+                      });
                   });
+              } else {
+                const url =
+                  "http://localhost:3000/api/managers/" +
+                  manager.id +
+                  "/replace";
+                axios.post(url, manager);
+                setTimeout(() => {
+                  this.$router.push("/managers");
+                  location.reload();
+                }, 100);
+                return 0;
               }
-              const url =
-                "http://localhost:3000/api/managers/" + manager.id + "/replace";
-              axios.post(url, manager);
             }
-            this.$router.push("/managers");
-            location.reload();
-            return 0;
           }
         } else if (
           this.emailEdit != this.email &&
@@ -2478,53 +3115,228 @@ const EditManager = {
                     if (manager.status == 2) {
                       axios
                         .get(
-                          "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
-                            manager.id +
-                            "&filter[where][and][1][role]=" +
-                            manager.position +
-                            1
+                          "http://localhost:3000/api/managers?filter[where][id]=" +
+                            this.$route.params.id
+                        )
+                        .then((respMan) => {
+                          axios
+                            .get(
+                              "http://localhost:3000/api/departments?filter[where][id]=" +
+                                respMan.data[0].position
+                            )
+                            .then((respPos) => {
+                              if (respPos.data[0].positionType == "Giám đốc") {
+                                axios
+                                  .get(
+                                    "http://localhost:3000/api/roles?filter[where][roleName]=" +
+                                      "Giám đốc"
+                                  )
+                                  .then((respRole) => {
+                                    axios
+                                      .get(
+                                        "http://localhost:3000/api/accounts?filter[where][role]=" +
+                                          respRole.data[0].id
+                                      )
+                                      .then((respAcc) => {
+                                        const account = {
+                                          userId: respAcc.data[0].userId,
+                                          username: respAcc.data[0].username,
+                                          password: respAcc.data[0].password,
+                                          role: respAcc.data[0].role,
+                                          status: 2,
+                                          idTable: respAcc.data[0].idTable,
+                                          id: respAcc.data[0].id,
+                                        };
+                                        const url_5 =
+                                          "http://localhost:3000/api/accounts/" +
+                                          account.id +
+                                          "/replace";
+                                        axios.post(url_5, account);
+                                        const url =
+                                          "http://localhost:3000/api/managers/" +
+                                          manager.id +
+                                          "/replace";
+                                        axios.post(url, manager);
+                                        axios
+                                          .delete(
+                                            "http://localhost:3000/api/Photos/manager/files/" +
+                                              this.imageEdit
+                                          )
+                                          .then((resp) => {
+                                            console.log(resp);
+                                          })
+                                          .catch((err) => console.log(err));
+                                        axios
+                                          .post(
+                                            "http://localhost:3000/api/Photos/manager/upload?filename=" +
+                                              fileName,
+                                            fd
+                                          )
+                                          .then((res) => {
+                                            console.log(res);
+                                          })
+                                          .catch((err) => console.log(err));
+                                        setTimeout(() => {
+                                          this.$router.push("/managers");
+                                          location.reload();
+                                        }, 100);
+                                        return 0;
+                                      });
+                                  });
+                              } else if (
+                                respPos.data[0].positionType == "Quản lý"
+                              ) {
+                                axios
+                                  .get(
+                                    "http://localhost:3000/api/roles?filter[where][roleName]=" +
+                                      "Quản lý"
+                                  )
+                                  .then((respRole) => {
+                                    axios
+                                      .get(
+                                        "http://localhost:3000/api/accounts?filter[where][role]=" +
+                                          respRole.data[0].id
+                                      )
+                                      .then((respAcc) => {
+                                        const account = {
+                                          userId: respAcc.data[0].userId,
+                                          username: respAcc.data[0].username,
+                                          password: respAcc.data[0].password,
+                                          role: respAcc.data[0].role,
+                                          status: 2,
+                                          idTable: respAcc.data[0].idTable,
+                                          id: respAcc.data[0].id,
+                                        };
+                                        const url_5 =
+                                          "http://localhost:3000/api/accounts/" +
+                                          account.id +
+                                          "/replace";
+                                        axios.post(url_5, account);
+                                        const url =
+                                          "http://localhost:3000/api/managers/" +
+                                          manager.id +
+                                          "/replace";
+                                        axios.post(url, manager);
+                                        axios
+                                          .delete(
+                                            "http://localhost:3000/api/Photos/manager/files/" +
+                                              this.imageEdit
+                                          )
+                                          .then((resp) => {
+                                            console.log(resp);
+                                          })
+                                          .catch((err) => console.log(err));
+                                        axios
+                                          .post(
+                                            "http://localhost:3000/api/Photos/manager/upload?filename=" +
+                                              fileName,
+                                            fd
+                                          )
+                                          .then((res) => {
+                                            console.log(res);
+                                          })
+                                          .catch((err) => console.log(err));
+                                        setTimeout(() => {
+                                          this.$router.push("/managers");
+                                          location.reload();
+                                        }, 100);
+                                        return 0;
+                                      });
+                                  });
+                              } else if (
+                                respPos.data[0].positionType == "Giám học"
+                              ) {
+                                axios
+                                  .get(
+                                    "http://localhost:3000/api/roles?filter[where][roleName]=" +
+                                      "Giám học"
+                                  )
+                                  .then((respRole) => {
+                                    axios
+                                      .get(
+                                        "http://localhost:3000/api/accounts?filter[where][role]=" +
+                                          respRole.data[0].id
+                                      )
+                                      .then((respAcc) => {
+                                        const account = {
+                                          userId: respAcc.data[0].userId,
+                                          username: respAcc.data[0].username,
+                                          password: respAcc.data[0].password,
+                                          role: respAcc.data[0].role,
+                                          status: 2,
+                                          idTable: respAcc.data[0].idTable,
+                                          id: respAcc.data[0].id,
+                                        };
+                                        const url_5 =
+                                          "http://localhost:3000/api/accounts/" +
+                                          account.id +
+                                          "/replace";
+                                        axios.post(url_5, account);
+                                        const url =
+                                          "http://localhost:3000/api/managers/" +
+                                          manager.id +
+                                          "/replace";
+                                        axios.post(url, manager);
+                                        axios
+                                          .delete(
+                                            "http://localhost:3000/api/Photos/manager/files/" +
+                                              this.imageEdit
+                                          )
+                                          .then((resp) => {
+                                            console.log(resp);
+                                          })
+                                          .catch((err) => console.log(err));
+                                        axios
+                                          .post(
+                                            "http://localhost:3000/api/Photos/manager/upload?filename=" +
+                                              fileName,
+                                            fd
+                                          )
+                                          .then((res) => {
+                                            console.log(res);
+                                          })
+                                          .catch((err) => console.log(err));
+                                        setTimeout(() => {
+                                          this.$router.push("/managers");
+                                          location.reload();
+                                        }, 100);
+                                        return 0;
+                                      });
+                                  });
+                              }
+                            });
+                        });
+                    } else {
+                      const url =
+                        "http://localhost:3000/api/managers/" +
+                        manager.id +
+                        "/replace";
+                      axios.post(url, manager);
+                      axios
+                        .delete(
+                          "http://localhost:3000/api/Photos/manager/files/" +
+                            this.imageEdit
                         )
                         .then((resp) => {
-                          const account = {
-                            userId: resp.data[0].userId,
-                            username: resp.data[0].username,
-                            password: resp.data[0].password,
-                            role: resp.data[0].role,
-                            status: 2,
-                            idTable: resp.data[0].idTable,
-                            id: resp.data[0].id,
-                          };
-                          const url_5 =
-                            "http://localhost:3000/api/accounts/" +
-                            account.id +
-                            "/replace";
-                          axios.post(url_5, account);
-                        });
+                          console.log(resp);
+                        })
+                        .catch((err) => console.log(err));
+                      axios
+                        .post(
+                          "http://localhost:3000/api/Photos/manager/upload?filename=" +
+                            fileName,
+                          fd
+                        )
+                        .then((res) => {
+                          console.log(res);
+                        })
+                        .catch((err) => console.log(err));
+                      setTimeout(() => {
+                        this.$router.push("/managers");
+                        location.reload();
+                      }, 100);
+                      return 0;
                     }
-                    const url =
-                      "http://localhost:3000/api/managers/" +
-                      manager.id +
-                      "/replace";
-                    axios.post(url, manager);
-                    axios
-                      .delete(
-                        "http://localhost:3000/api/Photos/manager/files/" +
-                          this.imageEdit
-                      )
-                      .then((resp) => {
-                        console.log(resp);
-                      })
-                      .catch((err) => console.log(err));
-                    axios
-                      .post(
-                        "http://localhost:3000/api/Photos/manager/upload?filename=" +
-                          fileName,
-                        fd
-                      )
-                      .then((res) => {
-                        console.log(res);
-                      })
-                      .catch((err) => console.log(err));
                   } else {
                     const manager = {
                       managerId: this.managerId,
@@ -2542,44 +3354,210 @@ const EditManager = {
                     if (manager.status == 2) {
                       axios
                         .get(
-                          "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
-                            manager.id +
-                            "&filter[where][and][1][role]=" +
-                            manager.position +
-                            1
+                          "http://localhost:3000/api/managers?filter[where][id]=" +
+                            this.$route.params.id
                         )
-                        .then((resp) => {
-                          const account = {
-                            userId: resp.data[0].userId,
-                            username: resp.data[0].username,
-                            password: resp.data[0].password,
-                            role: resp.data[0].role,
-                            status: 2,
-                            idTable: resp.data[0].idTable,
-                            id: resp.data[0].id,
-                          };
-                          const url_5 =
-                            "http://localhost:3000/api/accounts/" +
-                            account.id +
-                            "/replace";
-                          axios.post(url_5, account);
+                        .then((respMan) => {
+                          axios
+                            .get(
+                              "http://localhost:3000/api/departments?filter[where][id]=" +
+                                respMan.data[0].position
+                            )
+                            .then((respPos) => {
+                              if (respPos.data[0].positionType == "Giám đốc") {
+                                axios
+                                  .get(
+                                    "http://localhost:3000/api/roles?filter[where][roleName]=" +
+                                      "Giám đốc"
+                                  )
+                                  .then((respRole) => {
+                                    axios
+                                      .get(
+                                        "http://localhost:3000/api/accounts?filter[where][role]=" +
+                                          respRole.data[0].id
+                                      )
+                                      .then((respAcc) => {
+                                        const account = {
+                                          userId: respAcc.data[0].userId,
+                                          username: respAcc.data[0].username,
+                                          password: respAcc.data[0].password,
+                                          role: respAcc.data[0].role,
+                                          status: 2,
+                                          idTable: respAcc.data[0].idTable,
+                                          id: respAcc.data[0].id,
+                                        };
+                                        const url_5 =
+                                          "http://localhost:3000/api/accounts/" +
+                                          account.id +
+                                          "/replace";
+                                        axios.post(url_5, account);
+                                        const url =
+                                          "http://localhost:3000/api/managers/" +
+                                          manager.id +
+                                          "/replace";
+                                        axios.post(url, manager);
+                                        axios
+                                          .delete(
+                                            "http://localhost:3000/api/Photos/manager/files/" +
+                                              this.imageEdit
+                                          )
+                                          .then((resp) => {
+                                            console.log(resp);
+                                          })
+                                          .catch((err) => console.log(err));
+                                        axios
+                                          .post(
+                                            "http://localhost:3000/api/Photos/manager/upload?filename=" +
+                                              fileName,
+                                            fd
+                                          )
+                                          .then((res) => {
+                                            console.log(res);
+                                          })
+                                          .catch((err) => console.log(err));
+                                        setTimeout(() => {
+                                          this.$router.push("/managers");
+                                          location.reload();
+                                        }, 100);
+                                        return 0;
+                                      });
+                                  });
+                              } else if (
+                                respPos.data[0].positionType == "Quản lý"
+                              ) {
+                                axios
+                                  .get(
+                                    "http://localhost:3000/api/roles?filter[where][roleName]=" +
+                                      "Quản lý"
+                                  )
+                                  .then((respRole) => {
+                                    axios
+                                      .get(
+                                        "http://localhost:3000/api/accounts?filter[where][role]=" +
+                                          respRole.data[0].id
+                                      )
+                                      .then((respAcc) => {
+                                        const account = {
+                                          userId: respAcc.data[0].userId,
+                                          username: respAcc.data[0].username,
+                                          password: respAcc.data[0].password,
+                                          role: respAcc.data[0].role,
+                                          status: 2,
+                                          idTable: respAcc.data[0].idTable,
+                                          id: respAcc.data[0].id,
+                                        };
+                                        const url_5 =
+                                          "http://localhost:3000/api/accounts/" +
+                                          account.id +
+                                          "/replace";
+                                        axios.post(url_5, account);
+                                        const url =
+                                          "http://localhost:3000/api/managers/" +
+                                          manager.id +
+                                          "/replace";
+                                        axios.post(url, manager);
+                                        axios
+                                          .delete(
+                                            "http://localhost:3000/api/Photos/manager/files/" +
+                                              this.imageEdit
+                                          )
+                                          .then((resp) => {
+                                            console.log(resp);
+                                          })
+                                          .catch((err) => console.log(err));
+                                        axios
+                                          .post(
+                                            "http://localhost:3000/api/Photos/manager/upload?filename=" +
+                                              fileName,
+                                            fd
+                                          )
+                                          .then((res) => {
+                                            console.log(res);
+                                          })
+                                          .catch((err) => console.log(err));
+                                        setTimeout(() => {
+                                          this.$router.push("/managers");
+                                          location.reload();
+                                        }, 100);
+                                        return 0;
+                                      });
+                                  });
+                              } else if (
+                                respPos.data[0].positionType == "Giám học"
+                              ) {
+                                axios
+                                  .get(
+                                    "http://localhost:3000/api/roles?filter[where][roleName]=" +
+                                      "Giám học"
+                                  )
+                                  .then((respRole) => {
+                                    axios
+                                      .get(
+                                        "http://localhost:3000/api/accounts?filter[where][role]=" +
+                                          respRole.data[0].id
+                                      )
+                                      .then((respAcc) => {
+                                        const account = {
+                                          userId: respAcc.data[0].userId,
+                                          username: respAcc.data[0].username,
+                                          password: respAcc.data[0].password,
+                                          role: respAcc.data[0].role,
+                                          status: 2,
+                                          idTable: respAcc.data[0].idTable,
+                                          id: respAcc.data[0].id,
+                                        };
+                                        const url_5 =
+                                          "http://localhost:3000/api/accounts/" +
+                                          account.id +
+                                          "/replace";
+                                        axios.post(url_5, account);
+                                        const url =
+                                          "http://localhost:3000/api/managers/" +
+                                          manager.id +
+                                          "/replace";
+                                        axios.post(url, manager);
+                                        axios
+                                          .post(
+                                            "http://localhost:3000/api/Photos/manager/upload?filename=" +
+                                              fileName,
+                                            fd
+                                          )
+                                          .then((res) => {
+                                            console.log(res);
+                                          })
+                                          .catch((err) => console.log(err));
+                                        setTimeout(() => {
+                                          this.$router.push("/managers");
+                                          location.reload();
+                                        }, 100);
+                                        return 0;
+                                      });
+                                  });
+                              }
+                            });
                         });
+                    } else {
+                      const url =
+                        "http://localhost:3000/api/managers/" +
+                        manager.id +
+                        "/replace";
+                      axios.post(url, manager);
+                      axios
+                        .post(
+                          "http://localhost:3000/api/Photos/manager/upload?filename=" +
+                            fileName,
+                          fd
+                        )
+                        .then((res) => {
+                          console.log(res);
+                        })
+                        .catch((err) => console.log(err));
+                      setTimeout(() => {
+                        this.$router.push("/managers");
+                        location.reload();
+                      }, 100);
+                      return 0;
                     }
-                    const url =
-                      "http://localhost:3000/api/managers/" +
-                      manager.id +
-                      "/replace";
-                    axios.post(url, manager);
-                    axios
-                      .post(
-                        "http://localhost:3000/api/Photos/manager/upload?filename=" +
-                          fileName,
-                        fd
-                      )
-                      .then((res) => {
-                        console.log(res);
-                      })
-                      .catch((err) => console.log(err));
                   }
                 } else {
                   const manager = {
@@ -2598,38 +3576,149 @@ const EditManager = {
                   if (manager.status == 2) {
                     axios
                       .get(
-                        "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
-                          manager.id +
-                          "&filter[where][and][1][role]=" +
-                          manager.position +
-                          1
+                        "http://localhost:3000/api/managers?filter[where][id]=" +
+                          this.$route.params.id
                       )
-                      .then((resp) => {
-                        const account = {
-                          userId: resp.data[0].userId,
-                          username: resp.data[0].username,
-                          password: resp.data[0].password,
-                          role: resp.data[0].role,
-                          status: 2,
-                          idTable: resp.data[0].idTable,
-                          id: resp.data[0].id,
-                        };
-                        const url_5 =
-                          "http://localhost:3000/api/accounts/" +
-                          account.id +
-                          "/replace";
-                        axios.post(url_5, account);
+                      .then((respMan) => {
+                        axios
+                          .get(
+                            "http://localhost:3000/api/departments?filter[where][id]=" +
+                              respMan.data[0].position
+                          )
+                          .then((respPos) => {
+                            if (respPos.data[0].positionType == "Giám đốc") {
+                              axios
+                                .get(
+                                  "http://localhost:3000/api/roles?filter[where][roleName]=" +
+                                    "Giám đốc"
+                                )
+                                .then((respRole) => {
+                                  axios
+                                    .get(
+                                      "http://localhost:3000/api/accounts?filter[where][role]=" +
+                                        respRole.data[0].id
+                                    )
+                                    .then((respAcc) => {
+                                      const account = {
+                                        userId: respAcc.data[0].userId,
+                                        username: respAcc.data[0].username,
+                                        password: respAcc.data[0].password,
+                                        role: respAcc.data[0].role,
+                                        status: 2,
+                                        idTable: respAcc.data[0].idTable,
+                                        id: respAcc.data[0].id,
+                                      };
+                                      const url_5 =
+                                        "http://localhost:3000/api/accounts/" +
+                                        account.id +
+                                        "/replace";
+                                      axios.post(url_5, account);
+                                      const url =
+                                        "http://localhost:3000/api/managers/" +
+                                        manager.id +
+                                        "/replace";
+                                      axios.post(url, manager);
+                                      setTimeout(() => {
+                                        this.$router.push("/managers");
+                                        location.reload();
+                                      }, 100);
+                                      return 0;
+                                    });
+                                });
+                            } else if (respPos.data[0].positionType == "Quản lý") {
+                              axios
+                                .get(
+                                  "http://localhost:3000/api/roles?filter[where][roleName]=" +
+                                    "Quản lý"
+                                )
+                                .then((respRole) => {
+                                  axios
+                                    .get(
+                                      "http://localhost:3000/api/accounts?filter[where][role]=" +
+                                        respRole.data[0].id
+                                    )
+                                    .then((respAcc) => {
+                                      const account = {
+                                        userId: respAcc.data[0].userId,
+                                        username: respAcc.data[0].username,
+                                        password: respAcc.data[0].password,
+                                        role: respAcc.data[0].role,
+                                        status: 2,
+                                        idTable: respAcc.data[0].idTable,
+                                        id: respAcc.data[0].id,
+                                      };
+                                      const url_5 =
+                                        "http://localhost:3000/api/accounts/" +
+                                        account.id +
+                                        "/replace";
+                                      axios.post(url_5, account);
+                                      const url =
+                                        "http://localhost:3000/api/managers/" +
+                                        manager.id +
+                                        "/replace";
+                                      axios.post(url, manager);
+                                      setTimeout(() => {
+                                        this.$router.push("/managers");
+                                        location.reload();
+                                      }, 100);
+                                      return 0;
+                                    });
+                                });
+                            } else if (respPos.data[0].positionType == "Giám học") {
+                              axios
+                                .get(
+                                  "http://localhost:3000/api/roles?filter[where][roleName]=" +
+                                    "Giám học"
+                                )
+                                .then((respRole) => {
+                                  axios
+                                    .get(
+                                      "http://localhost:3000/api/accounts?filter[where][role]=" +
+                                        respRole.data[0].id
+                                    )
+                                    .then((respAcc) => {
+                                      const account = {
+                                        userId: respAcc.data[0].userId,
+                                        username: respAcc.data[0].username,
+                                        password: respAcc.data[0].password,
+                                        role: respAcc.data[0].role,
+                                        status: 2,
+                                        idTable: respAcc.data[0].idTable,
+                                        id: respAcc.data[0].id,
+                                      };
+                                      const url_5 =
+                                        "http://localhost:3000/api/accounts/" +
+                                        account.id +
+                                        "/replace";
+                                      axios.post(url_5, account);
+                                      const url =
+                                        "http://localhost:3000/api/managers/" +
+                                        manager.id +
+                                        "/replace";
+                                      axios.post(url, manager);
+                                      setTimeout(() => {
+                                        this.$router.push("/managers");
+                                        location.reload();
+                                      }, 100);
+                                      return 0;
+                                    });
+                                });
+                            }
+                          });
                       });
+                  } else {
+                    const url =
+                      "http://localhost:3000/api/managers/" +
+                      manager.id +
+                      "/replace";
+                    axios.post(url, manager);
+                    setTimeout(() => {
+                      this.$router.push("/managers");
+                      location.reload();
+                    }, 100);
+                    return 0;
                   }
-                  const url =
-                    "http://localhost:3000/api/managers/" +
-                    manager.id +
-                    "/replace";
-                  axios.post(url, manager);
                 }
-                this.$router.push("/managers");
-                location.reload();
-                return 0;
               }
             });
         } else if (
@@ -2691,53 +3780,228 @@ const EditManager = {
                     if (manager.status == 2) {
                       axios
                         .get(
-                          "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
-                            manager.id +
-                            "&filter[where][and][1][role]=" +
-                            manager.position +
-                            1
+                          "http://localhost:3000/api/managers?filter[where][id]=" +
+                            this.$route.params.id
+                        )
+                        .then((respMan) => {
+                          axios
+                            .get(
+                              "http://localhost:3000/api/departments?filter[where][id]=" +
+                                respMan.data[0].position
+                            )
+                            .then((respPos) => {
+                              if (respPos.data[0].positionType == "Giám đốc") {
+                                axios
+                                  .get(
+                                    "http://localhost:3000/api/roles?filter[where][roleName]=" +
+                                      "Giám đốc"
+                                  )
+                                  .then((respRole) => {
+                                    axios
+                                      .get(
+                                        "http://localhost:3000/api/accounts?filter[where][role]=" +
+                                          respRole.data[0].id
+                                      )
+                                      .then((respAcc) => {
+                                        const account = {
+                                          userId: respAcc.data[0].userId,
+                                          username: respAcc.data[0].username,
+                                          password: respAcc.data[0].password,
+                                          role: respAcc.data[0].role,
+                                          status: 2,
+                                          idTable: respAcc.data[0].idTable,
+                                          id: respAcc.data[0].id,
+                                        };
+                                        const url_5 =
+                                          "http://localhost:3000/api/accounts/" +
+                                          account.id +
+                                          "/replace";
+                                        axios.post(url_5, account);
+                                        const url =
+                                          "http://localhost:3000/api/managers/" +
+                                          manager.id +
+                                          "/replace";
+                                        axios.post(url, manager);
+                                        axios
+                                          .delete(
+                                            "http://localhost:3000/api/Photos/manager/files/" +
+                                              this.imageEdit
+                                          )
+                                          .then((resp) => {
+                                            console.log(resp);
+                                          })
+                                          .catch((err) => console.log(err));
+                                        axios
+                                          .post(
+                                            "http://localhost:3000/api/Photos/manager/upload?filename=" +
+                                              fileName,
+                                            fd
+                                          )
+                                          .then((res) => {
+                                            console.log(res);
+                                          })
+                                          .catch((err) => console.log(err));
+                                        setTimeout(() => {
+                                          this.$router.push("/managers");
+                                          location.reload();
+                                        }, 100);
+                                        return 0;
+                                      });
+                                  });
+                              } else if (
+                                respPos.data[0].positionType == "Quản lý"
+                              ) {
+                                axios
+                                  .get(
+                                    "http://localhost:3000/api/roles?filter[where][roleName]=" +
+                                      "Quản lý"
+                                  )
+                                  .then((respRole) => {
+                                    axios
+                                      .get(
+                                        "http://localhost:3000/api/accounts?filter[where][role]=" +
+                                          respRole.data[0].id
+                                      )
+                                      .then((respAcc) => {
+                                        const account = {
+                                          userId: respAcc.data[0].userId,
+                                          username: respAcc.data[0].username,
+                                          password: respAcc.data[0].password,
+                                          role: respAcc.data[0].role,
+                                          status: 2,
+                                          idTable: respAcc.data[0].idTable,
+                                          id: respAcc.data[0].id,
+                                        };
+                                        const url_5 =
+                                          "http://localhost:3000/api/accounts/" +
+                                          account.id +
+                                          "/replace";
+                                        axios.post(url_5, account);
+                                        const url =
+                                          "http://localhost:3000/api/managers/" +
+                                          manager.id +
+                                          "/replace";
+                                        axios.post(url, manager);
+                                        axios
+                                          .delete(
+                                            "http://localhost:3000/api/Photos/manager/files/" +
+                                              this.imageEdit
+                                          )
+                                          .then((resp) => {
+                                            console.log(resp);
+                                          })
+                                          .catch((err) => console.log(err));
+                                        axios
+                                          .post(
+                                            "http://localhost:3000/api/Photos/manager/upload?filename=" +
+                                              fileName,
+                                            fd
+                                          )
+                                          .then((res) => {
+                                            console.log(res);
+                                          })
+                                          .catch((err) => console.log(err));
+                                        setTimeout(() => {
+                                          this.$router.push("/managers");
+                                          location.reload();
+                                        }, 100);
+                                        return 0;
+                                      });
+                                  });
+                              } else if (
+                                respPos.data[0].positionType == "Giám học"
+                              ) {
+                                axios
+                                  .get(
+                                    "http://localhost:3000/api/roles?filter[where][roleName]=" +
+                                      "Giám học"
+                                  )
+                                  .then((respRole) => {
+                                    axios
+                                      .get(
+                                        "http://localhost:3000/api/accounts?filter[where][role]=" +
+                                          respRole.data[0].id
+                                      )
+                                      .then((respAcc) => {
+                                        const account = {
+                                          userId: respAcc.data[0].userId,
+                                          username: respAcc.data[0].username,
+                                          password: respAcc.data[0].password,
+                                          role: respAcc.data[0].role,
+                                          status: 2,
+                                          idTable: respAcc.data[0].idTable,
+                                          id: respAcc.data[0].id,
+                                        };
+                                        const url_5 =
+                                          "http://localhost:3000/api/accounts/" +
+                                          account.id +
+                                          "/replace";
+                                        axios.post(url_5, account);
+                                        const url =
+                                          "http://localhost:3000/api/managers/" +
+                                          manager.id +
+                                          "/replace";
+                                        axios.post(url, manager);
+                                        axios
+                                          .delete(
+                                            "http://localhost:3000/api/Photos/manager/files/" +
+                                              this.imageEdit
+                                          )
+                                          .then((resp) => {
+                                            console.log(resp);
+                                          })
+                                          .catch((err) => console.log(err));
+                                        axios
+                                          .post(
+                                            "http://localhost:3000/api/Photos/manager/upload?filename=" +
+                                              fileName,
+                                            fd
+                                          )
+                                          .then((res) => {
+                                            console.log(res);
+                                          })
+                                          .catch((err) => console.log(err));
+                                        setTimeout(() => {
+                                          this.$router.push("/managers");
+                                          location.reload();
+                                        }, 100);
+                                        return 0;
+                                      });
+                                  });
+                              }
+                            });
+                        });
+                    } else {
+                      const url =
+                        "http://localhost:3000/api/managers/" +
+                        manager.id +
+                        "/replace";
+                      axios.post(url, manager);
+                      axios
+                        .delete(
+                          "http://localhost:3000/api/Photos/manager/files/" +
+                            this.imageEdit
                         )
                         .then((resp) => {
-                          const account = {
-                            userId: resp.data[0].userId,
-                            username: resp.data[0].username,
-                            password: resp.data[0].password,
-                            role: resp.data[0].role,
-                            status: 2,
-                            idTable: resp.data[0].idTable,
-                            id: resp.data[0].id,
-                          };
-                          const url_5 =
-                            "http://localhost:3000/api/accounts/" +
-                            account.id +
-                            "/replace";
-                          axios.post(url_5, account);
-                        });
+                          console.log(resp);
+                        })
+                        .catch((err) => console.log(err));
+                      axios
+                        .post(
+                          "http://localhost:3000/api/Photos/manager/upload?filename=" +
+                            fileName,
+                          fd
+                        )
+                        .then((res) => {
+                          console.log(res);
+                        })
+                        .catch((err) => console.log(err));
+                      setTimeout(() => {
+                        this.$router.push("/managers");
+                        location.reload();
+                      }, 100);
+                      return 0;
                     }
-                    const url =
-                      "http://localhost:3000/api/managers/" +
-                      manager.id +
-                      "/replace";
-                    axios.post(url, manager);
-                    axios
-                      .delete(
-                        "http://localhost:3000/api/Photos/manager/files/" +
-                          this.imageEdit
-                      )
-                      .then((resp) => {
-                        console.log(resp);
-                      })
-                      .catch((err) => console.log(err));
-                    axios
-                      .post(
-                        "http://localhost:3000/api/Photos/manager/upload?filename=" +
-                          fileName,
-                        fd
-                      )
-                      .then((res) => {
-                        console.log(res);
-                      })
-                      .catch((err) => console.log(err));
                   } else {
                     const manager = {
                       managerId: this.managerId,
@@ -2755,44 +4019,210 @@ const EditManager = {
                     if (manager.status == 2) {
                       axios
                         .get(
-                          "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
-                            manager.id +
-                            "&filter[where][and][1][role]=" +
-                            manager.position +
-                            1
+                          "http://localhost:3000/api/managers?filter[where][id]=" +
+                            this.$route.params.id
                         )
-                        .then((resp) => {
-                          const account = {
-                            userId: resp.data[0].userId,
-                            username: resp.data[0].username,
-                            password: resp.data[0].password,
-                            role: resp.data[0].role,
-                            status: 2,
-                            idTable: resp.data[0].idTable,
-                            id: resp.data[0].id,
-                          };
-                          const url_5 =
-                            "http://localhost:3000/api/accounts/" +
-                            account.id +
-                            "/replace";
-                          axios.post(url_5, account);
+                        .then((respMan) => {
+                          axios
+                            .get(
+                              "http://localhost:3000/api/departments?filter[where][id]=" +
+                                respMan.data[0].position
+                            )
+                            .then((respPos) => {
+                              if (respPos.data[0].positionType == "Giám đốc") {
+                                axios
+                                  .get(
+                                    "http://localhost:3000/api/roles?filter[where][roleName]=" +
+                                      "Giám đốc"
+                                  )
+                                  .then((respRole) => {
+                                    axios
+                                      .get(
+                                        "http://localhost:3000/api/accounts?filter[where][role]=" +
+                                          respRole.data[0].id
+                                      )
+                                      .then((respAcc) => {
+                                        const account = {
+                                          userId: respAcc.data[0].userId,
+                                          username: respAcc.data[0].username,
+                                          password: respAcc.data[0].password,
+                                          role: respAcc.data[0].role,
+                                          status: 2,
+                                          idTable: respAcc.data[0].idTable,
+                                          id: respAcc.data[0].id,
+                                        };
+                                        const url_5 =
+                                          "http://localhost:3000/api/accounts/" +
+                                          account.id +
+                                          "/replace";
+                                        axios.post(url_5, account);
+                                        const url =
+                                          "http://localhost:3000/api/managers/" +
+                                          manager.id +
+                                          "/replace";
+                                        axios.post(url, manager);
+                                        axios
+                                          .delete(
+                                            "http://localhost:3000/api/Photos/manager/files/" +
+                                              this.imageEdit
+                                          )
+                                          .then((resp) => {
+                                            console.log(resp);
+                                          })
+                                          .catch((err) => console.log(err));
+                                        axios
+                                          .post(
+                                            "http://localhost:3000/api/Photos/manager/upload?filename=" +
+                                              fileName,
+                                            fd
+                                          )
+                                          .then((res) => {
+                                            console.log(res);
+                                          })
+                                          .catch((err) => console.log(err));
+                                        setTimeout(() => {
+                                          this.$router.push("/managers");
+                                          location.reload();
+                                        }, 100);
+                                        return 0;
+                                      });
+                                  });
+                              } else if (
+                                respPos.data[0].positionType == "Quản lý"
+                              ) {
+                                axios
+                                  .get(
+                                    "http://localhost:3000/api/roles?filter[where][roleName]=" +
+                                      "Quản lý"
+                                  )
+                                  .then((respRole) => {
+                                    axios
+                                      .get(
+                                        "http://localhost:3000/api/accounts?filter[where][role]=" +
+                                          respRole.data[0].id
+                                      )
+                                      .then((respAcc) => {
+                                        const account = {
+                                          userId: respAcc.data[0].userId,
+                                          username: respAcc.data[0].username,
+                                          password: respAcc.data[0].password,
+                                          role: respAcc.data[0].role,
+                                          status: 2,
+                                          idTable: respAcc.data[0].idTable,
+                                          id: respAcc.data[0].id,
+                                        };
+                                        const url_5 =
+                                          "http://localhost:3000/api/accounts/" +
+                                          account.id +
+                                          "/replace";
+                                        axios.post(url_5, account);
+                                        const url =
+                                          "http://localhost:3000/api/managers/" +
+                                          manager.id +
+                                          "/replace";
+                                        axios.post(url, manager);
+                                        axios
+                                          .delete(
+                                            "http://localhost:3000/api/Photos/manager/files/" +
+                                              this.imageEdit
+                                          )
+                                          .then((resp) => {
+                                            console.log(resp);
+                                          })
+                                          .catch((err) => console.log(err));
+                                        axios
+                                          .post(
+                                            "http://localhost:3000/api/Photos/manager/upload?filename=" +
+                                              fileName,
+                                            fd
+                                          )
+                                          .then((res) => {
+                                            console.log(res);
+                                          })
+                                          .catch((err) => console.log(err));
+                                        setTimeout(() => {
+                                          this.$router.push("/managers");
+                                          location.reload();
+                                        }, 100);
+                                        return 0;
+                                      });
+                                  });
+                              } else if (
+                                respPos.data[0].positionType == "Giám học"
+                              ) {
+                                axios
+                                  .get(
+                                    "http://localhost:3000/api/roles?filter[where][roleName]=" +
+                                      "Giám học"
+                                  )
+                                  .then((respRole) => {
+                                    axios
+                                      .get(
+                                        "http://localhost:3000/api/accounts?filter[where][role]=" +
+                                          respRole.data[0].id
+                                      )
+                                      .then((respAcc) => {
+                                        const account = {
+                                          userId: respAcc.data[0].userId,
+                                          username: respAcc.data[0].username,
+                                          password: respAcc.data[0].password,
+                                          role: respAcc.data[0].role,
+                                          status: 2,
+                                          idTable: respAcc.data[0].idTable,
+                                          id: respAcc.data[0].id,
+                                        };
+                                        const url_5 =
+                                          "http://localhost:3000/api/accounts/" +
+                                          account.id +
+                                          "/replace";
+                                        axios.post(url_5, account);
+                                        const url =
+                                          "http://localhost:3000/api/managers/" +
+                                          manager.id +
+                                          "/replace";
+                                        axios.post(url, manager);
+                                        axios
+                                          .post(
+                                            "http://localhost:3000/api/Photos/manager/upload?filename=" +
+                                              fileName,
+                                            fd
+                                          )
+                                          .then((res) => {
+                                            console.log(res);
+                                          })
+                                          .catch((err) => console.log(err));
+                                        setTimeout(() => {
+                                          this.$router.push("/managers");
+                                          location.reload();
+                                        }, 100);
+                                        return 0;
+                                      });
+                                  });
+                              }
+                            });
                         });
+                    } else {
+                      const url =
+                        "http://localhost:3000/api/managers/" +
+                        manager.id +
+                        "/replace";
+                      axios.post(url, manager);
+                      axios
+                        .post(
+                          "http://localhost:3000/api/Photos/manager/upload?filename=" +
+                            fileName,
+                          fd
+                        )
+                        .then((res) => {
+                          console.log(res);
+                        })
+                        .catch((err) => console.log(err));
+                      setTimeout(() => {
+                        this.$router.push("/managers");
+                        location.reload();
+                      }, 100);
+                      return 0;
                     }
-                    const url =
-                      "http://localhost:3000/api/managers/" +
-                      manager.id +
-                      "/replace";
-                    axios.post(url, manager);
-                    axios
-                      .post(
-                        "http://localhost:3000/api/Photos/manager/upload?filename=" +
-                          fileName,
-                        fd
-                      )
-                      .then((res) => {
-                        console.log(res);
-                      })
-                      .catch((err) => console.log(err));
                   }
                 } else {
                   const manager = {
@@ -2811,38 +4241,149 @@ const EditManager = {
                   if (manager.status == 2) {
                     axios
                       .get(
-                        "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
-                          manager.id +
-                          "&filter[where][and][1][role]=" +
-                          manager.position +
-                          1
+                        "http://localhost:3000/api/managers?filter[where][id]=" +
+                          this.$route.params.id
                       )
-                      .then((resp) => {
-                        const account = {
-                          userId: resp.data[0].userId,
-                          username: resp.data[0].username,
-                          password: resp.data[0].password,
-                          role: resp.data[0].role,
-                          status: 2,
-                          idTable: resp.data[0].idTable,
-                          id: resp.data[0].id,
-                        };
-                        const url_5 =
-                          "http://localhost:3000/api/accounts/" +
-                          account.id +
-                          "/replace";
-                        axios.post(url_5, account);
+                      .then((respMan) => {
+                        axios
+                          .get(
+                            "http://localhost:3000/api/departments?filter[where][id]=" +
+                              respMan.data[0].position
+                          )
+                          .then((respPos) => {
+                            if (respPos.data[0].positionType == "Giám đốc") {
+                              axios
+                                .get(
+                                  "http://localhost:3000/api/roles?filter[where][roleName]=" +
+                                    "Giám đốc"
+                                )
+                                .then((respRole) => {
+                                  axios
+                                    .get(
+                                      "http://localhost:3000/api/accounts?filter[where][role]=" +
+                                        respRole.data[0].id
+                                    )
+                                    .then((respAcc) => {
+                                      const account = {
+                                        userId: respAcc.data[0].userId,
+                                        username: respAcc.data[0].username,
+                                        password: respAcc.data[0].password,
+                                        role: respAcc.data[0].role,
+                                        status: 2,
+                                        idTable: respAcc.data[0].idTable,
+                                        id: respAcc.data[0].id,
+                                      };
+                                      const url_5 =
+                                        "http://localhost:3000/api/accounts/" +
+                                        account.id +
+                                        "/replace";
+                                      axios.post(url_5, account);
+                                      const url =
+                                        "http://localhost:3000/api/managers/" +
+                                        manager.id +
+                                        "/replace";
+                                      axios.post(url, manager);
+                                      setTimeout(() => {
+                                        this.$router.push("/managers");
+                                        location.reload();
+                                      }, 100);
+                                      return 0;
+                                    });
+                                });
+                            } else if (respPos.data[0].positionType == "Quản lý") {
+                              axios
+                                .get(
+                                  "http://localhost:3000/api/roles?filter[where][roleName]=" +
+                                    "Quản lý"
+                                )
+                                .then((respRole) => {
+                                  axios
+                                    .get(
+                                      "http://localhost:3000/api/accounts?filter[where][role]=" +
+                                        respRole.data[0].id
+                                    )
+                                    .then((respAcc) => {
+                                      const account = {
+                                        userId: respAcc.data[0].userId,
+                                        username: respAcc.data[0].username,
+                                        password: respAcc.data[0].password,
+                                        role: respAcc.data[0].role,
+                                        status: 2,
+                                        idTable: respAcc.data[0].idTable,
+                                        id: respAcc.data[0].id,
+                                      };
+                                      const url_5 =
+                                        "http://localhost:3000/api/accounts/" +
+                                        account.id +
+                                        "/replace";
+                                      axios.post(url_5, account);
+                                      const url =
+                                        "http://localhost:3000/api/managers/" +
+                                        manager.id +
+                                        "/replace";
+                                      axios.post(url, manager);
+                                      setTimeout(() => {
+                                        this.$router.push("/managers");
+                                        location.reload();
+                                      }, 100);
+                                      return 0;
+                                    });
+                                });
+                            } else if (respPos.data[0].positionType == "Giám học") {
+                              axios
+                                .get(
+                                  "http://localhost:3000/api/roles?filter[where][roleName]=" +
+                                    "Giám học"
+                                )
+                                .then((respRole) => {
+                                  axios
+                                    .get(
+                                      "http://localhost:3000/api/accounts?filter[where][role]=" +
+                                        respRole.data[0].id
+                                    )
+                                    .then((respAcc) => {
+                                      const account = {
+                                        userId: respAcc.data[0].userId,
+                                        username: respAcc.data[0].username,
+                                        password: respAcc.data[0].password,
+                                        role: respAcc.data[0].role,
+                                        status: 2,
+                                        idTable: respAcc.data[0].idTable,
+                                        id: respAcc.data[0].id,
+                                      };
+                                      const url_5 =
+                                        "http://localhost:3000/api/accounts/" +
+                                        account.id +
+                                        "/replace";
+                                      axios.post(url_5, account);
+                                      const url =
+                                        "http://localhost:3000/api/managers/" +
+                                        manager.id +
+                                        "/replace";
+                                      axios.post(url, manager);
+                                      setTimeout(() => {
+                                        this.$router.push("/managers");
+                                        location.reload();
+                                      }, 100);
+                                      return 0;
+                                    });
+                                });
+                            }
+                          });
                       });
+                  } else {
+                    const url =
+                      "http://localhost:3000/api/managers/" +
+                      manager.id +
+                      "/replace";
+                    axios.post(url, manager);
+                    setTimeout(() => {
+                      this.$router.push("/managers");
+                      location.reload();
+                    }, 100);
+                    return 0;
                   }
-                  const url =
-                    "http://localhost:3000/api/managers/" +
-                    manager.id +
-                    "/replace";
-                  axios.post(url, manager);
                 }
-                this.$router.push("/managers");
-                location.reload();
-                return 0;
               }
             });
         } else {
@@ -2890,16 +4431,11 @@ const EditManager = {
                     } else {
                       if (this.selectedFile != null) {
                         const fd = new FormData();
-                        fd.append(
-                          "image",
-                          this.selectedFile,
-                          this.selectedFile.name
-                        );
+                        fd.append("image", this.selectedFile, this.selectedFile.name);
                         var start = this.selectedFile.name.lastIndexOf(".");
                         var end = this.selectedFile.length;
                         var fileName =
-                          this.managerId +
-                          this.selectedFile.name.slice(start, end);
+                          this.managerId + this.selectedFile.name.slice(start, end);
                         if (this.imageEdit != null) {
                           const manager = {
                             managerId: this.managerId,
@@ -2917,53 +4453,228 @@ const EditManager = {
                           if (manager.status == 2) {
                             axios
                               .get(
-                                "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
-                                  manager.id +
-                                  "&filter[where][and][1][role]=" +
-                                  manager.position +
-                                  1
+                                "http://localhost:3000/api/managers?filter[where][id]=" +
+                                  this.$route.params.id
+                              )
+                              .then((respMan) => {
+                                axios
+                                  .get(
+                                    "http://localhost:3000/api/departments?filter[where][id]=" +
+                                      respMan.data[0].position
+                                  )
+                                  .then((respPos) => {
+                                    if (respPos.data[0].positionType == "Giám đốc") {
+                                      axios
+                                        .get(
+                                          "http://localhost:3000/api/roles?filter[where][roleName]=" +
+                                            "Giám đốc"
+                                        )
+                                        .then((respRole) => {
+                                          axios
+                                            .get(
+                                              "http://localhost:3000/api/accounts?filter[where][role]=" +
+                                                respRole.data[0].id
+                                            )
+                                            .then((respAcc) => {
+                                              const account = {
+                                                userId: respAcc.data[0].userId,
+                                                username: respAcc.data[0].username,
+                                                password: respAcc.data[0].password,
+                                                role: respAcc.data[0].role,
+                                                status: 2,
+                                                idTable: respAcc.data[0].idTable,
+                                                id: respAcc.data[0].id,
+                                              };
+                                              const url_5 =
+                                                "http://localhost:3000/api/accounts/" +
+                                                account.id +
+                                                "/replace";
+                                              axios.post(url_5, account);
+                                              const url =
+                                                "http://localhost:3000/api/managers/" +
+                                                manager.id +
+                                                "/replace";
+                                              axios.post(url, manager);
+                                              axios
+                                                .delete(
+                                                  "http://localhost:3000/api/Photos/manager/files/" +
+                                                    this.imageEdit
+                                                )
+                                                .then((resp) => {
+                                                  console.log(resp);
+                                                })
+                                                .catch((err) => console.log(err));
+                                              axios
+                                                .post(
+                                                  "http://localhost:3000/api/Photos/manager/upload?filename=" +
+                                                    fileName,
+                                                  fd
+                                                )
+                                                .then((res) => {
+                                                  console.log(res);
+                                                })
+                                                .catch((err) => console.log(err));
+                                              setTimeout(() => {
+                                                this.$router.push("/managers");
+                                                location.reload();
+                                              }, 100);
+                                              return 0;
+                                            });
+                                        });
+                                    } else if (
+                                      respPos.data[0].positionType == "Quản lý"
+                                    ) {
+                                      axios
+                                        .get(
+                                          "http://localhost:3000/api/roles?filter[where][roleName]=" +
+                                            "Quản lý"
+                                        )
+                                        .then((respRole) => {
+                                          axios
+                                            .get(
+                                              "http://localhost:3000/api/accounts?filter[where][role]=" +
+                                                respRole.data[0].id
+                                            )
+                                            .then((respAcc) => {
+                                              const account = {
+                                                userId: respAcc.data[0].userId,
+                                                username: respAcc.data[0].username,
+                                                password: respAcc.data[0].password,
+                                                role: respAcc.data[0].role,
+                                                status: 2,
+                                                idTable: respAcc.data[0].idTable,
+                                                id: respAcc.data[0].id,
+                                              };
+                                              const url_5 =
+                                                "http://localhost:3000/api/accounts/" +
+                                                account.id +
+                                                "/replace";
+                                              axios.post(url_5, account);
+                                              const url =
+                                                "http://localhost:3000/api/managers/" +
+                                                manager.id +
+                                                "/replace";
+                                              axios.post(url, manager);
+                                              axios
+                                                .delete(
+                                                  "http://localhost:3000/api/Photos/manager/files/" +
+                                                    this.imageEdit
+                                                )
+                                                .then((resp) => {
+                                                  console.log(resp);
+                                                })
+                                                .catch((err) => console.log(err));
+                                              axios
+                                                .post(
+                                                  "http://localhost:3000/api/Photos/manager/upload?filename=" +
+                                                    fileName,
+                                                  fd
+                                                )
+                                                .then((res) => {
+                                                  console.log(res);
+                                                })
+                                                .catch((err) => console.log(err));
+                                              setTimeout(() => {
+                                                this.$router.push("/managers");
+                                                location.reload();
+                                              }, 100);
+                                              return 0;
+                                            });
+                                        });
+                                    } else if (
+                                      respPos.data[0].positionType == "Giám học"
+                                    ) {
+                                      axios
+                                        .get(
+                                          "http://localhost:3000/api/roles?filter[where][roleName]=" +
+                                            "Giám học"
+                                        )
+                                        .then((respRole) => {
+                                          axios
+                                            .get(
+                                              "http://localhost:3000/api/accounts?filter[where][role]=" +
+                                                respRole.data[0].id
+                                            )
+                                            .then((respAcc) => {
+                                              const account = {
+                                                userId: respAcc.data[0].userId,
+                                                username: respAcc.data[0].username,
+                                                password: respAcc.data[0].password,
+                                                role: respAcc.data[0].role,
+                                                status: 2,
+                                                idTable: respAcc.data[0].idTable,
+                                                id: respAcc.data[0].id,
+                                              };
+                                              const url_5 =
+                                                "http://localhost:3000/api/accounts/" +
+                                                account.id +
+                                                "/replace";
+                                              axios.post(url_5, account);
+                                              const url =
+                                                "http://localhost:3000/api/managers/" +
+                                                manager.id +
+                                                "/replace";
+                                              axios.post(url, manager);
+                                              axios
+                                                .delete(
+                                                  "http://localhost:3000/api/Photos/manager/files/" +
+                                                    this.imageEdit
+                                                )
+                                                .then((resp) => {
+                                                  console.log(resp);
+                                                })
+                                                .catch((err) => console.log(err));
+                                              axios
+                                                .post(
+                                                  "http://localhost:3000/api/Photos/manager/upload?filename=" +
+                                                    fileName,
+                                                  fd
+                                                )
+                                                .then((res) => {
+                                                  console.log(res);
+                                                })
+                                                .catch((err) => console.log(err));
+                                              setTimeout(() => {
+                                                this.$router.push("/managers");
+                                                location.reload();
+                                              }, 100);
+                                              return 0;
+                                            });
+                                        });
+                                    }
+                                  });
+                              });
+                          } else {
+                            const url =
+                              "http://localhost:3000/api/managers/" +
+                              manager.id +
+                              "/replace";
+                            axios.post(url, manager);
+                            axios
+                              .delete(
+                                "http://localhost:3000/api/Photos/manager/files/" +
+                                  this.imageEdit
                               )
                               .then((resp) => {
-                                const account = {
-                                  userId: resp.data[0].userId,
-                                  username: resp.data[0].username,
-                                  password: resp.data[0].password,
-                                  role: resp.data[0].role,
-                                  status: 2,
-                                  idTable: resp.data[0].idTable,
-                                  id: resp.data[0].id,
-                                };
-                                const url_5 =
-                                  "http://localhost:3000/api/accounts/" +
-                                  account.id +
-                                  "/replace";
-                                axios.post(url_5, account);
-                              });
+                                console.log(resp);
+                              })
+                              .catch((err) => console.log(err));
+                            axios
+                              .post(
+                                "http://localhost:3000/api/Photos/manager/upload?filename=" +
+                                  fileName,
+                                fd
+                              )
+                              .then((res) => {
+                                console.log(res);
+                              })
+                              .catch((err) => console.log(err));
+                            setTimeout(() => {
+                              this.$router.push("/managers");
+                              location.reload();
+                            }, 100);
+                            return 0;
                           }
-                          const url =
-                            "http://localhost:3000/api/managers/" +
-                            manager.id +
-                            "/replace";
-                          axios.post(url, manager);
-                          axios
-                            .delete(
-                              "http://localhost:3000/api/Photos/manager/files/" +
-                                this.imageEdit
-                            )
-                            .then((resp) => {
-                              console.log(resp);
-                            })
-                            .catch((err) => console.log(err));
-                          axios
-                            .post(
-                              "http://localhost:3000/api/Photos/manager/upload?filename=" +
-                                fileName,
-                              fd
-                            )
-                            .then((res) => {
-                              console.log(res);
-                            })
-                            .catch((err) => console.log(err));
                         } else {
                           const manager = {
                             managerId: this.managerId,
@@ -2981,44 +4692,210 @@ const EditManager = {
                           if (manager.status == 2) {
                             axios
                               .get(
-                                "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
-                                  manager.id +
-                                  "&filter[where][and][1][role]=" +
-                                  manager.position +
-                                  1
+                                "http://localhost:3000/api/managers?filter[where][id]=" +
+                                  this.$route.params.id
                               )
-                              .then((resp) => {
-                                const account = {
-                                  userId: resp.data[0].userId,
-                                  username: resp.data[0].username,
-                                  password: resp.data[0].password,
-                                  role: resp.data[0].role,
-                                  status: 2,
-                                  idTable: resp.data[0].idTable,
-                                  id: resp.data[0].id,
-                                };
-                                const url_5 =
-                                  "http://localhost:3000/api/accounts/" +
-                                  account.id +
-                                  "/replace";
-                                axios.post(url_5, account);
+                              .then((respMan) => {
+                                axios
+                                  .get(
+                                    "http://localhost:3000/api/departments?filter[where][id]=" +
+                                      respMan.data[0].position
+                                  )
+                                  .then((respPos) => {
+                                    if (respPos.data[0].positionType == "Giám đốc") {
+                                      axios
+                                        .get(
+                                          "http://localhost:3000/api/roles?filter[where][roleName]=" +
+                                            "Giám đốc"
+                                        )
+                                        .then((respRole) => {
+                                          axios
+                                            .get(
+                                              "http://localhost:3000/api/accounts?filter[where][role]=" +
+                                                respRole.data[0].id
+                                            )
+                                            .then((respAcc) => {
+                                              const account = {
+                                                userId: respAcc.data[0].userId,
+                                                username: respAcc.data[0].username,
+                                                password: respAcc.data[0].password,
+                                                role: respAcc.data[0].role,
+                                                status: 2,
+                                                idTable: respAcc.data[0].idTable,
+                                                id: respAcc.data[0].id,
+                                              };
+                                              const url_5 =
+                                                "http://localhost:3000/api/accounts/" +
+                                                account.id +
+                                                "/replace";
+                                              axios.post(url_5, account);
+                                              const url =
+                                                "http://localhost:3000/api/managers/" +
+                                                manager.id +
+                                                "/replace";
+                                              axios.post(url, manager);
+                                              axios
+                                                .delete(
+                                                  "http://localhost:3000/api/Photos/manager/files/" +
+                                                    this.imageEdit
+                                                )
+                                                .then((resp) => {
+                                                  console.log(resp);
+                                                })
+                                                .catch((err) => console.log(err));
+                                              axios
+                                                .post(
+                                                  "http://localhost:3000/api/Photos/manager/upload?filename=" +
+                                                    fileName,
+                                                  fd
+                                                )
+                                                .then((res) => {
+                                                  console.log(res);
+                                                })
+                                                .catch((err) => console.log(err));
+                                              setTimeout(() => {
+                                                this.$router.push("/managers");
+                                                location.reload();
+                                              }, 100);
+                                              return 0;
+                                            });
+                                        });
+                                    } else if (
+                                      respPos.data[0].positionType == "Quản lý"
+                                    ) {
+                                      axios
+                                        .get(
+                                          "http://localhost:3000/api/roles?filter[where][roleName]=" +
+                                            "Quản lý"
+                                        )
+                                        .then((respRole) => {
+                                          axios
+                                            .get(
+                                              "http://localhost:3000/api/accounts?filter[where][role]=" +
+                                                respRole.data[0].id
+                                            )
+                                            .then((respAcc) => {
+                                              const account = {
+                                                userId: respAcc.data[0].userId,
+                                                username: respAcc.data[0].username,
+                                                password: respAcc.data[0].password,
+                                                role: respAcc.data[0].role,
+                                                status: 2,
+                                                idTable: respAcc.data[0].idTable,
+                                                id: respAcc.data[0].id,
+                                              };
+                                              const url_5 =
+                                                "http://localhost:3000/api/accounts/" +
+                                                account.id +
+                                                "/replace";
+                                              axios.post(url_5, account);
+                                              const url =
+                                                "http://localhost:3000/api/managers/" +
+                                                manager.id +
+                                                "/replace";
+                                              axios.post(url, manager);
+                                              axios
+                                                .delete(
+                                                  "http://localhost:3000/api/Photos/manager/files/" +
+                                                    this.imageEdit
+                                                )
+                                                .then((resp) => {
+                                                  console.log(resp);
+                                                })
+                                                .catch((err) => console.log(err));
+                                              axios
+                                                .post(
+                                                  "http://localhost:3000/api/Photos/manager/upload?filename=" +
+                                                    fileName,
+                                                  fd
+                                                )
+                                                .then((res) => {
+                                                  console.log(res);
+                                                })
+                                                .catch((err) => console.log(err));
+                                              setTimeout(() => {
+                                                this.$router.push("/managers");
+                                                location.reload();
+                                              }, 100);
+                                              return 0;
+                                            });
+                                        });
+                                    } else if (
+                                      respPos.data[0].positionType == "Giám học"
+                                    ) {
+                                      axios
+                                        .get(
+                                          "http://localhost:3000/api/roles?filter[where][roleName]=" +
+                                            "Giám học"
+                                        )
+                                        .then((respRole) => {
+                                          axios
+                                            .get(
+                                              "http://localhost:3000/api/accounts?filter[where][role]=" +
+                                                respRole.data[0].id
+                                            )
+                                            .then((respAcc) => {
+                                              const account = {
+                                                userId: respAcc.data[0].userId,
+                                                username: respAcc.data[0].username,
+                                                password: respAcc.data[0].password,
+                                                role: respAcc.data[0].role,
+                                                status: 2,
+                                                idTable: respAcc.data[0].idTable,
+                                                id: respAcc.data[0].id,
+                                              };
+                                              const url_5 =
+                                                "http://localhost:3000/api/accounts/" +
+                                                account.id +
+                                                "/replace";
+                                              axios.post(url_5, account);
+                                              const url =
+                                                "http://localhost:3000/api/managers/" +
+                                                manager.id +
+                                                "/replace";
+                                              axios.post(url, manager);
+                                              axios
+                                                .post(
+                                                  "http://localhost:3000/api/Photos/manager/upload?filename=" +
+                                                    fileName,
+                                                  fd
+                                                )
+                                                .then((res) => {
+                                                  console.log(res);
+                                                })
+                                                .catch((err) => console.log(err));
+                                              setTimeout(() => {
+                                                this.$router.push("/managers");
+                                                location.reload();
+                                              }, 100);
+                                              return 0;
+                                            });
+                                        });
+                                    }
+                                  });
                               });
+                          } else {
+                            const url =
+                              "http://localhost:3000/api/managers/" +
+                              manager.id +
+                              "/replace";
+                            axios.post(url, manager);
+                            axios
+                              .post(
+                                "http://localhost:3000/api/Photos/manager/upload?filename=" +
+                                  fileName,
+                                fd
+                              )
+                              .then((res) => {
+                                console.log(res);
+                              })
+                              .catch((err) => console.log(err));
+                            setTimeout(() => {
+                              this.$router.push("/managers");
+                              location.reload();
+                            }, 100);
+                            return 0;
                           }
-                          const url =
-                            "http://localhost:3000/api/managers/" +
-                            manager.id +
-                            "/replace";
-                          axios.post(url, manager);
-                          axios
-                            .post(
-                              "http://localhost:3000/api/Photos/manager/upload?filename=" +
-                                fileName,
-                              fd
-                            )
-                            .then((res) => {
-                              console.log(res);
-                            })
-                            .catch((err) => console.log(err));
                         }
                       } else {
                         const manager = {
@@ -3037,38 +4914,149 @@ const EditManager = {
                         if (manager.status == 2) {
                           axios
                             .get(
-                              "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
-                                manager.id +
-                                "&filter[where][and][1][role]=" +
-                                manager.position +
-                                1
+                              "http://localhost:3000/api/managers?filter[where][id]=" +
+                                this.$route.params.id
                             )
-                            .then((resp) => {
-                              const account = {
-                                userId: resp.data[0].userId,
-                                username: resp.data[0].username,
-                                password: resp.data[0].password,
-                                role: resp.data[0].role,
-                                status: 2,
-                                idTable: resp.data[0].idTable,
-                                id: resp.data[0].id,
-                              };
-                              const url_5 =
-                                "http://localhost:3000/api/accounts/" +
-                                account.id +
-                                "/replace";
-                              axios.post(url_5, account);
+                            .then((respMan) => {
+                              axios
+                                .get(
+                                  "http://localhost:3000/api/departments?filter[where][id]=" +
+                                    respMan.data[0].position
+                                )
+                                .then((respPos) => {
+                                  if (respPos.data[0].positionType == "Giám đốc") {
+                                    axios
+                                      .get(
+                                        "http://localhost:3000/api/roles?filter[where][roleName]=" +
+                                          "Giám đốc"
+                                      )
+                                      .then((respRole) => {
+                                        axios
+                                          .get(
+                                            "http://localhost:3000/api/accounts?filter[where][role]=" +
+                                              respRole.data[0].id
+                                          )
+                                          .then((respAcc) => {
+                                            const account = {
+                                              userId: respAcc.data[0].userId,
+                                              username: respAcc.data[0].username,
+                                              password: respAcc.data[0].password,
+                                              role: respAcc.data[0].role,
+                                              status: 2,
+                                              idTable: respAcc.data[0].idTable,
+                                              id: respAcc.data[0].id,
+                                            };
+                                            const url_5 =
+                                              "http://localhost:3000/api/accounts/" +
+                                              account.id +
+                                              "/replace";
+                                            axios.post(url_5, account);
+                                            const url =
+                                              "http://localhost:3000/api/managers/" +
+                                              manager.id +
+                                              "/replace";
+                                            axios.post(url, manager);
+                                            setTimeout(() => {
+                                              this.$router.push("/managers");
+                                              location.reload();
+                                            }, 100);
+                                            return 0;
+                                          });
+                                      });
+                                  } else if (respPos.data[0].positionType == "Quản lý") {
+                                    axios
+                                      .get(
+                                        "http://localhost:3000/api/roles?filter[where][roleName]=" +
+                                          "Quản lý"
+                                      )
+                                      .then((respRole) => {
+                                        axios
+                                          .get(
+                                            "http://localhost:3000/api/accounts?filter[where][role]=" +
+                                              respRole.data[0].id
+                                          )
+                                          .then((respAcc) => {
+                                            const account = {
+                                              userId: respAcc.data[0].userId,
+                                              username: respAcc.data[0].username,
+                                              password: respAcc.data[0].password,
+                                              role: respAcc.data[0].role,
+                                              status: 2,
+                                              idTable: respAcc.data[0].idTable,
+                                              id: respAcc.data[0].id,
+                                            };
+                                            const url_5 =
+                                              "http://localhost:3000/api/accounts/" +
+                                              account.id +
+                                              "/replace";
+                                            axios.post(url_5, account);
+                                            const url =
+                                              "http://localhost:3000/api/managers/" +
+                                              manager.id +
+                                              "/replace";
+                                            axios.post(url, manager);
+                                            setTimeout(() => {
+                                              this.$router.push("/managers");
+                                              location.reload();
+                                            }, 100);
+                                            return 0;
+                                          });
+                                      });
+                                  } else if (respPos.data[0].positionType == "Giám học") {
+                                    axios
+                                      .get(
+                                        "http://localhost:3000/api/roles?filter[where][roleName]=" +
+                                          "Giám học"
+                                      )
+                                      .then((respRole) => {
+                                        axios
+                                          .get(
+                                            "http://localhost:3000/api/accounts?filter[where][role]=" +
+                                              respRole.data[0].id
+                                          )
+                                          .then((respAcc) => {
+                                            const account = {
+                                              userId: respAcc.data[0].userId,
+                                              username: respAcc.data[0].username,
+                                              password: respAcc.data[0].password,
+                                              role: respAcc.data[0].role,
+                                              status: 2,
+                                              idTable: respAcc.data[0].idTable,
+                                              id: respAcc.data[0].id,
+                                            };
+                                            const url_5 =
+                                              "http://localhost:3000/api/accounts/" +
+                                              account.id +
+                                              "/replace";
+                                            axios.post(url_5, account);
+                                            const url =
+                                              "http://localhost:3000/api/managers/" +
+                                              manager.id +
+                                              "/replace";
+                                            axios.post(url, manager);
+                                            setTimeout(() => {
+                                              this.$router.push("/managers");
+                                              location.reload();
+                                            }, 100);
+                                            return 0;
+                                          });
+                                      });
+                                  }
+                                });
                             });
+                        } else {
+                          const url =
+                            "http://localhost:3000/api/managers/" +
+                            manager.id +
+                            "/replace";
+                          axios.post(url, manager);
+                          setTimeout(() => {
+                            this.$router.push("/managers");
+                            location.reload();
+                          }, 100);
+                          return 0;
                         }
-                        const url =
-                          "http://localhost:3000/api/managers/" +
-                          manager.id +
-                          "/replace";
-                        axios.post(url, manager);
                       }
-                      this.$router.push("/managers");
-                      location.reload();
-                      return 0;
                     }
                   });
               }
@@ -3267,6 +5255,7 @@ const ListDepartment = {
   mounted() {
     axios.get("http://localhost:3000/api/departments").then((response) => {
       this.departments = response.data;
+      console.log(this.departments);
     });
   },
   computed: {},
@@ -3317,7 +5306,7 @@ const ListDepartment = {
     <div class="card-body">
       <hr style="height:1px;color:lightgray;background-color:lightgray">
       <div class="table-responsive" style="margin-top:-8px">
-        <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+        <table id="dataTable" class="table table-bordered" style="width:100%">
           <thead>
             <tr>
               <th scope="col">ID</th>
@@ -3519,12 +5508,12 @@ const EditDepartment = {
     });
     axios
       .get(
-        "http://localhost:3000/api/departments/getDepartment?id=" +
+        "http://localhost:3000/api/departments?filter[where][id]=" +
           this.$route.params.id
       )
       .then((response) => {
-        this.name = response.data.department.name;
-        this.positionType = response.data.department.positionType;
+        this.name = response.data[0].name;
+        this.positionType = response.data[0].positionType;
       });
   },
   computed: {
@@ -3550,10 +5539,11 @@ const EditDepartment = {
         const department = {
           name: this.name,
           positionType: this.positionType,
-          id: this.$route.params.id,
         };
         const url =
-          "http://localhost:3000/api/departments/" + department.id + "/replace";
+          "http://localhost:3000/api/departments/" +
+          this.$route.params.id +
+          "/replace";
         axios.post(url, department);
         this.$router.push("/departments");
         location.reload();
@@ -3800,7 +5790,7 @@ const ListCandidate = {
                     </button>
                   </div>
                   <div class="col-lg-4">
-                    <button :title="titleButtonEdit" @click="getDataCandidateUpdate(candidate)"
+                    <button v-show="candidate.status == 1" :title="titleButtonEdit" @click="getDataCandidateUpdate(candidate)"
                       class="btn btn-warning btn-sm h-28px w-28px rounded" type="submit"
                       style="margin-left: -15px;">
                       <i class="fas fa-edit fa-md ml--2px"></i>
@@ -4161,13 +6151,32 @@ const AddCandidate = {
                               status: resp.data.status,
                               idTable: resp.data.id,
                             };
-                            const rateCandidate = {
-                              candidate: resp.data.id,
-                              month: 0,
-                              year: 0,
-                              score: 0,
-                              idSchedule: 0,
-                            };
+                            var current = new Date();
+                            var year = current.getFullYear();
+                            for (i = 1; i < 7; i++) {
+                              const rateCandidate = {
+                                candidate: resp.data.id,
+                                month: i,
+                                year: year,
+                                score: 0,
+                                idSchedule: 0,
+                              };
+                              const url_3 =
+                                "http://localhost:3000/api/rateCandidates";
+                              axios.post(url_3, rateCandidate);
+                            }
+                            for (i = 7; i < 13; i++) {
+                              const rateCandidate = {
+                                candidate: resp.data.id,
+                                month: i,
+                                year: year,
+                                score: 0,
+                                idSchedule: 0,
+                              };
+                              const url_3 =
+                                "http://localhost:3000/api/rateCandidates";
+                              axios.post(url_3, rateCandidate);
+                            }
                             const url_2 =
                               "http://localhost:3000/api/communities/" +
                               community.id +
@@ -4175,9 +6184,6 @@ const AddCandidate = {
                             axios.post(url_2, community);
                             const url = "http://localhost:3000/api/accounts";
                             axios.post(url, account);
-                            const url_3 =
-                              "http://localhost:3000/api/rateCandidates";
-                            axios.post(url_3, rateCandidate);
                             if (this.selectedFile != null) {
                               axios
                                 .post(
@@ -4190,13 +6196,13 @@ const AddCandidate = {
                                 })
                                 .catch((err) => console.log(err));
                             }
+                            setTimeout(() => {
+                              this.$router.push("/candidates");
+                              location.reload();
+                            }, 100);
+                            return 0;
                           });
                       });
-                    setTimeout(() => {
-                      this.$router.push("/candidates");
-                      location.reload();
-                    }, 100);
-                    return 0;
                   }
                 });
             }
@@ -4570,7 +6576,6 @@ const EditCandidate = {
                   community: this.community,
                   homeland: this.homeland,
                   status: this.status,
-                  id: this.$route.params.id,
                 };
                 if (candidate.status == 2) {
                   axios
@@ -4589,37 +6594,245 @@ const EditCandidate = {
                         idTable: resp.data[0].idTable,
                         id: resp.data[0].id,
                       };
-                      const url_5 =
-                        "http://localhost:3000/api/accounts/" +
-                        account.id +
-                        "/replace";
-                      axios.post(url_5, account);
+                      if (this.community != this.communityEdit) {
+                        axios
+                          .get(
+                            "http://localhost:3000/api/communities/getCommunity?id=" +
+                              this.communityEdit
+                          )
+                          .then((response) => {
+                            this.communityName =
+                              response.data.community.communityName;
+                            this.patron = response.data.community.patron;
+                            this.address = response.data.community.address;
+                            this.amount = response.data.community.amount;
+                            let amount = 0;
+                            amount = Number(this.amount) - 1;
+                            const communityEdit = {
+                              communityName: this.communityName,
+                              patron: this.patron,
+                              address: this.address,
+                              amount: amount,
+                              id: this.communityEdit,
+                            };
+                            const url_2 =
+                              "http://localhost:3000/api/communities/" +
+                              communityEdit.id +
+                              "/replace";
+                            axios.post(url_2, communityEdit);
+                            axios
+                              .get(
+                                "http://localhost:3000/api/communities/getCommunity?id=" +
+                                  this.community
+                              )
+                              .then((response) => {
+                                this.communityName =
+                                  response.data.community.communityName;
+                                this.patron = response.data.community.patron;
+                                this.address = response.data.community.address;
+                                this.amount = response.data.community.amount;
+                                let amount = 0;
+                                amount = Number(this.amount) + 1;
+                                const community = {
+                                  communityName: this.communityName,
+                                  patron: this.patron,
+                                  address: this.address,
+                                  amount: amount,
+                                  id: this.community,
+                                };
+                                axios
+                                  .delete(
+                                    "http://localhost:3000/api/Photos/candidate/files/" +
+                                      this.imageEdit
+                                  )
+                                  .then((resp) => {
+                                    console.log(resp);
+                                  })
+                                  .catch((err) => console.log(err));
+                                axios
+                                  .post(
+                                    "http://localhost:3000/api/Photos/candidate/upload?filename=" +
+                                      fileName,
+                                    fd
+                                  )
+                                  .then((res) => {
+                                    console.log(res);
+                                  })
+                                  .catch((err) => console.log(err));
+                                const url_5 =
+                                  "http://localhost:3000/api/accounts/" +
+                                  account.id +
+                                  "/replace";
+                                axios.post(url_5, account);
+                                const url =
+                                  "http://localhost:3000/api/candidates/" +
+                                  this.$route.params.id +
+                                  "/replace";
+                                axios.post(url, candidate);
+                                const url_1 =
+                                  "http://localhost:3000/api/communities/" +
+                                  community.id +
+                                  "/replace";
+                                axios.post(url_1, community);
+                                setTimeout(() => {
+                                  this.$router.push("/candidates");
+                                  location.reload();
+                                }, 500);
+                                return 0;
+                              });
+                          });
+                      } else {
+                        axios
+                          .delete(
+                            "http://localhost:3000/api/Photos/candidate/files/" +
+                              this.imageEdit
+                          )
+                          .then((resp) => {
+                            console.log(resp);
+                          })
+                          .catch((err) => console.log(err));
+                        axios
+                          .post(
+                            "http://localhost:3000/api/Photos/candidate/upload?filename=" +
+                              fileName,
+                            fd
+                          )
+                          .then((res) => {
+                            console.log(res);
+                          })
+                          .catch((err) => console.log(err));
+                        const url_5 =
+                          "http://localhost:3000/api/accounts/" +
+                          account.id +
+                          "/replace";
+                        axios.post(url_5, account);
+                        const url =
+                          "http://localhost:3000/api/candidates/" +
+                          this.$route.params.id +
+                          "/replace";
+                        axios.post(url, candidate);
+                        setTimeout(() => {
+                          this.$router.push("/candidates");
+                          location.reload();
+                        }, 500);
+                        return 0;
+                      }
                     });
+                } else {
+                  if (this.community != this.communityEdit) {
+                    axios
+                      .get(
+                        "http://localhost:3000/api/communities/getCommunity?id=" +
+                          this.communityEdit
+                      )
+                      .then((response) => {
+                        this.communityName =
+                          response.data.community.communityName;
+                        this.patron = response.data.community.patron;
+                        this.address = response.data.community.address;
+                        this.amount = response.data.community.amount;
+                        let amount = 0;
+                        amount = Number(this.amount) - 1;
+                        const communityEdit = {
+                          communityName: this.communityName,
+                          patron: this.patron,
+                          address: this.address,
+                          amount: amount,
+                          id: this.communityEdit,
+                        };
+                        const url_2 =
+                          "http://localhost:3000/api/communities/" +
+                          communityEdit.id +
+                          "/replace";
+                        axios.post(url_2, communityEdit);
+                        axios
+                          .get(
+                            "http://localhost:3000/api/communities/getCommunity?id=" +
+                              this.community
+                          )
+                          .then((response) => {
+                            this.communityName =
+                              response.data.community.communityName;
+                            this.patron = response.data.community.patron;
+                            this.address = response.data.community.address;
+                            this.amount = response.data.community.amount;
+                            let amount = 0;
+                            amount = Number(this.amount) + 1;
+                            const community = {
+                              communityName: this.communityName,
+                              patron: this.patron,
+                              address: this.address,
+                              amount: amount,
+                              id: this.community,
+                            };
+                            axios
+                              .delete(
+                                "http://localhost:3000/api/Photos/candidate/files/" +
+                                  this.imageEdit
+                              )
+                              .then((resp) => {
+                                console.log(resp);
+                              })
+                              .catch((err) => console.log(err));
+                            axios
+                              .post(
+                                "http://localhost:3000/api/Photos/candidate/upload?filename=" +
+                                  fileName,
+                                fd
+                              )
+                              .then((res) => {
+                                console.log(res);
+                              })
+                              .catch((err) => console.log(err));
+                            const url =
+                              "http://localhost:3000/api/candidates/" +
+                              this.$route.params.id +
+                              "/replace";
+                            axios.post(url, candidate);
+                            const url_1 =
+                              "http://localhost:3000/api/communities/" +
+                              community.id +
+                              "/replace";
+                            axios.post(url_1, community);
+                            setTimeout(() => {
+                              this.$router.push("/candidates");
+                              location.reload();
+                            }, 500);
+                            return 0;
+                          });
+                      });
+                  } else {
+                    axios
+                      .delete(
+                        "http://localhost:3000/api/Photos/candidate/files/" +
+                          this.imageEdit
+                      )
+                      .then((resp) => {
+                        console.log(resp);
+                      })
+                      .catch((err) => console.log(err));
+                    axios
+                      .post(
+                        "http://localhost:3000/api/Photos/candidate/upload?filename=" +
+                          fileName,
+                        fd
+                      )
+                      .then((res) => {
+                        console.log(res);
+                      })
+                      .catch((err) => console.log(err));
+                    const url =
+                      "http://localhost:3000/api/candidates/" +
+                      this.$route.params.id +
+                      "/replace";
+                    axios.post(url, candidate);
+                    setTimeout(() => {
+                      this.$router.push("/candidates");
+                      location.reload();
+                    }, 500);
+                    return 0;
+                  }
                 }
-                const url =
-                  "http://localhost:3000/api/candidates/" +
-                  candidate.id +
-                  "/replace";
-                axios.post(url, candidate);
-                axios
-                  .delete(
-                    "http://localhost:3000/api/Photos/candidate/files/" +
-                      this.imageEdit
-                  )
-                  .then((resp) => {
-                    console.log(resp);
-                  })
-                  .catch((err) => console.log(err));
-                axios
-                  .post(
-                    "http://localhost:3000/api/Photos/candidate/upload?filename=" +
-                      fileName,
-                    fd
-                  )
-                  .then((res) => {
-                    console.log(res);
-                  })
-                  .catch((err) => console.log(err));
               } else {
                 const candidate = {
                   candidateId: this.candidateId,
@@ -4643,37 +6856,227 @@ const EditCandidate = {
                         "&filter[where][and][1][role]=5"
                     )
                     .then((resp) => {
-                      const account = {
-                        userId: resp.data[0].userId,
-                        username: resp.data[0].username,
-                        password: resp.data[0].password,
-                        role: resp.data[0].role,
-                        status: 2,
-                        idTable: resp.data[0].idTable,
-                        id: resp.data[0].id,
-                      };
-                      const url_5 =
-                        "http://localhost:3000/api/accounts/" +
-                        account.id +
-                        "/replace";
-                      axios.post(url_5, account);
+                      if (this.community != this.communityEdit) {
+                        axios
+                          .get(
+                            "http://localhost:3000/api/communities/getCommunity?id=" +
+                              this.communityEdit
+                          )
+                          .then((response) => {
+                            this.communityName =
+                              response.data.community.communityName;
+                            this.patron = response.data.community.patron;
+                            this.address = response.data.community.address;
+                            this.amount = response.data.community.amount;
+                            let amount = 0;
+                            amount = Number(this.amount) - 1;
+                            const communityEdit = {
+                              communityName: this.communityName,
+                              patron: this.patron,
+                              address: this.address,
+                              amount: amount,
+                              id: this.communityEdit,
+                            };
+                            const url_2 =
+                              "http://localhost:3000/api/communities/" +
+                              communityEdit.id +
+                              "/replace";
+                            axios.post(url_2, communityEdit);
+                            axios
+                              .get(
+                                "http://localhost:3000/api/communities/getCommunity?id=" +
+                                  this.community
+                              )
+                              .then((response) => {
+                                this.communityName =
+                                  response.data.community.communityName;
+                                this.patron = response.data.community.patron;
+                                this.address = response.data.community.address;
+                                this.amount = response.data.community.amount;
+                                let amount = 0;
+                                amount = Number(this.amount) + 1;
+                                const community = {
+                                  communityName: this.communityName,
+                                  patron: this.patron,
+                                  address: this.address,
+                                  amount: amount,
+                                  id: this.community,
+                                };
+                                const account = {
+                                  userId: resp.data[0].userId,
+                                  username: resp.data[0].username,
+                                  password: resp.data[0].password,
+                                  role: resp.data[0].role,
+                                  status: 2,
+                                  idTable: resp.data[0].idTable,
+                                  id: resp.data[0].id,
+                                };
+                                axios
+                                  .post(
+                                    "http://localhost:3000/api/Photos/candidate/upload?filename=" +
+                                      fileName,
+                                    fd
+                                  )
+                                  .then((res) => {
+                                    console.log(res);
+                                  })
+                                  .catch((err) => console.log(err));
+                                const url_1 =
+                                  "http://localhost:3000/api/communities/" +
+                                  community.id +
+                                  "/replace";
+                                axios.post(url_1, community);
+                                const url_5 =
+                                  "http://localhost:3000/api/accounts/" +
+                                  account.id +
+                                  "/replace";
+                                axios.post(url_5, account);
+                                const url =
+                                  "http://localhost:3000/api/candidates/" +
+                                  candidate.id +
+                                  "/replace";
+                                axios.post(url, candidate);
+                                setTimeout(() => {
+                                  this.$router.push("/candidates");
+                                  location.reload();
+                                }, 500);
+                                return 0;
+                              });
+                          });
+                      } else {
+                        const account = {
+                          userId: resp.data[0].userId,
+                          username: resp.data[0].username,
+                          password: resp.data[0].password,
+                          role: resp.data[0].role,
+                          status: 2,
+                          idTable: resp.data[0].idTable,
+                          id: resp.data[0].id,
+                        };
+                        axios
+                          .post(
+                            "http://localhost:3000/api/Photos/candidate/upload?filename=" +
+                              fileName,
+                            fd
+                          )
+                          .then((res) => {
+                            console.log(res);
+                          })
+                          .catch((err) => console.log(err));
+                        const url_5 =
+                          "http://localhost:3000/api/accounts/" +
+                          account.id +
+                          "/replace";
+                        axios.post(url_5, account);
+                        const url =
+                          "http://localhost:3000/api/candidates/" +
+                          candidate.id +
+                          "/replace";
+                        axios.post(url, candidate);
+                        setTimeout(() => {
+                          this.$router.push("/candidates");
+                          location.reload();
+                        }, 500);
+                        return 0;
+                      }
                     });
+                } else {
+                  if (this.community != this.communityEdit) {
+                    axios
+                      .get(
+                        "http://localhost:3000/api/communities/getCommunity?id=" +
+                          this.communityEdit
+                      )
+                      .then((response) => {
+                        this.communityName =
+                          response.data.community.communityName;
+                        this.patron = response.data.community.patron;
+                        this.address = response.data.community.address;
+                        this.amount = response.data.community.amount;
+                        let amount = 0;
+                        amount = Number(this.amount) - 1;
+                        const communityEdit = {
+                          communityName: this.communityName,
+                          patron: this.patron,
+                          address: this.address,
+                          amount: amount,
+                          id: this.communityEdit,
+                        };
+                        const url_2 =
+                          "http://localhost:3000/api/communities/" +
+                          communityEdit.id +
+                          "/replace";
+                        axios.post(url_2, communityEdit);
+                        axios
+                          .get(
+                            "http://localhost:3000/api/communities/getCommunity?id=" +
+                              this.community
+                          )
+                          .then((response) => {
+                            this.communityName =
+                              response.data.community.communityName;
+                            this.patron = response.data.community.patron;
+                            this.address = response.data.community.address;
+                            this.amount = response.data.community.amount;
+                            let amount = 0;
+                            amount = Number(this.amount) + 1;
+                            const community = {
+                              communityName: this.communityName,
+                              patron: this.patron,
+                              address: this.address,
+                              amount: amount,
+                              id: this.community,
+                            };
+                            axios
+                              .post(
+                                "http://localhost:3000/api/Photos/candidate/upload?filename=" +
+                                  fileName,
+                                fd
+                              )
+                              .then((res) => {
+                                console.log(res);
+                              })
+                              .catch((err) => console.log(err));
+                            const url_1 =
+                              "http://localhost:3000/api/communities/" +
+                              community.id +
+                              "/replace";
+                            axios.post(url_1, community);
+                            const url =
+                              "http://localhost:3000/api/candidates/" +
+                              candidate.id +
+                              "/replace";
+                            axios.post(url, candidate);
+                            setTimeout(() => {
+                              this.$router.push("/candidates");
+                              location.reload();
+                            }, 500);
+                            return 0;
+                          });
+                      });
+                  } else {
+                    axios
+                      .post(
+                        "http://localhost:3000/api/Photos/candidate/upload?filename=" +
+                          fileName,
+                        fd
+                      )
+                      .then((res) => {
+                        console.log(res);
+                      })
+                      .catch((err) => console.log(err));
+                    const url =
+                      "http://localhost:3000/api/candidates/" +
+                      candidate.id +
+                      "/replace";
+                    axios.post(url, candidate);
+                    setTimeout(() => {
+                      this.$router.push("/candidates");
+                      location.reload();
+                    }, 500);
+                    return 0;
+                  }
                 }
-                const url =
-                  "http://localhost:3000/api/candidates/" +
-                  candidate.id +
-                  "/replace";
-                axios.post(url, candidate);
-                axios
-                  .post(
-                    "http://localhost:3000/api/Photos/candidate/upload?filename=" +
-                      fileName,
-                    fd
-                  )
-                  .then((res) => {
-                    console.log(res);
-                  })
-                  .catch((err) => console.log(err));
               }
             } else {
               const candidate = {
@@ -4707,50 +7110,98 @@ const EditCandidate = {
                       idTable: resp.data[0].idTable,
                       id: resp.data[0].id,
                     };
-                    const url_5 =
-                      "http://localhost:3000/api/accounts/" +
-                      account.id +
-                      "/replace";
-                    axios.post(url_5, account);
+                    if (this.community != this.communityEdit) {
+                      axios
+                        .get(
+                          "http://localhost:3000/api/communities/getCommunity?id=" +
+                            this.communityEdit
+                        )
+                        .then((response) => {
+                          this.communityName =
+                            response.data.community.communityName;
+                          this.patron = response.data.community.patron;
+                          this.address = response.data.community.address;
+                          this.amount = response.data.community.amount;
+                          let amount = 0;
+                          amount = Number(this.amount) - 1;
+                          const communityEdit = {
+                            communityName: this.communityName,
+                            patron: this.patron,
+                            address: this.address,
+                            amount: amount,
+                            id: this.communityEdit,
+                          };
+                          const url_2 =
+                            "http://localhost:3000/api/communities/" +
+                            communityEdit.id +
+                            "/replace";
+                          axios.post(url_2, communityEdit);
+                          axios
+                            .get(
+                              "http://localhost:3000/api/communities/getCommunity?id=" +
+                                this.community
+                            )
+                            .then((response) => {
+                              this.communityName =
+                                response.data.community.communityName;
+                              this.patron = response.data.community.patron;
+                              this.address = response.data.community.address;
+                              this.amount = response.data.community.amount;
+                              let amount = 0;
+                              amount = Number(this.amount) + 1;
+                              const community = {
+                                communityName: this.communityName,
+                                patron: this.patron,
+                                address: this.address,
+                                amount: amount,
+                                id: this.community,
+                              };
+                              const url_5 =
+                                "http://localhost:3000/api/accounts/" +
+                                account.id +
+                                "/replace";
+                              axios.post(url_5, account);
+                              const url =
+                                "http://localhost:3000/api/candidates/" +
+                                candidate.id +
+                                "/replace";
+                              axios.post(url, candidate);
+                              const url_1 =
+                                "http://localhost:3000/api/communities/" +
+                                community.id +
+                                "/replace";
+                              axios.post(url_1, community);
+                              setTimeout(() => {
+                                this.$router.push("/candidates");
+                                location.reload();
+                              }, 500);
+                              return 0;
+                            });
+                        });
+                    } else {
+                      const url_5 =
+                        "http://localhost:3000/api/accounts/" +
+                        account.id +
+                        "/replace";
+                      axios.post(url_5, account);
+                      const url =
+                        "http://localhost:3000/api/candidates/" +
+                        candidate.id +
+                        "/replace";
+                      axios.post(url, candidate);
+                      setTimeout(() => {
+                        this.$router.push("/candidates");
+                        location.reload();
+                      }, 500);
+                      return 0;
+                    }
                   });
-              }
-              const url =
-                "http://localhost:3000/api/candidates/" +
-                candidate.id +
-                "/replace";
-              axios.post(url, candidate);
-            }
-            if (this.community != this.communityEdit) {
-              axios
-                .get(
-                  "http://localhost:3000/api/communities/getCommunity?id=" +
-                    this.communityEdit
-                )
-                .then((response) => {
-                  this.communityName = response.data.community.communityName;
-                  this.patron = response.data.community.patron;
-                  this.address = response.data.community.address;
-                  this.amount = response.data.community.amount;
-                  let amount = 0;
-                  amount = Number(this.amount) - 1;
-                  const communityEdit = {
-                    communityName: this.communityName,
-                    patron: this.patron,
-                    address: this.address,
-                    amount: amount,
-                    id: this.communityEdit,
-                  };
-                  console.log(communityEdit.amount);
-                  console.log(communityEdit.id);
-                  const url_2 =
-                    "http://localhost:3000/api/communities/" +
-                    communityEdit.id +
-                    "/replace";
-                  axios.post(url_2, communityEdit);
+              } else {
+                if (this.community != this.communityEdit) {
                   axios
                     .get(
                       "http://localhost:3000/api/communities/getCommunity?id=" +
-                        this.community
+                        this.communityEdit
                     )
                     .then((response) => {
                       this.communityName =
@@ -4759,29 +7210,70 @@ const EditCandidate = {
                       this.address = response.data.community.address;
                       this.amount = response.data.community.amount;
                       let amount = 0;
-                      amount = Number(this.amount) + 1;
-                      const community = {
+                      amount = Number(this.amount) - 1;
+                      const communityEdit = {
                         communityName: this.communityName,
                         patron: this.patron,
                         address: this.address,
                         amount: amount,
-                        id: this.community,
+                        id: this.communityEdit,
                       };
-                      console.log(community.amount);
-                      console.log(community.id);
-                      const url_1 =
+                      const url_2 =
                         "http://localhost:3000/api/communities/" +
-                        community.id +
+                        communityEdit.id +
                         "/replace";
-                      axios.post(url_1, community);
+                      axios.post(url_2, communityEdit);
+                      axios
+                        .get(
+                          "http://localhost:3000/api/communities/getCommunity?id=" +
+                            this.community
+                        )
+                        .then((response) => {
+                          this.communityName =
+                            response.data.community.communityName;
+                          this.patron = response.data.community.patron;
+                          this.address = response.data.community.address;
+                          this.amount = response.data.community.amount;
+                          let amount = 0;
+                          amount = Number(this.amount) + 1;
+                          const community = {
+                            communityName: this.communityName,
+                            patron: this.patron,
+                            address: this.address,
+                            amount: amount,
+                            id: this.community,
+                          };
+                          const url =
+                            "http://localhost:3000/api/candidates/" +
+                            candidate.id +
+                            "/replace";
+                          axios.post(url, candidate);
+                          const url_1 =
+                            "http://localhost:3000/api/communities/" +
+                            community.id +
+                            "/replace";
+                          axios.post(url_1, community);
+                          setTimeout(() => {
+                            this.$router.push("/candidates");
+                            location.reload();
+                          }, 500);
+                          return 0;
+                        });
                     });
-                });
+                } else {
+                  const url =
+                    "http://localhost:3000/api/candidates/" +
+                    candidate.id +
+                    "/replace";
+                  axios.post(url, candidate);
+                  setTimeout(() => {
+                    this.$router.push("/candidates");
+                    location.reload();
+                  }, 500);
+                  return 0;
+                }
+              }
             }
-            setTimeout(() => {
-              this.$router.push("/candidates");
-              location.reload();
-            }, 500);
-            return 0;
           }
         } else if (
           this.emailEdit != this.email &&
@@ -4814,20 +7306,6 @@ const EditCandidate = {
                   }
                 );
               } else {
-                const candidate = {
-                  candidateId: null,
-                  christianName: null,
-                  fullName: null,
-                  birthday: null,
-                  phone: null,
-                  email: null,
-                  image: null,
-                  position: null,
-                  community: null,
-                  homeland: null,
-                  status: null,
-                  id: null,
-                };
                 if (this.selectedFile != null) {
                   const fd = new FormData();
                   fd.append("image", this.selectedFile, this.selectedFile.name);
@@ -4836,7 +7314,7 @@ const EditCandidate = {
                   var fileName =
                     this.candidateId + this.selectedFile.name.slice(start, end);
                   if (this.imageEdit != null) {
-                    candidate = {
+                    const candidate = {
                       candidateId: this.candidateId,
                       christianName: this.christianName,
                       fullName: this.fullName,
@@ -4850,27 +7328,241 @@ const EditCandidate = {
                       status: this.status,
                       id: this.$route.params.id,
                     };
-                    axios
-                      .delete(
-                        "http://localhost:3000/api/Photos/candidate/files/" +
-                          this.imageEdit
-                      )
-                      .then((resp) => {
-                        console.log(resp);
-                      })
-                      .catch((err) => console.log(err));
-                    axios
-                      .post(
-                        "http://localhost:3000/api/Photos/candidate/upload?filename=" +
-                          fileName,
-                        fd
-                      )
-                      .then((res) => {
-                        console.log(res);
-                      })
-                      .catch((err) => console.log(err));
+                    if (this.community != this.communityEdit) {
+                      axios
+                        .get(
+                          "http://localhost:3000/api/communities/getCommunity?id=" +
+                            this.communityEdit
+                        )
+                        .then((response) => {
+                          this.communityName =
+                            response.data.community.communityName;
+                          this.patron = response.data.community.patron;
+                          this.address = response.data.community.address;
+                          this.amount = response.data.community.amount;
+                          console.log(this.address);
+                          let amount = 0;
+                          amount = Number(this.amount) - 1;
+                          console.log(this.amount);
+                          const communityEdit = {
+                            communityName: this.communityName,
+                            patron: this.patron,
+                            address: this.address,
+                            amount: amount,
+                            id: this.communityEdit,
+                          };
+                          axios
+                            .get(
+                              "http://localhost:3000/api/communities/getCommunity?id=" +
+                                this.community
+                            )
+                            .then((response) => {
+                              this.communityName =
+                                response.data.community.communityName;
+                              this.patron = response.data.community.patron;
+                              this.address = response.data.community.address;
+                              this.amount = response.data.community.amount;
+                              let amount = 0;
+                              amount = Number(this.amount) + 1;
+                              const community = {
+                                communityName: this.communityName,
+                                patron: this.patron,
+                                address: this.address,
+                                amount: amount,
+                                id: this.community,
+                              };
+                              if (this.candidate.status == 2) {
+                                axios
+                                  .get(
+                                    "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                                      candidate.id +
+                                      "&filter[where][and][1][role]=5"
+                                  )
+                                  .then((resp) => {
+                                    const account = {
+                                      userId: resp.data[0].userId,
+                                      username: resp.data[0].username,
+                                      password: resp.data[0].password,
+                                      role: resp.data[0].role,
+                                      status: 2,
+                                      idTable: resp.data[0].idTable,
+                                      id: resp.data[0].id,
+                                    };
+                                    const url_5 =
+                                      "http://localhost:3000/api/accounts/" +
+                                      account.id +
+                                      "/replace";
+                                    axios.post(url_5, account);
+                                    const url_1 =
+                                      "http://localhost:3000/api/communities/" +
+                                      community.id +
+                                      "/replace";
+                                    axios.post(url_1, community);
+                                    const url_2 =
+                                      "http://localhost:3000/api/communities/" +
+                                      communityEdit.id +
+                                      "/replace";
+                                    axios.post(url_2, communityEdit);
+                                    const url =
+                                      "http://localhost:3000/api/candidates/" +
+                                      candidate.id +
+                                      "/replace";
+                                    axios.post(url, candidate);
+                                    axios
+                                      .delete(
+                                        "http://localhost:3000/api/Photos/candidate/files/" +
+                                          this.imageEdit
+                                      )
+                                      .then((resp) => {
+                                        console.log(resp);
+                                      })
+                                      .catch((err) => console.log(err));
+                                    axios
+                                      .post(
+                                        "http://localhost:3000/api/Photos/candidate/upload?filename=" +
+                                          fileName,
+                                        fd
+                                      )
+                                      .then((res) => {
+                                        console.log(res);
+                                      })
+                                      .catch((err) => console.log(err));
+                                    setTimeout(() => {
+                                      this.$router.push("/candidates");
+                                      location.reload();
+                                    }, 100);
+                                    return 0;
+                                  });
+                              } else {
+                                const url_1 =
+                                  "http://localhost:3000/api/communities/" +
+                                  community.id +
+                                  "/replace";
+                                axios.post(url_1, community);
+                                const url_2 =
+                                  "http://localhost:3000/api/communities/" +
+                                  communityEdit.id +
+                                  "/replace";
+                                axios.post(url_2, communityEdit);
+                                const url =
+                                  "http://localhost:3000/api/candidates/" +
+                                  candidate.id +
+                                  "/replace";
+                                axios.post(url, candidate);
+                                axios
+                                  .delete(
+                                    "http://localhost:3000/api/Photos/candidate/files/" +
+                                      this.imageEdit
+                                  )
+                                  .then((resp) => {
+                                    console.log(resp);
+                                  })
+                                  .catch((err) => console.log(err));
+                                axios
+                                  .post(
+                                    "http://localhost:3000/api/Photos/candidate/upload?filename=" +
+                                      fileName,
+                                    fd
+                                  )
+                                  .then((res) => {
+                                    console.log(res);
+                                  })
+                                  .catch((err) => console.log(err));
+                                setTimeout(() => {
+                                  this.$router.push("/candidates");
+                                  location.reload();
+                                }, 100);
+                                return 0;
+                              }
+                            });
+                        });
+                    } else {
+                      if (this.candidate.status == 2) {
+                        axios
+                          .get(
+                            "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                              candidate.id +
+                              "&filter[where][and][1][role]=5"
+                          )
+                          .then((resp) => {
+                            const account = {
+                              userId: resp.data[0].userId,
+                              username: resp.data[0].username,
+                              password: resp.data[0].password,
+                              role: resp.data[0].role,
+                              status: 2,
+                              idTable: resp.data[0].idTable,
+                              id: resp.data[0].id,
+                            };
+                            const url_5 =
+                              "http://localhost:3000/api/accounts/" +
+                              account.id +
+                              "/replace";
+                            axios.post(url_5, account);
+                            const url =
+                              "http://localhost:3000/api/candidates/" +
+                              candidate.id +
+                              "/replace";
+                            axios.post(url, this.candidate);
+                            axios
+                              .delete(
+                                "http://localhost:3000/api/Photos/candidate/files/" +
+                                  this.imageEdit
+                              )
+                              .then((resp) => {
+                                console.log(resp);
+                              })
+                              .catch((err) => console.log(err));
+                            axios
+                              .post(
+                                "http://localhost:3000/api/Photos/candidate/upload?filename=" +
+                                  fileName,
+                                fd
+                              )
+                              .then((res) => {
+                                console.log(res);
+                              })
+                              .catch((err) => console.log(err));
+                            setTimeout(() => {
+                              this.$router.push("/candidates");
+                              location.reload();
+                            }, 100);
+                            return 0;
+                          });
+                      } else {
+                        const url =
+                          "http://localhost:3000/api/candidates/" +
+                          candidate.id +
+                          "/replace";
+                        axios.post(url, this.candidate);
+                        axios
+                          .delete(
+                            "http://localhost:3000/api/Photos/candidate/files/" +
+                              this.imageEdit
+                          )
+                          .then((resp) => {
+                            console.log(resp);
+                          })
+                          .catch((err) => console.log(err));
+                        axios
+                          .post(
+                            "http://localhost:3000/api/Photos/candidate/upload?filename=" +
+                              fileName,
+                            fd
+                          )
+                          .then((res) => {
+                            console.log(res);
+                          })
+                          .catch((err) => console.log(err));
+                        setTimeout(() => {
+                          this.$router.push("/candidates");
+                          location.reload();
+                        }, 100);
+                        return 0;
+                      }
+                    }
                   } else {
-                    candidate = {
+                    const candidate = {
                       candidateId: this.candidateId,
                       christianName: this.christianName,
                       fullName: this.fullName,
@@ -4884,19 +7576,206 @@ const EditCandidate = {
                       status: this.status,
                       id: this.$route.params.id,
                     };
-                    axios
-                      .post(
-                        "http://localhost:3000/api/Photos/candidate/upload?filename=" +
-                          fileName,
-                        fd
-                      )
-                      .then((res) => {
-                        console.log(res);
-                      })
-                      .catch((err) => console.log(err));
+                    if (this.community != this.communityEdit) {
+                      axios
+                        .get(
+                          "http://localhost:3000/api/communities/getCommunity?id=" +
+                            this.communityEdit
+                        )
+                        .then((response) => {
+                          this.communityName =
+                            response.data.community.communityName;
+                          this.patron = response.data.community.patron;
+                          this.address = response.data.community.address;
+                          this.amount = response.data.community.amount;
+                          console.log(this.address);
+                          let amount = 0;
+                          amount = Number(this.amount) - 1;
+                          console.log(this.amount);
+                          const communityEdit = {
+                            communityName: this.communityName,
+                            patron: this.patron,
+                            address: this.address,
+                            amount: amount,
+                            id: this.communityEdit,
+                          };
+                          axios
+                            .get(
+                              "http://localhost:3000/api/communities/getCommunity?id=" +
+                                this.community
+                            )
+                            .then((response) => {
+                              this.communityName =
+                                response.data.community.communityName;
+                              this.patron = response.data.community.patron;
+                              this.address = response.data.community.address;
+                              this.amount = response.data.community.amount;
+                              let amount = 0;
+                              amount = Number(this.amount) + 1;
+                              const community = {
+                                communityName: this.communityName,
+                                patron: this.patron,
+                                address: this.address,
+                                amount: amount,
+                                id: this.community,
+                              };
+                              if (this.candidate.status == 2) {
+                                axios
+                                  .get(
+                                    "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                                      candidate.id +
+                                      "&filter[where][and][1][role]=5"
+                                  )
+                                  .then((resp) => {
+                                    const account = {
+                                      userId: resp.data[0].userId,
+                                      username: resp.data[0].username,
+                                      password: resp.data[0].password,
+                                      role: resp.data[0].role,
+                                      status: 2,
+                                      idTable: resp.data[0].idTable,
+                                      id: resp.data[0].id,
+                                    };
+                                    const url_5 =
+                                      "http://localhost:3000/api/accounts/" +
+                                      account.id +
+                                      "/replace";
+                                    axios.post(url_5, account);
+                                    const url_1 =
+                                      "http://localhost:3000/api/communities/" +
+                                      community.id +
+                                      "/replace";
+                                    axios.post(url_1, community);
+                                    const url_2 =
+                                      "http://localhost:3000/api/communities/" +
+                                      communityEdit.id +
+                                      "/replace";
+                                    axios.post(url_2, communityEdit);
+                                    const url =
+                                      "http://localhost:3000/api/candidates/" +
+                                      candidate.id +
+                                      "/replace";
+                                    axios.post(url, candidate);
+                                    axios
+                                      .post(
+                                        "http://localhost:3000/api/Photos/candidate/upload?filename=" +
+                                          fileName,
+                                        fd
+                                      )
+                                      .then((res) => {
+                                        console.log(res);
+                                      })
+                                      .catch((err) => console.log(err));
+                                    setTimeout(() => {
+                                      this.$router.push("/candidates");
+                                      location.reload();
+                                    }, 100);
+                                    return 0;
+                                  });
+                              } else {
+                                const url_1 =
+                                  "http://localhost:3000/api/communities/" +
+                                  community.id +
+                                  "/replace";
+                                axios.post(url_1, community);
+                                const url_2 =
+                                  "http://localhost:3000/api/communities/" +
+                                  communityEdit.id +
+                                  "/replace";
+                                axios.post(url_2, communityEdit);
+                                const url =
+                                  "http://localhost:3000/api/candidates/" +
+                                  candidate.id +
+                                  "/replace";
+                                axios.post(url, candidate);
+                                axios
+                                  .post(
+                                    "http://localhost:3000/api/Photos/candidate/upload?filename=" +
+                                      fileName,
+                                    fd
+                                  )
+                                  .then((res) => {
+                                    console.log(res);
+                                  })
+                                  .catch((err) => console.log(err));
+                                setTimeout(() => {
+                                  this.$router.push("/candidates");
+                                  location.reload();
+                                }, 100);
+                                return 0;
+                              }
+                            });
+                        });
+                    } else {
+                      if (this.candidate.status == 2) {
+                        axios
+                          .get(
+                            "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                              candidate.id +
+                              "&filter[where][and][1][role]=5"
+                          )
+                          .then((resp) => {
+                            const account = {
+                              userId: resp.data[0].userId,
+                              username: resp.data[0].username,
+                              password: resp.data[0].password,
+                              role: resp.data[0].role,
+                              status: 2,
+                              idTable: resp.data[0].idTable,
+                              id: resp.data[0].id,
+                            };
+                            const url_5 =
+                              "http://localhost:3000/api/accounts/" +
+                              account.id +
+                              "/replace";
+                            axios.post(url_5, account);
+                            const url =
+                              "http://localhost:3000/api/candidates/" +
+                              candidate.id +
+                              "/replace";
+                            axios.post(url, candidate);
+                            axios
+                              .post(
+                                "http://localhost:3000/api/Photos/candidate/upload?filename=" +
+                                  fileName,
+                                fd
+                              )
+                              .then((res) => {
+                                console.log(res);
+                              })
+                              .catch((err) => console.log(err));
+                            setTimeout(() => {
+                              this.$router.push("/candidates");
+                              location.reload();
+                            }, 100);
+                            return 0;
+                          });
+                      } else {
+                        const url =
+                          "http://localhost:3000/api/candidates/" +
+                          candidate.id +
+                          "/replace";
+                        axios.post(url, candidate);
+                        axios
+                          .post(
+                            "http://localhost:3000/api/Photos/candidate/upload?filename=" +
+                              fileName,
+                            fd
+                          )
+                          .then((res) => {
+                            console.log(res);
+                          })
+                          .catch((err) => console.log(err));
+                        setTimeout(() => {
+                          this.$router.push("/candidates");
+                          location.reload();
+                        }, 100);
+                        return 0;
+                      }
+                    }
                   }
                 } else {
-                  candidate = {
+                  const candidate = {
                     candidateId: this.candidateId,
                     christianName: this.christianName,
                     fullName: this.fullName,
@@ -4910,97 +7789,164 @@ const EditCandidate = {
                     status: this.status,
                     id: this.$route.params.id,
                   };
-                }
-                if (this.community != this.communityEdit) {
-                  axios
-                    .get(
-                      "http://localhost:3000/api/communities/getCommunity?id=" +
-                        this.communityEdit
-                    )
-                    .then((response) => {
-                      this.communityName =
-                        response.data.community.communityName;
-                      this.patron = response.data.community.patron;
-                      this.address = response.data.community.address;
-                      this.amount = response.data.community.amount;
-                      console.log(this.address);
-                      let amount = 0;
-                      amount = Number(this.amount) - 1;
-                      console.log(this.amount);
-                      const communityEdit = {
-                        communityName: this.communityName,
-                        patron: this.patron,
-                        address: this.address,
-                        amount: amount,
-                        id: this.communityEdit,
-                      };
+                  if (this.community != this.communityEdit) {
+                    axios
+                      .get(
+                        "http://localhost:3000/api/communities/getCommunity?id=" +
+                          this.communityEdit
+                      )
+                      .then((response) => {
+                        this.communityName =
+                          response.data.community.communityName;
+                        this.patron = response.data.community.patron;
+                        this.address = response.data.community.address;
+                        this.amount = response.data.community.amount;
+                        console.log(this.address);
+                        let amount = 0;
+                        amount = Number(this.amount) - 1;
+                        console.log(this.amount);
+                        const communityEdit = {
+                          communityName: this.communityName,
+                          patron: this.patron,
+                          address: this.address,
+                          amount: amount,
+                          id: this.communityEdit,
+                        };
+                        axios
+                          .get(
+                            "http://localhost:3000/api/communities/getCommunity?id=" +
+                              this.community
+                          )
+                          .then((response) => {
+                            this.communityName =
+                              response.data.community.communityName;
+                            this.patron = response.data.community.patron;
+                            this.address = response.data.community.address;
+                            this.amount = response.data.community.amount;
+                            let amount = 0;
+                            amount = Number(this.amount) + 1;
+                            const community = {
+                              communityName: this.communityName,
+                              patron: this.patron,
+                              address: this.address,
+                              amount: amount,
+                              id: this.community,
+                            };
+                            if (this.candidate.status == 2) {
+                              axios
+                                .get(
+                                  "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                                    candidate.id +
+                                    "&filter[where][and][1][role]=5"
+                                )
+                                .then((resp) => {
+                                  const account = {
+                                    userId: resp.data[0].userId,
+                                    username: resp.data[0].username,
+                                    password: resp.data[0].password,
+                                    role: resp.data[0].role,
+                                    status: 2,
+                                    idTable: resp.data[0].idTable,
+                                    id: resp.data[0].id,
+                                  };
+                                  const url_5 =
+                                    "http://localhost:3000/api/accounts/" +
+                                    account.id +
+                                    "/replace";
+                                  axios.post(url_5, account);
+                                  const url_1 =
+                                    "http://localhost:3000/api/communities/" +
+                                    community.id +
+                                    "/replace";
+                                  axios.post(url_1, community);
+                                  const url_2 =
+                                    "http://localhost:3000/api/communities/" +
+                                    communityEdit.id +
+                                    "/replace";
+                                  axios.post(url_2, communityEdit);
+                                  const url =
+                                    "http://localhost:3000/api/candidates/" +
+                                    candidate.id +
+                                    "/replace";
+                                  axios.post(url, candidate);
+                                  setTimeout(() => {
+                                    this.$router.push("/candidates");
+                                    location.reload();
+                                  }, 100);
+                                  return 0;
+                                });
+                            } else {
+                              const url_1 =
+                                "http://localhost:3000/api/communities/" +
+                                community.id +
+                                "/replace";
+                              axios.post(url_1, community);
+                              const url_2 =
+                                "http://localhost:3000/api/communities/" +
+                                communityEdit.id +
+                                "/replace";
+                              axios.post(url_2, communityEdit);
+                              const url =
+                                "http://localhost:3000/api/candidates/" +
+                                candidate.id +
+                                "/replace";
+                              axios.post(url, candidate);
+                              setTimeout(() => {
+                                this.$router.push("/candidates");
+                                location.reload();
+                              }, 100);
+                              return 0;
+                            }
+                          });
+                      });
+                  } else {
+                    if (this.candidate.status == 2) {
                       axios
                         .get(
-                          "http://localhost:3000/api/communities/getCommunity?id=" +
-                            this.community
+                          "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                            candidate.id +
+                            "&filter[where][and][1][role]=5"
                         )
-                        .then((response) => {
-                          this.communityName =
-                            response.data.community.communityName;
-                          this.patron = response.data.community.patron;
-                          this.address = response.data.community.address;
-                          this.amount = response.data.community.amount;
-                          let amount = 0;
-                          amount = Number(this.amount) + 1;
-                          const community = {
-                            communityName: this.communityName,
-                            patron: this.patron,
-                            address: this.address,
-                            amount: amount,
-                            id: this.community,
+                        .then((resp) => {
+                          const account = {
+                            userId: resp.data[0].userId,
+                            username: resp.data[0].username,
+                            password: resp.data[0].password,
+                            role: resp.data[0].role,
+                            status: 2,
+                            idTable: resp.data[0].idTable,
+                            id: resp.data[0].id,
                           };
-                          if (candidate.status == 2) {
-                            axios
-                              .get(
-                                "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
-                                  candidate.id +
-                                  "&filter[where][and][1][role]=5"
-                              )
-                              .then((resp) => {
-                                const account = {
-                                  userId: resp.data[0].userId,
-                                  username: resp.data[0].username,
-                                  password: resp.data[0].password,
-                                  role: resp.data[0].role,
-                                  status: 2,
-                                  idTable: resp.data[0].idTable,
-                                  id: resp.data[0].id,
-                                };
-                                const url_5 =
-                                  "http://localhost:3000/api/accounts/" +
-                                  account.id +
-                                  "/replace";
-                                axios.post(url_5, account);
-                              });
-                          }
-                          const url_1 =
-                            "http://localhost:3000/api/communities/" +
-                            community.id +
+                          const url_5 =
+                            "http://localhost:3000/api/accounts/" +
+                            account.id +
                             "/replace";
-                          axios.post(url_1, community);
-                          const url_2 =
-                            "http://localhost:3000/api/communities/" +
-                            communityEdit.id +
-                            "/replace";
-                          axios.post(url_2, communityEdit);
+                          axios.post(url_5, account);
                           const url =
                             "http://localhost:3000/api/candidates/" +
                             candidate.id +
                             "/replace";
                           axios.post(url, candidate);
+                          setTimeout(() => {
+                            this.$router.push("/candidates");
+                            location.reload();
+                          }, 100);
+                          return 0;
                         });
-                    });
+                    } else {
+                      const url =
+                        "http://localhost:3000/api/candidates/" +
+                        candidate.id +
+                        "/replace";
+                      axios.post(url, candidate);
+                      setTimeout(() => {
+                        this.$router.push("/candidates");
+                        location.reload();
+                      }, 100);
+                      return 0;
+                    }
+                  }
                 }
-                setTimeout(() => {
-                  this.$router.push("/candidates");
-                  location.reload();
-                }, 100);
-                return 0;
               }
             });
         } else if (
@@ -5038,20 +7984,6 @@ const EditCandidate = {
                   }
                 );
               } else {
-                const candidate = {
-                  candidateId: null,
-                  christianName: null,
-                  fullName: null,
-                  birthday: null,
-                  phone: null,
-                  email: null,
-                  image: null,
-                  position: null,
-                  community: null,
-                  homeland: null,
-                  status: null,
-                  id: null,
-                };
                 if (this.selectedFile != null) {
                   const fd = new FormData();
                   fd.append("image", this.selectedFile, this.selectedFile.name);
@@ -5060,7 +7992,7 @@ const EditCandidate = {
                   var fileName =
                     this.candidateId + this.selectedFile.name.slice(start, end);
                   if (this.imageEdit != null) {
-                    candidate = {
+                    const candidate = {
                       candidateId: this.candidateId,
                       christianName: this.christianName,
                       fullName: this.fullName,
@@ -5074,27 +8006,241 @@ const EditCandidate = {
                       status: this.status,
                       id: this.$route.params.id,
                     };
-                    axios
-                      .delete(
-                        "http://localhost:3000/api/Photos/candidate/files/" +
-                          this.imageEdit
-                      )
-                      .then((resp) => {
-                        console.log(resp);
-                      })
-                      .catch((err) => console.log(err));
-                    axios
-                      .post(
-                        "http://localhost:3000/api/Photos/candidate/upload?filename=" +
-                          fileName,
-                        fd
-                      )
-                      .then((res) => {
-                        console.log(res);
-                      })
-                      .catch((err) => console.log(err));
+                    if (this.community != this.communityEdit) {
+                      axios
+                        .get(
+                          "http://localhost:3000/api/communities/getCommunity?id=" +
+                            this.communityEdit
+                        )
+                        .then((response) => {
+                          this.communityName =
+                            response.data.community.communityName;
+                          this.patron = response.data.community.patron;
+                          this.address = response.data.community.address;
+                          this.amount = response.data.community.amount;
+                          console.log(this.address);
+                          let amount = 0;
+                          amount = Number(this.amount) - 1;
+                          console.log(this.amount);
+                          const communityEdit = {
+                            communityName: this.communityName,
+                            patron: this.patron,
+                            address: this.address,
+                            amount: amount,
+                            id: this.communityEdit,
+                          };
+                          axios
+                            .get(
+                              "http://localhost:3000/api/communities/getCommunity?id=" +
+                                this.community
+                            )
+                            .then((response) => {
+                              this.communityName =
+                                response.data.community.communityName;
+                              this.patron = response.data.community.patron;
+                              this.address = response.data.community.address;
+                              this.amount = response.data.community.amount;
+                              let amount = 0;
+                              amount = Number(this.amount) + 1;
+                              const community = {
+                                communityName: this.communityName,
+                                patron: this.patron,
+                                address: this.address,
+                                amount: amount,
+                                id: this.community,
+                              };
+                              if (this.candidate.status == 2) {
+                                axios
+                                  .get(
+                                    "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                                      candidate.id +
+                                      "&filter[where][and][1][role]=5"
+                                  )
+                                  .then((resp) => {
+                                    const account = {
+                                      userId: resp.data[0].userId,
+                                      username: resp.data[0].username,
+                                      password: resp.data[0].password,
+                                      role: resp.data[0].role,
+                                      status: 2,
+                                      idTable: resp.data[0].idTable,
+                                      id: resp.data[0].id,
+                                    };
+                                    const url_5 =
+                                      "http://localhost:3000/api/accounts/" +
+                                      account.id +
+                                      "/replace";
+                                    axios.post(url_5, account);
+                                    const url_1 =
+                                      "http://localhost:3000/api/communities/" +
+                                      community.id +
+                                      "/replace";
+                                    axios.post(url_1, community);
+                                    const url_2 =
+                                      "http://localhost:3000/api/communities/" +
+                                      communityEdit.id +
+                                      "/replace";
+                                    axios.post(url_2, communityEdit);
+                                    const url =
+                                      "http://localhost:3000/api/candidates/" +
+                                      candidate.id +
+                                      "/replace";
+                                    axios.post(url, candidate);
+                                    axios
+                                      .delete(
+                                        "http://localhost:3000/api/Photos/candidate/files/" +
+                                          this.imageEdit
+                                      )
+                                      .then((resp) => {
+                                        console.log(resp);
+                                      })
+                                      .catch((err) => console.log(err));
+                                    axios
+                                      .post(
+                                        "http://localhost:3000/api/Photos/candidate/upload?filename=" +
+                                          fileName,
+                                        fd
+                                      )
+                                      .then((res) => {
+                                        console.log(res);
+                                      })
+                                      .catch((err) => console.log(err));
+                                    setTimeout(() => {
+                                      this.$router.push("/candidates");
+                                      location.reload();
+                                    }, 100);
+                                    return 0;
+                                  });
+                              } else {
+                                const url_1 =
+                                  "http://localhost:3000/api/communities/" +
+                                  community.id +
+                                  "/replace";
+                                axios.post(url_1, community);
+                                const url_2 =
+                                  "http://localhost:3000/api/communities/" +
+                                  communityEdit.id +
+                                  "/replace";
+                                axios.post(url_2, communityEdit);
+                                const url =
+                                  "http://localhost:3000/api/candidates/" +
+                                  candidate.id +
+                                  "/replace";
+                                axios.post(url, candidate);
+                                axios
+                                  .delete(
+                                    "http://localhost:3000/api/Photos/candidate/files/" +
+                                      this.imageEdit
+                                  )
+                                  .then((resp) => {
+                                    console.log(resp);
+                                  })
+                                  .catch((err) => console.log(err));
+                                axios
+                                  .post(
+                                    "http://localhost:3000/api/Photos/candidate/upload?filename=" +
+                                      fileName,
+                                    fd
+                                  )
+                                  .then((res) => {
+                                    console.log(res);
+                                  })
+                                  .catch((err) => console.log(err));
+                                setTimeout(() => {
+                                  this.$router.push("/candidates");
+                                  location.reload();
+                                }, 100);
+                                return 0;
+                              }
+                            });
+                        });
+                    } else {
+                      if (this.candidate.status == 2) {
+                        axios
+                          .get(
+                            "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                              candidate.id +
+                              "&filter[where][and][1][role]=5"
+                          )
+                          .then((resp) => {
+                            const account = {
+                              userId: resp.data[0].userId,
+                              username: resp.data[0].username,
+                              password: resp.data[0].password,
+                              role: resp.data[0].role,
+                              status: 2,
+                              idTable: resp.data[0].idTable,
+                              id: resp.data[0].id,
+                            };
+                            const url_5 =
+                              "http://localhost:3000/api/accounts/" +
+                              account.id +
+                              "/replace";
+                            axios.post(url_5, account);
+                            const url =
+                              "http://localhost:3000/api/candidates/" +
+                              candidate.id +
+                              "/replace";
+                            axios.post(url, this.candidate);
+                            axios
+                              .delete(
+                                "http://localhost:3000/api/Photos/candidate/files/" +
+                                  this.imageEdit
+                              )
+                              .then((resp) => {
+                                console.log(resp);
+                              })
+                              .catch((err) => console.log(err));
+                            axios
+                              .post(
+                                "http://localhost:3000/api/Photos/candidate/upload?filename=" +
+                                  fileName,
+                                fd
+                              )
+                              .then((res) => {
+                                console.log(res);
+                              })
+                              .catch((err) => console.log(err));
+                            setTimeout(() => {
+                              this.$router.push("/candidates");
+                              location.reload();
+                            }, 100);
+                            return 0;
+                          });
+                      } else {
+                        const url =
+                          "http://localhost:3000/api/candidates/" +
+                          candidate.id +
+                          "/replace";
+                        axios.post(url, this.candidate);
+                        axios
+                          .delete(
+                            "http://localhost:3000/api/Photos/candidate/files/" +
+                              this.imageEdit
+                          )
+                          .then((resp) => {
+                            console.log(resp);
+                          })
+                          .catch((err) => console.log(err));
+                        axios
+                          .post(
+                            "http://localhost:3000/api/Photos/candidate/upload?filename=" +
+                              fileName,
+                            fd
+                          )
+                          .then((res) => {
+                            console.log(res);
+                          })
+                          .catch((err) => console.log(err));
+                        setTimeout(() => {
+                          this.$router.push("/candidates");
+                          location.reload();
+                        }, 100);
+                        return 0;
+                      }
+                    }
                   } else {
-                    candidate = {
+                    const candidate = {
                       candidateId: this.candidateId,
                       christianName: this.christianName,
                       fullName: this.fullName,
@@ -5108,19 +8254,206 @@ const EditCandidate = {
                       status: this.status,
                       id: this.$route.params.id,
                     };
-                    axios
-                      .post(
-                        "http://localhost:3000/api/Photos/candidate/upload?filename=" +
-                          fileName,
-                        fd
-                      )
-                      .then((res) => {
-                        console.log(res);
-                      })
-                      .catch((err) => console.log(err));
+                    if (this.community != this.communityEdit) {
+                      axios
+                        .get(
+                          "http://localhost:3000/api/communities/getCommunity?id=" +
+                            this.communityEdit
+                        )
+                        .then((response) => {
+                          this.communityName =
+                            response.data.community.communityName;
+                          this.patron = response.data.community.patron;
+                          this.address = response.data.community.address;
+                          this.amount = response.data.community.amount;
+                          console.log(this.address);
+                          let amount = 0;
+                          amount = Number(this.amount) - 1;
+                          console.log(this.amount);
+                          const communityEdit = {
+                            communityName: this.communityName,
+                            patron: this.patron,
+                            address: this.address,
+                            amount: amount,
+                            id: this.communityEdit,
+                          };
+                          axios
+                            .get(
+                              "http://localhost:3000/api/communities/getCommunity?id=" +
+                                this.community
+                            )
+                            .then((response) => {
+                              this.communityName =
+                                response.data.community.communityName;
+                              this.patron = response.data.community.patron;
+                              this.address = response.data.community.address;
+                              this.amount = response.data.community.amount;
+                              let amount = 0;
+                              amount = Number(this.amount) + 1;
+                              const community = {
+                                communityName: this.communityName,
+                                patron: this.patron,
+                                address: this.address,
+                                amount: amount,
+                                id: this.community,
+                              };
+                              if (this.candidate.status == 2) {
+                                axios
+                                  .get(
+                                    "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                                      candidate.id +
+                                      "&filter[where][and][1][role]=5"
+                                  )
+                                  .then((resp) => {
+                                    const account = {
+                                      userId: resp.data[0].userId,
+                                      username: resp.data[0].username,
+                                      password: resp.data[0].password,
+                                      role: resp.data[0].role,
+                                      status: 2,
+                                      idTable: resp.data[0].idTable,
+                                      id: resp.data[0].id,
+                                    };
+                                    const url_5 =
+                                      "http://localhost:3000/api/accounts/" +
+                                      account.id +
+                                      "/replace";
+                                    axios.post(url_5, account);
+                                    const url_1 =
+                                      "http://localhost:3000/api/communities/" +
+                                      community.id +
+                                      "/replace";
+                                    axios.post(url_1, community);
+                                    const url_2 =
+                                      "http://localhost:3000/api/communities/" +
+                                      communityEdit.id +
+                                      "/replace";
+                                    axios.post(url_2, communityEdit);
+                                    const url =
+                                      "http://localhost:3000/api/candidates/" +
+                                      candidate.id +
+                                      "/replace";
+                                    axios.post(url, candidate);
+                                    axios
+                                      .post(
+                                        "http://localhost:3000/api/Photos/candidate/upload?filename=" +
+                                          fileName,
+                                        fd
+                                      )
+                                      .then((res) => {
+                                        console.log(res);
+                                      })
+                                      .catch((err) => console.log(err));
+                                    setTimeout(() => {
+                                      this.$router.push("/candidates");
+                                      location.reload();
+                                    }, 100);
+                                    return 0;
+                                  });
+                              } else {
+                                const url_1 =
+                                  "http://localhost:3000/api/communities/" +
+                                  community.id +
+                                  "/replace";
+                                axios.post(url_1, community);
+                                const url_2 =
+                                  "http://localhost:3000/api/communities/" +
+                                  communityEdit.id +
+                                  "/replace";
+                                axios.post(url_2, communityEdit);
+                                const url =
+                                  "http://localhost:3000/api/candidates/" +
+                                  candidate.id +
+                                  "/replace";
+                                axios.post(url, candidate);
+                                axios
+                                  .post(
+                                    "http://localhost:3000/api/Photos/candidate/upload?filename=" +
+                                      fileName,
+                                    fd
+                                  )
+                                  .then((res) => {
+                                    console.log(res);
+                                  })
+                                  .catch((err) => console.log(err));
+                                setTimeout(() => {
+                                  this.$router.push("/candidates");
+                                  location.reload();
+                                }, 100);
+                                return 0;
+                              }
+                            });
+                        });
+                    } else {
+                      if (this.candidate.status == 2) {
+                        axios
+                          .get(
+                            "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                              candidate.id +
+                              "&filter[where][and][1][role]=5"
+                          )
+                          .then((resp) => {
+                            const account = {
+                              userId: resp.data[0].userId,
+                              username: resp.data[0].username,
+                              password: resp.data[0].password,
+                              role: resp.data[0].role,
+                              status: 2,
+                              idTable: resp.data[0].idTable,
+                              id: resp.data[0].id,
+                            };
+                            const url_5 =
+                              "http://localhost:3000/api/accounts/" +
+                              account.id +
+                              "/replace";
+                            axios.post(url_5, account);
+                            const url =
+                              "http://localhost:3000/api/candidates/" +
+                              candidate.id +
+                              "/replace";
+                            axios.post(url, candidate);
+                            axios
+                              .post(
+                                "http://localhost:3000/api/Photos/candidate/upload?filename=" +
+                                  fileName,
+                                fd
+                              )
+                              .then((res) => {
+                                console.log(res);
+                              })
+                              .catch((err) => console.log(err));
+                            setTimeout(() => {
+                              this.$router.push("/candidates");
+                              location.reload();
+                            }, 100);
+                            return 0;
+                          });
+                      } else {
+                        const url =
+                          "http://localhost:3000/api/candidates/" +
+                          candidate.id +
+                          "/replace";
+                        axios.post(url, candidate);
+                        axios
+                          .post(
+                            "http://localhost:3000/api/Photos/candidate/upload?filename=" +
+                              fileName,
+                            fd
+                          )
+                          .then((res) => {
+                            console.log(res);
+                          })
+                          .catch((err) => console.log(err));
+                        setTimeout(() => {
+                          this.$router.push("/candidates");
+                          location.reload();
+                        }, 100);
+                        return 0;
+                      }
+                    }
                   }
                 } else {
-                  candidate = {
+                  const candidate = {
                     candidateId: this.candidateId,
                     christianName: this.christianName,
                     fullName: this.fullName,
@@ -5134,97 +8467,164 @@ const EditCandidate = {
                     status: this.status,
                     id: this.$route.params.id,
                   };
-                }
-                if (this.community != this.communityEdit) {
-                  axios
-                    .get(
-                      "http://localhost:3000/api/communities/getCommunity?id=" +
-                        this.communityEdit
-                    )
-                    .then((response) => {
-                      this.communityName =
-                        response.data.community.communityName;
-                      this.patron = response.data.community.patron;
-                      this.address = response.data.community.address;
-                      this.amount = response.data.community.amount;
-                      console.log(this.address);
-                      let amount = 0;
-                      amount = Number(this.amount) - 1;
-                      console.log(this.amount);
-                      const communityEdit = {
-                        communityName: this.communityName,
-                        patron: this.patron,
-                        address: this.address,
-                        amount: amount,
-                        id: this.communityEdit,
-                      };
+                  if (this.community != this.communityEdit) {
+                    axios
+                      .get(
+                        "http://localhost:3000/api/communities/getCommunity?id=" +
+                          this.communityEdit
+                      )
+                      .then((response) => {
+                        this.communityName =
+                          response.data.community.communityName;
+                        this.patron = response.data.community.patron;
+                        this.address = response.data.community.address;
+                        this.amount = response.data.community.amount;
+                        console.log(this.address);
+                        let amount = 0;
+                        amount = Number(this.amount) - 1;
+                        console.log(this.amount);
+                        const communityEdit = {
+                          communityName: this.communityName,
+                          patron: this.patron,
+                          address: this.address,
+                          amount: amount,
+                          id: this.communityEdit,
+                        };
+                        axios
+                          .get(
+                            "http://localhost:3000/api/communities/getCommunity?id=" +
+                              this.community
+                          )
+                          .then((response) => {
+                            this.communityName =
+                              response.data.community.communityName;
+                            this.patron = response.data.community.patron;
+                            this.address = response.data.community.address;
+                            this.amount = response.data.community.amount;
+                            let amount = 0;
+                            amount = Number(this.amount) + 1;
+                            const community = {
+                              communityName: this.communityName,
+                              patron: this.patron,
+                              address: this.address,
+                              amount: amount,
+                              id: this.community,
+                            };
+                            if (this.candidate.status == 2) {
+                              axios
+                                .get(
+                                  "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                                    candidate.id +
+                                    "&filter[where][and][1][role]=5"
+                                )
+                                .then((resp) => {
+                                  const account = {
+                                    userId: resp.data[0].userId,
+                                    username: resp.data[0].username,
+                                    password: resp.data[0].password,
+                                    role: resp.data[0].role,
+                                    status: 2,
+                                    idTable: resp.data[0].idTable,
+                                    id: resp.data[0].id,
+                                  };
+                                  const url_5 =
+                                    "http://localhost:3000/api/accounts/" +
+                                    account.id +
+                                    "/replace";
+                                  axios.post(url_5, account);
+                                  const url_1 =
+                                    "http://localhost:3000/api/communities/" +
+                                    community.id +
+                                    "/replace";
+                                  axios.post(url_1, community);
+                                  const url_2 =
+                                    "http://localhost:3000/api/communities/" +
+                                    communityEdit.id +
+                                    "/replace";
+                                  axios.post(url_2, communityEdit);
+                                  const url =
+                                    "http://localhost:3000/api/candidates/" +
+                                    candidate.id +
+                                    "/replace";
+                                  axios.post(url, candidate);
+                                  setTimeout(() => {
+                                    this.$router.push("/candidates");
+                                    location.reload();
+                                  }, 100);
+                                  return 0;
+                                });
+                            } else {
+                              const url_1 =
+                                "http://localhost:3000/api/communities/" +
+                                community.id +
+                                "/replace";
+                              axios.post(url_1, community);
+                              const url_2 =
+                                "http://localhost:3000/api/communities/" +
+                                communityEdit.id +
+                                "/replace";
+                              axios.post(url_2, communityEdit);
+                              const url =
+                                "http://localhost:3000/api/candidates/" +
+                                candidate.id +
+                                "/replace";
+                              axios.post(url, candidate);
+                              setTimeout(() => {
+                                this.$router.push("/candidates");
+                                location.reload();
+                              }, 100);
+                              return 0;
+                            }
+                          });
+                      });
+                  } else {
+                    if (this.candidate.status == 2) {
                       axios
                         .get(
-                          "http://localhost:3000/api/communities/getCommunity?id=" +
-                            this.community
+                          "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                            candidate.id +
+                            "&filter[where][and][1][role]=5"
                         )
-                        .then((response) => {
-                          this.communityName =
-                            response.data.community.communityName;
-                          this.patron = response.data.community.patron;
-                          this.address = response.data.community.address;
-                          this.amount = response.data.community.amount;
-                          let amount = 0;
-                          amount = Number(this.amount) + 1;
-                          const community = {
-                            communityName: this.communityName,
-                            patron: this.patron,
-                            address: this.address,
-                            amount: amount,
-                            id: this.community,
+                        .then((resp) => {
+                          const account = {
+                            userId: resp.data[0].userId,
+                            username: resp.data[0].username,
+                            password: resp.data[0].password,
+                            role: resp.data[0].role,
+                            status: 2,
+                            idTable: resp.data[0].idTable,
+                            id: resp.data[0].id,
                           };
-                          if (candidate.status == 2) {
-                            axios
-                              .get(
-                                "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
-                                  candidate.id +
-                                  "&filter[where][and][1][role]=5"
-                              )
-                              .then((resp) => {
-                                const account = {
-                                  userId: resp.data[0].userId,
-                                  username: resp.data[0].username,
-                                  password: resp.data[0].password,
-                                  role: resp.data[0].role,
-                                  status: 2,
-                                  idTable: resp.data[0].idTable,
-                                  id: resp.data[0].id,
-                                };
-                                const url_5 =
-                                  "http://localhost:3000/api/accounts/" +
-                                  account.id +
-                                  "/replace";
-                                axios.post(url_5, account);
-                              });
-                          }
-                          const url_1 =
-                            "http://localhost:3000/api/communities/" +
-                            community.id +
+                          const url_5 =
+                            "http://localhost:3000/api/accounts/" +
+                            account.id +
                             "/replace";
-                          axios.post(url_1, community);
-                          const url_2 =
-                            "http://localhost:3000/api/communities/" +
-                            communityEdit.id +
-                            "/replace";
-                          axios.post(url_2, communityEdit);
+                          axios.post(url_5, account);
                           const url =
                             "http://localhost:3000/api/candidates/" +
                             candidate.id +
                             "/replace";
                           axios.post(url, candidate);
+                          setTimeout(() => {
+                            this.$router.push("/candidates");
+                            location.reload();
+                          }, 100);
+                          return 0;
                         });
-                    });
+                    } else {
+                      const url =
+                        "http://localhost:3000/api/candidates/" +
+                        candidate.id +
+                        "/replace";
+                      axios.post(url, candidate);
+                      setTimeout(() => {
+                        this.$router.push("/candidates");
+                        location.reload();
+                      }, 100);
+                      return 0;
+                    }
+                  }
                 }
-                setTimeout(() => {
-                  this.$router.push("/candidates");
-                  location.reload();
-                }, 100);
-                return 0;
               }
             });
         } else {
@@ -5270,20 +8670,6 @@ const EditCandidate = {
                         }
                       );
                     } else {
-                      const candidate = {
-                        candidateId: null,
-                        christianName: null,
-                        fullName: null,
-                        birthday: null,
-                        phone: null,
-                        email: null,
-                        image: null,
-                        position: null,
-                        community: null,
-                        homeland: null,
-                        status: null,
-                        id: null,
-                      };
                       if (this.selectedFile != null) {
                         const fd = new FormData();
                         fd.append(
@@ -5297,7 +8683,7 @@ const EditCandidate = {
                           this.candidateId +
                           this.selectedFile.name.slice(start, end);
                         if (this.imageEdit != null) {
-                          candidate = {
+                          const candidate = {
                             candidateId: this.candidateId,
                             christianName: this.christianName,
                             fullName: this.fullName,
@@ -5311,27 +8697,244 @@ const EditCandidate = {
                             status: this.status,
                             id: this.$route.params.id,
                           };
-                          axios
-                            .delete(
-                              "http://localhost:3000/api/Photos/candidate/files/" +
-                                this.imageEdit
-                            )
-                            .then((resp) => {
-                              console.log(resp);
-                            })
-                            .catch((err) => console.log(err));
-                          axios
-                            .post(
-                              "http://localhost:3000/api/Photos/candidate/upload?filename=" +
-                                fileName,
-                              fd
-                            )
-                            .then((res) => {
-                              console.log(res);
-                            })
-                            .catch((err) => console.log(err));
+                          if (this.community != this.communityEdit) {
+                            axios
+                              .get(
+                                "http://localhost:3000/api/communities/getCommunity?id=" +
+                                  this.communityEdit
+                              )
+                              .then((response) => {
+                                this.communityName =
+                                  response.data.community.communityName;
+                                this.patron = response.data.community.patron;
+                                this.address = response.data.community.address;
+                                this.amount = response.data.community.amount;
+                                console.log(this.address);
+                                let amount = 0;
+                                amount = Number(this.amount) - 1;
+                                console.log(this.amount);
+                                const communityEdit = {
+                                  communityName: this.communityName,
+                                  patron: this.patron,
+                                  address: this.address,
+                                  amount: amount,
+                                  id: this.communityEdit,
+                                };
+                                axios
+                                  .get(
+                                    "http://localhost:3000/api/communities/getCommunity?id=" +
+                                      this.community
+                                  )
+                                  .then((response) => {
+                                    this.communityName =
+                                      response.data.community.communityName;
+                                    this.patron =
+                                      response.data.community.patron;
+                                    this.address =
+                                      response.data.community.address;
+                                    this.amount =
+                                      response.data.community.amount;
+                                    let amount = 0;
+                                    amount = Number(this.amount) + 1;
+                                    const community = {
+                                      communityName: this.communityName,
+                                      patron: this.patron,
+                                      address: this.address,
+                                      amount: amount,
+                                      id: this.community,
+                                    };
+                                    if (this.candidate.status == 2) {
+                                      axios
+                                        .get(
+                                          "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                                            candidate.id +
+                                            "&filter[where][and][1][role]=5"
+                                        )
+                                        .then((resp) => {
+                                          const account = {
+                                            userId: resp.data[0].userId,
+                                            username: resp.data[0].username,
+                                            password: resp.data[0].password,
+                                            role: resp.data[0].role,
+                                            status: 2,
+                                            idTable: resp.data[0].idTable,
+                                            id: resp.data[0].id,
+                                          };
+                                          const url_5 =
+                                            "http://localhost:3000/api/accounts/" +
+                                            account.id +
+                                            "/replace";
+                                          axios.post(url_5, account);
+                                          const url_1 =
+                                            "http://localhost:3000/api/communities/" +
+                                            community.id +
+                                            "/replace";
+                                          axios.post(url_1, community);
+                                          const url_2 =
+                                            "http://localhost:3000/api/communities/" +
+                                            communityEdit.id +
+                                            "/replace";
+                                          axios.post(url_2, communityEdit);
+                                          const url =
+                                            "http://localhost:3000/api/candidates/" +
+                                            candidate.id +
+                                            "/replace";
+                                          axios.post(url, candidate);
+                                          axios
+                                            .delete(
+                                              "http://localhost:3000/api/Photos/candidate/files/" +
+                                                this.imageEdit
+                                            )
+                                            .then((resp) => {
+                                              console.log(resp);
+                                            })
+                                            .catch((err) => console.log(err));
+                                          axios
+                                            .post(
+                                              "http://localhost:3000/api/Photos/candidate/upload?filename=" +
+                                                fileName,
+                                              fd
+                                            )
+                                            .then((res) => {
+                                              console.log(res);
+                                            })
+                                            .catch((err) => console.log(err));
+                                          setTimeout(() => {
+                                            this.$router.push("/candidates");
+                                            location.reload();
+                                          }, 100);
+                                          return 0;
+                                        });
+                                    } else {
+                                      const url_1 =
+                                        "http://localhost:3000/api/communities/" +
+                                        community.id +
+                                        "/replace";
+                                      axios.post(url_1, community);
+                                      const url_2 =
+                                        "http://localhost:3000/api/communities/" +
+                                        communityEdit.id +
+                                        "/replace";
+                                      axios.post(url_2, communityEdit);
+                                      const url =
+                                        "http://localhost:3000/api/candidates/" +
+                                        candidate.id +
+                                        "/replace";
+                                      axios.post(url, candidate);
+                                      axios
+                                        .delete(
+                                          "http://localhost:3000/api/Photos/candidate/files/" +
+                                            this.imageEdit
+                                        )
+                                        .then((resp) => {
+                                          console.log(resp);
+                                        })
+                                        .catch((err) => console.log(err));
+                                      axios
+                                        .post(
+                                          "http://localhost:3000/api/Photos/candidate/upload?filename=" +
+                                            fileName,
+                                          fd
+                                        )
+                                        .then((res) => {
+                                          console.log(res);
+                                        })
+                                        .catch((err) => console.log(err));
+                                      setTimeout(() => {
+                                        this.$router.push("/candidates");
+                                        location.reload();
+                                      }, 100);
+                                      return 0;
+                                    }
+                                  });
+                              });
+                          } else {
+                            if (this.candidate.status == 2) {
+                              axios
+                                .get(
+                                  "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                                    candidate.id +
+                                    "&filter[where][and][1][role]=5"
+                                )
+                                .then((resp) => {
+                                  const account = {
+                                    userId: resp.data[0].userId,
+                                    username: resp.data[0].username,
+                                    password: resp.data[0].password,
+                                    role: resp.data[0].role,
+                                    status: 2,
+                                    idTable: resp.data[0].idTable,
+                                    id: resp.data[0].id,
+                                  };
+                                  const url_5 =
+                                    "http://localhost:3000/api/accounts/" +
+                                    account.id +
+                                    "/replace";
+                                  axios.post(url_5, account);
+                                  const url =
+                                    "http://localhost:3000/api/candidates/" +
+                                    candidate.id +
+                                    "/replace";
+                                  axios.post(url, this.candidate);
+                                  axios
+                                    .delete(
+                                      "http://localhost:3000/api/Photos/candidate/files/" +
+                                        this.imageEdit
+                                    )
+                                    .then((resp) => {
+                                      console.log(resp);
+                                    })
+                                    .catch((err) => console.log(err));
+                                  axios
+                                    .post(
+                                      "http://localhost:3000/api/Photos/candidate/upload?filename=" +
+                                        fileName,
+                                      fd
+                                    )
+                                    .then((res) => {
+                                      console.log(res);
+                                    })
+                                    .catch((err) => console.log(err));
+                                  setTimeout(() => {
+                                    this.$router.push("/candidates");
+                                    location.reload();
+                                  }, 100);
+                                  return 0;
+                                });
+                            } else {
+                              const url =
+                                "http://localhost:3000/api/candidates/" +
+                                candidate.id +
+                                "/replace";
+                              axios.post(url, this.candidate);
+                              axios
+                                .delete(
+                                  "http://localhost:3000/api/Photos/candidate/files/" +
+                                    this.imageEdit
+                                )
+                                .then((resp) => {
+                                  console.log(resp);
+                                })
+                                .catch((err) => console.log(err));
+                              axios
+                                .post(
+                                  "http://localhost:3000/api/Photos/candidate/upload?filename=" +
+                                    fileName,
+                                  fd
+                                )
+                                .then((res) => {
+                                  console.log(res);
+                                })
+                                .catch((err) => console.log(err));
+                              setTimeout(() => {
+                                this.$router.push("/candidates");
+                                location.reload();
+                              }, 100);
+                              return 0;
+                            }
+                          }
                         } else {
-                          candidate = {
+                          const candidate = {
                             candidateId: this.candidateId,
                             christianName: this.christianName,
                             fullName: this.fullName,
@@ -5345,19 +8948,209 @@ const EditCandidate = {
                             status: this.status,
                             id: this.$route.params.id,
                           };
-                          axios
-                            .post(
-                              "http://localhost:3000/api/Photos/candidate/upload?filename=" +
-                                fileName,
-                              fd
-                            )
-                            .then((res) => {
-                              console.log(res);
-                            })
-                            .catch((err) => console.log(err));
+                          if (this.community != this.communityEdit) {
+                            axios
+                              .get(
+                                "http://localhost:3000/api/communities/getCommunity?id=" +
+                                  this.communityEdit
+                              )
+                              .then((response) => {
+                                this.communityName =
+                                  response.data.community.communityName;
+                                this.patron = response.data.community.patron;
+                                this.address = response.data.community.address;
+                                this.amount = response.data.community.amount;
+                                console.log(this.address);
+                                let amount = 0;
+                                amount = Number(this.amount) - 1;
+                                console.log(this.amount);
+                                const communityEdit = {
+                                  communityName: this.communityName,
+                                  patron: this.patron,
+                                  address: this.address,
+                                  amount: amount,
+                                  id: this.communityEdit,
+                                };
+                                axios
+                                  .get(
+                                    "http://localhost:3000/api/communities/getCommunity?id=" +
+                                      this.community
+                                  )
+                                  .then((response) => {
+                                    this.communityName =
+                                      response.data.community.communityName;
+                                    this.patron =
+                                      response.data.community.patron;
+                                    this.address =
+                                      response.data.community.address;
+                                    this.amount =
+                                      response.data.community.amount;
+                                    let amount = 0;
+                                    amount = Number(this.amount) + 1;
+                                    const community = {
+                                      communityName: this.communityName,
+                                      patron: this.patron,
+                                      address: this.address,
+                                      amount: amount,
+                                      id: this.community,
+                                    };
+                                    if (this.candidate.status == 2) {
+                                      axios
+                                        .get(
+                                          "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                                            candidate.id +
+                                            "&filter[where][and][1][role]=5"
+                                        )
+                                        .then((resp) => {
+                                          const account = {
+                                            userId: resp.data[0].userId,
+                                            username: resp.data[0].username,
+                                            password: resp.data[0].password,
+                                            role: resp.data[0].role,
+                                            status: 2,
+                                            idTable: resp.data[0].idTable,
+                                            id: resp.data[0].id,
+                                          };
+                                          const url_5 =
+                                            "http://localhost:3000/api/accounts/" +
+                                            account.id +
+                                            "/replace";
+                                          axios.post(url_5, account);
+                                          const url_1 =
+                                            "http://localhost:3000/api/communities/" +
+                                            community.id +
+                                            "/replace";
+                                          axios.post(url_1, community);
+                                          const url_2 =
+                                            "http://localhost:3000/api/communities/" +
+                                            communityEdit.id +
+                                            "/replace";
+                                          axios.post(url_2, communityEdit);
+                                          const url =
+                                            "http://localhost:3000/api/candidates/" +
+                                            candidate.id +
+                                            "/replace";
+                                          axios.post(url, candidate);
+                                          axios
+                                            .post(
+                                              "http://localhost:3000/api/Photos/candidate/upload?filename=" +
+                                                fileName,
+                                              fd
+                                            )
+                                            .then((res) => {
+                                              console.log(res);
+                                            })
+                                            .catch((err) => console.log(err));
+                                          setTimeout(() => {
+                                            this.$router.push("/candidates");
+                                            location.reload();
+                                          }, 100);
+                                          return 0;
+                                        });
+                                    } else {
+                                      const url_1 =
+                                        "http://localhost:3000/api/communities/" +
+                                        community.id +
+                                        "/replace";
+                                      axios.post(url_1, community);
+                                      const url_2 =
+                                        "http://localhost:3000/api/communities/" +
+                                        communityEdit.id +
+                                        "/replace";
+                                      axios.post(url_2, communityEdit);
+                                      const url =
+                                        "http://localhost:3000/api/candidates/" +
+                                        candidate.id +
+                                        "/replace";
+                                      axios.post(url, candidate);
+                                      axios
+                                        .post(
+                                          "http://localhost:3000/api/Photos/candidate/upload?filename=" +
+                                            fileName,
+                                          fd
+                                        )
+                                        .then((res) => {
+                                          console.log(res);
+                                        })
+                                        .catch((err) => console.log(err));
+                                      setTimeout(() => {
+                                        this.$router.push("/candidates");
+                                        location.reload();
+                                      }, 100);
+                                      return 0;
+                                    }
+                                  });
+                              });
+                          } else {
+                            if (this.candidate.status == 2) {
+                              axios
+                                .get(
+                                  "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                                    candidate.id +
+                                    "&filter[where][and][1][role]=5"
+                                )
+                                .then((resp) => {
+                                  const account = {
+                                    userId: resp.data[0].userId,
+                                    username: resp.data[0].username,
+                                    password: resp.data[0].password,
+                                    role: resp.data[0].role,
+                                    status: 2,
+                                    idTable: resp.data[0].idTable,
+                                    id: resp.data[0].id,
+                                  };
+                                  const url_5 =
+                                    "http://localhost:3000/api/accounts/" +
+                                    account.id +
+                                    "/replace";
+                                  axios.post(url_5, account);
+                                  const url =
+                                    "http://localhost:3000/api/candidates/" +
+                                    candidate.id +
+                                    "/replace";
+                                  axios.post(url, candidate);
+                                  axios
+                                    .post(
+                                      "http://localhost:3000/api/Photos/candidate/upload?filename=" +
+                                        fileName,
+                                      fd
+                                    )
+                                    .then((res) => {
+                                      console.log(res);
+                                    })
+                                    .catch((err) => console.log(err));
+                                  setTimeout(() => {
+                                    this.$router.push("/candidates");
+                                    location.reload();
+                                  }, 100);
+                                  return 0;
+                                });
+                            } else {
+                              const url =
+                                "http://localhost:3000/api/candidates/" +
+                                candidate.id +
+                                "/replace";
+                              axios.post(url, candidate);
+                              axios
+                                .post(
+                                  "http://localhost:3000/api/Photos/candidate/upload?filename=" +
+                                    fileName,
+                                  fd
+                                )
+                                .then((res) => {
+                                  console.log(res);
+                                })
+                                .catch((err) => console.log(err));
+                              setTimeout(() => {
+                                this.$router.push("/candidates");
+                                location.reload();
+                              }, 100);
+                              return 0;
+                            }
+                          }
                         }
                       } else {
-                        candidate = {
+                        const candidate = {
                           candidateId: this.candidateId,
                           christianName: this.christianName,
                           fullName: this.fullName,
@@ -5371,97 +9164,165 @@ const EditCandidate = {
                           status: this.status,
                           id: this.$route.params.id,
                         };
-                      }
-                      if (this.community != this.communityEdit) {
-                        axios
-                          .get(
-                            "http://localhost:3000/api/communities/getCommunity?id=" +
-                              this.communityEdit
-                          )
-                          .then((response) => {
-                            this.communityName =
-                              response.data.community.communityName;
-                            this.patron = response.data.community.patron;
-                            this.address = response.data.community.address;
-                            this.amount = response.data.community.amount;
-                            console.log(this.address);
-                            let amount = 0;
-                            amount = Number(this.amount) - 1;
-                            console.log(this.amount);
-                            const communityEdit = {
-                              communityName: this.communityName,
-                              patron: this.patron,
-                              address: this.address,
-                              amount: amount,
-                              id: this.communityEdit,
-                            };
+                        if (this.community != this.communityEdit) {
+                          axios
+                            .get(
+                              "http://localhost:3000/api/communities/getCommunity?id=" +
+                                this.communityEdit
+                            )
+                            .then((response) => {
+                              this.communityName =
+                                response.data.community.communityName;
+                              this.patron = response.data.community.patron;
+                              this.address = response.data.community.address;
+                              this.amount = response.data.community.amount;
+                              console.log(this.address);
+                              let amount = 0;
+                              amount = Number(this.amount) - 1;
+                              console.log(this.amount);
+                              const communityEdit = {
+                                communityName: this.communityName,
+                                patron: this.patron,
+                                address: this.address,
+                                amount: amount,
+                                id: this.communityEdit,
+                              };
+                              axios
+                                .get(
+                                  "http://localhost:3000/api/communities/getCommunity?id=" +
+                                    this.community
+                                )
+                                .then((response) => {
+                                  this.communityName =
+                                    response.data.community.communityName;
+                                  this.patron = response.data.community.patron;
+                                  this.address =
+                                    response.data.community.address;
+                                  this.amount = response.data.community.amount;
+                                  let amount = 0;
+                                  amount = Number(this.amount) + 1;
+                                  const community = {
+                                    communityName: this.communityName,
+                                    patron: this.patron,
+                                    address: this.address,
+                                    amount: amount,
+                                    id: this.community,
+                                  };
+                                  if (this.candidate.status == 2) {
+                                    axios
+                                      .get(
+                                        "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                                          candidate.id +
+                                          "&filter[where][and][1][role]=5"
+                                      )
+                                      .then((resp) => {
+                                        const account = {
+                                          userId: resp.data[0].userId,
+                                          username: resp.data[0].username,
+                                          password: resp.data[0].password,
+                                          role: resp.data[0].role,
+                                          status: 2,
+                                          idTable: resp.data[0].idTable,
+                                          id: resp.data[0].id,
+                                        };
+                                        const url_5 =
+                                          "http://localhost:3000/api/accounts/" +
+                                          account.id +
+                                          "/replace";
+                                        axios.post(url_5, account);
+                                        const url_1 =
+                                          "http://localhost:3000/api/communities/" +
+                                          community.id +
+                                          "/replace";
+                                        axios.post(url_1, community);
+                                        const url_2 =
+                                          "http://localhost:3000/api/communities/" +
+                                          communityEdit.id +
+                                          "/replace";
+                                        axios.post(url_2, communityEdit);
+                                        const url =
+                                          "http://localhost:3000/api/candidates/" +
+                                          candidate.id +
+                                          "/replace";
+                                        axios.post(url, candidate);
+                                        setTimeout(() => {
+                                          this.$router.push("/candidates");
+                                          location.reload();
+                                        }, 100);
+                                        return 0;
+                                      });
+                                  } else {
+                                    const url_1 =
+                                      "http://localhost:3000/api/communities/" +
+                                      community.id +
+                                      "/replace";
+                                    axios.post(url_1, community);
+                                    const url_2 =
+                                      "http://localhost:3000/api/communities/" +
+                                      communityEdit.id +
+                                      "/replace";
+                                    axios.post(url_2, communityEdit);
+                                    const url =
+                                      "http://localhost:3000/api/candidates/" +
+                                      candidate.id +
+                                      "/replace";
+                                    axios.post(url, candidate);
+                                    setTimeout(() => {
+                                      this.$router.push("/candidates");
+                                      location.reload();
+                                    }, 100);
+                                    return 0;
+                                  }
+                                });
+                            });
+                        } else {
+                          if (this.candidate.status == 2) {
                             axios
                               .get(
-                                "http://localhost:3000/api/communities/getCommunity?id=" +
-                                  this.community
+                                "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                                  candidate.id +
+                                  "&filter[where][and][1][role]=5"
                               )
-                              .then((response) => {
-                                this.communityName =
-                                  response.data.community.communityName;
-                                this.patron = response.data.community.patron;
-                                this.address = response.data.community.address;
-                                this.amount = response.data.community.amount;
-                                let amount = 0;
-                                amount = Number(this.amount) + 1;
-                                const community = {
-                                  communityName: this.communityName,
-                                  patron: this.patron,
-                                  address: this.address,
-                                  amount: amount,
-                                  id: this.community,
+                              .then((resp) => {
+                                const account = {
+                                  userId: resp.data[0].userId,
+                                  username: resp.data[0].username,
+                                  password: resp.data[0].password,
+                                  role: resp.data[0].role,
+                                  status: 2,
+                                  idTable: resp.data[0].idTable,
+                                  id: resp.data[0].id,
                                 };
-                                if (candidate.status == 2) {
-                                  axios
-                                    .get(
-                                      "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
-                                        candidate.id +
-                                        "&filter[where][and][1][role]=5"
-                                    )
-                                    .then((resp) => {
-                                      const account = {
-                                        userId: resp.data[0].userId,
-                                        username: resp.data[0].username,
-                                        password: resp.data[0].password,
-                                        role: resp.data[0].role,
-                                        status: 2,
-                                        idTable: resp.data[0].idTable,
-                                        id: resp.data[0].id,
-                                      };
-                                      const url_5 =
-                                        "http://localhost:3000/api/accounts/" +
-                                        account.id +
-                                        "/replace";
-                                      axios.post(url_5, account);
-                                    });
-                                }
-                                const url_1 =
-                                  "http://localhost:3000/api/communities/" +
-                                  community.id +
+                                const url_5 =
+                                  "http://localhost:3000/api/accounts/" +
+                                  account.id +
                                   "/replace";
-                                axios.post(url_1, community);
-                                const url_2 =
-                                  "http://localhost:3000/api/communities/" +
-                                  communityEdit.id +
-                                  "/replace";
-                                axios.post(url_2, communityEdit);
+                                axios.post(url_5, account);
                                 const url =
                                   "http://localhost:3000/api/candidates/" +
                                   candidate.id +
                                   "/replace";
                                 axios.post(url, candidate);
+                                setTimeout(() => {
+                                  this.$router.push("/candidates");
+                                  location.reload();
+                                }, 100);
+                                return 0;
                               });
-                          });
+                          } else {
+                            const url =
+                              "http://localhost:3000/api/candidates/" +
+                              candidate.id +
+                              "/replace";
+                            axios.post(url, candidate);
+                            setTimeout(() => {
+                              this.$router.push("/candidates");
+                              location.reload();
+                            }, 100);
+                            return 0;
+                          }
+                        }
                       }
-                      setTimeout(() => {
-                        this.$router.push("/candidates");
-                        location.reload();
-                      }, 100);
-                      return 0;
                     }
                   });
               }
@@ -5755,7 +9616,7 @@ const ListCommunity = {
             <tr v-for="(community, index) in communities" :key="community.id">
               <th class="align-middle" scope="row">{{ index + 1 }}</th>
               <td>{{ community.communityName }}</td>
-              <td>{{ crypt.formatDateDisplay(community.patron) }}</td>
+              <td>{{ crypt.formatDateAndMonth(community.patron) }}</td>
               <td>{{ community.address }}</td>
               <td>{{ community.amount }}</td>
               <td class="align-middle">
@@ -6221,11 +10082,12 @@ const ListCompanion = {
     },
 
     deleteDataCompanion(companion) {
+      var pos = companion.position;
       axios
         .delete("http://localhost:3000/api/companions/" + companion.id)
         .then((response) => {
           console.log(response);
-          this.companions.splice(id, 1);
+          this.companions.splice(companion.id, 1);
         });
       if (companion.position == 6) {
         axios
@@ -6330,7 +10192,7 @@ const ListCompanion = {
                     </button>
                   </div>
                   <div class="col-lg-4">
-                    <button :title="titleButtonEdit" @click="getDataCompanionUpdate(companion)"
+                    <button v-show="companion.status == 1" :title="titleButtonEdit" @click="getDataCompanionUpdate(companion)"
                       class="btn btn-warning btn-sm h-28px w-28px rounded" type="submit"
                       style="margin-left: -17px;">
                       <i class="fas fa-edit fa-md ml--2px"></i>
@@ -8393,9 +12255,9 @@ const ListSpiritualGuide = {
         )
         .then((response) => {
           console.log(response);
-          this.spiritualGuides.splice(id, 1);
+          this.spiritualGuides.splice(spiritualGuide.id, 1);
         });
-      if (companion.position == 8) {
+      if (spiritualGuide.position == 8) {
         axios
           .get(
             "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
@@ -8411,7 +12273,7 @@ const ListSpiritualGuide = {
                 }, 10);
               });
           });
-      } else if (companion.position == 9) {
+      } else if (spiritualGuide.position == 9) {
         axios
           .get(
             "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
@@ -8498,7 +12360,7 @@ const ListSpiritualGuide = {
                     </button>
                   </div>
                   <div class="col-lg-4">
-                    <button :title="titleButtonEdit" @click="getDataSpiritualGuideUpdate(spiritualGuide)"
+                    <button v-show="spiritualGuide.status == 1" :title="titleButtonEdit" @click="getDataSpiritualGuideUpdate(spiritualGuide)"
                       class="btn btn-warning btn-sm h-28px w-28px rounded" type="submit"
                       style="margin-left: -17px;">
                       <i class="fas fa-edit fa-md ml--2px"></i>
@@ -11258,7 +15120,7 @@ const ListTeacher = {
                     </button>
                   </div>
                   <div class="col-lg-4">
-                    <button :title="titleButtonEdit" @click="getDataTeacherUpdate(teacher)"
+                    <button v-show="teacher.status == 1" :title="titleButtonEdit" @click="getDataTeacherUpdate(teacher)"
                       class="btn btn-warning btn-sm h-28px w-28px rounded" type="submit"
                       style="margin-left: -15.5px;">
                       <i class="fas fa-edit fa-md ml--2px"></i>
@@ -12909,6 +16771,7 @@ const ListSchedule = {
       teachers: [],
       idTable: 0,
       role: 0,
+      roelName: null,
     };
   },
   mounted() {
@@ -12927,7 +16790,35 @@ const ListSchedule = {
       )
       .then((resp) => {
         this.idTable = resp.data.idTable;
-        this.role = resp.data.role;
+        axios
+          .get(
+            "http://localhost:3000/api/roles?filter[where][id]=" +
+              resp.data.role
+          )
+          .then((respRole) => {
+            this.roleName = respRole.data[0].roleName;
+            if (this.roleName == "Quản trị viên") {
+              this.role = 1;
+            } else if (this.roleName == "Giám đốc") {
+              this.role = 2;
+            } else if (this.roleName == "Quản lý") {
+              this.role = 3;
+            } else if (this.roleName == "Giám học") {
+              this.role = 4;
+            } else if (this.roleName == "Ứng sinh") {
+              this.role = 5;
+            } else if (this.roleName == "Trưởng linh hướng") {
+              this.role = 6;
+            } else if (this.roleName == "Linh hướng") {
+              this.role = 7;
+            } else if (this.roleName == "Trưởng đồng hành") {
+              this.role = 8;
+            } else if (this.roleName == "Đồng hành") {
+              this.role = 9;
+            } else if (this.roleName == "Giảng viên") {
+              this.role = 10;
+            }
+          });
       });
   },
   computed: {},
@@ -12971,7 +16862,7 @@ const ListSchedule = {
           <h6 class="m-0 font-weight-bold text-dark">Danh sách Lịch Học</h6>
         </div>
         <div class="col-md-6"></div>
-        <div class="col-md-2" style="padding-left:68px;">
+        <div class="col-md-2" style="padding-left:68px;" v-show="role === 1 || role === 4">
           <router-link :to="{ name: 'addSchedule' }">
             <button :title="titleButtonAdd" class="btn rounded btn-hover-blue"
               style="background-color: #056299;color: white;font-size:14px;">
@@ -13028,7 +16919,7 @@ const ListSchedule = {
                   <div class="col-lg-4">
                     <button :title="titleButtonDelete" data-toggle="modal" @click="getDetailSchedule(schedule)"
                       data-target="#deleteScheduleModal" class="btn btn-danger btn-sm h-28px w-28px rounded"
-                      style="margin-left: -13px;">
+                      style="margin-left: -7px;">
                       <i class="far fa-trash-alt fa-md ml--1px"></i>
                     </button>
                   </div>
@@ -14012,78 +17903,10 @@ const RegisteringScheduleCompanion = {
       checkRegister: 0,
       checkAdd: 0,
       checkDelete: 0,
+      roleName: null,
     };
   },
   mounted() {
-    // let promiseResponse = axios.get("http://localhost:3000/api/logins/findOne?filter[where][token]=token")
-    //                     .then(response => response.data)
-    //                     .then(data => {return data})
-    // console.log(promiseResponse);
-    // Promise.resolve(promiseResponse).then((jsonResults) => {
-    //   console.log(jsonResults);
-    //   this.data().idTable = jsonResults.idTable;
-    //   console.log(this.idTable);
-    // })
-    // var path =
-    //   "http://localhost:3000/api/logins/findOne?filter[where][token]=token";
-    // function loadDataPromise(path) {
-    //   return new Promise(function (res, rej) {
-    //     axios
-    //       .get(path)
-    //       .then(function (response) {
-    //         res(response.data);
-    //       })
-    //       .catch(function (err) {
-    //         rej(err);
-    //       });
-    //   });
-    // }
-    // async function Loaddata() {
-    //   let c = await loadDataPromise(path);
-    //   return await c;
-    // }
-
-    // var obj = loadDataPromise(path).then((resp) => {
-    //   return resp.json();
-    // });
-    // console.log(obj);
-    // axios
-    //   .get(
-    //     "http://localhost:3000/api/logins/findOne?filter[where][token]=token"
-    //   )
-    //   .then((resp) => {
-    //     this.idTable = resp.data.idTable;
-    //     this.role = resp.data.role;
-    //     axios
-    //       .get("http://localhost:3000/api/scheduleCompanions?filter[where][companion]=" + this.idTable
-    //       )
-    //       .then((response) => {
-    //         console.log(response.data);
-    //         this.scheduleCompanions = response.data;
-    //         if(this.scheduleCompanions.length != 0){
-    //           this.checkDelete = 1;
-    //         } else {
-    //           this.checkAdd = 1;
-    //         }
-    //       });
-    //   });
-    // axios
-    //   .get("http://localhost:3000/api/scheduleCompanions?filter[where][companion]=12")
-    //   .then((response) => {
-    //     console.log(response.data);
-    //     // this.scheduleCompanions = response.data;
-    //   });
-    axios
-      .get(
-        "http://localhost:3000/api/scheduleCompanions?filter[where][and][0][candidate]=25&filter[where][and][1][status]=1"
-      )
-      .then((respoSche) => {
-        var schedules = respoSche.data;
-        var lengthSchedule = schedules.length;
-        if (lengthSchedule == 1) {
-          this.checkRegister = 1;
-        }
-      });
     axios.get("http://localhost:3000/api/candidates").then((resp) => {
       this.candidates = resp.data;
     });
@@ -14094,182 +17917,239 @@ const RegisteringScheduleCompanion = {
       )
       .then((resp) => {
         this.idTable = resp.data.idTable;
-        this.role = resp.data.role;
-        if (this.role == 8 || this.role == 9) {
-          axios
-            .get(
-              "http://localhost:3000/api/scheduleCompanions?filter[where][companion]=" +
-                this.idTable
-            )
-            .then((response) => {
-              var parsedobj = JSON.parse(JSON.stringify(response.data));
-              this.scheduleCompanions = parsedobj;
-              if (response.data.length != 0) {
-                this.checkDelete = 1;
-              } else {
-                this.checkAdd = 1;
-              }
-            });
-        } else if (this.role == 5) {
-          axios
-            .get(
-              "http://localhost:3000/api/candidates?filter[where][id]=" +
-                this.idTable
-            )
-            .then((respCan) => {
-              var community = respCan.data[0].community;
+        console.log(resp.data.idTable)
+        console.log(resp.data);
+        axios
+          .get(
+            "http://localhost:3000/api/scheduleCompanions?filter[where][and][0][candidate]=" +
+              this.idTable +
+              "&filter[where][and][1][status]=1"
+          )
+          .then((respoSche) => {
+            var schedules = respoSche.data;
+            console.log(respoSche.data);
+            var lengthSchedule = schedules.length;
+            console.log(lengthSchedule);
+            if (lengthSchedule == 1) {
+              this.checkRegister = 1;
               axios
                 .get(
-                  "http://localhost:3000/api/groupCommunities?filter[where][firstCom]=" +
-                    community
+                  "http://localhost:3000/api/metCompanions?filter[where][idSchedule]=" +
+                    respoSche.data[0].id
                 )
-                .then((respGroupCom) => {
-                  var groupCommunity = {};
-                  groupCommunity = respGroupCom.data;
-                  if (groupCommunity != null) {
-                    var idGroup = respGroupCom.data[0].id;
-                    axios
-                      .get(
-                        "http://localhost:3000/api/companions?filter[where][groupCommunity]=" +
-                          idGroup
-                      )
-                      .then((respCom) => {
-                        var companion = respCom.data[0].id;
-                        axios
-                          .get(
-                            "http://localhost:3000/api/scheduleCompanions?filter[where][companion]=" +
-                              companion
-                          )
-                          .then((respSchedule) => {
-                            this.scheduleCompanions = respSchedule.data;
-                          });
-                      });
-                  } else {
-                    axios
-                      .get(
-                        "http://localhost:3000/api/groupCommunities?filter[where][secondCom]=" +
-                          community
-                      )
-                      .then((respGroupCom) => {
-                        var groupCommunity = {};
-                        groupCommunity = respGroupCom.data;
-                        if (groupCommunity != null) {
-                          var idGroup = respGroupCom.data[0].id;
-                          axios
-                            .get(
-                              "http://localhost:3000/api/companions?filter[where][groupCommunity]=" +
-                                idGroup
-                            )
-                            .then((respCom) => {
-                              var companion = respCom.data[0].id;
-                              axios
-                                .get(
-                                  "http://localhost:3000/api/scheduleCompanions?filter[where][companion]=" +
-                                    companion
-                                )
-                                .then((resp) => {
-                                  this.scheduleCompanions = resp.data;
-                                });
-                            });
-                        } else {
-                          axios
-                            .get(
-                              "http://localhost:3000/api/groupCommunities?filter[where][thirdCom]=" +
-                                community
-                            )
-                            .then((respGroupCom) => {
-                              var groupCommunity = {};
-                              groupCommunity = respGroupCom.data;
-                              if (groupCommunity != null) {
-                                var idGroup = respGroupCom.data[0].id;
-                                axios
-                                  .get(
-                                    "http://localhost:3000/api/companions?filter[where][groupCommunity]=" +
-                                      idGroup
-                                  )
-                                  .then((respCom) => {
-                                    var companion = respCom.data[0].id;
-                                    axios
-                                      .get(
-                                        "http://localhost:3000/api/scheduleCompanions?filter[where][companion]=" +
-                                          companion
-                                      )
-                                      .then((respSchedule) => {
-                                        this.scheduleCompanions =
-                                          respSchedule.data;
-                                      });
-                                  });
-                              } else {
-                                axios
-                                  .get(
-                                    "http://localhost:3000/api/groupCommunities?filter[where][fourthCom]=" +
-                                      community
-                                  )
-                                  .then((respGroupCom) => {
-                                    var groupCommunity = {};
-                                    groupCommunity = respGroupCom.data;
-                                    if (groupCommunity != null) {
-                                      var idGroup = respGroupCom.data[0].id;
-                                      axios
-                                        .get(
-                                          "http://localhost:3000/api/companions?filter[where][groupCommunity]=" +
-                                            idGroup
-                                        )
-                                        .then((respCom) => {
-                                          var companion = respCom.data[0].id;
-                                          axios
-                                            .get(
-                                              "http://localhost:3000/api/scheduleCompanions?filter[where][companion]=" +
-                                                companion
-                                            )
-                                            .then((respSchedule) => {
-                                              // var parsedobj = JSON.parse(JSON.stringify(respSchedule.data))
-                                              this.scheduleCompanions =
-                                                respSchedule.data;
-                                            });
-                                        });
-                                    } else {
-                                      axios
-                                        .get(
-                                          "http://localhost:3000/api/groupCommunities?filter[where][fifthCom]=" +
-                                            community
-                                        )
-                                        .then((respGroupCom) => {
-                                          var groupCommunity = {};
-                                          groupCommunity = respGroupCom.data;
-                                          if (groupCommunity != null) {
-                                            var idGroup =
-                                              respGroupCom.data[0].id;
-                                            axios
-                                              .get(
-                                                "http://localhost:3000/api/companions?filter[where][groupCommunity]=" +
-                                                  idGroup
-                                              )
-                                              .then((respCom) => {
-                                                var companion =
-                                                  respCom.data[0].id;
-                                                axios
-                                                  .get(
-                                                    "http://localhost:3000/api/scheduleCompanions?filter[where][companion]=" +
-                                                      companion
-                                                  )
-                                                  .then((respSchedule) => {
-                                                    this.scheduleCompanions =
-                                                      respSchedule.data;
-                                                  });
-                                              });
-                                          }
-                                        });
-                                    }
-                                  });
-                              }
-                            });
-                        }
-                      });
+                .then((respMet) => {
+                  if (respMet.data[0].reportStatus == 2) {
+                    this.checkRegister = 0;
                   }
                 });
-            });
-        }
+            }
+          });
+        axios
+          .get(
+            "http://localhost:3000/api/roles?filter[where][id]=" +
+              resp.data.role
+          )
+          .then((respRole) => {
+            this.roleName = respRole.data[0].roleName;
+            if (this.roleName == "Quản trị viên") {
+              this.role = 1;
+            } else if (this.roleName == "Giám đốc") {
+              this.role = 2;
+            } else if (this.roleName == "Quản lý") {
+              this.role = 3;
+            } else if (this.roleName == "Giám học") {
+              this.role = 4;
+            } else if (this.roleName == "Ứng sinh") {
+              this.role = 5;
+            } else if (this.roleName == "Trưởng linh hướng") {
+              this.role = 6;
+            } else if (this.roleName == "Linh hướng") {
+              this.role = 7;
+            } else if (this.roleName == "Trưởng đồng hành") {
+              this.role = 8;
+            } else if (this.roleName == "Đồng hành") {
+              this.role = 9;
+            } else if (this.roleName == "Giảng viên") {
+              this.role = 10;
+            }
+            if (this.role == 8 || this.role == 9) {
+              axios
+                .get(
+                  "http://localhost:3000/api/scheduleCompanions?filter[where][companion]=" +
+                    this.idTable
+                )
+                .then((response) => {
+                  var parsedobj = JSON.parse(JSON.stringify(response.data));
+                  this.scheduleCompanions = parsedobj;
+                  if (response.data.length != 0) {
+                    this.checkDelete = 1;
+                  } else {
+                    this.checkAdd = 1;
+                  }
+                });
+            } else if (this.role == 5) {
+              axios
+                .get(
+                  "http://localhost:3000/api/candidates?filter[where][id]=" +
+                    this.idTable
+                )
+                .then((respCan) => {
+                  var community = respCan.data[0].community;
+                  axios
+                    .get(
+                      "http://localhost:3000/api/groupCommunities?filter[where][firstCom]=" +
+                        community
+                    )
+                    .then((respGroupCom) => {
+                      var groupCommunity = {};
+                      groupCommunity = respGroupCom.data;
+                      if (groupCommunity != null) {
+                        var idGroup = respGroupCom.data[0].id;
+                        axios
+                          .get(
+                            "http://localhost:3000/api/companions?filter[where][groupCommunity]=" +
+                              idGroup
+                          )
+                          .then((respCom) => {
+                            var companion = respCom.data[0].id;
+                            axios
+                              .get(
+                                "http://localhost:3000/api/scheduleCompanions?filter[where][companion]=" +
+                                  companion
+                              )
+                              .then((respSchedule) => {
+                                this.scheduleCompanions = respSchedule.data;
+                              });
+                          });
+                      } else {
+                        axios
+                          .get(
+                            "http://localhost:3000/api/groupCommunities?filter[where][secondCom]=" +
+                              community
+                          )
+                          .then((respGroupCom) => {
+                            var groupCommunity = {};
+                            groupCommunity = respGroupCom.data;
+                            if (groupCommunity != null) {
+                              var idGroup = respGroupCom.data[0].id;
+                              axios
+                                .get(
+                                  "http://localhost:3000/api/companions?filter[where][groupCommunity]=" +
+                                    idGroup
+                                )
+                                .then((respCom) => {
+                                  var companion = respCom.data[0].id;
+                                  axios
+                                    .get(
+                                      "http://localhost:3000/api/scheduleCompanions?filter[where][companion]=" +
+                                        companion
+                                    )
+                                    .then((resp) => {
+                                      this.scheduleCompanions = resp.data;
+                                    });
+                                });
+                            } else {
+                              axios
+                                .get(
+                                  "http://localhost:3000/api/groupCommunities?filter[where][thirdCom]=" +
+                                    community
+                                )
+                                .then((respGroupCom) => {
+                                  var groupCommunity = {};
+                                  groupCommunity = respGroupCom.data;
+                                  if (groupCommunity != null) {
+                                    var idGroup = respGroupCom.data[0].id;
+                                    axios
+                                      .get(
+                                        "http://localhost:3000/api/companions?filter[where][groupCommunity]=" +
+                                          idGroup
+                                      )
+                                      .then((respCom) => {
+                                        var companion = respCom.data[0].id;
+                                        axios
+                                          .get(
+                                            "http://localhost:3000/api/scheduleCompanions?filter[where][companion]=" +
+                                              companion
+                                          )
+                                          .then((respSchedule) => {
+                                            this.scheduleCompanions =
+                                              respSchedule.data;
+                                          });
+                                      });
+                                  } else {
+                                    axios
+                                      .get(
+                                        "http://localhost:3000/api/groupCommunities?filter[where][fourthCom]=" +
+                                          community
+                                      )
+                                      .then((respGroupCom) => {
+                                        var groupCommunity = {};
+                                        groupCommunity = respGroupCom.data;
+                                        if (groupCommunity != null) {
+                                          var idGroup = respGroupCom.data[0].id;
+                                          axios
+                                            .get(
+                                              "http://localhost:3000/api/companions?filter[where][groupCommunity]=" +
+                                                idGroup
+                                            )
+                                            .then((respCom) => {
+                                              var companion =
+                                                respCom.data[0].id;
+                                              axios
+                                                .get(
+                                                  "http://localhost:3000/api/scheduleCompanions?filter[where][companion]=" +
+                                                    companion
+                                                )
+                                                .then((respSchedule) => {
+                                                  // var parsedobj = JSON.parse(JSON.stringify(respSchedule.data))
+                                                  this.scheduleCompanions =
+                                                    respSchedule.data;
+                                                });
+                                            });
+                                        } else {
+                                          axios
+                                            .get(
+                                              "http://localhost:3000/api/groupCommunities?filter[where][fifthCom]=" +
+                                                community
+                                            )
+                                            .then((respGroupCom) => {
+                                              var groupCommunity = {};
+                                              groupCommunity =
+                                                respGroupCom.data;
+                                              if (groupCommunity != null) {
+                                                var idGroup =
+                                                  respGroupCom.data[0].id;
+                                                axios
+                                                  .get(
+                                                    "http://localhost:3000/api/companions?filter[where][groupCommunity]=" +
+                                                      idGroup
+                                                  )
+                                                  .then((respCom) => {
+                                                    var companion =
+                                                      respCom.data[0].id;
+                                                    axios
+                                                      .get(
+                                                        "http://localhost:3000/api/scheduleCompanions?filter[where][companion]=" +
+                                                          companion
+                                                      )
+                                                      .then((respSchedule) => {
+                                                        this.scheduleCompanions =
+                                                          respSchedule.data;
+                                                      });
+                                                  });
+                                              }
+                                            });
+                                        }
+                                      });
+                                  }
+                                });
+                            }
+                          });
+                      }
+                    });
+                });
+            }
+          });
       });
     axios.get("http://localhost:3000/api/metCompanions").then((resp) => {
       this.metCompanions = resp.data;
@@ -14520,6 +18400,7 @@ const RegisteringScheduleCompanion = {
     },
 
     updateScheduleCompanion(scheduleCompanionEdit) {
+      var reportStatus = 1;
       axios
         .get(
           "http://localhost:3000/api/scheduleCompanions/getScheduleCompanion?id=" +
@@ -14578,17 +18459,37 @@ const RegisteringScheduleCompanion = {
                           resp.data[0].id
                       )
                       .then((response) => {
-                        axios
-                          .delete(
-                            "http://localhost:3000/api/metCompanions/" +
-                              response.data[0].id
-                          )
-                          .then((resp) => {
-                            this.metCompanions.splice(response.data[0].id, 1);
-                            setTimeout(() => {
-                              location.reload();
-                            }, 100);
-                          });
+                        var currentDate = new Date();
+                        var date =
+                          currentDate.getFullYear() +
+                          "-" +
+                          (currentDate.getMonth() > 8
+                            ? currentDate.getMonth() + 1
+                            : "0" + (date.getMonth() + 1)) +
+                          "-" +
+                          (currentDate.getDate() > 9
+                            ? currentDate.getDate()
+                            : "0" + currentDate.getDate());
+                        const metCompanionUpdate = {
+                          candidate: response.data[0].candidate,
+                          companion: response.data[0].companion,
+                          registeredDate: date,
+                          status: 1,
+                          reportStatus: response.data[0].reportStatus,
+                          dateMet:
+                            scheduleCompanionEdit.date +
+                            "/" +
+                            currentDate.getFullYear(),
+                          idSchedule: scheduleCompanionEdit.id,
+                        };
+                        const url =
+                          "http://localhost:3000/api/metCompanions/" +
+                          response.data[0].id +
+                          "/replace";
+                        axios.post(url, metCompanionUpdate);
+                        setTimeout(() => {
+                          location.reload();
+                        }, 50);
                       });
                   });
               }
@@ -14611,11 +18512,23 @@ const RegisteringScheduleCompanion = {
                 groupSession: scheduleCompanionOld.groupSession,
               };
               var currentDate = new Date();
+              var date =
+                currentDate.getFullYear() +
+                "-" +
+                (currentDate.getMonth() > 8
+                  ? currentDate.getMonth() + 1
+                  : "0" + (currentDate.getMonth() + 1)) +
+                "-" +
+                (currentDate.getDate() > 9
+                  ? currentDate.getDate()
+                  : "0" + currentDate.getDate());
               const metCompanion = {
                 companion: scheduleCompanionNew.companion,
                 candidate: this.idTable,
-                registeredDate: currentDate,
-                reportStatus: 1,
+                registeredDate: date,
+                reportStatus: reportStatus,
+                dateMet:
+                  scheduleCompanionNew.date + "/" + currentDate.getFullYear(),
                 status: 1,
                 idSchedule: scheduleCompanionEdit.id,
               };
@@ -14633,40 +18546,6 @@ const RegisteringScheduleCompanion = {
                     };
                     const url_3 = `http://localhost:3000/api/countMets`;
                     axios.post(url_3, countMet);
-                  }
-                });
-              axios
-                .get(
-                  "http://localhost:3000/api/rateCandidates?filter[where][candidate]=" +
-                    this.idTable
-                )
-                .then((respRate) => {
-                  var currentDate = new Date();
-                  var month = currentDate.getMonth() + 1;
-                  var year = currentDate.getFullYear();
-                  if (respRate.data.length == 1) {
-                    const rateCandidate = {
-                      candidate: respRate.data[0].candidate,
-                      month: month,
-                      year: year,
-                      score: 0,
-                      idSchedule: scheduleCompanionEdit.id,
-                    };
-                    const url_2 =
-                      "http://localhost:3000/api/rateCandidates/" +
-                      respRate.data[0].id +
-                      "/replace";
-                    axios.post(url_2, rateCandidate);
-                  } else {
-                    const rateCandidate = {
-                      candidate: scheduleCompanionEdit.candidate,
-                      month: month,
-                      year: year,
-                      score: 0,
-                      idSchedule: scheduleCompanionEdit.id,
-                    };
-                    const url_2 = `http://localhost:3000/api/rateCandidates`;
-                    axios.post(url_2, rateCandidate);
                   }
                 });
               const url_1 = `http://localhost:3000/api/metCompanions`;
@@ -14771,7 +18650,7 @@ const RegisteringScheduleCompanion = {
               axios.post(url, scheduleCompanionNew);
               setTimeout(() => {
                 location.reload();
-              }, 2000);
+              }, 2500);
             }
           } else if (this.role == 5) {
             var max = this.scheduleCompanions.length;
@@ -15702,7 +19581,7 @@ const RegisteringScheduleCompanion = {
   </div>
   `,
 };
-
+//REPORT COMPANION
 const ReportCompanion = {
   template: `
   <div>
@@ -15728,8 +19607,12 @@ const ListReportCompanion = {
       reportCompanion: {},
       companions: [],
       candidates: [],
+      communities: [],
       role: 0,
       idTable: 0,
+      roleName: null,
+      roleName: null,
+      metCompanions: [],
     };
   },
   mounted() {
@@ -15739,39 +19622,50 @@ const ListReportCompanion = {
       )
       .then((resp) => {
         this.idTable = resp.data.idTable;
-        this.role = resp.data.role;
-        if (this.role === 8 || this.role === 9) {
-          axios
-            .get(
-              "http://localhost:3000/api/reportCompanions?filter[where][companion]=" +
-                this.idTable
-            )
-            .then((response) => {
-              this.reportCompanions = response.data;
-            });
-        } else if (this.role === 1 || this.role === 2) {
-          axios
-            .get("http://localhost:3000/api/reportCompanions")
-            .then((response) => {
-              this.reportCompanions = response.data;
-            });
-        } else if (this.role == 5) {
-          axios
-            .get(
-              "http://localhost:3000/api/reportCompanions?filter[where][candidate]=" +
-                this.idTable
-            )
-            .then((response) => {
-              this.reportCompanions = response.data;
-            });
-        }
+        axios
+          .get(
+            "http://localhost:3000/api/roles?filter[where][id]=" +
+              resp.data.role
+          )
+          .then((respRole) => {
+            this.roleName = respRole.data[0].roleName;
+            if (this.roleName == "Quản trị viên") {
+              this.role = 1;
+            } else if (this.roleName == "Giám đốc") {
+              this.role = 2;
+            } else if (this.roleName == "Quản lý") {
+              this.role = 3;
+            } else if (this.roleName == "Giám học") {
+              this.role = 4;
+            } else if (this.roleName == "Ứng sinh") {
+              this.role = 5;
+            } else if (this.roleName == "Trưởng linh hướng") {
+              this.role = 6;
+            } else if (this.roleName == "Linh hướng") {
+              this.role = 7;
+            } else if (this.roleName == "Trưởng đồng hành") {
+              this.role = 8;
+            } else if (this.roleName == "Đồng hành") {
+              this.role = 9;
+            } else if (this.roleName == "Giảng viên") {
+              this.role = 10;
+            }
+          });
       });
-
+    axios.get("http://localhost:3000/api/reportCompanions").then((response) => {
+      this.reportCompanions = response.data;
+    });
     axios.get("http://localhost:3000/api/candidates").then((respCan) => {
       this.candidates = respCan.data;
     });
     axios.get("http://localhost:3000/api/companions").then((respCom) => {
       this.companions = respCom.data;
+    });
+    axios.get("http://localhost:3000/api/communities").then((respComm) => {
+      this.communities = respComm.data;
+    });
+    axios.get("http://localhost:3000/api/metCompanions").then((respMet) => {
+      this.metCompanions = respMet.data;
     });
   },
   computed: {},
@@ -15790,20 +19684,34 @@ const ListReportCompanion = {
     EvaluateCandidate(reportCompanion) {
       axios
         .get(
-          "http://localhost:3000/api/rateCandidates?where[idSchedule]=" +
-            reportCompanion.idSchedule
+          "http://localhost:3000/api/metCompanions?filter[where][id]=" +
+            reportCompanion.idMetCompanion
         )
         .then((resp) => {
-          var idRateCandidate = resp.data[0].id;
-          this.$router.push({
-            name: "editRateCandidate",
-            params: { id: idRateCandidate },
-          });
+          var date = new Date(resp.data[0].registeredDate);
+          var month = date.getMonth() + 1;
+          var year = date.getFullYear();
+          axios
+            .get(
+              "http://localhost:3000/api/rateCandidates?filter[where][and][0][candidate]=" +
+                reportCompanion.candidate +
+                "&filter[where][and][1][month]=" +
+                month +
+                "&filter[where][and][2][year]=" +
+                year
+            )
+            .then((resp) => {
+              var idRateCandidate = resp.data[0].id;
+              this.$router.push({
+                name: "editRateCandidate",
+                params: { id: idRateCandidate },
+              });
+            });
         });
     },
 
     ConfirmReportCompanion(reportCompanion) {
-      if (reportCompanion.status == 1) {
+      if (reportCompanion.isRead == 1) {
         const newReportCompanion = {
           companion: reportCompanion.companion,
           candidate: reportCompanion.candidate,
@@ -15819,7 +19727,7 @@ const ListReportCompanion = {
           darkCD: reportCompanion.darkCD,
           darkTD: reportCompanion.darkTD,
           targetNextMonth: reportCompanion.targetNextMonth,
-          idSchedule: reportCompanion.idSchedule,
+          idMetCompanion: reportCompanion.idMetCompanion,
           isRead: 2,
         };
         const url =
@@ -15830,7 +19738,7 @@ const ListReportCompanion = {
         setTimeout(() => {
           location.reload();
         }, 50);
-      } else if (reportCompanion.status == 2) {
+      } else if (reportCompanion.isRead == 2) {
         const newReportCompanion = {
           companion: reportCompanion.companion,
           candidate: reportCompanion.candidate,
@@ -15846,7 +19754,7 @@ const ListReportCompanion = {
           darkCD: reportCompanion.darkCD,
           darkTD: reportCompanion.darkTD,
           targetNextMonth: reportCompanion.targetNextMonth,
-          idSchedule: reportCompanion.idSchedule,
+          idMetCompanion: reportCompanion.idMetCompanion,
           isRead: 1,
         };
         const url =
@@ -15869,13 +19777,7 @@ const ListReportCompanion = {
         </div>
         <div class="col-md-6"></div>
         <div class="col-md-2" style="padding-left:68px;">
-          <router-link :to="{ name: 'addReportCompanion' }">
-            <button :title="titleButtonAdd" class="btn  rounded btn-hover-blue"
-              style="background-color: #056299;color: white;font-size:14px;">
-              <i class="fas fa-plus"></i>
-              &nbsp;Thêm
-            </button>
-          </router-link>
+          
         </div>
       </div>
     </div>
@@ -15904,7 +19806,71 @@ const ListReportCompanion = {
             </tr>
           </tfoot>
           <tbody>
-            <tr v-for="(reportCompanion, index) in reportCompanions" :key="reportCompanion.id">
+            <tr v-for="(reportCompanion, index) in reportCompanions" :key="reportCompanion.id" v-show="role === 1 || role === 2">
+              <th>{{ index + 1 }}</th>
+              <td v-for="candidate in candidates" v-if="candidate.id == reportCompanion.candidate">{{ candidate.fullName }}</td>
+              <td v-for="companion in companions" v-if="companion.id == reportCompanion.companion">{{ companion.fullName }}</td>
+              <td>{{ crypt.formatDateDisplay(reportCompanion.reportDate) }}</td>
+              <td v-for="isRead in isReads" v-if="isRead.id == reportCompanion.isRead">{{ isRead.name }}</td>
+              <td>
+                <div class="row" style="margin-left:-15px;">
+                  <div class="col-lg-4">
+                    <button :title="titleButtonDisplay" data-toggle="modal" @click="getDetailReportCompanion(reportCompanion)"
+                      data-target="#detailReportCompanionModal"
+                      class="btn btn-primary btn-sm align-middle h-28px w-28px rounded" type="submit">
+                      <i class="far fa-eye fa-md ml--3px"></i>
+                    </button>
+                  </div>
+                  <div class="col-lg-4">
+                    <button :title="titleButtonConfirm" @click="ConfirmReportCompanion(reportCompanion)"
+                       class="btn btn-info btn-sm h-28px w-28px rounded"
+                      style="margin-left: -12px;">
+                      <i class="far fa-check-circle fa-md ml--1px"></i>
+                    </button>
+                  </div>
+                  <div class="col-lg-4">
+                    <button :title="titleButtonScore" v-show="reportCompanion.isRead === 2" @click="EvaluateCandidate(reportCompanion)"
+                       class="btn btn-warning btn-sm h-28px w-28px rounded"
+                      style="margin-left: -25px;">
+                      <i class="fas fa-star-half-alt fa-md ml--1px"></i>
+                    </button>
+                  </div>
+                </div>
+              </td>
+            </tr>
+            <tr v-for="(reportCompanion, index) in reportCompanions" v-if="reportCompanion.companion === idTable" :key="reportCompanion.id" v-show="role === 8 || role === 9">
+              <th>{{ index + 1 }}</th>
+              <td v-for="candidate in candidates" v-if="candidate.id == reportCompanion.candidate">{{ candidate.fullName }}</td>
+              <td v-for="companion in companions" v-if="companion.id == reportCompanion.companion">{{ companion.fullName }}</td>
+              <td>{{ crypt.formatDateDisplay(reportCompanion.reportDate) }}</td>
+              <td v-for="isRead in isReads" v-if="isRead.id == reportCompanion.isRead">{{ isRead.name }}</td>
+              <td>
+                <div class="row" style="margin-left:-15px;">
+                  <div class="col-lg-4">
+                    <button :title="titleButtonDisplay" data-toggle="modal" @click="getDetailReportCompanion(reportCompanion)"
+                      data-target="#detailReportCompanionModal"
+                      class="btn btn-primary btn-sm align-middle h-28px w-28px rounded" type="submit">
+                      <i class="far fa-eye fa-md ml--3px"></i>
+                    </button>
+                  </div>
+                  <div class="col-lg-4">
+                    <button :title="titleButtonConfirm" @click="ConfirmReportCompanion(reportCompanion)"
+                      class="btn btn-info btn-sm h-28px w-28px rounded"
+                      style="margin-left: -13px;">
+                      <i class="far fa-check-circle fa-md ml--1px"></i>
+                    </button>
+                  </div>
+                  <div class="col-lg-4">
+                    <button :title="titleButtonScore"  v-show="reportCompanion.isRead === 2" @click="EvaluateCandidate(reportCompanion)"
+                      class="btn btn-warning btn-sm h-28px w-28px rounded"
+                      style="margin-left: -25px;">
+                      <i class="fas fa-star-half-alt fa-md ml--1px"></i>
+                    </button>
+                  </div>
+                </div>
+              </td>
+            </tr>
+            <tr v-for="(reportCompanion, index) in reportCompanions" v-if="reportCompanion.candidate === idTable" :key="reportCompanion.id" v-show="role === 5">
               <th>{{ index + 1 }}</th>
               <td v-for="candidate in candidates" v-if="candidate.id == reportCompanion.candidate">{{ candidate.fullName }}</td>
               <td v-for="companion in companions" v-if="companion.id == reportCompanion.companion">{{ companion.fullName }}</td>
@@ -15926,20 +19892,6 @@ const ListReportCompanion = {
                       <i class="fas fa-edit fa-md ml--2px"></i>
                     </button>
                   </div>
-                  <div class="col-lg-4" v-show="role === 1 || role === 2 || role === 8 || role === 9">
-                    <button :title="titleButtonConfirm" @click="ConfirmReportCompanion(reportCompanion)"
-                       class="btn btn-info btn-sm h-28px w-28px rounded"
-                      style="margin-left: -25.5px;">
-                      <i class="far fa-check-circle fa-md ml--1px"></i>
-                    </button>
-                  </div>
-                  <div class="col-lg-4" v-show="role === 1 || role === 2 || role === 8 || role === 9">
-                    <button :title="titleButtonScore" @click="EvaluateCandidate(reportCompanion)"
-                       class="btn btn-info btn-sm h-28px w-28px rounded"
-                      style="margin-left: -25.5px;">
-                      <i class="fas fa-star-half-alt fa-md ml--1px"></i>
-                    </button>
-                  </div>
                 </div>
               </td>
             </tr>
@@ -15950,16 +19902,163 @@ const ListReportCompanion = {
     <div id="detailReportCompanionModal" class="modal modal-edu-general default-popup-PrimaryModal fade rounded"
       role="dialog">
       <div class="modal-dialog">
-        <div class="modal-content">
-          <div class="modal-header header-color-modal bg-color-1">
-            <h4 class="modal-title" style="margin-left: -30px;">Bản Báo Cáo Đồng Hành</h4>
-            <div class="modal-close-area modal-close-df bg-danger"
-              style="padding-left: -200px;padding-bottom:-200px;">
-              <a class="close" data-dismiss="modal" href="#"><i class="fas fa-times"></i></a>
-            </div>
-          </div>
+        <div class="modal-content" style="width:800px;margin-left:-125px;">
           <div class="modal-body">
-            
+            <div class="container-fluid mt-5" style="margin-left:35px;">
+              <div class="row">
+                <div class="col-md-10">
+                  <span class="text-danger">Nhà Ứng Sinh Dòng Tên Việt Nam</span>
+                  <hr style="height:1px;color:lightgray;background-color:lightgray;margin-top: -1px;">
+                </div>
+                <div class="col-md-2">
+                  <img src="../images/logoungsinh.png"
+                    style="width: 80px;height: 80px;margin-top: -43px;margin-left: -35px;" alt="logo-nus" />
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-11 text-center">
+                  <strong style="font-size: larger;">NỘI DUNG GẶP ĐỒNG HÀNH</strong>
+                </div>
+              </div>
+              <div class="row mt-4">
+                <div class="col-md-11">
+                  <table style="width:60%;border: 1.5px dashed black;border-collapse: collapse;text-align: center;"
+                    class="mx-auto w-auto">
+                    <tr>
+                      <td
+                        style="width: 40%;border: 1.5px dashed black;border-collapse: collapse;text-align: center;padding: 5px;">
+                        Họ và tên</td>
+                      <td style="border: 1.5px dashed black;border-collapse: collapse;text-align: center;padding: 5px;" v-for="candidate in candidates" v-if="candidate.id == reportCompanion.candidate">{{ candidate.fullName }}</td>
+                    </tr>
+                    <tr>
+                      <td style="border: 1.5px dashed black;border-collapse: collapse;text-align: center;padding: 5px;">Cộng đoàn
+                      </td>
+                      <td style="border: 1.5px dashed black;border-collapse: collapse;text-align: center;padding: 5px;" v-for="candidate in candidates" v-if="candidate.id == reportCompanion.candidate">
+                        <span v-for="community in communities" v-if="community.id == candidate.community">{{ community.communityName }}</span>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="border: 1.5px dashed black;border-collapse: collapse;text-align: center;padding: 5px;">Ngày,
+                        tháng, năm đồng hành</td>
+                      <td style="border: 1.5px dashed black;border-collapse: collapse;text-align: center;padding: 5px;" v-for="metCompanion in metCompanions" v-if="metCompanion.id == reportCompanion.idMetCompanion">{{ metCompanion.dateMet }}</td>
+                    </tr>
+                  </table>
+                </div>
+              </div>
+              <div class="row mt-5">
+                <div class="col-md-11">
+                  <strong>1. <u>Những kinh nghiệm giúp tôi lớn lên hơn, dấn thân hơn trong đời sống ơn gọi.</u></strong>
+                </div>
+              </div>
+              <div class="row mt-1">
+                <div class="col-md-11 table-report-content">
+                  <table style="width:100%" class="mx-auto w-auto">
+                    <tr>
+                      <th>STT</th>
+                      <th style="width: 20%;">PHƯƠNG DIỆN</th>
+                      <th>KINH NGHIỆM</th>
+                    </tr>
+                    <tr>
+                      <td>1</td>
+                      <th>Thiêng liêng</th>
+                      <td class="text-left">
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; {{ reportCompanion.brightTL }}
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>2</td>
+                      <th>Nhân bản</th>
+                      <td class="text-left">
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{ reportCompanion.brightNB }}
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>3</td>
+                      <th>Tri thức</th>
+                      <td class="text-left">
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{ reportCompanion.brightTT }}
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>4</td>
+                      <th>Cộng đoàn</th>
+                      <td class="text-left">
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{ reportCompanion.brightCD }}
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>5</td>
+                      <th>Tông đồ</th>
+                      <td class="text-left">
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{ reportCompanion.brightTD }}
+                      </td>
+                    </tr>
+                  </table>
+                </div>
+              </div>
+              <div class="row mt-4">
+                <div class="col-md-11">
+                  <strong>2. <u>Những kinh nghiệm khiến đời sống tôi bị trì trệ, cản trở tôi dấn thân trong đời sống ơn
+                      gọi.</u></strong>
+                </div>
+              </div>
+              <div class="row mt-1">
+                <div class="col-md-11 table-report-content">
+                  <table style="width:100%" class="mx-auto w-auto">
+                    <tr>
+                      <th>STT</th>
+                      <th style="width: 20%;">PHƯƠNG DIỆN</th>
+                      <th>KINH NGHIỆM</th>
+                    </tr>
+                    <tr>
+                      <td>1</td>
+                      <th>Thiêng liêng</th>
+                      <td class="text-left">
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; {{ reportCompanion.darkTL }}
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>2</td>
+                      <th>Nhân bản</th>
+                      <td class="text-left">
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{ reportCompanion.darkNB }}
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>3</td>
+                      <th>Tri thức</th>
+                      <td class="text-left">
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{ reportCompanion.darkTT }}
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>4</td>
+                      <th>Cộng đoàn</th>
+                      <td class="text-left">
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{ reportCompanion.darkCD }}
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>5</td>
+                      <th>Tông đồ</th>
+                      <td class="text-left">
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{ reportCompanion.darkTD }}
+                      </td>
+                    </tr>
+                  </table>
+                </div>
+              </div>
+              <div class="row mt-4">
+                <div class="col-md-12">
+                  <strong>3. <u>Dựa trên nhận định tháng vừa qua, tôi có những ước ao hay quyết tâm gì cho tháng sắp tới.</u></strong>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-11">
+                  {{ reportCompanion.targetNextMonth }}
+                </div>
+              </div>
+            </div>
           </div>
           <div class="modal-footer">
           </div>
@@ -15987,7 +20086,7 @@ const AddReportCompanion = {
       darkCD: null,
       darkTD: null,
       targetNextMonth: null,
-      idSchedule: 0,
+      idMetCompanion: 0,
       isRead: 1,
       isReads: [
         { id: 1, name: "Chưa duyệt" },
@@ -16010,6 +20109,8 @@ const AddReportCompanion = {
       reportCompanions: [],
       idTable: 0,
       role: 0,
+      roleName: null,
+      idSchedule: 0,
     };
   },
   mounted() {
@@ -16019,40 +20120,52 @@ const AddReportCompanion = {
       )
       .then((resp) => {
         this.idTable = resp.data.idTable;
-        this.role = resp.data.role;
+        axios
+          .get(
+            "http://localhost:3000/api/roles?filter[where][id]=" +
+              resp.data.role
+          )
+          .then((respRole) => {
+            this.roleName = respRole.data[0].roleName;
+            if (this.roleName == "Quản trị viên") {
+              this.role = 1;
+            } else if (this.roleName == "Giám đốc") {
+              this.role = 2;
+            } else if (this.roleName == "Quản lý") {
+              this.role = 3;
+            } else if (this.roleName == "Giám học") {
+              this.role = 4;
+            } else if (this.roleName == "Ứng sinh") {
+              this.role = 5;
+            } else if (this.roleName == "Trưởng linh hướng") {
+              this.role = 6;
+            } else if (this.roleName == "Linh hướng") {
+              this.role = 7;
+            } else if (this.roleName == "Trưởng đồng hành") {
+              this.role = 8;
+            } else if (this.roleName == "Đồng hành") {
+              this.role = 9;
+            } else if (this.roleName == "Giảng viên") {
+              this.role = 10;
+            }
+          });
         axios
           .get(
             "http://localhost:3000/api/scheduleCompanions?filter[where][and][0][status]=1&filter[where][and][1][candidate]=" +
               this.idTable
           )
           .then((respSche) => {
-            this.scheduleCompanions = respSche.data;
-            console.log(this.scheduleCompanions);
+            this.idSchedule = respSche.data[0].id;
             this.companion = respSche.data[0].companion;
             this.candidate = respSche.data[0].candidate;
-            console.log(this.companion);
-            console.log(this.candidate);
           });
       });
     axios.get("http://localhost:3000/api/companions").then((response) => {
       this.companions = response.data;
-      console.log(this.companions);
     });
     axios.get("http://localhost:3000/api/candidates").then((respCan) => {
       this.candidates = respCan.data;
-      console.log(this.candidates);
     });
-    // axios
-    //   .get("http://localhost:3000/api/scheduleCompanions?filter[where][candidate]=25")
-    //   .then((respSche) => {
-    //     this.scheduleCompanions = respSche.data;
-    //     console.log(this.scheduleCompanions)
-    //     this.companion = respSche.data[0].companion;
-
-    // });
-    // axios.get("http://localhost:3000/api/reportCompanions").then((respRe) => {
-    //   this.reportCompanions = respRe.data;
-    // });
   },
   computed: {
     refreshFormReportCompanion() {
@@ -16073,30 +20186,50 @@ const AddReportCompanion = {
   },
   methods: {
     submitAddReportCompanionForm() {
-      var currentDate = new Date();
-      if (this.scheduleCompanion != null) {
-        const reportCompanion = {
-          candidate: this.idTable,
-          companion: this.scheduleCompanion.companion,
-          reportDate: currentDate,
-          brightTL: this.brightTL,
-          brightNB: this.brightNB,
-          brightTT: this.brightTT,
-          brightCD: this.brightCD,
-          brightTD: this.brightTD,
-          darkTL: this.darkTL,
-          darkNB: this.darkNB,
-          darkTT: this.darkTT,
-          darkCD: this.darkCD,
-          darkTD: this.darkTD,
-          idSchedule: this.scheduleCompanion.id,
-          isRead: 1,
-        };
-        const url = `http://localhost:3000/api/reportCompanions`;
-        axios.post(url, reportCompanion);
-        this.$router.push("/");
-        return 0;
-      }
+      axios
+        .get(
+          "http://localhost:3000/api/metCompanions?filter[where][idSchedule]=" +
+            this.idSchedule
+        )
+        .then((respMet) => {
+          var currentDate = new Date();
+          const reportCompanion = {
+            candidate: this.idTable,
+            companion: this.companion,
+            reportDate: currentDate,
+            brightTL: this.brightTL,
+            brightNB: this.brightNB,
+            brightTT: this.brightTT,
+            brightCD: this.brightCD,
+            brightTD: this.brightTD,
+            darkTL: this.darkTL,
+            darkNB: this.darkNB,
+            darkTT: this.darkTT,
+            darkCD: this.darkCD,
+            darkTD: this.darkTD,
+            targetNextMonth: this.targetNextMonth,
+            idMetCompanion: respMet.data[0].id,
+            isRead: 1,
+          };
+          const metCompanion = {
+            companion: respMet.data[0].companion,
+            candidate: respMet.data[0].candidate,
+            registeredDate: respMet.data[0].registeredDate,
+            status: respMet.data[0].status,
+            dateMet: respMet.data[0].dateMet,
+            reportStatus: 2,
+            idSchedule: respMet.data[0].idSchedule,
+          };
+          const url_1 =
+            "http://localhost:3000/api/metCompanions/" +
+            respMet.data[0].id +
+            "/replace";
+          axios.post(url_1, metCompanion);
+          const url = `http://localhost:3000/api/reportCompanions`;
+          axios.post(url, reportCompanion);
+          this.$router.push("/");
+          return 0;
+        });
     },
 
     clearInputReportCompanionForm() {
@@ -16245,7 +20378,7 @@ const AddReportCompanion = {
           </div>
         </div>
         <div class="row mt-1">
-          <div class="col-lg-6">
+          <div class="col-lg-12">
             <label class=" font-weight-bold col-form-label" for="targetNextMonth">Mục Tiêu</label>
             <textarea class="form-control text-size-13px" :title="titleTargetNextMonth" id="targetNextMonth" v-model="targetNextMonth"
               name="targetNextMonth" rows="4" style="margin-top: -5px;"></textarea>
@@ -16293,7 +20426,7 @@ const EditReportCompanion = {
       darkCD: null,
       darkTD: null,
       targetNextMonth: null,
-      idSchedule: 0,
+      idMetCompanion: 0,
       isRead: 1,
       isReads: [
         { id: 1, name: "Chưa duyệt" },
@@ -16317,6 +20450,7 @@ const EditReportCompanion = {
       reportCompanions: [],
       idTable: 0,
       role: 0,
+      roleName: null,
       reportCompanion: {},
     };
   },
@@ -16327,7 +20461,35 @@ const EditReportCompanion = {
       )
       .then((resp) => {
         this.idTable = resp.data.idTable;
-        this.role = resp.data.role;
+        axios
+          .get(
+            "http://localhost:3000/api/roles?filter[where][id]=" +
+              resp.data.role
+          )
+          .then((respRole) => {
+            this.roleName = respRole.data[0].roleName;
+            if (this.roleName == "Quản trị viên") {
+              this.role = 1;
+            } else if (this.roleName == "Giám đốc") {
+              this.role = 2;
+            } else if (this.roleName == "Quản lý") {
+              this.role = 3;
+            } else if (this.roleName == "Giám học") {
+              this.role = 4;
+            } else if (this.roleName == "Ứng sinh") {
+              this.role = 5;
+            } else if (this.roleName == "Trưởng linh hướng") {
+              this.role = 6;
+            } else if (this.roleName == "Linh hướng") {
+              this.role = 7;
+            } else if (this.roleName == "Trưởng đồng hành") {
+              this.role = 8;
+            } else if (this.roleName == "Đồng hành") {
+              this.role = 9;
+            } else if (this.roleName == "Giảng viên") {
+              this.role = 10;
+            }
+          });
       });
     axios.get("http://localhost:3000/api/candidates").then((respCan) => {
       this.candidates = respCan.data;
@@ -16355,7 +20517,7 @@ const EditReportCompanion = {
         this.darkCD = response.data[0].darkCD;
         this.darkTD = response.data[0].darkTD;
         this.targetNextMonth = response.data[0].targetNextMonth;
-        this.idSchedule = response.data[0].idSchedule;
+        this.idMetCompanion = response.data[0].idMetCompanion;
         this.isRead = response.data[0].isRead;
       });
   },
@@ -16378,34 +20540,33 @@ const EditReportCompanion = {
   },
   methods: {
     submitEditReportCompanionForm() {
-      if (this.scheduleCompanion != null) {
-        const reportCompanion = {
-          candidate: this.candidate,
-          companion: this.companion,
-          reportDate: currentDate,
-          brightTL: this.brightTL,
-          brightNB: this.brightNB,
-          brightTT: this.brightTT,
-          brightCD: this.brightCD,
-          brightTD: this.brightTD,
-          darkTL: this.darkTL,
-          darkNB: this.darkNB,
-          darkTT: this.darkTT,
-          darkCD: this.darkCD,
-          darkTD: this.darkTD,
-          idSchedule: this.idSchedule,
-          isRead: 1,
-          id: this.$route.params.id,
-        };
-        const url =
-          "http://localhost:3000/api/reportCompanions/" +
-          reportCompanion.id +
-          "/replace";
-        axios.post(url, reportCompanion);
-        this.$router.push("/");
-        location.reload();
-        return 0;
-      }
+      var currentDate = new Date();
+      const reportCompanion = {
+        candidate: this.candidate,
+        companion: this.companion,
+        reportDate: currentDate,
+        brightTL: this.brightTL,
+        brightNB: this.brightNB,
+        brightTT: this.brightTT,
+        brightCD: this.brightCD,
+        brightTD: this.brightTD,
+        darkTL: this.darkTL,
+        darkNB: this.darkNB,
+        darkTT: this.darkTT,
+        darkCD: this.darkCD,
+        darkTD: this.darkTD,
+        targetNextMonth: this.targetNextMonth,
+        idMetCompanion: this.idMetCompanion,
+        isRead: 1,
+      };
+      const url =
+        "http://localhost:3000/api/reportCompanions/" +
+        this.$route.params.id +
+        "/replace";
+      axios.post(url, reportCompanion);
+      this.$router.push("/");
+      location.reload();
+      return 0;
     },
 
     clearInputReportCompanionForm() {
@@ -16474,97 +20635,85 @@ const EditReportCompanion = {
           </div>
         </div>
         <div class="row">
-          <div class="col-md-4"></div>
-          <div class="col-md-8">
-            <strong>1. <u>Những kinh nghiệm giúp tôi lớn lên hơn, dấn thân hơn trong đời sống ơn gọi.</u></strong>
+          <div class="col-md-12">
+            <strong style="font-size:15px;">1. <u style="font-size:15px;">Những kinh nghiệm giúp tôi lớn lên hơn, dấn thân hơn trong đời sống ơn gọi.</u></strong>
           </div>
         </div>
         <div class="row">
-          <div class="col-lg-4"></div>
-          <div class="col-lg-4">
+          <div class="col-lg-6">
             <label class=" font-weight-bold col-form-label" for="brightTL">Thiêng Liêng</label>
             <textarea class="form-control text-size-13px" :title="titleBrightTL" id="brightTL" v-model="brightTL"
               name="brightTL" rows="4" :value="brightTL" v-on:keyup="brightTL = $event.target.value" style="margin-top: -5px;"></textarea>
           </div>
-          <div class="col-lg-4">
+          <div class="col-lg-6">
             <label class=" font-weight-bold col-form-label" for="brightNB">Nhân Bản</label>
             <textarea class="form-control text-size-13px" :title="titleBrightNB" id="brightNB" v-model="brightNB"
               name="brightNB" rows="4" :value="brightNB" v-on:keyup="brightNB = $event.target.value" style="margin-top: -5px;"></textarea>
           </div>
         </div>
         <div class="row mt-1">
-          <div class="col-lg-4"></div>
-          <div class="col-lg-4">
+          <div class="col-lg-6">
             <label class=" font-weight-bold col-form-label" for="brightTT">Tri Thức</label>
             <textarea class="form-control text-size-13px" :title="titleBrightTT" id="brightTT" v-model="brightTT"
               name="brightTT" rows="4" :value="brightTT" v-on:keyup="brightTT = $event.target.value" style="margin-top: -5px;"></textarea>
           </div>
-          <div class="col-lg-4">
+          <div class="col-lg-6">
             <label class=" font-weight-bold col-form-label" for="brightCD">Cộng Đoàn</label>
             <textarea class="form-control text-size-13px" :title="titleBrightCD" id="brightCD" v-model="brightCD"
               name="brightCD" rows="4" :value="brightCD" v-on:keyup="brightCD = $event.target.value" style="margin-top: -5px;"></textarea>
           </div>
         </div>
         <div class="row mt-1">
-          <div class="col-lg-4"></div>
-          <div class="col-lg-4">
+          <div class="col-lg-6">
             <label class=" font-weight-bold col-form-label" for="brightTD">Tông Đồ</label>
             <textarea class="form-control text-size-13px" :title="titleBrightTD" id="brightTD" v-model="brightTD"
               name="brightTD" rows="4" :value="brightTD" v-on:keyup="brightTD = $event.target.value" style="margin-top: -5px;"></textarea>
           </div>
-          <div class="col-lg-4"></div>
         </div>
-        <div class="row">
-          <div class="col-md-4"></div>
-          <div class="col-md-8">
-            <strong>2. <u>Những kinh nghiệm khiến đời sống tôi bị trì trệ, cản trở tôi dấn thân trong đời sống ơn
+        <div class="row mt-3">
+          <div class="col-md-12">
+            <strong style="font-size:15px;">2. <u style="font-size:15px;">Những kinh nghiệm khiến đời sống tôi bị trì trệ, cản trở tôi dấn thân trong đời sống ơn
                 gọi.</u></strong>
           </div>
         </div>
         <div class="row">
-          <div class="col-lg-4"></div>
-          <div class="col-lg-4">
+          <div class="col-lg-6">
             <label class=" font-weight-bold col-form-label" for="darkTL">Thiêng Liêng</label>
             <textarea class="form-control text-size-13px" :title="titleDarkTL" id="darkTL" v-model="darkTL"
               name="darkTL" rows="4" :value="darkTL" v-on:keyup="darkTL = $event.target.value" style="margin-top: -5px;"></textarea>
           </div>
-          <div class="col-lg-4">
+          <div class="col-lg-6">
             <label class=" font-weight-bold col-form-label" for="darkNB">Nhân Bản</label>
             <textarea class="form-control text-size-13px" :title="titleDarkNB" id="darkNB" v-model="darkNB"
               name="darkNB" rows="4" :value="darkNB" v-on:keyup="darkNB = $event.target.value" style="margin-top: -5px;"></textarea>
           </div>
         </div>
         <div class="row mt-1">
-          <div class="col-lg-4"></div>
-          <div class="col-lg-4">
+          <div class="col-lg-6">
             <label class=" font-weight-bold col-form-label" for="darkTT">Tri Thức</label>
             <textarea class="form-control text-size-13px" :title="titleDarkTT" id="darkTT" v-model="darkTT"
               name="darkTT" rows="4" :value="darkTT" v-on:keyup="darkTT = $event.target.value" style="margin-top: -5px;"></textarea>
           </div>
-          <div class="col-lg-4">
+          <div class="col-lg-6">
             <label class=" font-weight-bold col-form-label" for="darkCD">Cộng Đoàn</label>
             <textarea class="form-control text-size-13px" :title="titleDarkCD" id="darkCD" v-model="darkCD"
               name="darkCD" rows="4" :value="darkCD" v-on:keyup="darkCD = $event.target.value" style="margin-top: -5px;"></textarea>
           </div>
         </div>
         <div class="row mt-1">
-          <div class="col-lg-4"></div>
-          <div class="col-lg-4">
+          <div class="col-lg-6">
             <label class=" font-weight-bold col-form-label" for="darkTD">Tông Đồ</label>
             <textarea class="form-control text-size-13px" :title="titleDarkTD" id="darkTD" v-model="darkTD"
               name="darkTD" rows="4" :value="darkTD" v-on:keyup="darkTD = $event.target.value" style="margin-top: -5px;"></textarea>
           </div>
-          <div class="col-lg-4"></div>
         </div>
-        <div class="row">
-          <div class="col-md-4"></div>
-          <div class="col-md-8">
-            <strong>3. <u>Dựa trên nhận định tháng vừa qua, tôi có những ước ao hay quyết tâm gì cho tháng sắp tới.</u></strong>
+        <div class="row mt-3">
+          <div class="col-md-12">
+            <strong style="font-size:15px;">3. <u style="font-size:15px;">Dựa trên nhận định tháng vừa qua, tôi có những ước ao hay quyết tâm gì cho tháng sắp tới.</u></strong>
           </div>
         </div>
         <div class="row mt-1">
-          <div class="col-lg-4"></div>
-          <div class="col-lg-4">
+          <div class="col-lg-12">
             <label class=" font-weight-bold col-form-label" for="targetNextMonth">Mục Tiêu</label>
             <textarea class="form-control text-size-13px" :title="titleTargetNextMonth" id="targetNextMonth" v-model="targetNextMonth"
               name="targetNextMonth" rows="4"
@@ -16597,7 +20746,7 @@ const EditReportCompanion = {
   </div>
   `,
 };
-
+//RATE CANDIDATE
 const RateCandidate = {
   template: `
   <div>
@@ -16616,6 +20765,22 @@ const ListRateCandidate = {
       candidates: [],
       countMets: [],
       titleButtonDisplay: "Xem thống kê",
+      rateCandidateFollowCan: [],
+      arrayYear: [],
+      months: [
+        { id: 1, month: 1 },
+        { id: 2, month: 2 },
+        { id: 3, month: 3 },
+        { id: 4, month: 4 },
+        { id: 5, month: 5 },
+        { id: 6, month: 6 },
+        { id: 7, month: 7 },
+        { id: 8, month: 8 },
+        { id: 9, month: 9 },
+        { id: 10, month: 10 },
+        { id: 11, month: 11 },
+        { id: 12, month: 12 },
+      ],
     };
   },
   mounted() {
@@ -16628,11 +20793,37 @@ const ListRateCandidate = {
     axios.get("http://localhost:3000/api/countMets").then((respCountMet) => {
       this.countMets = respCountMet.data;
     });
-    
   },
   computed: {},
   methods: {
-    goToRateCandidate(candidate) {},
+    getDataRateCandidate(candidate) {
+      axios
+        .get(
+          "http://localhost:3000/api/rateCandidates?filter[where][candidate]=" +
+            candidate
+        )
+        .then((resp) => {
+          var currentYear = resp.data[0].year;
+          this.arrayYear = [];
+          var yearAdd = {
+            id: 0,
+            year: currentYear,
+          };
+          this.arrayYear.push(yearAdd);
+          var idArrayyear = 0;
+          for (i = 0; i < resp.data.length; i++) {
+            if (resp.data[i].year != currentYear) {
+              var yearAdd1 = {
+                id: idArrayyear + 1,
+                year: resp.data[i].year,
+              };
+              this.arrayYear.push(yearAdd1);
+              currentYear = resp.data[i].year;
+              idArrayyear = idArrayyear + 1;
+            }
+          }
+        });
+    },
   },
   template: `
   <div class="card shadow mb-4" style="margin-top: -5px;">
@@ -16680,16 +20871,14 @@ const ListRateCandidate = {
               <td>
                 {{ countMet.countMetSpiritualGuide }}
               </td>
-              <td v-for="candidate in candidates" v-if="candidate.id == countMet.candidate && candidate.status == 1">
-                <i class="fas fa-toggle-on fa-lg text-success"></i>
-              </td>
-              <td v-for="candidate in candidates" v-else>
-                <i class="fas fa-toggle-off fa-lg text-danger"></i>
+              <td v-for="candidate in candidates" v-if="candidate.id == countMet.candidate">
+                <i v-show="candidate.status == 1" class="fas fa-toggle-on fa-lg text-success"></i>
+                <i v-show="candidate.status == 2" class="fas fa-toggle-off fa-lg text-danger"></i>
               </td>
               <td class="align-middle">
                 <div class="row">
                   <div class="col-4">
-                    <button :title="titleButtonDisplay" @click="goToRateCandidate(candidate)" class="btn btn-primary btn-sm h-28px w-28px rounded"
+                    <button :title="titleButtonDisplay" data-toggle="modal" @click="getDataRateCandidate(countMet.candidate)" data-target="#chartRateCandidateModal" class="btn btn-primary btn-sm h-28px w-28px rounded"
                       type="submit">
                       <i class="far fa-eye fa-md ml--2px"></i>
                     </button>
@@ -16699,6 +20888,34 @@ const ListRateCandidate = {
             </tr>
           </tbody>
         </table>
+      </div>
+    </div>
+    <div id="chartRateCandidateModal" class="modal modal-edu-general default-popup-PrimaryModal fade" role="dialog">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header header-color-modal bg-color-1">
+            <h4 class="modal-title" style="margin-left: -30px;">Thông số giám sát ứng sinh hàng tháng</h4>
+            <div class="modal-close-area modal-close-df" style="padding-left: -200px;padding-bottom:-200px;">
+              <a class="close" data-dismiss="modal" href="#"><i class="fas fa-times"></i></a>
+            </div>
+          </div>
+          <div class="modal-body">
+            <table style="width:100%">
+              <thead>
+                <tr>
+                  <th></th>
+                  <th v-for="m in months" class="text-center">{{ m.month }}</th>
+                </tr>
+              </thead>
+              <tr v-for="year in arrayYear">
+                <th class="text-center">{{year.year}}</th>
+                <td class="text-center" v-for="rate in rateCandidates" v-if="rate.year == year.year">
+                    {{ rate.score }}
+                </td>
+              </tr>
+            </table>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -16735,7 +20952,7 @@ const EditRateCandidate = {
         this.candidate = respRate.data[0].candidate;
         this.month = respRate.data[0].month;
         this.year = respRate.data[0].year;
-        this.year = respRate.data[0].score;
+        this.score = respRate.data[0].score;
         this.idSchedule = respRate.data[0].idSchedule;
       });
   },
@@ -16762,11 +20979,10 @@ const EditRateCandidate = {
           year: this.year,
           score: this.score,
           idSchedule: this.idSchedule,
-          id: this.$route.params.id,
         };
         const url =
           "http://localhost:3000/api/rateCandidates/" +
-          rateCandidate.id +
+          this.$route.params.id +
           "/replace";
         axios.post(url, rateCandidate);
         this.$router.push("/reportCompanions");
@@ -16789,7 +21005,7 @@ const EditRateCandidate = {
   template: `
   <div class="card shadow mb-4" style="margin-top: -5px;">
   <div class="card-header py-3">
-    <h6 class="m-0 font-weight-bold text-dark">Đánh Giá Ứng Sinh Tháng {{ month }}</h6>
+    <h6 class="m-0 font-weight-bold text-dark">Đánh Giá Ứng Sinh Tháng {{ month }} Năm {{ year }}</h6>
   </div>
   <div class="card-body">
     <form @submit.prevent="submitEditRateCandidateForm" action="POST" method="" autocomplete="off">
@@ -16893,35 +21109,13 @@ const RegisteringScheduleSpiritualGuide = {
       scheduleSpiritualGuide: {},
       role: 0,
       idTable: 0,
+      roleName: null,
       metSpiritualGuides: [],
       checkAdd: 0,
       checkDelete: 0,
     };
   },
   mounted() {
-    // let promiseResponse = axios.get("http://localhost:3000/api/logins/findOne?filter[where][token]=token")
-    //                     .then(response => response.data)
-    //                     .then(data => {return data})
-    // Promise.resolve(promiseResponse).then((jsonResults) => {
-    //   console.log(jsonResults);
-    //   this.idTable = jsonResults.idTable;
-    //   console.log(this.idTable);
-    // })
-    // axios
-    //   .get(
-    //     "http://localhost:3000/api/logins/findOne?filter[where][token]=token"
-    //   )
-    //   .then((resp) => {
-    //     this.idTable = resp.data.idTable;
-    //     this.role = resp.data.role;
-    //   });
-    // axios
-    //   .get(
-    //     "http://localhost:3000/api/scheduleSpiritualGuides?filter[where][spiritualGuide]=8"
-    //   )
-    //   .then((response) => {
-    //     this.scheduleSpiritualGuides = response.data;
-    //   });
     axios.get("http://localhost:3000/api/candidates").then((resp) => {
       this.candidates = resp.data;
     });
@@ -16932,181 +21126,211 @@ const RegisteringScheduleSpiritualGuide = {
       )
       .then((resp) => {
         this.idTable = resp.data.idTable;
-        this.role = resp.data.role;
-        if (this.role == 6 || this.role == 7) {
-          axios
-            .get(
-              "http://localhost:3000/api/scheduleSpiritualGuides?filter[where][spiritualGuide]=" +
-                this.idTable
-            )
-            .then((response) => {
-              this.scheduleSpiritualGuides = response.data;
-              if (response.data.length == 0) {
-                this.checkAdd = 1;
-              } else {
-                this.checkDelete = 1;
-              }
-            });
-        } else if (this.role == 5) {
-          axios
-            .get(
-              "http://localhost:3000/api/candidates?filter[where][id]=" +
-                this.idTable
-            )
-            .then((respCan) => {
-              var community = respCan.data[0].community;
+        axios
+          .get(
+            "http://localhost:3000/api/roles?filter[where][id]=" +
+              resp.data.role
+          )
+          .then((respRole) => {
+            this.roleName = respRole.data[0].roleName;
+            if (this.roleName == "Quản trị viên") {
+              this.role = 1;
+            } else if (this.roleName == "Giám đốc") {
+              this.role = 2;
+            } else if (this.roleName == "Quản lý") {
+              this.role = 3;
+            } else if (this.roleName == "Giám học") {
+              this.role = 4;
+            } else if (this.roleName == "Ứng sinh") {
+              this.role = 5;
+            } else if (this.roleName == "Trưởng linh hướng") {
+              this.role = 6;
+            } else if (this.roleName == "Linh hướng") {
+              this.role = 7;
+            } else if (this.roleName == "Trưởng đồng hành") {
+              this.role = 8;
+            } else if (this.roleName == "Đồng hành") {
+              this.role = 9;
+            } else if (this.roleName == "Giảng viên") {
+              this.role = 10;
+            }
+            if (this.role == 6 || this.role == 7) {
               axios
                 .get(
-                  "http://localhost:3000/api/groupCommunities?filter[where][firstCom]=" +
-                    community
+                  "http://localhost:3000/api/scheduleSpiritualGuides?filter[where][spiritualGuide]=" +
+                    this.idTable
                 )
-                .then((respGroupCom) => {
-                  var groupCommunity = {};
-                  groupCommunity = respGroupCom.data;
-                  if (groupCommunity != null) {
-                    var idGroup = respGroupCom.data[0].id;
-                    axios
-                      .get(
-                        "http://localhost:3000/api/spiritualGuides?filter[where][groupCommunity]=" +
-                          idGroup
-                      )
-                      .then((respCom) => {
-                        var spiritualGuide = respCom.data[0].id;
-                        axios
-                          .get(
-                            "http://localhost:3000/api/scheduleSpiritualGuides?filter[where][spiritualGuide]=" +
-                              spiritualGuide
-                          )
-                          .then((respSchedule) => {
-                            this.scheduleSpiritualGuides = respSchedule.data;
-                          });
-                      });
+                .then((response) => {
+                  this.scheduleSpiritualGuides = response.data;
+                  if (response.data.length == 0) {
+                    this.checkAdd = 1;
                   } else {
-                    axios
-                      .get(
-                        "http://localhost:3000/api/groupCommunities?filter[where][secondCom]=" +
-                          community
-                      )
-                      .then((respGroupCom) => {
-                        var groupCommunity = {};
-                        groupCommunity = respGroupCom.data;
-                        if (groupCommunity != null) {
-                          var idGroup = respGroupCom.data[0].id;
-                          axios
-                            .get(
-                              "http://localhost:3000/api/spiritualGuides?filter[where][groupCommunity]=" +
-                                idGroup
-                            )
-                            .then((respCom) => {
-                              var spiritualGuide = respCom.data[0].id;
-                              axios
-                                .get(
-                                  "http://localhost:3000/api/scheduleSpiritualGuides?filter[where][spiritualGuide]=" +
-                                    spiritualGuide
-                                )
-                                .then((resp) => {
-                                  this.scheduleSpiritualGuides = resp.data;
-                                });
-                            });
-                        } else {
-                          axios
-                            .get(
-                              "http://localhost:3000/api/groupCommunities?filter[where][thirdCom]=" +
-                                community
-                            )
-                            .then((respGroupCom) => {
-                              var groupCommunity = {};
-                              groupCommunity = respGroupCom.data;
-                              if (groupCommunity != null) {
-                                var idGroup = respGroupCom.data[0].id;
-                                axios
-                                  .get(
-                                    "http://localhost:3000/api/spiritualGuides?filter[where][groupCommunity]=" +
-                                      idGroup
-                                  )
-                                  .then((respCom) => {
-                                    var spiritualGuide = respCom.data[0].id;
-                                    axios
-                                      .get(
-                                        "http://localhost:3000/api/scheduleSpiritualGuides?filter[where][spiritualGuide]=" +
-                                          spiritualGuide
-                                      )
-                                      .then((respSchedule) => {
-                                        this.scheduleSpiritualGuides =
-                                          respSchedule.data;
-                                      });
-                                  });
-                              } else {
-                                axios
-                                  .get(
-                                    "http://localhost:3000/api/groupCommunities?filter[where][fourthCom]=" +
-                                      community
-                                  )
-                                  .then((respGroupCom) => {
-                                    var groupCommunity = {};
-                                    groupCommunity = respGroupCom.data;
-                                    if (groupCommunity != null) {
-                                      var idGroup = respGroupCom.data[0].id;
-                                      axios
-                                        .get(
-                                          "http://localhost:3000/api/spiritualGuides?filter[where][groupCommunity]=" +
-                                            idGroup
-                                        )
-                                        .then((respCom) => {
-                                          var spiritualGuide =
-                                            respCom.data[0].id;
-                                          axios
-                                            .get(
-                                              "http://localhost:3000/api/scheduleSpiritualGuides?filter[where][spiritualGuide]=" +
-                                                spiritualGuide
-                                            )
-                                            .then((respSchedule) => {
-                                              this.scheduleSpiritualGuides =
-                                                respSchedule.data;
-                                            });
-                                        });
-                                    } else {
-                                      axios
-                                        .get(
-                                          "http://localhost:3000/api/groupCommunities?filter[where][fifthCom]=" +
-                                            community
-                                        )
-                                        .then((respGroupCom) => {
-                                          var groupCommunity = {};
-                                          groupCommunity = respGroupCom.data;
-                                          if (groupCommunity != null) {
-                                            var idGroup =
-                                              respGroupCom.data[0].id;
-                                            axios
-                                              .get(
-                                                "http://localhost:3000/api/spiritualGuides?filter[where][groupCommunity]=" +
-                                                  idGroup
-                                              )
-                                              .then((respCom) => {
-                                                var spiritualGuide =
-                                                  respCom.data[0].id;
-                                                axios
-                                                  .get(
-                                                    "http://localhost:3000/api/scheduleSpiritualGuides?filter[where][spiritualGuide]=" +
-                                                      spiritualGuide
-                                                  )
-                                                  .then((respSchedule) => {
-                                                    this.scheduleSpiritualGuides =
-                                                      respSchedule.data;
-                                                  });
-                                              });
-                                          }
-                                        });
-                                    }
-                                  });
-                              }
-                            });
-                        }
-                      });
+                    this.checkDelete = 1;
                   }
                 });
-            });
-        }
+            } else if (this.role == 5) {
+              axios
+                .get(
+                  "http://localhost:3000/api/candidates?filter[where][id]=" +
+                    this.idTable
+                )
+                .then((respCan) => {
+                  var community = respCan.data[0].community;
+                  axios
+                    .get(
+                      "http://localhost:3000/api/groupCommunities?filter[where][firstCom]=" +
+                        community
+                    )
+                    .then((respGroupCom) => {
+                      var groupCommunity = {};
+                      groupCommunity = respGroupCom.data;
+                      if (groupCommunity != null) {
+                        var idGroup = respGroupCom.data[0].id;
+                        axios
+                          .get(
+                            "http://localhost:3000/api/spiritualGuides?filter[where][groupCommunity]=" +
+                              idGroup
+                          )
+                          .then((respCom) => {
+                            var spiritualGuide = respCom.data[0].id;
+                            axios
+                              .get(
+                                "http://localhost:3000/api/scheduleSpiritualGuides?filter[where][spiritualGuide]=" +
+                                  spiritualGuide
+                              )
+                              .then((respSchedule) => {
+                                this.scheduleSpiritualGuides =
+                                  respSchedule.data;
+                              });
+                          });
+                      } else {
+                        axios
+                          .get(
+                            "http://localhost:3000/api/groupCommunities?filter[where][secondCom]=" +
+                              community
+                          )
+                          .then((respGroupCom) => {
+                            var groupCommunity = {};
+                            groupCommunity = respGroupCom.data;
+                            if (groupCommunity != null) {
+                              var idGroup = respGroupCom.data[0].id;
+                              axios
+                                .get(
+                                  "http://localhost:3000/api/spiritualGuides?filter[where][groupCommunity]=" +
+                                    idGroup
+                                )
+                                .then((respCom) => {
+                                  var spiritualGuide = respCom.data[0].id;
+                                  axios
+                                    .get(
+                                      "http://localhost:3000/api/scheduleSpiritualGuides?filter[where][spiritualGuide]=" +
+                                        spiritualGuide
+                                    )
+                                    .then((resp) => {
+                                      this.scheduleSpiritualGuides = resp.data;
+                                    });
+                                });
+                            } else {
+                              axios
+                                .get(
+                                  "http://localhost:3000/api/groupCommunities?filter[where][thirdCom]=" +
+                                    community
+                                )
+                                .then((respGroupCom) => {
+                                  var groupCommunity = {};
+                                  groupCommunity = respGroupCom.data;
+                                  if (groupCommunity != null) {
+                                    var idGroup = respGroupCom.data[0].id;
+                                    axios
+                                      .get(
+                                        "http://localhost:3000/api/spiritualGuides?filter[where][groupCommunity]=" +
+                                          idGroup
+                                      )
+                                      .then((respCom) => {
+                                        var spiritualGuide = respCom.data[0].id;
+                                        axios
+                                          .get(
+                                            "http://localhost:3000/api/scheduleSpiritualGuides?filter[where][spiritualGuide]=" +
+                                              spiritualGuide
+                                          )
+                                          .then((respSchedule) => {
+                                            this.scheduleSpiritualGuides =
+                                              respSchedule.data;
+                                          });
+                                      });
+                                  } else {
+                                    axios
+                                      .get(
+                                        "http://localhost:3000/api/groupCommunities?filter[where][fourthCom]=" +
+                                          community
+                                      )
+                                      .then((respGroupCom) => {
+                                        var groupCommunity = {};
+                                        groupCommunity = respGroupCom.data;
+                                        if (groupCommunity != null) {
+                                          var idGroup = respGroupCom.data[0].id;
+                                          axios
+                                            .get(
+                                              "http://localhost:3000/api/spiritualGuides?filter[where][groupCommunity]=" +
+                                                idGroup
+                                            )
+                                            .then((respCom) => {
+                                              var spiritualGuide =
+                                                respCom.data[0].id;
+                                              axios
+                                                .get(
+                                                  "http://localhost:3000/api/scheduleSpiritualGuides?filter[where][spiritualGuide]=" +
+                                                    spiritualGuide
+                                                )
+                                                .then((respSchedule) => {
+                                                  this.scheduleSpiritualGuides =
+                                                    respSchedule.data;
+                                                });
+                                            });
+                                        } else {
+                                          axios
+                                            .get(
+                                              "http://localhost:3000/api/groupCommunities?filter[where][fifthCom]=" +
+                                                community
+                                            )
+                                            .then((respGroupCom) => {
+                                              var groupCommunity = {};
+                                              groupCommunity =
+                                                respGroupCom.data;
+                                              if (groupCommunity != null) {
+                                                var idGroup =
+                                                  respGroupCom.data[0].id;
+                                                axios
+                                                  .get(
+                                                    "http://localhost:3000/api/spiritualGuides?filter[where][groupCommunity]=" +
+                                                      idGroup
+                                                  )
+                                                  .then((respCom) => {
+                                                    var spiritualGuide =
+                                                      respCom.data[0].id;
+                                                    axios
+                                                      .get(
+                                                        "http://localhost:3000/api/scheduleSpiritualGuides?filter[where][spiritualGuide]=" +
+                                                          spiritualGuide
+                                                      )
+                                                      .then((respSchedule) => {
+                                                        this.scheduleSpiritualGuides =
+                                                          respSchedule.data;
+                                                      });
+                                                  });
+                                              }
+                                            });
+                                        }
+                                      });
+                                  }
+                                });
+                            }
+                          });
+                      }
+                    });
+                });
+            }
+          });
       });
     axios.get("http://localhost:3000/api/metSpiritualGuides").then((resp) => {
       this.metSpiritualGuides = resp.data;
@@ -17472,7 +21696,6 @@ const RegisteringScheduleSpiritualGuide = {
                 candidate: this.idTable,
                 registeredDate: currentDate,
                 status: 1,
-                reportStatus: 1,
                 idSchedule: scheduleSpiritualGuideEdit.id,
               };
               axios
@@ -17595,7 +21818,7 @@ const RegisteringScheduleSpiritualGuide = {
               axios.post(url, scheduleSpiritualGuideNew);
               setTimeout(() => {
                 location.reload();
-              }, 2000);
+              }, 2500);
             }
           } else if (this.role == 5) {
             var max = this.scheduleSpiritualGuides.length;
@@ -18550,6 +22773,7 @@ const DetailProfile = {
       groupCommunity: 0,
       role: 0,
       idTable: 0,
+      roleName: null,
       selectedFile: null,
       htmlImage: null,
       fullNameShow: null,
@@ -18569,164 +22793,200 @@ const DetailProfile = {
           role: resp.data.role,
           idTable: resp.data.idTable,
         };
-        this.role = resp.data.role;
         this.idTable = resp.data.idTable;
-        if (
-          this.role == 1 ||
-          this.role == 2 ||
-          this.role == 3 ||
-          this.role == 4
-        ) {
-          axios
-            .get(
-              "http://localhost:3000/api/managers/getManager?id=" + this.idTable
-            )
-            .then((response) => {
-              this.managerId = response.data.manager.managerId;
-              this.christianName = response.data.manager.christianName;
-              this.fullName = response.data.manager.fullName;
-              this.fullNameShow = response.data.manager.fullName;
-              this.birthday = crypt.formatDate(response.data.manager.birthday);
-              this.phone = response.data.manager.phone;
-              this.phoneEdit = response.data.manager.phone;
-              this.email = response.data.manager.email;
-              this.emailEdit = response.data.manager.email;
-              this.imageEdit = response.data.manager.image;
-              this.position = response.data.manager.position;
-              this.homeland = response.data.manager.homeland;
-              this.status = response.data.manager.status;
-              this.htmlImage =
-                `
-              <img class="profile-user-img img-fluid rounded-circle img-thumbnail" id="image"
-              src="../api/Photos/manager/download/` +
-                this.imageEdit +
-                `" alt="User Image">
-              `;
-            });
-        }
-        if (this.role == 5) {
-          axios
-            .get(
-              "http://localhost:3000/api/candidates/getCandidate?id=" +
-                this.idTable
-            )
-            .then((response) => {
-              this.candidateId = response.data.candidate.candidateId;
-              this.christianName = response.data.candidate.christianName;
-              this.fullName = response.data.candidate.fullName;
-              this.fullNameShow = response.data.candidate.fullName;
-              this.birthday = crypt.formatDate(
-                response.data.candidate.birthday
-              );
-              this.phone = response.data.candidate.phone;
-              this.phoneEdit = response.data.candidate.phone;
-              this.email = response.data.candidate.email;
-              this.emailEdit = response.data.candidate.email;
-              this.imageEdit = response.data.candidate.image;
-              this.position = response.data.candidate.position;
-              this.community = response.data.candidate.community;
-              this.communityEdit = response.data.candidate.community;
-              this.homeland = response.data.candidate.homeland;
-              this.status = response.data.candidate.status;
-              this.htmlImage =
-                `
-              <img class="profile-user-img img-fluid rounded-circle img-thumbnail" id="image"
-              src="../api/Photos/candidate/download/` +
-                this.imageEdit +
-                `" alt="User Image">
-              `;
-            });
-        }
-        if (this.role == 6 || this.role == 7) {
-          axios
-            .get(
-              "http://localhost:3000/api/spiritualGuides/getSpiritualGuide?id=" +
-                this.idTable
-            )
-            .then((response) => {
-              this.spiritualGuideId =
-                response.data.spiritualGuide.spiritualGuideId;
-              this.christianName = response.data.spiritualGuide.christianName;
-              this.fullName = response.data.spiritualGuide.fullName;
-              this.fullNameShow = response.data.spiritualGuide.fullName;
-              this.birthday = crypt.formatDate(
-                response.data.spiritualGuide.birthday
-              );
-              this.phone = response.data.spiritualGuide.phone;
-              this.phoneEdit = response.data.spiritualGuide.phone;
-              this.email = response.data.spiritualGuide.email;
-              this.emailEdit = response.data.spiritualGuide.email;
-              this.groupCommunity = response.data.spiritualGuide.groupCommunity;
-              this.position = response.data.spiritualGuide.position;
-              this.imageEdit = response.data.spiritualGuide.image;
-              this.status = response.data.spiritualGuide.status;
-              this.htmlImage =
-                `
-              <img class="profile-user-img img-fluid rounded-circle img-thumbnail" id="image"
-              src="../api/Photos/spiritualGuide/download/` +
-                this.imageEdit +
-                `" alt="User Image">
-              `;
-            });
-        }
-        if (this.role == 8 || this.role == 9) {
-          axios
-            .get(
-              "http://localhost:3000/api/companions/getCompanion?id=" +
-                this.idTable
-            )
-            .then((response) => {
-              this.companionId = response.data.companion.companionId;
-              this.christianName = response.data.companion.christianName;
-              this.fullName = response.data.companion.fullName;
-              this.fullNameShow = response.data.companion.fullName;
-              this.birthday = crypt.formatDate(
-                response.data.companion.birthday
-              );
-              this.phone = response.data.companion.phone;
-              this.phoneEdit = response.data.companion.phone;
-              this.email = response.data.companion.email;
-              this.emailEdit = response.data.companion.email;
-              this.groupCommunity = response.data.companion.groupCommunity;
-              this.position = response.data.companion.position;
-              this.imageEdit = response.data.companion.image;
-              this.status = response.data.companion.status;
-              this.htmlImage =
-                `
-              <img class="profile-user-img img-fluid rounded-circle img-thumbnail" id="image"
-              src="../api/Photos/companion/download/` +
-                this.imageEdit +
-                `" alt="User Image">
-              `;
-            });
-        }
-        if (this.role == 10) {
-          axios
-            .get(
-              "http://localhost:3000/api/teachers/getTeacher?id=" + this.idTable
-            )
-            .then((response) => {
-              this.teacherId = response.data.teacher.teacherId;
-              this.fullName = response.data.teacher.fullName;
-              this.fullNameShow = response.data.teacher.fullName;
-              this.gender = response.data.teacher.gender;
-              this.birthday = crypt.formatDate(response.data.teacher.birthday);
-              this.phone = response.data.teacher.phone;
-              this.phoneEdit = response.data.teacher.phone;
-              this.email = response.data.teacher.email;
-              this.emailEdit = response.data.teacher.email;
-              this.imageEdit = response.data.teacher.image;
-              this.subject = response.data.teacher.subject;
-              this.status = response.data.teacher.status;
-              this.htmlImage =
-                `
-              <img class="profile-user-img img-fluid rounded-circle img-thumbnail" id="image"
-              src="../api/Photos/teacher/download/` +
-                this.imageEdit +
-                `" alt="User Image">
-              `;
-            });
-        }
+        axios
+          .get(
+            "http://localhost:3000/api/roles?filter[where][id]=" +
+              resp.data.role
+          )
+          .then((respRole) => {
+            this.roleName = respRole.data[0].roleName;
+            if (this.roleName == "Quản trị viên") {
+              this.role = 1;
+            } else if (this.roleName == "Giám đốc") {
+              this.role = 2;
+            } else if (this.roleName == "Quản lý") {
+              this.role = 3;
+            } else if (this.roleName == "Giám học") {
+              this.role = 4;
+            } else if (this.roleName == "Ứng sinh") {
+              this.role = 5;
+            } else if (this.roleName == "Trưởng linh hướng") {
+              this.role = 6;
+            } else if (this.roleName == "Linh hướng") {
+              this.role = 7;
+            } else if (this.roleName == "Trưởng đồng hành") {
+              this.role = 8;
+            } else if (this.roleName == "Đồng hành") {
+              this.role = 9;
+            } else if (this.roleName == "Giảng viên") {
+              this.role = 10;
+            }
+            if (
+              this.role == 1 ||
+              this.role == 2 ||
+              this.role == 3 ||
+              this.role == 4
+            ) {
+              axios
+                .get(
+                  "http://localhost:3000/api/managers/getManager?id=" +
+                    this.idTable
+                )
+                .then((response) => {
+                  this.managerId = response.data.manager.managerId;
+                  this.christianName = response.data.manager.christianName;
+                  this.fullName = response.data.manager.fullName;
+                  this.fullNameShow = response.data.manager.fullName;
+                  this.birthday = crypt.formatDate(
+                    response.data.manager.birthday
+                  );
+                  this.phone = response.data.manager.phone;
+                  this.phoneEdit = response.data.manager.phone;
+                  this.email = response.data.manager.email;
+                  this.emailEdit = response.data.manager.email;
+                  this.imageEdit = response.data.manager.image;
+                  this.position = response.data.manager.position;
+                  this.homeland = response.data.manager.homeland;
+                  this.status = response.data.manager.status;
+                  this.htmlImage =
+                    `
+                  <img class="profile-user-img img-fluid rounded-circle img-thumbnail" id="image"
+                  src="../api/Photos/manager/download/` +
+                    this.imageEdit +
+                    `" alt="User Image">
+                  `;
+                });
+            }
+            if (this.role == 5) {
+              axios
+                .get(
+                  "http://localhost:3000/api/candidates/getCandidate?id=" +
+                    this.idTable
+                )
+                .then((response) => {
+                  this.candidateId = response.data.candidate.candidateId;
+                  this.christianName = response.data.candidate.christianName;
+                  this.fullName = response.data.candidate.fullName;
+                  this.fullNameShow = response.data.candidate.fullName;
+                  this.birthday = crypt.formatDate(
+                    response.data.candidate.birthday
+                  );
+                  this.phone = response.data.candidate.phone;
+                  this.phoneEdit = response.data.candidate.phone;
+                  this.email = response.data.candidate.email;
+                  this.emailEdit = response.data.candidate.email;
+                  this.imageEdit = response.data.candidate.image;
+                  this.position = response.data.candidate.position;
+                  this.community = response.data.candidate.community;
+                  this.communityEdit = response.data.candidate.community;
+                  this.homeland = response.data.candidate.homeland;
+                  this.status = response.data.candidate.status;
+                  this.htmlImage =
+                    `
+                  <img class="profile-user-img img-fluid rounded-circle img-thumbnail" id="image"
+                  src="../api/Photos/candidate/download/` +
+                    this.imageEdit +
+                    `" alt="User Image">
+                  `;
+                });
+            }
+            if (this.role == 6 || this.role == 7) {
+              axios
+                .get(
+                  "http://localhost:3000/api/spiritualGuides/getSpiritualGuide?id=" +
+                    this.idTable
+                )
+                .then((response) => {
+                  this.spiritualGuideId =
+                    response.data.spiritualGuide.spiritualGuideId;
+                  this.christianName =
+                    response.data.spiritualGuide.christianName;
+                  this.fullName = response.data.spiritualGuide.fullName;
+                  this.fullNameShow = response.data.spiritualGuide.fullName;
+                  this.birthday = crypt.formatDate(
+                    response.data.spiritualGuide.birthday
+                  );
+                  this.phone = response.data.spiritualGuide.phone;
+                  this.phoneEdit = response.data.spiritualGuide.phone;
+                  this.email = response.data.spiritualGuide.email;
+                  this.emailEdit = response.data.spiritualGuide.email;
+                  this.groupCommunity =
+                    response.data.spiritualGuide.groupCommunity;
+                  this.position = response.data.spiritualGuide.position;
+                  this.imageEdit = response.data.spiritualGuide.image;
+                  this.status = response.data.spiritualGuide.status;
+                  this.htmlImage =
+                    `
+                  <img class="profile-user-img img-fluid rounded-circle img-thumbnail" id="image"
+                  src="../api/Photos/spiritualGuide/download/` +
+                    this.imageEdit +
+                    `" alt="User Image">
+                  `;
+                });
+            }
+            if (this.role == 8 || this.role == 9) {
+              axios
+                .get(
+                  "http://localhost:3000/api/companions/getCompanion?id=" +
+                    this.idTable
+                )
+                .then((response) => {
+                  this.companionId = response.data.companion.companionId;
+                  this.christianName = response.data.companion.christianName;
+                  this.fullName = response.data.companion.fullName;
+                  this.fullNameShow = response.data.companion.fullName;
+                  this.birthday = crypt.formatDate(
+                    response.data.companion.birthday
+                  );
+                  this.phone = response.data.companion.phone;
+                  this.phoneEdit = response.data.companion.phone;
+                  this.email = response.data.companion.email;
+                  this.emailEdit = response.data.companion.email;
+                  this.groupCommunity = response.data.companion.groupCommunity;
+                  this.position = response.data.companion.position;
+                  this.imageEdit = response.data.companion.image;
+                  this.status = response.data.companion.status;
+                  this.htmlImage =
+                    `
+                  <img class="profile-user-img img-fluid rounded-circle img-thumbnail" id="image"
+                  src="../api/Photos/companion/download/` +
+                    this.imageEdit +
+                    `" alt="User Image">
+                  `;
+                });
+            }
+            if (this.role == 10) {
+              axios
+                .get(
+                  "http://localhost:3000/api/teachers/getTeacher?id=" +
+                    this.idTable
+                )
+                .then((response) => {
+                  this.teacherId = response.data.teacher.teacherId;
+                  this.fullName = response.data.teacher.fullName;
+                  this.fullNameShow = response.data.teacher.fullName;
+                  this.gender = response.data.teacher.gender;
+                  this.birthday = crypt.formatDate(
+                    response.data.teacher.birthday
+                  );
+                  this.phone = response.data.teacher.phone;
+                  this.phoneEdit = response.data.teacher.phone;
+                  this.email = response.data.teacher.email;
+                  this.emailEdit = response.data.teacher.email;
+                  this.imageEdit = response.data.teacher.image;
+                  this.subject = response.data.teacher.subject;
+                  this.status = response.data.teacher.status;
+                  this.htmlImage =
+                    `
+                  <img class="profile-user-img img-fluid rounded-circle img-thumbnail" id="image"
+                  src="../api/Photos/teacher/download/` +
+                    this.imageEdit +
+                    `" alt="User Image">
+                  `;
+                });
+            }
+          });
       });
   },
   computed: {
@@ -21893,6 +26153,7 @@ const ChangePassword = {
     return {
       userId: null,
       role: 0,
+      roleName: null,
       status: 0,
       idTable: 0,
       username: null,
@@ -21915,7 +26176,35 @@ const ChangePassword = {
         this.id = resp.data.idAccount;
         this.idTable = resp.data.idTable;
         this.username = resp.data.username;
-        this.role = resp.data.role;
+        axios
+          .get(
+            "http://localhost:3000/api/roles?filter[where][id]=" +
+              resp.data.role
+          )
+          .then((respRole) => {
+            this.roleName = respRole.data[0].roleName;
+            if (this.roleName == "Quản trị viên") {
+              this.role = 1;
+            } else if (this.roleName == "Giám đốc") {
+              this.role = 2;
+            } else if (this.roleName == "Quản lý") {
+              this.role = 3;
+            } else if (this.roleName == "Giám học") {
+              this.role = 4;
+            } else if (this.roleName == "Ứng sinh") {
+              this.role = 5;
+            } else if (this.roleName == "Trưởng linh hướng") {
+              this.role = 6;
+            } else if (this.roleName == "Linh hướng") {
+              this.role = 7;
+            } else if (this.roleName == "Trưởng đồng hành") {
+              this.role = 8;
+            } else if (this.roleName == "Đồng hành") {
+              this.role = 9;
+            } else if (this.roleName == "Giảng viên") {
+              this.role = 10;
+            }
+          });
         this.oldPasswordEdit = resp.data.password;
         this.status = resp.data.status;
       });
@@ -22144,8 +26433,8 @@ const ListMetCompanion = {
   data() {
     return {
       statuses: [
-        { id: 1, name: "Chưa gặp người ĐH" },
-        { id: 2, name: "Đã gặp người ĐH" },
+        { id: 1, name: "Chưa gặp ĐH" },
+        { id: 2, name: "Đã gặp ĐH" },
       ],
       reportStatuses: [
         { id: 1, name: "Chưa làm báo cáo" },
@@ -22157,41 +26446,54 @@ const ListMetCompanion = {
       candidates: [],
       idTable: 0,
       role: 0,
+      roleName: null,
     };
   },
   mounted() {
+    axios.get("http://localhost:3000/api/companions").then((respCom) => {
+      this.companions = respCom.data;
+    });
+    axios.get("http://localhost:3000/api/candidates").then((respCan) => {
+      this.candidates = respCan.data;
+    });
     axios
       .get(
         "http://localhost:3000/api/logins/findOne?filter[where][token]=token"
       )
       .then((resp) => {
         this.idTable = resp.data.idTable;
-        this.role = resp.data.role;
-        if (this.role == 8 || this.role == 9) {
-          axios
-            .get(
-              "http://localhost:3000/api/metCompanions?filter[where][companion]=" +
-                this.idTable
-            )
-            .then((response) => {
-              this.metCompanions = response.data;
-            });
-        } else if (this.role == 1 || this.role == 2) {
-          axios
-            .get("http://localhost:3000/api/metCompanions")
-            .then((response) => {
-              this.metCompanions = response.data;
-            });
-        }
+        axios
+          .get(
+            "http://localhost:3000/api/roles?filter[where][id]=" +
+              resp.data.role
+          )
+          .then((respRole) => {
+            this.roleName = respRole.data[0].roleName;
+            if (this.roleName == "Quản trị viên") {
+              this.role = 1;
+            } else if (this.roleName == "Giám đốc") {
+              this.role = 2;
+            } else if (this.roleName == "Quản lý") {
+              this.role = 3;
+            } else if (this.roleName == "Giám học") {
+              this.role = 4;
+            } else if (this.roleName == "Ứng sinh") {
+              this.role = 5;
+            } else if (this.roleName == "Trưởng linh hướng") {
+              this.role = 6;
+            } else if (this.roleName == "Linh hướng") {
+              this.role = 7;
+            } else if (this.roleName == "Trưởng đồng hành") {
+              this.role = 8;
+            } else if (this.roleName == "Đồng hành") {
+              this.role = 9;
+            } else if (this.roleName == "Giảng viên") {
+              this.role = 10;
+            }
+          });
       });
-    // axios.get("http://localhost:3000/api/metCompanions").then((response) => {
-    //   this.metCompanions = response.data;
-    // });
-    axios.get("http://localhost:3000/api/companions").then((respCom) => {
-      this.companions = respCom.data;
-    });
-    axios.get("http://localhost:3000/api/candidates").then((respCan) => {
-      this.candidates = respCan.data;
+    axios.get("http://localhost:3000/api/metCompanions").then((response) => {
+      this.metCompanions = response.data;
     });
   },
   computed: {},
@@ -22203,136 +26505,157 @@ const ListMetCompanion = {
           candidate: metCompanion.candidate,
           registeredDate: metCompanion.registeredDate,
           status: 2,
+          dateMet: metCompanion.dateMet,
           reportStatus: metCompanion.reportStatus,
           idSchedule: metCompanion.idSchedule,
         };
         axios
           .get(
             "http://localhost:3000/api/countMets?filter[where][candidate]=" +
-            metCompanion.candidate
+              metCompanion.candidate
           )
           .then((respCountMet) => {
             const countMet = {
-              candidate: this.idTable,
+              candidate: metCompanion.candidate,
               countMetCompanion: respCountMet.data[0].countMetCompanion + 1,
-              countMetSpiritualGuide: respCountMet.data[0].countMetSpiritualGuide,
-              id: respCountMet.data[0].id
+              countMetSpiritualGuide:
+                respCountMet.data[0].countMetSpiritualGuide,
+              id: respCountMet.data[0].id,
             };
+            console.log(countMet);
             const url_3 =
-              "http://localhost:3000/api/countMets/" +
-              countMet.id +
+              "http://localhost:3000/api/countMets/" + countMet.id + "/replace";
+            axios.post(url_3, countMet);
+            const url =
+              "http://localhost:3000/api/metCompanions/" +
+              metCompanion.id +
               "/replace";
-            axios.post(url_3 , countMet);
+            axios.post(url, newMetCompanion);
+            setTimeout(() => {
+              location.reload();
+            }, 50);
           });
-        const url =
-          "http://localhost:3000/api/metCompanions/" +
-          metCompanion.id +
-          "/replace";
-        axios.post(url, newMetCompanion);
-        setTimeout(() => {
-          location.reload();
-        }, 50);
       } else if (metCompanion.status == 2) {
         const newMetCompanion = {
           companion: metCompanion.companion,
           candidate: metCompanion.candidate,
           registeredDate: metCompanion.registeredDate,
           status: 1,
+          dateMet: metCompanion.dateMet,
           reportStatus: metCompanion.reportStatus,
           idSchedule: metCompanion.idSchedule,
         };
         axios
           .get(
             "http://localhost:3000/api/countMets?filter[where][candidate]=" +
-            metCompanion.candidate
+              metCompanion.candidate
           )
           .then((respCountMet) => {
             const countMet = {
-              candidate: this.idTable,
+              candidate: metCompanion.candidate,
               countMetCompanion: respCountMet.data[0].countMetCompanion - 1,
-              countMetSpiritualGuide: respCountMet.data[0].countMetSpiritualGuide,
-              id: respCountMet.data[0].id
+              countMetSpiritualGuide:
+                respCountMet.data[0].countMetSpiritualGuide,
+              id: respCountMet.data[0].id,
             };
             const url_3 =
-              "http://localhost:3000/api/countMets/" +
-              countMet.id +
+              "http://localhost:3000/api/countMets/" + countMet.id + "/replace";
+            axios.post(url_3, countMet);
+            const url =
+              "http://localhost:3000/api/metCompanions/" +
+              metCompanion.id +
               "/replace";
-            axios.post(url_3 , countMet);
+            axios.post(url, newMetCompanion);
+            setTimeout(() => {
+              location.reload();
+            }, 50);
           });
-        const url =
-          "http://localhost:3000/api/metCompanions/" +
-          metCompanion.id +
-          "/replace";
-        axios.post(url, newMetCompanion);
-        setTimeout(() => {
-          location.reload();
-        }, 50);
       }
     },
   },
   template: `
   <div class="card shadow mb-4" style="margin-top: -5px;">
-    <div class="card-header py-3" style="margin-bottom:-40px">
-      <div class="row">
-        <div class="col-md-4">
-          <h6 class="m-0 font-weight-bold text-dark">Thống Kê Ứng Sinh Gặp Đồng Hành</h6>
-        </div>
-        <div class="col-md-6"></div>
-        <div class="col-md-2"></div>
+  <div class="card-header py-3" style="margin-bottom:-40px">
+    <div class="row">
+      <div class="col-md-4">
+        <h6 class="m-0 font-weight-bold text-dark">Thống kê Gặp Đồng hành</h6>
+      </div>
+      <div class="col-md-6"></div>
+      <div class="col-md-2" style="padding-left:68px;">
       </div>
     </div>
-    <div class="card-body">
-      <hr style="height:1px;color:lightgray;background-color:lightgray">
-      <div class="table-responsive" style="margin-top:-8px">
-        <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
-          <thead>
-            <tr>
-              <th scope="col">STT</th>
+  </div>
+  <div class="card-body">
+    <hr style="height:1px;color:lightgray;background-color:lightgray">
+    <div class="table-responsive" style="margin-top:-8px">
+      <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+        <thead>
+          <tr>
+            <th scope="col">STT</th>
               <th scope="col">Người Đồng Hành</th>
               <th scope="col">Ứng Sinh</th>
               <th scope="col">Ngày Đăng Ký</th>
               <th scope="col">Trạng Thái</th>
               <th scope="col">Báo Cáo ĐH</th>
               <th scope="col">Action</th>
-            </tr>
-          </thead>
-          <tfoot>
-            <tr>
-              <th scope="col">STT</th>
-              <th scope="col">Người Đồng Hành</th>
-              <th scope="col">Ứng Sinh</th>
-              <th scope="col">Ngày Đăng Ký</th>
-              <th scope="col">Trạng Thái</th>
-              <th scope="col">Báo Cáo ĐH</th>
-              <th scope="col">Action</th>
-            </tr>
-          </tfoot>
-          <tbody>
-            <tr v-for="(metCompanion, index) in metCompanions" :key="metCompanion.id">
-              <th class="align-middle" scope="row">{{ index + 1 }}</th>
-              <td v-for="companion in companions" v-if="companion.id == metCompanion.companion">{{ companion.fullName }}</td>
-              <td v-for="candidate in candidates" v-if="candidate.id == metCompanion.candidate">{{ candidate.fullName }}</td>
-              <td>{{ crypt.formatDateDisplay(metCompanion.registeredDate) }}</td>
-              <td v-for="status in statuses" v-if="metCompanion.status == status.id">{{ status.name }}</td>
-              <td v-for="reportStatus in reportStatuses" v-if="metCompanion.reportStatus == reportStatus.id">{{ reportStatus.name }}</td>
-              <td class="align-middle">
-                <div class="row" style="margin-left:-15px;">
-                  <div class="col-4">
-                    <button :title="titleButtonConfirm" @click="ConfirmMetCompanion(metCompanion)" class="btn btn-primary btn-sm h-28px w-28px rounded"
-                      type="submit">
-                      <i class="fas fa-check fa-md ml--2px"></i>
-                    </button>
-                  </div>
+          </tr>
+        </thead>
+        <tfoot>
+          <tr>
+            <th scope="col">STT</th>
+            <th scope="col">Người Đồng Hành</th>
+            <th scope="col">Ứng Sinh</th>
+            <th scope="col">Ngày Đăng Ký</th>
+            <th scope="col">Trạng Thái</th>
+            <th scope="col">Báo Cáo ĐH</th>
+            <th scope="col">Action</th>
+          </tr>
+        </tfoot>
+        <tbody>
+          <tr v-for="(metCompanion, index) in metCompanions" v-if="metCompanion.companion === idTable" :key="metCompanion.id" v-show="role === 8 || role === 9">
+            <th class="align-middle" scope="row">{{ index + 1 }}</th>
+            <td v-for="companion in companions" v-if="companion.id == metCompanion.companion">{{ companion.fullName }}</td>
+            <td v-for="candidate in candidates" v-if="candidate.id == metCompanion.candidate">{{ candidate.fullName }}</td>
+            <td>{{ crypt.formatDateDisplay(metCompanion.registeredDate) }}</td>
+            <td v-for="status in statuses" v-if="status.id == metCompanion.status">{{ status.name }}</td>
+            <td v-for="reportStatus in reportStatuses" v-if="reportStatus.id == metCompanion.reportStatus">{{ reportStatus.name }}</td>
+            <td class="align-middle">
+              <div class="row">
+                <div class="col-4">
+                  <button :title="titleButtonConfirm" @click="ConfirmMetCompanion(metCompanion)" class="btn btn-primary btn-sm h-28px w-28px rounded"
+                    type="submit">
+                    <i class="fas fa-check fa-md ml--2px"></i>
+                  </button>
                 </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+              </div>
+            </td>
+          </tr>
+          <tr v-for="(metCompanion, index) in metCompanions" :key="metCompanion.id" v-show="role === 1 || role === 2">
+            <th class="align-middle" scope="row">{{ index + 1 }}</th>
+            <td v-for="companion in companions" v-if="companion.id == metCompanion.companion">{{ companion.fullName }}</td>
+            <td v-for="candidate in candidates" v-if="candidate.id == metCompanion.candidate">{{ candidate.fullName }}</td>
+            <td>{{ crypt.formatDateDisplay(metCompanion.registeredDate) }}</td>
+            <td v-for="status in statuses" v-if="status.id == metCompanion.status">{{ status.name }}</td>
+            <td v-for="reportStatus in reportStatuses" v-if="reportStatus.id == metCompanion.reportStatus">{{ reportStatus.name }}</td>
+            <td class="align-middle">
+              <div class="row">
+                <div class="col-4">
+                  <button :title="titleButtonConfirm" @click="ConfirmMetCompanion(metCompanion)" class="btn btn-primary btn-sm h-28px w-28px rounded"
+                    type="submit">
+                    <i class="fas fa-check fa-md ml--2px"></i>
+                  </button>
+                </div>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
+  </div>
+</div>
   `,
 };
-
+//Met SpiritualGuide
 const MetSpiritualGuide = {
   template: `
   <div>
@@ -22345,12 +26668,8 @@ const ListMetSpiritualGuide = {
   data() {
     return {
       statuses: [
-        { id: 1, name: "Chưa gặp người LH" },
-        { id: 2, name: "Đã gặp người LH" },
-      ],
-      reportStatuses: [
-        { id: 1, name: "Chưa làm báo cáo" },
-        { id: 2, name: "Đã làm báo cáo" },
+        { id: 1, name: "Chưa gặp LH" },
+        { id: 2, name: "Đã gặp LH" },
       ],
       metSpiritualGuides: [],
       titleButtonConfirm: "Xác nhận đã gặp",
@@ -22358,6 +26677,7 @@ const ListMetSpiritualGuide = {
       candidates: [],
       idTable: 0,
       role: 0,
+      roleName: null,
     };
   },
   mounted() {
@@ -22367,29 +26687,41 @@ const ListMetSpiritualGuide = {
       )
       .then((resp) => {
         this.idTable = resp.data.idTable;
-        this.role = resp.data.role;
+        axios
+          .get(
+            "http://localhost:3000/api/roles?filter[where][id]=" +
+              resp.data.role
+          )
+          .then((respRole) => {
+            this.roleName = respRole.data[0].roleName;
+            if (this.roleName == "Quản trị viên") {
+              this.role = 1;
+            } else if (this.roleName == "Giám đốc") {
+              this.role = 2;
+            } else if (this.roleName == "Quản lý") {
+              this.role = 3;
+            } else if (this.roleName == "Giám học") {
+              this.role = 4;
+            } else if (this.roleName == "Ứng sinh") {
+              this.role = 5;
+            } else if (this.roleName == "Trưởng linh hướng") {
+              this.role = 6;
+            } else if (this.roleName == "Linh hướng") {
+              this.role = 7;
+            } else if (this.roleName == "Trưởng đồng hành") {
+              this.role = 8;
+            } else if (this.roleName == "Đồng hành") {
+              this.role = 9;
+            } else if (this.roleName == "Giảng viên") {
+              this.role = 10;
+            }
+          });
       });
-    if (this.role == 6 || this.role == 7) {
-      axios
-        .get(
-          "http://localhost:3000/api/metSpiritualGuides?filter[where][spiritualGuide]=" +
-            this.idTable
-        )
-        .then((response) => {
-          this.metSpiritualGuides = response.data;
-        });
-    } else if (this.role === 1 || this.role === 2) {
-      axios
-        .get("http://localhost:3000/api/metSpiritualGuides")
-        .then((response) => {
-          this.metSpiritualGuides = response.data;
-        });
-    }
-    // axios
-    //   .get("http://localhost:3000/api/metSpiritualGuides")
-    //   .then((response) => {
-    //     this.metSpiritualGuides = response.data;
-    //   });
+    axios
+      .get("http://localhost:3000/api/metSpiritualGuides")
+      .then((response) => {
+        this.metSpiritualGuides = response.data;
+      });
     axios
       .get("http://localhost:3000/api/spiritualGuides")
       .then((respSpirit) => {
@@ -22408,70 +26740,66 @@ const ListMetSpiritualGuide = {
           candidate: metSpiritualGuide.candidate,
           registeredDate: metSpiritualGuide.registeredDate,
           status: 2,
-          reportStatus: metSpiritualGuide.reportStatus,
           idSchedule: metSpiritualGuide.idSchedule,
         };
         axios
           .get(
             "http://localhost:3000/api/countMets?filter[where][candidate]=" +
-            metSpiritualGuide.candidate
+              metSpiritualGuide.candidate
           )
           .then((respCountMet) => {
             const countMet = {
-              candidate: this.idTable,
+              candidate: respCountMet.data[0].candidate,
               countMetCompanion: respCountMet.data[0].countMetCompanion,
-              countMetSpiritualGuide: respCountMet.data[0].countMetSpiritualGuide + 1,
-              id: respCountMet.data[0].id
+              countMetSpiritualGuide:
+                respCountMet.data[0].countMetSpiritualGuide + 1,
+              id: respCountMet.data[0].id,
             };
             const url_3 =
-              "http://localhost:3000/api/countMets/" +
-              countMet.id +
+              "http://localhost:3000/api/countMets/" + countMet.id + "/replace";
+            axios.post(url_3, countMet);
+            const url =
+              "http://localhost:3000/api/metSpiritualGuides/" +
+              metSpiritualGuide.id +
               "/replace";
-            axios.post(url_3 , countMet);
+            axios.post(url, newMetSpiritualGuide);
+            setTimeout(() => {
+              location.reload();
+            }, 50);
           });
-        const url =
-          "http://localhost:3000/api/metSpiritualGuides/" +
-          metSpiritualGuide.id +
-          "/replace";
-        axios.post(url, newMetSpiritualGuide);
-        setTimeout(() => {
-          location.reload();
-        }, 50);
       } else if (metSpiritualGuide.status == 2) {
         const newMetSpiritualGuide = {
           spiritualGuide: metSpiritualGuide.spiritualGuide,
           candidate: metSpiritualGuide.candidate,
           registeredDate: metSpiritualGuide.registeredDate,
           status: 1,
-          reportStatus: metSpiritualGuide.reportStatus,
           idSchedule: metSpiritualGuide.idSchedule,
         };
         axios
           .get(
             "http://localhost:3000/api/countMets?filter[where][candidate]=" +
-            metSpiritualGuide.candidate
+              metSpiritualGuide.candidate
           )
           .then((respCountMet) => {
             const countMet = {
               candidate: this.idTable,
               countMetCompanion: respCountMet.data[0].countMetCompanion,
-              countMetSpiritualGuide: respCountMet.data[0].countMetSpiritualGuide - 1,
-              id: respCountMet.data[0].id
+              countMetSpiritualGuide:
+                respCountMet.data[0].countMetSpiritualGuide - 1,
+              id: respCountMet.data[0].id,
             };
             const url_3 =
-              "http://localhost:3000/api/countMets/" +
-              countMet.id +
+              "http://localhost:3000/api/countMets/" + countMet.id + "/replace";
+            axios.post(url_3, countMet);
+            const url =
+              "http://localhost:3000/api/metSpiritualGuides/" +
+              metSpiritualGuide.id +
               "/replace";
-            axios.post(url_3 , countMet);
+            axios.post(url, newMetSpiritualGuide);
+            setTimeout(() => {
+              location.reload();
+            }, 50);
           });
-        const url =
-          "http://localhost:3000/api/metSpiritualGuides/" +
-          metSpiritualGuide.id +
-          "/replace";
-        axios.post(url, newMetSpiritualGuide);
-        setTimeout(() => {
-          location.reload();
-        }, 50);
       }
     },
   },
@@ -22497,7 +26825,6 @@ const ListMetSpiritualGuide = {
               <th scope="col">Ứng Sinh</th>
               <th scope="col">Ngày Đăng Ký</th>
               <th scope="col">Trạng Thái</th>
-              <th scope="col">Báo Cáo LH</th>
               <th scope="col">Action</th>
             </tr>
           </thead>
@@ -22508,12 +26835,11 @@ const ListMetSpiritualGuide = {
               <th scope="col">Ứng Sinh</th>
               <th scope="col">Ngày Đăng Ký</th>
               <th scope="col">Trạng Thái</th>
-              <th scope="col">Báo Cáo LH</th>
               <th scope="col">Action</th>
             </tr>
           </tfoot>
           <tbody>
-            <tr v-for="(metSpiritualGuide, index) in metSpiritualGuides" :key="metSpiritualGuide.id">
+            <tr v-for="(metSpiritualGuide, index) in metSpiritualGuides" v-if="metSpiritualGuide.spiritualGuide === idTable" :key="metSpiritualGuide.id" v-show="role === 6 || role === 7">
               <th class="align-middle" scope="row">{{ index + 1 }}</th>
               <td v-for="spiritualGuide in spiritualGuides" v-if="spiritualGuide.id == metSpiritualGuide.spiritualGuide">
                 {{ spiritualGuide.fullName }}
@@ -22525,8 +26851,28 @@ const ListMetSpiritualGuide = {
               <td v-for="status in statuses" v-if="metSpiritualGuide.status == status.id">
                 {{ status.name }}
               </td>
-              <td v-for="reportStatus in reportStatuses" v-if="metSpiritualGuide.reportStatus == reportStatus.id">
-                {{ reportStatus.name }}
+              <td class="align-middle">
+                <div class="row" style="margin-left:-15px;">
+                  <div class="col-4">
+                    <button :title="titleButtonConfirm" @click="ConfirmMetSpiritualGuide(metSpiritualGuide)" class="btn btn-primary btn-sm h-28px w-28px rounded"
+                      type="submit">
+                      <i class="fas fa-check fa-md ml--2px"></i>
+                    </button>
+                  </div>
+                </div>
+              </td>
+            </tr>
+            <tr v-for="(metSpiritualGuide, index) in metSpiritualGuides" :key="metSpiritualGuide.id" v-show="role === 1 || role === 2">
+              <th class="align-middle" scope="row">{{ index + 1 }}</th>
+              <td v-for="spiritualGuide in spiritualGuides" v-if="spiritualGuide.id == metSpiritualGuide.spiritualGuide">
+                {{ spiritualGuide.fullName }}
+              </td>
+              <td v-for="candidate in candidates" v-if="candidate.id == metSpiritualGuide.candidate">
+                {{ candidate.fullName }}
+              </td>
+              <td>{{ crypt.formatDate(metSpiritualGuide.registeredDate) }}</td>
+              <td v-for="status in statuses" v-if="metSpiritualGuide.status == status.id">
+                {{ status.name }}
               </td>
               <td class="align-middle">
                 <div class="row" style="margin-left:-15px;">
@@ -22833,6 +27179,15 @@ var crypt = {
         : "0" + (date.getMonth() + 1)) +
       "-" +
       (date.getDate() > 9 ? date.getDate() : "0" + date.getDate())
+    );
+  },
+
+  formatDateAndMonth: function (dateFormat) {
+    var date = new Date(dateFormat);
+    return (
+      (date.getDate() > 9 ? date.getDate() : "0" + date.getDate()) +
+      "/" +
+      (date.getMonth() > 8 ? date.getMonth() + 1 : "0" + (date.getMonth() + 1))
     );
   },
 

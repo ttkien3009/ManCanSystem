@@ -1,269 +1,2657 @@
-const RateCandidate = {
-  template: `
-  <div>
-    <router-view />
-  </div>
-  `,
-};
-
-const ListRateCandidate = {
-  data() {
-    return {
-      rateCandidate: {},
-      countMetCompanion: 0,
-      countSpiritualGuide: 0,
-      rateCandidates: [],
-      candidates: [],
-      titleButtonDisplay: "Xem thống kê",
-    };
-  },
-  mounted() {
-    axios.get("http://localhost:3000/api/rateCandidates").then((response) => {
-      this.rateCandidates = response.data;
-    });
-    axios.get("http://localhost:3000/api/candidates").then((respCan) => {
-      this.candidates = respCan.data;
-    });
-  },
-  computed: {},
-  methods: {
-    getCountMetCompanion(idCandidate){
-      axios
-        .get("http://localhost:3000/api/metCompanions?filter[where][and][0][candidate]=" + idCandidate + "&filter[where][and][1][status]=2")
-        .then((resp) => {
-          return resp.data.length;
-        });
-    },
-
-    getCountMetSpiritualGuide(idCandidate){
-      axios
-        .get("http://localhost:3000/api/metSpiritualGuides?filter[where][and][0][candidate]=" + idCandidate + "&filter[where][and][1][status]=2")
-        .then((respSp) => {
-          return respSp.data.length;
-        });
-    },
-
-    goToRateCandidate(candidate){
-
-    }
-  },
-  template: `
-  <div class="card shadow mb-4" style="margin-top: -5px;">
-    <div class="card-header py-3" style="margin-bottom:-40px">
-      <div class="row">
-        <div class="col-md-4">
-          <h6 class="m-0 font-weight-bold text-dark">Thống kê thông số Ứng Sinh</h6>
-        </div>
-        <div class="col-md-6"></div>
-        <div class="col-md-2" style="padding-left:68px;">
-        </div>
-      </div>
-    </div>
-    <div class="card-body">
-      <hr style="height:1px;color:lightgray;background-color:lightgray">
-      <div class="table-responsive" style="margin-top:-8px">
-        <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
-          <thead>
-            <tr>
-              <th scope="col">STT</th>
-              <th scope="col">Ứng Sinh</th>
-              <th scope="col">Số Lấn Gặp Đồng Hành</th>
-              <th scope="col">Số Lấn Gặp Linh Hướng</th>
-              <th scope="col">Trạng Thái</th>
-              <th scope="col">Action</th>
-            </tr>
-          </thead>
-          <tfoot>
-            <tr>
-              <th scope="col">STT</th>
-              <th scope="col">Ứng Sinh</th>
-              <th scope="col">Số Lấn Gặp Đồng Hành</th>
-              <th scope="col">Số Lấn Gặp Linh Hướng</th>
-              <th scope="col">Trạng Thái</th>
-              <th scope="col">Action</th>
-            </tr>
-          </tfoot>
-          <tbody>
-            <tr v-for="(candidate, index) in candidates" :key="candidate.id">
-              <th class="align-middle" scope="row">{{ index + 1 }}</th>
-              <td>{{ candidate.fullName }}</td>
-              <td>{{ rateCandidate.username }}</td>
-              <td>
-                {{ getCountMetCompanion(candidate.id) }}
-              </td>
-              <td>
-                {{ getCountMetSpiritualGuide(candidate.id) }}
-              </td>
-              <td v-if="candidate.status == 1">
-                <i class="fas fa-toggle-on fa-lg text-success"></i>
-              </td>
-              <td v-if="candidate.status == 2">
-                <i class="fas fa-toggle-off fa-lg text-danger"></i>
-              </td>
-              <td class="align-middle">
-                <div class="row">
-                  <div class="col-4">
-                    <button :title="titleButtonDisplay" @click="goToRateCandidate(candidate)" class="btn btn-primary btn-sm h-28px w-28px rounded"
-                      type="submit">
-                      <i class="far fa-eye fa-md ml--2px"></i>
-                    </button>
-                  </div>
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-  `,
-};
-
-const EditRateCandidate = {
-  data() {
-    return {
-      candidate: null,
-      month: 0,
-      year: 0,
-      score: 0,
-      idSchedule: 0,
-      titleScore: "Nhập điểm đánh giá cho ứng sinh",
-      rateCandidates: [],
-      candidates: [],
-      rateCandidate: {},
-    };
-  },
-  mounted() {
-    axios.get("http://localhost:3000/api/candidates").then((response) => {
-      this.candidates = response.data;
-    });
-    axios.get("http://localhost:3000/api/rateCandidates").then((response) => {
-      this.rateCandidates = response.data;
-    });
-    axios
-      .get(
-        "http://localhost:3000/api/rateCandidates?filter[where][id]=" +
-          this.$route.params.id
-      )
-      .then((respRate) => {
-        this.candidate = respRate.data[0].candidate;
-        this.month = respRate.data[0].month;
-        this.year = respRate.data[0].year;
-        this.year = respRate.data[0].score;
-        this.idSchedule = respRate.data[0].idSchedule;
-      });
-  },
-
-  computed: {
-    refreshForm() {
-      return (this.score != 0);
-    },
-  },
-  methods: {
-    submitEditRateCandidateForm() {
-      if(this.score < 0 || this.score > 100)
-      {
-        alertify.alert("Thông báo", "Số điểm không hợp lệ! Vui lòng nhập lại. (0 -> 100)", function () {
-          alertify.success("Ok");
-        });
+submitEditManagerForm() {
+  if (this.editManagerFormIsValid) {
+    if (this.emailEdit == this.email && this.phoneEdit == this.phone) {
+      if (crypt.getAge(this.birthday) < 28) {
+        alertify.alert(
+          "Thông báo",
+          "Tuổi của người quản lý nhỏ hơn 28!",
+          function () {
+            alertify.success("Ok");
+          }
+        );
+      } else if (crypt.getAge(this.birthday) > 60) {
+        alertify.alert(
+          "Thông báo",
+          "Tuổi của người quản lý lớn hơn 60!",
+          function () {
+            alertify.success("Ok");
+          }
+        );
       } else {
-        const rateCandidate = {
-          candidate: this.candidate,
-          month: this.month,
-          year: this.year,
-          score: this.score,
-          idSchedule: this.idSchedule,
-          id: this.$route.params.id,
-        };
-        const url =
-          "http://localhost:3000/api/rateCandidates/" + rateCandidate.id + "/replace";
-        axios.post(url, rateCandidate);
-        this.$router.push("/reportCompanions");
-        location.reload();
-        return 0;
+        if (this.selectedFile != null) {
+          const fd = new FormData();
+          fd.append("image", this.selectedFile, this.selectedFile.name);
+          var start = this.selectedFile.name.lastIndexOf(".");
+          var end = this.selectedFile.length;
+          var fileName =
+            this.managerId + this.selectedFile.name.slice(start, end);
+          if (this.imageEdit != null) {
+            const manager = {
+              managerId: this.managerId,
+              christianName: this.christianName,
+              fullName: this.fullName,
+              birthday: this.birthday,
+              phone: this.phone,
+              email: this.email,
+              image: fileName,
+              position: this.position,
+              homeland: this.homeland,
+              status: this.status,
+              id: this.$route.params.id,
+            };
+            if (manager.status == 2) {
+              axios
+                .get(
+                  "http://localhost:3000/api/managers?filter[where][id]=" +
+                    this.$route.params.id
+                )
+                .then((respMan) => {
+                  axios
+                    .get(
+                      "http://localhost:3000/api/departments?filter[where][id]=" +
+                        respMan.data[0].position
+                    )
+                    .then((respPos) => {
+                      if (respPos.data[0].positionType == "Giám đốc") {
+                        axios
+                          .get(
+                            "http://localhost:3000/api/roles?filter[where][roleName]=" +
+                              "Giám đốc"
+                          )
+                          .then((respRole) => {
+                            axios
+                              .get(
+                                "http://localhost:3000/api/accounts?filter[where][role]=" +
+                                  respRole.data[0].id
+                              )
+                              .then((respAcc) => {
+                                const account = {
+                                  userId: respAcc.data[0].userId,
+                                  username: respAcc.data[0].username,
+                                  password: respAcc.data[0].password,
+                                  role: respAcc.data[0].role,
+                                  status: 2,
+                                  idTable: respAcc.data[0].idTable,
+                                  id: respAcc.data[0].id,
+                                };
+                                const url_5 =
+                                  "http://localhost:3000/api/accounts/" +
+                                  account.id +
+                                  "/replace";
+                                axios.post(url_5, account);
+                                const url =
+                                  "http://localhost:3000/api/managers/" +
+                                  manager.id +
+                                  "/replace";
+                                axios.post(url, manager);
+                                axios
+                                  .delete(
+                                    "http://localhost:3000/api/Photos/manager/files/" +
+                                      this.imageEdit
+                                  )
+                                  .then((resp) => {
+                                    console.log(resp);
+                                  })
+                                  .catch((err) => console.log(err));
+                                axios
+                                  .post(
+                                    "http://localhost:3000/api/Photos/manager/upload?filename=" +
+                                      fileName,
+                                    fd
+                                  )
+                                  .then((res) => {
+                                    console.log(res);
+                                  })
+                                  .catch((err) => console.log(err));
+                                setTimeout(() => {
+                                  this.$router.push("/managers");
+                                  location.reload();
+                                }, 100);
+                                return 0;
+                              });
+                          });
+                      } else if (
+                        respPos.data[0].positionType == "Quản lý"
+                      ) {
+                        axios
+                          .get(
+                            "http://localhost:3000/api/roles?filter[where][roleName]=" +
+                              "Quản lý"
+                          )
+                          .then((respRole) => {
+                            axios
+                              .get(
+                                "http://localhost:3000/api/accounts?filter[where][role]=" +
+                                  respRole.data[0].id
+                              )
+                              .then((respAcc) => {
+                                const account = {
+                                  userId: respAcc.data[0].userId,
+                                  username: respAcc.data[0].username,
+                                  password: respAcc.data[0].password,
+                                  role: respAcc.data[0].role,
+                                  status: 2,
+                                  idTable: respAcc.data[0].idTable,
+                                  id: respAcc.data[0].id,
+                                };
+                                const url_5 =
+                                  "http://localhost:3000/api/accounts/" +
+                                  account.id +
+                                  "/replace";
+                                axios.post(url_5, account);
+                                const url =
+                                  "http://localhost:3000/api/managers/" +
+                                  manager.id +
+                                  "/replace";
+                                axios.post(url, manager);
+                                axios
+                                  .delete(
+                                    "http://localhost:3000/api/Photos/manager/files/" +
+                                      this.imageEdit
+                                  )
+                                  .then((resp) => {
+                                    console.log(resp);
+                                  })
+                                  .catch((err) => console.log(err));
+                                axios
+                                  .post(
+                                    "http://localhost:3000/api/Photos/manager/upload?filename=" +
+                                      fileName,
+                                    fd
+                                  )
+                                  .then((res) => {
+                                    console.log(res);
+                                  })
+                                  .catch((err) => console.log(err));
+                                setTimeout(() => {
+                                  this.$router.push("/managers");
+                                  location.reload();
+                                }, 100);
+                                return 0;
+                              });
+                          });
+                      } else if (
+                        respPos.data[0].positionType == "Giám học"
+                      ) {
+                        axios
+                          .get(
+                            "http://localhost:3000/api/roles?filter[where][roleName]=" +
+                              "Giám học"
+                          )
+                          .then((respRole) => {
+                            axios
+                              .get(
+                                "http://localhost:3000/api/accounts?filter[where][role]=" +
+                                  respRole.data[0].id
+                              )
+                              .then((respAcc) => {
+                                const account = {
+                                  userId: respAcc.data[0].userId,
+                                  username: respAcc.data[0].username,
+                                  password: respAcc.data[0].password,
+                                  role: respAcc.data[0].role,
+                                  status: 2,
+                                  idTable: respAcc.data[0].idTable,
+                                  id: respAcc.data[0].id,
+                                };
+                                const url_5 =
+                                  "http://localhost:3000/api/accounts/" +
+                                  account.id +
+                                  "/replace";
+                                axios.post(url_5, account);
+                                const url =
+                                  "http://localhost:3000/api/managers/" +
+                                  manager.id +
+                                  "/replace";
+                                axios.post(url, manager);
+                                axios
+                                  .delete(
+                                    "http://localhost:3000/api/Photos/manager/files/" +
+                                      this.imageEdit
+                                  )
+                                  .then((resp) => {
+                                    console.log(resp);
+                                  })
+                                  .catch((err) => console.log(err));
+                                axios
+                                  .post(
+                                    "http://localhost:3000/api/Photos/manager/upload?filename=" +
+                                      fileName,
+                                    fd
+                                  )
+                                  .then((res) => {
+                                    console.log(res);
+                                  })
+                                  .catch((err) => console.log(err));
+                                setTimeout(() => {
+                                  this.$router.push("/managers");
+                                  location.reload();
+                                }, 100);
+                                return 0;
+                              });
+                          });
+                      }
+                    });
+                });
+            } else {
+              const url =
+                "http://localhost:3000/api/managers/" +
+                manager.id +
+                "/replace";
+              axios.post(url, manager);
+              axios
+                .delete(
+                  "http://localhost:3000/api/Photos/manager/files/" +
+                    this.imageEdit
+                )
+                .then((resp) => {
+                  console.log(resp);
+                })
+                .catch((err) => console.log(err));
+              axios
+                .post(
+                  "http://localhost:3000/api/Photos/manager/upload?filename=" +
+                    fileName,
+                  fd
+                )
+                .then((res) => {
+                  console.log(res);
+                })
+                .catch((err) => console.log(err));
+              setTimeout(() => {
+                this.$router.push("/managers");
+                location.reload();
+              }, 100);
+              return 0;
+            }
+          } else {
+            const manager = {
+              managerId: this.managerId,
+              christianName: this.christianName,
+              fullName: this.fullName,
+              birthday: this.birthday,
+              phone: this.phone,
+              email: this.email,
+              image: fileName,
+              position: this.position,
+              homeland: this.homeland,
+              status: this.status,
+              id: this.$route.params.id,
+            };
+            if (manager.status == 2) {
+              axios
+                .get(
+                  "http://localhost:3000/api/managers?filter[where][id]=" +
+                    this.$route.params.id
+                )
+                .then((respMan) => {
+                  axios
+                    .get(
+                      "http://localhost:3000/api/departments?filter[where][id]=" +
+                        respMan.data[0].position
+                    )
+                    .then((respPos) => {
+                      if (respPos.data[0].positionType == "Giám đốc") {
+                        axios
+                          .get(
+                            "http://localhost:3000/api/roles?filter[where][roleName]=" +
+                              "Giám đốc"
+                          )
+                          .then((respRole) => {
+                            axios
+                              .get(
+                                "http://localhost:3000/api/accounts?filter[where][role]=" +
+                                  respRole.data[0].id
+                              )
+                              .then((respAcc) => {
+                                const account = {
+                                  userId: respAcc.data[0].userId,
+                                  username: respAcc.data[0].username,
+                                  password: respAcc.data[0].password,
+                                  role: respAcc.data[0].role,
+                                  status: 2,
+                                  idTable: respAcc.data[0].idTable,
+                                  id: respAcc.data[0].id,
+                                };
+                                const url_5 =
+                                  "http://localhost:3000/api/accounts/" +
+                                  account.id +
+                                  "/replace";
+                                axios.post(url_5, account);
+                                const url =
+                                  "http://localhost:3000/api/managers/" +
+                                  manager.id +
+                                  "/replace";
+                                axios.post(url, manager);
+                                axios
+                                  .delete(
+                                    "http://localhost:3000/api/Photos/manager/files/" +
+                                      this.imageEdit
+                                  )
+                                  .then((resp) => {
+                                    console.log(resp);
+                                  })
+                                  .catch((err) => console.log(err));
+                                axios
+                                  .post(
+                                    "http://localhost:3000/api/Photos/manager/upload?filename=" +
+                                      fileName,
+                                    fd
+                                  )
+                                  .then((res) => {
+                                    console.log(res);
+                                  })
+                                  .catch((err) => console.log(err));
+                                setTimeout(() => {
+                                  this.$router.push("/managers");
+                                  location.reload();
+                                }, 100);
+                                return 0;
+                              });
+                          });
+                      } else if (
+                        respPos.data[0].positionType == "Quản lý"
+                      ) {
+                        axios
+                          .get(
+                            "http://localhost:3000/api/roles?filter[where][roleName]=" +
+                              "Quản lý"
+                          )
+                          .then((respRole) => {
+                            axios
+                              .get(
+                                "http://localhost:3000/api/accounts?filter[where][role]=" +
+                                  respRole.data[0].id
+                              )
+                              .then((respAcc) => {
+                                const account = {
+                                  userId: respAcc.data[0].userId,
+                                  username: respAcc.data[0].username,
+                                  password: respAcc.data[0].password,
+                                  role: respAcc.data[0].role,
+                                  status: 2,
+                                  idTable: respAcc.data[0].idTable,
+                                  id: respAcc.data[0].id,
+                                };
+                                const url_5 =
+                                  "http://localhost:3000/api/accounts/" +
+                                  account.id +
+                                  "/replace";
+                                axios.post(url_5, account);
+                                const url =
+                                  "http://localhost:3000/api/managers/" +
+                                  manager.id +
+                                  "/replace";
+                                axios.post(url, manager);
+                                axios
+                                  .delete(
+                                    "http://localhost:3000/api/Photos/manager/files/" +
+                                      this.imageEdit
+                                  )
+                                  .then((resp) => {
+                                    console.log(resp);
+                                  })
+                                  .catch((err) => console.log(err));
+                                axios
+                                  .post(
+                                    "http://localhost:3000/api/Photos/manager/upload?filename=" +
+                                      fileName,
+                                    fd
+                                  )
+                                  .then((res) => {
+                                    console.log(res);
+                                  })
+                                  .catch((err) => console.log(err));
+                                setTimeout(() => {
+                                  this.$router.push("/managers");
+                                  location.reload();
+                                }, 100);
+                                return 0;
+                              });
+                          });
+                      } else if (
+                        respPos.data[0].positionType == "Giám học"
+                      ) {
+                        axios
+                          .get(
+                            "http://localhost:3000/api/roles?filter[where][roleName]=" +
+                              "Giám học"
+                          )
+                          .then((respRole) => {
+                            axios
+                              .get(
+                                "http://localhost:3000/api/accounts?filter[where][role]=" +
+                                  respRole.data[0].id
+                              )
+                              .then((respAcc) => {
+                                const account = {
+                                  userId: respAcc.data[0].userId,
+                                  username: respAcc.data[0].username,
+                                  password: respAcc.data[0].password,
+                                  role: respAcc.data[0].role,
+                                  status: 2,
+                                  idTable: respAcc.data[0].idTable,
+                                  id: respAcc.data[0].id,
+                                };
+                                const url_5 =
+                                  "http://localhost:3000/api/accounts/" +
+                                  account.id +
+                                  "/replace";
+                                axios.post(url_5, account);
+                                const url =
+                                  "http://localhost:3000/api/managers/" +
+                                  manager.id +
+                                  "/replace";
+                                axios.post(url, manager);
+                                axios
+                                  .post(
+                                    "http://localhost:3000/api/Photos/manager/upload?filename=" +
+                                      fileName,
+                                    fd
+                                  )
+                                  .then((res) => {
+                                    console.log(res);
+                                  })
+                                  .catch((err) => console.log(err));
+                                setTimeout(() => {
+                                  this.$router.push("/managers");
+                                  location.reload();
+                                }, 100);
+                                return 0;
+                              });
+                          });
+                      }
+                    });
+                });
+            } else {
+              const url =
+                "http://localhost:3000/api/managers/" +
+                manager.id +
+                "/replace";
+              axios.post(url, manager);
+              axios
+                .post(
+                  "http://localhost:3000/api/Photos/manager/upload?filename=" +
+                    fileName,
+                  fd
+                )
+                .then((res) => {
+                  console.log(res);
+                })
+                .catch((err) => console.log(err));
+              setTimeout(() => {
+                this.$router.push("/managers");
+                location.reload();
+              }, 100);
+              return 0;
+            }
+          }
+        } else {
+          const manager = {
+            managerId: this.managerId,
+            christianName: this.christianName,
+            fullName: this.fullName,
+            birthday: this.birthday,
+            phone: this.phone,
+            email: this.email,
+            image: this.imageEdit,
+            position: this.position,
+            homeland: this.homeland,
+            status: this.status,
+            id: this.$route.params.id,
+          };
+          if (manager.status == 2) {
+            axios
+              .get(
+                "http://localhost:3000/api/managers?filter[where][id]=" +
+                  this.$route.params.id
+              )
+              .then((respMan) => {
+                axios
+                  .get(
+                    "http://localhost:3000/api/departments?filter[where][id]=" +
+                      respMan.data[0].position
+                  )
+                  .then((respPos) => {
+                    if (respPos.data[0].positionType == "Giám đốc") {
+                      axios
+                        .get(
+                          "http://localhost:3000/api/roles?filter[where][roleName]=" +
+                            "Giám đốc"
+                        )
+                        .then((respRole) => {
+                          axios
+                            .get(
+                              "http://localhost:3000/api/accounts?filter[where][role]=" +
+                                respRole.data[0].id
+                            )
+                            .then((respAcc) => {
+                              const account = {
+                                userId: respAcc.data[0].userId,
+                                username: respAcc.data[0].username,
+                                password: respAcc.data[0].password,
+                                role: respAcc.data[0].role,
+                                status: 2,
+                                idTable: respAcc.data[0].idTable,
+                                id: respAcc.data[0].id,
+                              };
+                              const url_5 =
+                                "http://localhost:3000/api/accounts/" +
+                                account.id +
+                                "/replace";
+                              axios.post(url_5, account);
+                              const url =
+                                "http://localhost:3000/api/managers/" +
+                                manager.id +
+                                "/replace";
+                              axios.post(url, manager);
+                              setTimeout(() => {
+                                this.$router.push("/managers");
+                                location.reload();
+                              }, 100);
+                              return 0;
+                            });
+                        });
+                    } else if (respPos.data[0].positionType == "Quản lý") {
+                      axios
+                        .get(
+                          "http://localhost:3000/api/roles?filter[where][roleName]=" +
+                            "Quản lý"
+                        )
+                        .then((respRole) => {
+                          axios
+                            .get(
+                              "http://localhost:3000/api/accounts?filter[where][role]=" +
+                                respRole.data[0].id
+                            )
+                            .then((respAcc) => {
+                              const account = {
+                                userId: respAcc.data[0].userId,
+                                username: respAcc.data[0].username,
+                                password: respAcc.data[0].password,
+                                role: respAcc.data[0].role,
+                                status: 2,
+                                idTable: respAcc.data[0].idTable,
+                                id: respAcc.data[0].id,
+                              };
+                              const url_5 =
+                                "http://localhost:3000/api/accounts/" +
+                                account.id +
+                                "/replace";
+                              axios.post(url_5, account);
+                              const url =
+                                "http://localhost:3000/api/managers/" +
+                                manager.id +
+                                "/replace";
+                              axios.post(url, manager);
+                              setTimeout(() => {
+                                this.$router.push("/managers");
+                                location.reload();
+                              }, 100);
+                              return 0;
+                            });
+                        });
+                    } else if (respPos.data[0].positionType == "Giám học") {
+                      axios
+                        .get(
+                          "http://localhost:3000/api/roles?filter[where][roleName]=" +
+                            "Giám học"
+                        )
+                        .then((respRole) => {
+                          axios
+                            .get(
+                              "http://localhost:3000/api/accounts?filter[where][role]=" +
+                                respRole.data[0].id
+                            )
+                            .then((respAcc) => {
+                              const account = {
+                                userId: respAcc.data[0].userId,
+                                username: respAcc.data[0].username,
+                                password: respAcc.data[0].password,
+                                role: respAcc.data[0].role,
+                                status: 2,
+                                idTable: respAcc.data[0].idTable,
+                                id: respAcc.data[0].id,
+                              };
+                              const url_5 =
+                                "http://localhost:3000/api/accounts/" +
+                                account.id +
+                                "/replace";
+                              axios.post(url_5, account);
+                              const url =
+                                "http://localhost:3000/api/managers/" +
+                                manager.id +
+                                "/replace";
+                              axios.post(url, manager);
+                              setTimeout(() => {
+                                this.$router.push("/managers");
+                                location.reload();
+                              }, 100);
+                              return 0;
+                            });
+                        });
+                    }
+                  });
+              });
+          } else {
+            const url =
+              "http://localhost:3000/api/managers/" +
+              manager.id +
+              "/replace";
+            axios.post(url, manager);
+            setTimeout(() => {
+              this.$router.push("/managers");
+              location.reload();
+            }, 100);
+            return 0;
+          }
+        }
       }
-      
-    },
-
-    clearInput() {
-      if (this.score != 0) {
-        this.score = 0;
-      }
-    },
-
-    toListReportCompanion() {
-      this.$router.push("/reportCompanions");
-      location.reload();
-    },
-  },
-  template: `
-  <div class="card shadow mb-4" style="margin-top: -5px;">
-  <div class="card-header py-3">
-    <h6 class="m-0 font-weight-bold text-dark">Đánh Giá Ứng Sinh Tháng {{ month }}</h6>
-  </div>
-  <div class="card-body">
-    <form @submit.prevent="submitEditRateCandidateForm" action="POST" method="" autocomplete="off">
-      <div class="row mt-2">
-        <div class="col-lg-4">
-          <label class="font-weight-bold text-size-15px">Thông Tin Đánh Giá:</label>
-        </div>
-        <div class="col-lg-4">
-          <label class="font-weight-bold col-form-label" for="candidate">Ứng Sinh</label>
-          <select class="custom-select  text-size-13px  h-32px" v-model="candidate" id="candidate" name="candidate"
-            style="margin-top: -5px;" disabled>
-            <option v-for="candidate in candidates" v-bind:value ="candidate.id" :selected="candidate.id == candidate">{{ candidate.fullName }}</option>
-          </select>
-        </div>
-        <div class="col-lg-4">
-          <label class="font-weight-bold col-form-label" for="score">Điểm Số</label>
-          <input v-bind:title="titleScore" v-model="score" id="score" name="score"
-            type="number" class="form-control  text-size-13px " placeholder="Nhập Điểm Số Đánh Giá..."
-            :value="score" v-on:keyup="score = $event.target.value" style="margin-top: -5px;">
-        </div>
-      </div>
-      <div class="row mt-1">
-        <div class="col-lg-4"></div>
-        <div class="col-lg-4">
-          <label class="font-weight-bold col-form-label" for="month">Tháng</label>
-          <input v-model="month" id="month" name="month"
-            type="number" class="form-control  text-size-13px "
-            :value="month" v-on:keyup="month = $event.target.value" style="margin-top: -5px;" disabled>
-        </div>
-        <div class="col-lg-4">
-          <label class="font-weight-bold col-form-label" for="year">Năm</label>
-          <input v-model="year" id="year" name="year"
-            type="number" class="form-control  text-size-13px "
-            :value="year" v-on:keyup="year = $event.target.value" style="margin-top: -5px;" disabled>
-        </div>
-      </div>
-      <div class="row" style="margin-top: 30px;">
-        <div class="col-12">
-          <div style="float:right">
-            <button type="submit"
-              class="btn rounded btn-hover-blue"
-              style="background-color: #056299;color: white;font-size:13px;">
-              <i class="far fa-save fa-lg"></i>
-              &nbsp;Lưu
-            </button>
-          </div>
-          <div style="float:right; margin-right: 10px;">
-            <button :disabled="!refreshForm" @click="clearInput"
-              class="btn btn-success rounded" style="font-size:13px;">
-              <i class="fas fa-sync-alt"></i>
-              &nbsp;Làm mới
-            </button>
-          </div>
-          <div style="float:right; margin-right: 360px;">
-            <button class="btn rounded btn-hover-blue"
-              style="background-color: #056299;color: white;font-size:13px;" @click="toListReportCompanion">
-              <i class="fas fa-fast-backward"></i>
-              &nbsp;Quay lại
-            </button>
-          </div>
-        </div>
-      </div>
-    </form>
-  </div>
-</div>
-  `,
-};
+    } else if (
+      this.emailEdit != this.email &&
+      this.phoneEdit == this.phone
+    ) {
+      axios
+        .get(
+          "http://localhost:3000/api/managers/existsEmail?email=" +
+            this.email
+        )
+        .then((response) => {
+          if (response.data.bool == true) {
+            alertify.alert("Thông báo", "Email đã tồn tại!", function () {
+              alertify.success("Ok");
+            });
+          } else if (crypt.getAge(this.birthday) < 28) {
+            alertify.alert(
+              "Thông báo",
+              "Tuổi của người quản lý nhỏ hơn 28!",
+              function () {
+                alertify.success("Ok");
+              }
+            );
+          } else if (crypt.getAge(this.birthday) > 60) {
+            alertify.alert(
+              "Thông báo",
+              "Tuổi của người quản lý lớn hơn 60!",
+              function () {
+                alertify.success("Ok");
+              }
+            );
+          } else {
+            if (this.selectedFile != null) {
+              const fd = new FormData();
+              fd.append("image", this.selectedFile, this.selectedFile.name);
+              var start = this.selectedFile.name.lastIndexOf(".");
+              var end = this.selectedFile.length;
+              var fileName =
+                this.managerId + this.selectedFile.name.slice(start, end);
+              if (this.imageEdit != null) {
+                const manager = {
+                  managerId: this.managerId,
+                  christianName: this.christianName,
+                  fullName: this.fullName,
+                  birthday: this.birthday,
+                  phone: this.phone,
+                  email: this.email,
+                  image: fileName,
+                  position: this.position,
+                  homeland: this.homeland,
+                  status: this.status,
+                  id: this.$route.params.id,
+                };
+                if (manager.status == 2) {
+                  axios
+                    .get(
+                      "http://localhost:3000/api/managers?filter[where][id]=" +
+                        this.$route.params.id
+                    )
+                    .then((respMan) => {
+                      axios
+                        .get(
+                          "http://localhost:3000/api/departments?filter[where][id]=" +
+                            respMan.data[0].position
+                        )
+                        .then((respPos) => {
+                          if (respPos.data[0].positionType == "Giám đốc") {
+                            axios
+                              .get(
+                                "http://localhost:3000/api/roles?filter[where][roleName]=" +
+                                  "Giám đốc"
+                              )
+                              .then((respRole) => {
+                                axios
+                                  .get(
+                                    "http://localhost:3000/api/accounts?filter[where][role]=" +
+                                      respRole.data[0].id
+                                  )
+                                  .then((respAcc) => {
+                                    const account = {
+                                      userId: respAcc.data[0].userId,
+                                      username: respAcc.data[0].username,
+                                      password: respAcc.data[0].password,
+                                      role: respAcc.data[0].role,
+                                      status: 2,
+                                      idTable: respAcc.data[0].idTable,
+                                      id: respAcc.data[0].id,
+                                    };
+                                    const url_5 =
+                                      "http://localhost:3000/api/accounts/" +
+                                      account.id +
+                                      "/replace";
+                                    axios.post(url_5, account);
+                                    const url =
+                                      "http://localhost:3000/api/managers/" +
+                                      manager.id +
+                                      "/replace";
+                                    axios.post(url, manager);
+                                    axios
+                                      .delete(
+                                        "http://localhost:3000/api/Photos/manager/files/" +
+                                          this.imageEdit
+                                      )
+                                      .then((resp) => {
+                                        console.log(resp);
+                                      })
+                                      .catch((err) => console.log(err));
+                                    axios
+                                      .post(
+                                        "http://localhost:3000/api/Photos/manager/upload?filename=" +
+                                          fileName,
+                                        fd
+                                      )
+                                      .then((res) => {
+                                        console.log(res);
+                                      })
+                                      .catch((err) => console.log(err));
+                                    setTimeout(() => {
+                                      this.$router.push("/managers");
+                                      location.reload();
+                                    }, 100);
+                                    return 0;
+                                  });
+                              });
+                          } else if (
+                            respPos.data[0].positionType == "Quản lý"
+                          ) {
+                            axios
+                              .get(
+                                "http://localhost:3000/api/roles?filter[where][roleName]=" +
+                                  "Quản lý"
+                              )
+                              .then((respRole) => {
+                                axios
+                                  .get(
+                                    "http://localhost:3000/api/accounts?filter[where][role]=" +
+                                      respRole.data[0].id
+                                  )
+                                  .then((respAcc) => {
+                                    const account = {
+                                      userId: respAcc.data[0].userId,
+                                      username: respAcc.data[0].username,
+                                      password: respAcc.data[0].password,
+                                      role: respAcc.data[0].role,
+                                      status: 2,
+                                      idTable: respAcc.data[0].idTable,
+                                      id: respAcc.data[0].id,
+                                    };
+                                    const url_5 =
+                                      "http://localhost:3000/api/accounts/" +
+                                      account.id +
+                                      "/replace";
+                                    axios.post(url_5, account);
+                                    const url =
+                                      "http://localhost:3000/api/managers/" +
+                                      manager.id +
+                                      "/replace";
+                                    axios.post(url, manager);
+                                    axios
+                                      .delete(
+                                        "http://localhost:3000/api/Photos/manager/files/" +
+                                          this.imageEdit
+                                      )
+                                      .then((resp) => {
+                                        console.log(resp);
+                                      })
+                                      .catch((err) => console.log(err));
+                                    axios
+                                      .post(
+                                        "http://localhost:3000/api/Photos/manager/upload?filename=" +
+                                          fileName,
+                                        fd
+                                      )
+                                      .then((res) => {
+                                        console.log(res);
+                                      })
+                                      .catch((err) => console.log(err));
+                                    setTimeout(() => {
+                                      this.$router.push("/managers");
+                                      location.reload();
+                                    }, 100);
+                                    return 0;
+                                  });
+                              });
+                          } else if (
+                            respPos.data[0].positionType == "Giám học"
+                          ) {
+                            axios
+                              .get(
+                                "http://localhost:3000/api/roles?filter[where][roleName]=" +
+                                  "Giám học"
+                              )
+                              .then((respRole) => {
+                                axios
+                                  .get(
+                                    "http://localhost:3000/api/accounts?filter[where][role]=" +
+                                      respRole.data[0].id
+                                  )
+                                  .then((respAcc) => {
+                                    const account = {
+                                      userId: respAcc.data[0].userId,
+                                      username: respAcc.data[0].username,
+                                      password: respAcc.data[0].password,
+                                      role: respAcc.data[0].role,
+                                      status: 2,
+                                      idTable: respAcc.data[0].idTable,
+                                      id: respAcc.data[0].id,
+                                    };
+                                    const url_5 =
+                                      "http://localhost:3000/api/accounts/" +
+                                      account.id +
+                                      "/replace";
+                                    axios.post(url_5, account);
+                                    const url =
+                                      "http://localhost:3000/api/managers/" +
+                                      manager.id +
+                                      "/replace";
+                                    axios.post(url, manager);
+                                    axios
+                                      .delete(
+                                        "http://localhost:3000/api/Photos/manager/files/" +
+                                          this.imageEdit
+                                      )
+                                      .then((resp) => {
+                                        console.log(resp);
+                                      })
+                                      .catch((err) => console.log(err));
+                                    axios
+                                      .post(
+                                        "http://localhost:3000/api/Photos/manager/upload?filename=" +
+                                          fileName,
+                                        fd
+                                      )
+                                      .then((res) => {
+                                        console.log(res);
+                                      })
+                                      .catch((err) => console.log(err));
+                                    setTimeout(() => {
+                                      this.$router.push("/managers");
+                                      location.reload();
+                                    }, 100);
+                                    return 0;
+                                  });
+                              });
+                          }
+                        });
+                    });
+                } else {
+                  const url =
+                    "http://localhost:3000/api/managers/" +
+                    manager.id +
+                    "/replace";
+                  axios.post(url, manager);
+                  axios
+                    .delete(
+                      "http://localhost:3000/api/Photos/manager/files/" +
+                        this.imageEdit
+                    )
+                    .then((resp) => {
+                      console.log(resp);
+                    })
+                    .catch((err) => console.log(err));
+                  axios
+                    .post(
+                      "http://localhost:3000/api/Photos/manager/upload?filename=" +
+                        fileName,
+                      fd
+                    )
+                    .then((res) => {
+                      console.log(res);
+                    })
+                    .catch((err) => console.log(err));
+                  setTimeout(() => {
+                    this.$router.push("/managers");
+                    location.reload();
+                  }, 100);
+                  return 0;
+                }
+              } else {
+                const manager = {
+                  managerId: this.managerId,
+                  christianName: this.christianName,
+                  fullName: this.fullName,
+                  birthday: this.birthday,
+                  phone: this.phone,
+                  email: this.email,
+                  image: fileName,
+                  position: this.position,
+                  homeland: this.homeland,
+                  status: this.status,
+                  id: this.$route.params.id,
+                };
+                if (manager.status == 2) {
+                  axios
+                    .get(
+                      "http://localhost:3000/api/managers?filter[where][id]=" +
+                        this.$route.params.id
+                    )
+                    .then((respMan) => {
+                      axios
+                        .get(
+                          "http://localhost:3000/api/departments?filter[where][id]=" +
+                            respMan.data[0].position
+                        )
+                        .then((respPos) => {
+                          if (respPos.data[0].positionType == "Giám đốc") {
+                            axios
+                              .get(
+                                "http://localhost:3000/api/roles?filter[where][roleName]=" +
+                                  "Giám đốc"
+                              )
+                              .then((respRole) => {
+                                axios
+                                  .get(
+                                    "http://localhost:3000/api/accounts?filter[where][role]=" +
+                                      respRole.data[0].id
+                                  )
+                                  .then((respAcc) => {
+                                    const account = {
+                                      userId: respAcc.data[0].userId,
+                                      username: respAcc.data[0].username,
+                                      password: respAcc.data[0].password,
+                                      role: respAcc.data[0].role,
+                                      status: 2,
+                                      idTable: respAcc.data[0].idTable,
+                                      id: respAcc.data[0].id,
+                                    };
+                                    const url_5 =
+                                      "http://localhost:3000/api/accounts/" +
+                                      account.id +
+                                      "/replace";
+                                    axios.post(url_5, account);
+                                    const url =
+                                      "http://localhost:3000/api/managers/" +
+                                      manager.id +
+                                      "/replace";
+                                    axios.post(url, manager);
+                                    axios
+                                      .delete(
+                                        "http://localhost:3000/api/Photos/manager/files/" +
+                                          this.imageEdit
+                                      )
+                                      .then((resp) => {
+                                        console.log(resp);
+                                      })
+                                      .catch((err) => console.log(err));
+                                    axios
+                                      .post(
+                                        "http://localhost:3000/api/Photos/manager/upload?filename=" +
+                                          fileName,
+                                        fd
+                                      )
+                                      .then((res) => {
+                                        console.log(res);
+                                      })
+                                      .catch((err) => console.log(err));
+                                    setTimeout(() => {
+                                      this.$router.push("/managers");
+                                      location.reload();
+                                    }, 100);
+                                    return 0;
+                                  });
+                              });
+                          } else if (
+                            respPos.data[0].positionType == "Quản lý"
+                          ) {
+                            axios
+                              .get(
+                                "http://localhost:3000/api/roles?filter[where][roleName]=" +
+                                  "Quản lý"
+                              )
+                              .then((respRole) => {
+                                axios
+                                  .get(
+                                    "http://localhost:3000/api/accounts?filter[where][role]=" +
+                                      respRole.data[0].id
+                                  )
+                                  .then((respAcc) => {
+                                    const account = {
+                                      userId: respAcc.data[0].userId,
+                                      username: respAcc.data[0].username,
+                                      password: respAcc.data[0].password,
+                                      role: respAcc.data[0].role,
+                                      status: 2,
+                                      idTable: respAcc.data[0].idTable,
+                                      id: respAcc.data[0].id,
+                                    };
+                                    const url_5 =
+                                      "http://localhost:3000/api/accounts/" +
+                                      account.id +
+                                      "/replace";
+                                    axios.post(url_5, account);
+                                    const url =
+                                      "http://localhost:3000/api/managers/" +
+                                      manager.id +
+                                      "/replace";
+                                    axios.post(url, manager);
+                                    axios
+                                      .delete(
+                                        "http://localhost:3000/api/Photos/manager/files/" +
+                                          this.imageEdit
+                                      )
+                                      .then((resp) => {
+                                        console.log(resp);
+                                      })
+                                      .catch((err) => console.log(err));
+                                    axios
+                                      .post(
+                                        "http://localhost:3000/api/Photos/manager/upload?filename=" +
+                                          fileName,
+                                        fd
+                                      )
+                                      .then((res) => {
+                                        console.log(res);
+                                      })
+                                      .catch((err) => console.log(err));
+                                    setTimeout(() => {
+                                      this.$router.push("/managers");
+                                      location.reload();
+                                    }, 100);
+                                    return 0;
+                                  });
+                              });
+                          } else if (
+                            respPos.data[0].positionType == "Giám học"
+                          ) {
+                            axios
+                              .get(
+                                "http://localhost:3000/api/roles?filter[where][roleName]=" +
+                                  "Giám học"
+                              )
+                              .then((respRole) => {
+                                axios
+                                  .get(
+                                    "http://localhost:3000/api/accounts?filter[where][role]=" +
+                                      respRole.data[0].id
+                                  )
+                                  .then((respAcc) => {
+                                    const account = {
+                                      userId: respAcc.data[0].userId,
+                                      username: respAcc.data[0].username,
+                                      password: respAcc.data[0].password,
+                                      role: respAcc.data[0].role,
+                                      status: 2,
+                                      idTable: respAcc.data[0].idTable,
+                                      id: respAcc.data[0].id,
+                                    };
+                                    const url_5 =
+                                      "http://localhost:3000/api/accounts/" +
+                                      account.id +
+                                      "/replace";
+                                    axios.post(url_5, account);
+                                    const url =
+                                      "http://localhost:3000/api/managers/" +
+                                      manager.id +
+                                      "/replace";
+                                    axios.post(url, manager);
+                                    axios
+                                      .post(
+                                        "http://localhost:3000/api/Photos/manager/upload?filename=" +
+                                          fileName,
+                                        fd
+                                      )
+                                      .then((res) => {
+                                        console.log(res);
+                                      })
+                                      .catch((err) => console.log(err));
+                                    setTimeout(() => {
+                                      this.$router.push("/managers");
+                                      location.reload();
+                                    }, 100);
+                                    return 0;
+                                  });
+                              });
+                          }
+                        });
+                    });
+                } else {
+                  const url =
+                    "http://localhost:3000/api/managers/" +
+                    manager.id +
+                    "/replace";
+                  axios.post(url, manager);
+                  axios
+                    .post(
+                      "http://localhost:3000/api/Photos/manager/upload?filename=" +
+                        fileName,
+                      fd
+                    )
+                    .then((res) => {
+                      console.log(res);
+                    })
+                    .catch((err) => console.log(err));
+                  setTimeout(() => {
+                    this.$router.push("/managers");
+                    location.reload();
+                  }, 100);
+                  return 0;
+                }
+              }
+            } else {
+              const manager = {
+                managerId: this.managerId,
+                christianName: this.christianName,
+                fullName: this.fullName,
+                birthday: this.birthday,
+                phone: this.phone,
+                email: this.email,
+                image: this.imageEdit,
+                position: this.position,
+                homeland: this.homeland,
+                status: this.status,
+                id: this.$route.params.id,
+              };
+              if (manager.status == 2) {
+                axios
+                  .get(
+                    "http://localhost:3000/api/managers?filter[where][id]=" +
+                      this.$route.params.id
+                  )
+                  .then((respMan) => {
+                    axios
+                      .get(
+                        "http://localhost:3000/api/departments?filter[where][id]=" +
+                          respMan.data[0].position
+                      )
+                      .then((respPos) => {
+                        if (respPos.data[0].positionType == "Giám đốc") {
+                          axios
+                            .get(
+                              "http://localhost:3000/api/roles?filter[where][roleName]=" +
+                                "Giám đốc"
+                            )
+                            .then((respRole) => {
+                              axios
+                                .get(
+                                  "http://localhost:3000/api/accounts?filter[where][role]=" +
+                                    respRole.data[0].id
+                                )
+                                .then((respAcc) => {
+                                  const account = {
+                                    userId: respAcc.data[0].userId,
+                                    username: respAcc.data[0].username,
+                                    password: respAcc.data[0].password,
+                                    role: respAcc.data[0].role,
+                                    status: 2,
+                                    idTable: respAcc.data[0].idTable,
+                                    id: respAcc.data[0].id,
+                                  };
+                                  const url_5 =
+                                    "http://localhost:3000/api/accounts/" +
+                                    account.id +
+                                    "/replace";
+                                  axios.post(url_5, account);
+                                  const url =
+                                    "http://localhost:3000/api/managers/" +
+                                    manager.id +
+                                    "/replace";
+                                  axios.post(url, manager);
+                                  setTimeout(() => {
+                                    this.$router.push("/managers");
+                                    location.reload();
+                                  }, 100);
+                                  return 0;
+                                });
+                            });
+                        } else if (respPos.data[0].positionType == "Quản lý") {
+                          axios
+                            .get(
+                              "http://localhost:3000/api/roles?filter[where][roleName]=" +
+                                "Quản lý"
+                            )
+                            .then((respRole) => {
+                              axios
+                                .get(
+                                  "http://localhost:3000/api/accounts?filter[where][role]=" +
+                                    respRole.data[0].id
+                                )
+                                .then((respAcc) => {
+                                  const account = {
+                                    userId: respAcc.data[0].userId,
+                                    username: respAcc.data[0].username,
+                                    password: respAcc.data[0].password,
+                                    role: respAcc.data[0].role,
+                                    status: 2,
+                                    idTable: respAcc.data[0].idTable,
+                                    id: respAcc.data[0].id,
+                                  };
+                                  const url_5 =
+                                    "http://localhost:3000/api/accounts/" +
+                                    account.id +
+                                    "/replace";
+                                  axios.post(url_5, account);
+                                  const url =
+                                    "http://localhost:3000/api/managers/" +
+                                    manager.id +
+                                    "/replace";
+                                  axios.post(url, manager);
+                                  setTimeout(() => {
+                                    this.$router.push("/managers");
+                                    location.reload();
+                                  }, 100);
+                                  return 0;
+                                });
+                            });
+                        } else if (respPos.data[0].positionType == "Giám học") {
+                          axios
+                            .get(
+                              "http://localhost:3000/api/roles?filter[where][roleName]=" +
+                                "Giám học"
+                            )
+                            .then((respRole) => {
+                              axios
+                                .get(
+                                  "http://localhost:3000/api/accounts?filter[where][role]=" +
+                                    respRole.data[0].id
+                                )
+                                .then((respAcc) => {
+                                  const account = {
+                                    userId: respAcc.data[0].userId,
+                                    username: respAcc.data[0].username,
+                                    password: respAcc.data[0].password,
+                                    role: respAcc.data[0].role,
+                                    status: 2,
+                                    idTable: respAcc.data[0].idTable,
+                                    id: respAcc.data[0].id,
+                                  };
+                                  const url_5 =
+                                    "http://localhost:3000/api/accounts/" +
+                                    account.id +
+                                    "/replace";
+                                  axios.post(url_5, account);
+                                  const url =
+                                    "http://localhost:3000/api/managers/" +
+                                    manager.id +
+                                    "/replace";
+                                  axios.post(url, manager);
+                                  setTimeout(() => {
+                                    this.$router.push("/managers");
+                                    location.reload();
+                                  }, 100);
+                                  return 0;
+                                });
+                            });
+                        }
+                      });
+                  });
+              } else {
+                const url =
+                  "http://localhost:3000/api/managers/" +
+                  manager.id +
+                  "/replace";
+                axios.post(url, manager);
+                setTimeout(() => {
+                  this.$router.push("/managers");
+                  location.reload();
+                }, 100);
+                return 0;
+              }
+            }
+          }
+        });
+    } else if (
+      this.emailEdit == this.email &&
+      this.phoneEdit != this.phone
+    ) {
+      axios
+        .get(
+          "http://localhost:3000/api/managers/existsPhone?phone=" +
+            this.phone
+        )
+        .then((response) => {
+          if (response.data.bool == true) {
+            alertify.alert(
+              "Thông báo",
+              "Số điện thoại đã tồn tại!",
+              function () {
+                alertify.success("Ok");
+              }
+            );
+          } else if (crypt.getAge(this.birthday) < 28) {
+            alertify.alert(
+              "Thông báo",
+              "Tuổi của người quản lý nhỏ hơn 28!",
+              function () {
+                alertify.success("Ok");
+              }
+            );
+          } else if (crypt.getAge(this.birthday) > 60) {
+            alertify.alert(
+              "Thông báo",
+              "Tuổi của người quản lý lớn hơn 60!",
+              function () {
+                alertify.success("Ok");
+              }
+            );
+          } else {
+            if (this.selectedFile != null) {
+              const fd = new FormData();
+              fd.append("image", this.selectedFile, this.selectedFile.name);
+              var start = this.selectedFile.name.lastIndexOf(".");
+              var end = this.selectedFile.length;
+              var fileName =
+                this.managerId + this.selectedFile.name.slice(start, end);
+              if (this.imageEdit != null) {
+                const manager = {
+                  managerId: this.managerId,
+                  christianName: this.christianName,
+                  fullName: this.fullName,
+                  birthday: this.birthday,
+                  phone: this.phone,
+                  email: this.email,
+                  image: fileName,
+                  position: this.position,
+                  homeland: this.homeland,
+                  status: this.status,
+                  id: this.$route.params.id,
+                };
+                if (manager.status == 2) {
+                  axios
+                    .get(
+                      "http://localhost:3000/api/managers?filter[where][id]=" +
+                        this.$route.params.id
+                    )
+                    .then((respMan) => {
+                      axios
+                        .get(
+                          "http://localhost:3000/api/departments?filter[where][id]=" +
+                            respMan.data[0].position
+                        )
+                        .then((respPos) => {
+                          if (respPos.data[0].positionType == "Giám đốc") {
+                            axios
+                              .get(
+                                "http://localhost:3000/api/roles?filter[where][roleName]=" +
+                                  "Giám đốc"
+                              )
+                              .then((respRole) => {
+                                axios
+                                  .get(
+                                    "http://localhost:3000/api/accounts?filter[where][role]=" +
+                                      respRole.data[0].id
+                                  )
+                                  .then((respAcc) => {
+                                    const account = {
+                                      userId: respAcc.data[0].userId,
+                                      username: respAcc.data[0].username,
+                                      password: respAcc.data[0].password,
+                                      role: respAcc.data[0].role,
+                                      status: 2,
+                                      idTable: respAcc.data[0].idTable,
+                                      id: respAcc.data[0].id,
+                                    };
+                                    const url_5 =
+                                      "http://localhost:3000/api/accounts/" +
+                                      account.id +
+                                      "/replace";
+                                    axios.post(url_5, account);
+                                    const url =
+                                      "http://localhost:3000/api/managers/" +
+                                      manager.id +
+                                      "/replace";
+                                    axios.post(url, manager);
+                                    axios
+                                      .delete(
+                                        "http://localhost:3000/api/Photos/manager/files/" +
+                                          this.imageEdit
+                                      )
+                                      .then((resp) => {
+                                        console.log(resp);
+                                      })
+                                      .catch((err) => console.log(err));
+                                    axios
+                                      .post(
+                                        "http://localhost:3000/api/Photos/manager/upload?filename=" +
+                                          fileName,
+                                        fd
+                                      )
+                                      .then((res) => {
+                                        console.log(res);
+                                      })
+                                      .catch((err) => console.log(err));
+                                    setTimeout(() => {
+                                      this.$router.push("/managers");
+                                      location.reload();
+                                    }, 100);
+                                    return 0;
+                                  });
+                              });
+                          } else if (
+                            respPos.data[0].positionType == "Quản lý"
+                          ) {
+                            axios
+                              .get(
+                                "http://localhost:3000/api/roles?filter[where][roleName]=" +
+                                  "Quản lý"
+                              )
+                              .then((respRole) => {
+                                axios
+                                  .get(
+                                    "http://localhost:3000/api/accounts?filter[where][role]=" +
+                                      respRole.data[0].id
+                                  )
+                                  .then((respAcc) => {
+                                    const account = {
+                                      userId: respAcc.data[0].userId,
+                                      username: respAcc.data[0].username,
+                                      password: respAcc.data[0].password,
+                                      role: respAcc.data[0].role,
+                                      status: 2,
+                                      idTable: respAcc.data[0].idTable,
+                                      id: respAcc.data[0].id,
+                                    };
+                                    const url_5 =
+                                      "http://localhost:3000/api/accounts/" +
+                                      account.id +
+                                      "/replace";
+                                    axios.post(url_5, account);
+                                    const url =
+                                      "http://localhost:3000/api/managers/" +
+                                      manager.id +
+                                      "/replace";
+                                    axios.post(url, manager);
+                                    axios
+                                      .delete(
+                                        "http://localhost:3000/api/Photos/manager/files/" +
+                                          this.imageEdit
+                                      )
+                                      .then((resp) => {
+                                        console.log(resp);
+                                      })
+                                      .catch((err) => console.log(err));
+                                    axios
+                                      .post(
+                                        "http://localhost:3000/api/Photos/manager/upload?filename=" +
+                                          fileName,
+                                        fd
+                                      )
+                                      .then((res) => {
+                                        console.log(res);
+                                      })
+                                      .catch((err) => console.log(err));
+                                    setTimeout(() => {
+                                      this.$router.push("/managers");
+                                      location.reload();
+                                    }, 100);
+                                    return 0;
+                                  });
+                              });
+                          } else if (
+                            respPos.data[0].positionType == "Giám học"
+                          ) {
+                            axios
+                              .get(
+                                "http://localhost:3000/api/roles?filter[where][roleName]=" +
+                                  "Giám học"
+                              )
+                              .then((respRole) => {
+                                axios
+                                  .get(
+                                    "http://localhost:3000/api/accounts?filter[where][role]=" +
+                                      respRole.data[0].id
+                                  )
+                                  .then((respAcc) => {
+                                    const account = {
+                                      userId: respAcc.data[0].userId,
+                                      username: respAcc.data[0].username,
+                                      password: respAcc.data[0].password,
+                                      role: respAcc.data[0].role,
+                                      status: 2,
+                                      idTable: respAcc.data[0].idTable,
+                                      id: respAcc.data[0].id,
+                                    };
+                                    const url_5 =
+                                      "http://localhost:3000/api/accounts/" +
+                                      account.id +
+                                      "/replace";
+                                    axios.post(url_5, account);
+                                    const url =
+                                      "http://localhost:3000/api/managers/" +
+                                      manager.id +
+                                      "/replace";
+                                    axios.post(url, manager);
+                                    axios
+                                      .delete(
+                                        "http://localhost:3000/api/Photos/manager/files/" +
+                                          this.imageEdit
+                                      )
+                                      .then((resp) => {
+                                        console.log(resp);
+                                      })
+                                      .catch((err) => console.log(err));
+                                    axios
+                                      .post(
+                                        "http://localhost:3000/api/Photos/manager/upload?filename=" +
+                                          fileName,
+                                        fd
+                                      )
+                                      .then((res) => {
+                                        console.log(res);
+                                      })
+                                      .catch((err) => console.log(err));
+                                    setTimeout(() => {
+                                      this.$router.push("/managers");
+                                      location.reload();
+                                    }, 100);
+                                    return 0;
+                                  });
+                              });
+                          }
+                        });
+                    });
+                } else {
+                  const url =
+                    "http://localhost:3000/api/managers/" +
+                    manager.id +
+                    "/replace";
+                  axios.post(url, manager);
+                  axios
+                    .delete(
+                      "http://localhost:3000/api/Photos/manager/files/" +
+                        this.imageEdit
+                    )
+                    .then((resp) => {
+                      console.log(resp);
+                    })
+                    .catch((err) => console.log(err));
+                  axios
+                    .post(
+                      "http://localhost:3000/api/Photos/manager/upload?filename=" +
+                        fileName,
+                      fd
+                    )
+                    .then((res) => {
+                      console.log(res);
+                    })
+                    .catch((err) => console.log(err));
+                  setTimeout(() => {
+                    this.$router.push("/managers");
+                    location.reload();
+                  }, 100);
+                  return 0;
+                }
+              } else {
+                const manager = {
+                  managerId: this.managerId,
+                  christianName: this.christianName,
+                  fullName: this.fullName,
+                  birthday: this.birthday,
+                  phone: this.phone,
+                  email: this.email,
+                  image: fileName,
+                  position: this.position,
+                  homeland: this.homeland,
+                  status: this.status,
+                  id: this.$route.params.id,
+                };
+                if (manager.status == 2) {
+                  axios
+                    .get(
+                      "http://localhost:3000/api/managers?filter[where][id]=" +
+                        this.$route.params.id
+                    )
+                    .then((respMan) => {
+                      axios
+                        .get(
+                          "http://localhost:3000/api/departments?filter[where][id]=" +
+                            respMan.data[0].position
+                        )
+                        .then((respPos) => {
+                          if (respPos.data[0].positionType == "Giám đốc") {
+                            axios
+                              .get(
+                                "http://localhost:3000/api/roles?filter[where][roleName]=" +
+                                  "Giám đốc"
+                              )
+                              .then((respRole) => {
+                                axios
+                                  .get(
+                                    "http://localhost:3000/api/accounts?filter[where][role]=" +
+                                      respRole.data[0].id
+                                  )
+                                  .then((respAcc) => {
+                                    const account = {
+                                      userId: respAcc.data[0].userId,
+                                      username: respAcc.data[0].username,
+                                      password: respAcc.data[0].password,
+                                      role: respAcc.data[0].role,
+                                      status: 2,
+                                      idTable: respAcc.data[0].idTable,
+                                      id: respAcc.data[0].id,
+                                    };
+                                    const url_5 =
+                                      "http://localhost:3000/api/accounts/" +
+                                      account.id +
+                                      "/replace";
+                                    axios.post(url_5, account);
+                                    const url =
+                                      "http://localhost:3000/api/managers/" +
+                                      manager.id +
+                                      "/replace";
+                                    axios.post(url, manager);
+                                    axios
+                                      .delete(
+                                        "http://localhost:3000/api/Photos/manager/files/" +
+                                          this.imageEdit
+                                      )
+                                      .then((resp) => {
+                                        console.log(resp);
+                                      })
+                                      .catch((err) => console.log(err));
+                                    axios
+                                      .post(
+                                        "http://localhost:3000/api/Photos/manager/upload?filename=" +
+                                          fileName,
+                                        fd
+                                      )
+                                      .then((res) => {
+                                        console.log(res);
+                                      })
+                                      .catch((err) => console.log(err));
+                                    setTimeout(() => {
+                                      this.$router.push("/managers");
+                                      location.reload();
+                                    }, 100);
+                                    return 0;
+                                  });
+                              });
+                          } else if (
+                            respPos.data[0].positionType == "Quản lý"
+                          ) {
+                            axios
+                              .get(
+                                "http://localhost:3000/api/roles?filter[where][roleName]=" +
+                                  "Quản lý"
+                              )
+                              .then((respRole) => {
+                                axios
+                                  .get(
+                                    "http://localhost:3000/api/accounts?filter[where][role]=" +
+                                      respRole.data[0].id
+                                  )
+                                  .then((respAcc) => {
+                                    const account = {
+                                      userId: respAcc.data[0].userId,
+                                      username: respAcc.data[0].username,
+                                      password: respAcc.data[0].password,
+                                      role: respAcc.data[0].role,
+                                      status: 2,
+                                      idTable: respAcc.data[0].idTable,
+                                      id: respAcc.data[0].id,
+                                    };
+                                    const url_5 =
+                                      "http://localhost:3000/api/accounts/" +
+                                      account.id +
+                                      "/replace";
+                                    axios.post(url_5, account);
+                                    const url =
+                                      "http://localhost:3000/api/managers/" +
+                                      manager.id +
+                                      "/replace";
+                                    axios.post(url, manager);
+                                    axios
+                                      .delete(
+                                        "http://localhost:3000/api/Photos/manager/files/" +
+                                          this.imageEdit
+                                      )
+                                      .then((resp) => {
+                                        console.log(resp);
+                                      })
+                                      .catch((err) => console.log(err));
+                                    axios
+                                      .post(
+                                        "http://localhost:3000/api/Photos/manager/upload?filename=" +
+                                          fileName,
+                                        fd
+                                      )
+                                      .then((res) => {
+                                        console.log(res);
+                                      })
+                                      .catch((err) => console.log(err));
+                                    setTimeout(() => {
+                                      this.$router.push("/managers");
+                                      location.reload();
+                                    }, 100);
+                                    return 0;
+                                  });
+                              });
+                          } else if (
+                            respPos.data[0].positionType == "Giám học"
+                          ) {
+                            axios
+                              .get(
+                                "http://localhost:3000/api/roles?filter[where][roleName]=" +
+                                  "Giám học"
+                              )
+                              .then((respRole) => {
+                                axios
+                                  .get(
+                                    "http://localhost:3000/api/accounts?filter[where][role]=" +
+                                      respRole.data[0].id
+                                  )
+                                  .then((respAcc) => {
+                                    const account = {
+                                      userId: respAcc.data[0].userId,
+                                      username: respAcc.data[0].username,
+                                      password: respAcc.data[0].password,
+                                      role: respAcc.data[0].role,
+                                      status: 2,
+                                      idTable: respAcc.data[0].idTable,
+                                      id: respAcc.data[0].id,
+                                    };
+                                    const url_5 =
+                                      "http://localhost:3000/api/accounts/" +
+                                      account.id +
+                                      "/replace";
+                                    axios.post(url_5, account);
+                                    const url =
+                                      "http://localhost:3000/api/managers/" +
+                                      manager.id +
+                                      "/replace";
+                                    axios.post(url, manager);
+                                    axios
+                                      .post(
+                                        "http://localhost:3000/api/Photos/manager/upload?filename=" +
+                                          fileName,
+                                        fd
+                                      )
+                                      .then((res) => {
+                                        console.log(res);
+                                      })
+                                      .catch((err) => console.log(err));
+                                    setTimeout(() => {
+                                      this.$router.push("/managers");
+                                      location.reload();
+                                    }, 100);
+                                    return 0;
+                                  });
+                              });
+                          }
+                        });
+                    });
+                } else {
+                  const url =
+                    "http://localhost:3000/api/managers/" +
+                    manager.id +
+                    "/replace";
+                  axios.post(url, manager);
+                  axios
+                    .post(
+                      "http://localhost:3000/api/Photos/manager/upload?filename=" +
+                        fileName,
+                      fd
+                    )
+                    .then((res) => {
+                      console.log(res);
+                    })
+                    .catch((err) => console.log(err));
+                  setTimeout(() => {
+                    this.$router.push("/managers");
+                    location.reload();
+                  }, 100);
+                  return 0;
+                }
+              }
+            } else {
+              const manager = {
+                managerId: this.managerId,
+                christianName: this.christianName,
+                fullName: this.fullName,
+                birthday: this.birthday,
+                phone: this.phone,
+                email: this.email,
+                image: this.imageEdit,
+                position: this.position,
+                homeland: this.homeland,
+                status: this.status,
+                id: this.$route.params.id,
+              };
+              if (manager.status == 2) {
+                axios
+                  .get(
+                    "http://localhost:3000/api/managers?filter[where][id]=" +
+                      this.$route.params.id
+                  )
+                  .then((respMan) => {
+                    axios
+                      .get(
+                        "http://localhost:3000/api/departments?filter[where][id]=" +
+                          respMan.data[0].position
+                      )
+                      .then((respPos) => {
+                        if (respPos.data[0].positionType == "Giám đốc") {
+                          axios
+                            .get(
+                              "http://localhost:3000/api/roles?filter[where][roleName]=" +
+                                "Giám đốc"
+                            )
+                            .then((respRole) => {
+                              axios
+                                .get(
+                                  "http://localhost:3000/api/accounts?filter[where][role]=" +
+                                    respRole.data[0].id
+                                )
+                                .then((respAcc) => {
+                                  const account = {
+                                    userId: respAcc.data[0].userId,
+                                    username: respAcc.data[0].username,
+                                    password: respAcc.data[0].password,
+                                    role: respAcc.data[0].role,
+                                    status: 2,
+                                    idTable: respAcc.data[0].idTable,
+                                    id: respAcc.data[0].id,
+                                  };
+                                  const url_5 =
+                                    "http://localhost:3000/api/accounts/" +
+                                    account.id +
+                                    "/replace";
+                                  axios.post(url_5, account);
+                                  const url =
+                                    "http://localhost:3000/api/managers/" +
+                                    manager.id +
+                                    "/replace";
+                                  axios.post(url, manager);
+                                  setTimeout(() => {
+                                    this.$router.push("/managers");
+                                    location.reload();
+                                  }, 100);
+                                  return 0;
+                                });
+                            });
+                        } else if (respPos.data[0].positionType == "Quản lý") {
+                          axios
+                            .get(
+                              "http://localhost:3000/api/roles?filter[where][roleName]=" +
+                                "Quản lý"
+                            )
+                            .then((respRole) => {
+                              axios
+                                .get(
+                                  "http://localhost:3000/api/accounts?filter[where][role]=" +
+                                    respRole.data[0].id
+                                )
+                                .then((respAcc) => {
+                                  const account = {
+                                    userId: respAcc.data[0].userId,
+                                    username: respAcc.data[0].username,
+                                    password: respAcc.data[0].password,
+                                    role: respAcc.data[0].role,
+                                    status: 2,
+                                    idTable: respAcc.data[0].idTable,
+                                    id: respAcc.data[0].id,
+                                  };
+                                  const url_5 =
+                                    "http://localhost:3000/api/accounts/" +
+                                    account.id +
+                                    "/replace";
+                                  axios.post(url_5, account);
+                                  const url =
+                                    "http://localhost:3000/api/managers/" +
+                                    manager.id +
+                                    "/replace";
+                                  axios.post(url, manager);
+                                  setTimeout(() => {
+                                    this.$router.push("/managers");
+                                    location.reload();
+                                  }, 100);
+                                  return 0;
+                                });
+                            });
+                        } else if (respPos.data[0].positionType == "Giám học") {
+                          axios
+                            .get(
+                              "http://localhost:3000/api/roles?filter[where][roleName]=" +
+                                "Giám học"
+                            )
+                            .then((respRole) => {
+                              axios
+                                .get(
+                                  "http://localhost:3000/api/accounts?filter[where][role]=" +
+                                    respRole.data[0].id
+                                )
+                                .then((respAcc) => {
+                                  const account = {
+                                    userId: respAcc.data[0].userId,
+                                    username: respAcc.data[0].username,
+                                    password: respAcc.data[0].password,
+                                    role: respAcc.data[0].role,
+                                    status: 2,
+                                    idTable: respAcc.data[0].idTable,
+                                    id: respAcc.data[0].id,
+                                  };
+                                  const url_5 =
+                                    "http://localhost:3000/api/accounts/" +
+                                    account.id +
+                                    "/replace";
+                                  axios.post(url_5, account);
+                                  const url =
+                                    "http://localhost:3000/api/managers/" +
+                                    manager.id +
+                                    "/replace";
+                                  axios.post(url, manager);
+                                  setTimeout(() => {
+                                    this.$router.push("/managers");
+                                    location.reload();
+                                  }, 100);
+                                  return 0;
+                                });
+                            });
+                        }
+                      });
+                  });
+              } else {
+                const url =
+                  "http://localhost:3000/api/managers/" +
+                  manager.id +
+                  "/replace";
+                axios.post(url, manager);
+                setTimeout(() => {
+                  this.$router.push("/managers");
+                  location.reload();
+                }, 100);
+                return 0;
+              }
+            }
+          }
+        });
+    } else {
+      axios
+        .get(
+          "http://localhost:3000/api/managers/existsEmail?email=" +
+            this.email
+        )
+        .then((response) => {
+          if (response.data.bool == true) {
+            alertify.alert("Thông báo", "Email đã tồn tại!", function () {
+              alertify.success("Ok");
+            });
+          } else {
+            axios
+              .get(
+                "http://localhost:3000/api/managers/existsPhone?phone=" +
+                  this.phone
+              )
+              .then((resp) => {
+                if (resp.data.bool == true) {
+                  alertify.alert(
+                    "Thông báo",
+                    "Số điện thoại đã tồn tại!",
+                    function () {
+                      alertify.success("Ok");
+                    }
+                  );
+                } else if (crypt.getAge(this.birthday) < 28) {
+                  alertify.alert(
+                    "Thông báo",
+                    "Tuổi của người quản lý nhỏ hơn 28!",
+                    function () {
+                      alertify.success("Ok");
+                    }
+                  );
+                } else if (crypt.getAge(this.birthday) > 60) {
+                  alertify.alert(
+                    "Thông báo",
+                    "Tuổi của người quản lý lớn hơn 60!",
+                    function () {
+                      alertify.success("Ok");
+                    }
+                  );
+                } else {
+                  if (this.selectedFile != null) {
+                    const fd = new FormData();
+                    fd.append("image", this.selectedFile, this.selectedFile.name);
+                    var start = this.selectedFile.name.lastIndexOf(".");
+                    var end = this.selectedFile.length;
+                    var fileName =
+                      this.managerId + this.selectedFile.name.slice(start, end);
+                    if (this.imageEdit != null) {
+                      const manager = {
+                        managerId: this.managerId,
+                        christianName: this.christianName,
+                        fullName: this.fullName,
+                        birthday: this.birthday,
+                        phone: this.phone,
+                        email: this.email,
+                        image: fileName,
+                        position: this.position,
+                        homeland: this.homeland,
+                        status: this.status,
+                        id: this.$route.params.id,
+                      };
+                      if (manager.status == 2) {
+                        axios
+                          .get(
+                            "http://localhost:3000/api/managers?filter[where][id]=" +
+                              this.$route.params.id
+                          )
+                          .then((respMan) => {
+                            axios
+                              .get(
+                                "http://localhost:3000/api/departments?filter[where][id]=" +
+                                  respMan.data[0].position
+                              )
+                              .then((respPos) => {
+                                if (respPos.data[0].positionType == "Giám đốc") {
+                                  axios
+                                    .get(
+                                      "http://localhost:3000/api/roles?filter[where][roleName]=" +
+                                        "Giám đốc"
+                                    )
+                                    .then((respRole) => {
+                                      axios
+                                        .get(
+                                          "http://localhost:3000/api/accounts?filter[where][role]=" +
+                                            respRole.data[0].id
+                                        )
+                                        .then((respAcc) => {
+                                          const account = {
+                                            userId: respAcc.data[0].userId,
+                                            username: respAcc.data[0].username,
+                                            password: respAcc.data[0].password,
+                                            role: respAcc.data[0].role,
+                                            status: 2,
+                                            idTable: respAcc.data[0].idTable,
+                                            id: respAcc.data[0].id,
+                                          };
+                                          const url_5 =
+                                            "http://localhost:3000/api/accounts/" +
+                                            account.id +
+                                            "/replace";
+                                          axios.post(url_5, account);
+                                          const url =
+                                            "http://localhost:3000/api/managers/" +
+                                            manager.id +
+                                            "/replace";
+                                          axios.post(url, manager);
+                                          axios
+                                            .delete(
+                                              "http://localhost:3000/api/Photos/manager/files/" +
+                                                this.imageEdit
+                                            )
+                                            .then((resp) => {
+                                              console.log(resp);
+                                            })
+                                            .catch((err) => console.log(err));
+                                          axios
+                                            .post(
+                                              "http://localhost:3000/api/Photos/manager/upload?filename=" +
+                                                fileName,
+                                              fd
+                                            )
+                                            .then((res) => {
+                                              console.log(res);
+                                            })
+                                            .catch((err) => console.log(err));
+                                          setTimeout(() => {
+                                            this.$router.push("/managers");
+                                            location.reload();
+                                          }, 100);
+                                          return 0;
+                                        });
+                                    });
+                                } else if (
+                                  respPos.data[0].positionType == "Quản lý"
+                                ) {
+                                  axios
+                                    .get(
+                                      "http://localhost:3000/api/roles?filter[where][roleName]=" +
+                                        "Quản lý"
+                                    )
+                                    .then((respRole) => {
+                                      axios
+                                        .get(
+                                          "http://localhost:3000/api/accounts?filter[where][role]=" +
+                                            respRole.data[0].id
+                                        )
+                                        .then((respAcc) => {
+                                          const account = {
+                                            userId: respAcc.data[0].userId,
+                                            username: respAcc.data[0].username,
+                                            password: respAcc.data[0].password,
+                                            role: respAcc.data[0].role,
+                                            status: 2,
+                                            idTable: respAcc.data[0].idTable,
+                                            id: respAcc.data[0].id,
+                                          };
+                                          const url_5 =
+                                            "http://localhost:3000/api/accounts/" +
+                                            account.id +
+                                            "/replace";
+                                          axios.post(url_5, account);
+                                          const url =
+                                            "http://localhost:3000/api/managers/" +
+                                            manager.id +
+                                            "/replace";
+                                          axios.post(url, manager);
+                                          axios
+                                            .delete(
+                                              "http://localhost:3000/api/Photos/manager/files/" +
+                                                this.imageEdit
+                                            )
+                                            .then((resp) => {
+                                              console.log(resp);
+                                            })
+                                            .catch((err) => console.log(err));
+                                          axios
+                                            .post(
+                                              "http://localhost:3000/api/Photos/manager/upload?filename=" +
+                                                fileName,
+                                              fd
+                                            )
+                                            .then((res) => {
+                                              console.log(res);
+                                            })
+                                            .catch((err) => console.log(err));
+                                          setTimeout(() => {
+                                            this.$router.push("/managers");
+                                            location.reload();
+                                          }, 100);
+                                          return 0;
+                                        });
+                                    });
+                                } else if (
+                                  respPos.data[0].positionType == "Giám học"
+                                ) {
+                                  axios
+                                    .get(
+                                      "http://localhost:3000/api/roles?filter[where][roleName]=" +
+                                        "Giám học"
+                                    )
+                                    .then((respRole) => {
+                                      axios
+                                        .get(
+                                          "http://localhost:3000/api/accounts?filter[where][role]=" +
+                                            respRole.data[0].id
+                                        )
+                                        .then((respAcc) => {
+                                          const account = {
+                                            userId: respAcc.data[0].userId,
+                                            username: respAcc.data[0].username,
+                                            password: respAcc.data[0].password,
+                                            role: respAcc.data[0].role,
+                                            status: 2,
+                                            idTable: respAcc.data[0].idTable,
+                                            id: respAcc.data[0].id,
+                                          };
+                                          const url_5 =
+                                            "http://localhost:3000/api/accounts/" +
+                                            account.id +
+                                            "/replace";
+                                          axios.post(url_5, account);
+                                          const url =
+                                            "http://localhost:3000/api/managers/" +
+                                            manager.id +
+                                            "/replace";
+                                          axios.post(url, manager);
+                                          axios
+                                            .delete(
+                                              "http://localhost:3000/api/Photos/manager/files/" +
+                                                this.imageEdit
+                                            )
+                                            .then((resp) => {
+                                              console.log(resp);
+                                            })
+                                            .catch((err) => console.log(err));
+                                          axios
+                                            .post(
+                                              "http://localhost:3000/api/Photos/manager/upload?filename=" +
+                                                fileName,
+                                              fd
+                                            )
+                                            .then((res) => {
+                                              console.log(res);
+                                            })
+                                            .catch((err) => console.log(err));
+                                          setTimeout(() => {
+                                            this.$router.push("/managers");
+                                            location.reload();
+                                          }, 100);
+                                          return 0;
+                                        });
+                                    });
+                                }
+                              });
+                          });
+                      } else {
+                        const url =
+                          "http://localhost:3000/api/managers/" +
+                          manager.id +
+                          "/replace";
+                        axios.post(url, manager);
+                        axios
+                          .delete(
+                            "http://localhost:3000/api/Photos/manager/files/" +
+                              this.imageEdit
+                          )
+                          .then((resp) => {
+                            console.log(resp);
+                          })
+                          .catch((err) => console.log(err));
+                        axios
+                          .post(
+                            "http://localhost:3000/api/Photos/manager/upload?filename=" +
+                              fileName,
+                            fd
+                          )
+                          .then((res) => {
+                            console.log(res);
+                          })
+                          .catch((err) => console.log(err));
+                        setTimeout(() => {
+                          this.$router.push("/managers");
+                          location.reload();
+                        }, 100);
+                        return 0;
+                      }
+                    } else {
+                      const manager = {
+                        managerId: this.managerId,
+                        christianName: this.christianName,
+                        fullName: this.fullName,
+                        birthday: this.birthday,
+                        phone: this.phone,
+                        email: this.email,
+                        image: fileName,
+                        position: this.position,
+                        homeland: this.homeland,
+                        status: this.status,
+                        id: this.$route.params.id,
+                      };
+                      if (manager.status == 2) {
+                        axios
+                          .get(
+                            "http://localhost:3000/api/managers?filter[where][id]=" +
+                              this.$route.params.id
+                          )
+                          .then((respMan) => {
+                            axios
+                              .get(
+                                "http://localhost:3000/api/departments?filter[where][id]=" +
+                                  respMan.data[0].position
+                              )
+                              .then((respPos) => {
+                                if (respPos.data[0].positionType == "Giám đốc") {
+                                  axios
+                                    .get(
+                                      "http://localhost:3000/api/roles?filter[where][roleName]=" +
+                                        "Giám đốc"
+                                    )
+                                    .then((respRole) => {
+                                      axios
+                                        .get(
+                                          "http://localhost:3000/api/accounts?filter[where][role]=" +
+                                            respRole.data[0].id
+                                        )
+                                        .then((respAcc) => {
+                                          const account = {
+                                            userId: respAcc.data[0].userId,
+                                            username: respAcc.data[0].username,
+                                            password: respAcc.data[0].password,
+                                            role: respAcc.data[0].role,
+                                            status: 2,
+                                            idTable: respAcc.data[0].idTable,
+                                            id: respAcc.data[0].id,
+                                          };
+                                          const url_5 =
+                                            "http://localhost:3000/api/accounts/" +
+                                            account.id +
+                                            "/replace";
+                                          axios.post(url_5, account);
+                                          const url =
+                                            "http://localhost:3000/api/managers/" +
+                                            manager.id +
+                                            "/replace";
+                                          axios.post(url, manager);
+                                          axios
+                                            .delete(
+                                              "http://localhost:3000/api/Photos/manager/files/" +
+                                                this.imageEdit
+                                            )
+                                            .then((resp) => {
+                                              console.log(resp);
+                                            })
+                                            .catch((err) => console.log(err));
+                                          axios
+                                            .post(
+                                              "http://localhost:3000/api/Photos/manager/upload?filename=" +
+                                                fileName,
+                                              fd
+                                            )
+                                            .then((res) => {
+                                              console.log(res);
+                                            })
+                                            .catch((err) => console.log(err));
+                                          setTimeout(() => {
+                                            this.$router.push("/managers");
+                                            location.reload();
+                                          }, 100);
+                                          return 0;
+                                        });
+                                    });
+                                } else if (
+                                  respPos.data[0].positionType == "Quản lý"
+                                ) {
+                                  axios
+                                    .get(
+                                      "http://localhost:3000/api/roles?filter[where][roleName]=" +
+                                        "Quản lý"
+                                    )
+                                    .then((respRole) => {
+                                      axios
+                                        .get(
+                                          "http://localhost:3000/api/accounts?filter[where][role]=" +
+                                            respRole.data[0].id
+                                        )
+                                        .then((respAcc) => {
+                                          const account = {
+                                            userId: respAcc.data[0].userId,
+                                            username: respAcc.data[0].username,
+                                            password: respAcc.data[0].password,
+                                            role: respAcc.data[0].role,
+                                            status: 2,
+                                            idTable: respAcc.data[0].idTable,
+                                            id: respAcc.data[0].id,
+                                          };
+                                          const url_5 =
+                                            "http://localhost:3000/api/accounts/" +
+                                            account.id +
+                                            "/replace";
+                                          axios.post(url_5, account);
+                                          const url =
+                                            "http://localhost:3000/api/managers/" +
+                                            manager.id +
+                                            "/replace";
+                                          axios.post(url, manager);
+                                          axios
+                                            .delete(
+                                              "http://localhost:3000/api/Photos/manager/files/" +
+                                                this.imageEdit
+                                            )
+                                            .then((resp) => {
+                                              console.log(resp);
+                                            })
+                                            .catch((err) => console.log(err));
+                                          axios
+                                            .post(
+                                              "http://localhost:3000/api/Photos/manager/upload?filename=" +
+                                                fileName,
+                                              fd
+                                            )
+                                            .then((res) => {
+                                              console.log(res);
+                                            })
+                                            .catch((err) => console.log(err));
+                                          setTimeout(() => {
+                                            this.$router.push("/managers");
+                                            location.reload();
+                                          }, 100);
+                                          return 0;
+                                        });
+                                    });
+                                } else if (
+                                  respPos.data[0].positionType == "Giám học"
+                                ) {
+                                  axios
+                                    .get(
+                                      "http://localhost:3000/api/roles?filter[where][roleName]=" +
+                                        "Giám học"
+                                    )
+                                    .then((respRole) => {
+                                      axios
+                                        .get(
+                                          "http://localhost:3000/api/accounts?filter[where][role]=" +
+                                            respRole.data[0].id
+                                        )
+                                        .then((respAcc) => {
+                                          const account = {
+                                            userId: respAcc.data[0].userId,
+                                            username: respAcc.data[0].username,
+                                            password: respAcc.data[0].password,
+                                            role: respAcc.data[0].role,
+                                            status: 2,
+                                            idTable: respAcc.data[0].idTable,
+                                            id: respAcc.data[0].id,
+                                          };
+                                          const url_5 =
+                                            "http://localhost:3000/api/accounts/" +
+                                            account.id +
+                                            "/replace";
+                                          axios.post(url_5, account);
+                                          const url =
+                                            "http://localhost:3000/api/managers/" +
+                                            manager.id +
+                                            "/replace";
+                                          axios.post(url, manager);
+                                          axios
+                                            .post(
+                                              "http://localhost:3000/api/Photos/manager/upload?filename=" +
+                                                fileName,
+                                              fd
+                                            )
+                                            .then((res) => {
+                                              console.log(res);
+                                            })
+                                            .catch((err) => console.log(err));
+                                          setTimeout(() => {
+                                            this.$router.push("/managers");
+                                            location.reload();
+                                          }, 100);
+                                          return 0;
+                                        });
+                                    });
+                                }
+                              });
+                          });
+                      } else {
+                        const url =
+                          "http://localhost:3000/api/managers/" +
+                          manager.id +
+                          "/replace";
+                        axios.post(url, manager);
+                        axios
+                          .post(
+                            "http://localhost:3000/api/Photos/manager/upload?filename=" +
+                              fileName,
+                            fd
+                          )
+                          .then((res) => {
+                            console.log(res);
+                          })
+                          .catch((err) => console.log(err));
+                        setTimeout(() => {
+                          this.$router.push("/managers");
+                          location.reload();
+                        }, 100);
+                        return 0;
+                      }
+                    }
+                  } else {
+                    const manager = {
+                      managerId: this.managerId,
+                      christianName: this.christianName,
+                      fullName: this.fullName,
+                      birthday: this.birthday,
+                      phone: this.phone,
+                      email: this.email,
+                      image: this.imageEdit,
+                      position: this.position,
+                      homeland: this.homeland,
+                      status: this.status,
+                      id: this.$route.params.id,
+                    };
+                    if (manager.status == 2) {
+                      axios
+                        .get(
+                          "http://localhost:3000/api/managers?filter[where][id]=" +
+                            this.$route.params.id
+                        )
+                        .then((respMan) => {
+                          axios
+                            .get(
+                              "http://localhost:3000/api/departments?filter[where][id]=" +
+                                respMan.data[0].position
+                            )
+                            .then((respPos) => {
+                              if (respPos.data[0].positionType == "Giám đốc") {
+                                axios
+                                  .get(
+                                    "http://localhost:3000/api/roles?filter[where][roleName]=" +
+                                      "Giám đốc"
+                                  )
+                                  .then((respRole) => {
+                                    axios
+                                      .get(
+                                        "http://localhost:3000/api/accounts?filter[where][role]=" +
+                                          respRole.data[0].id
+                                      )
+                                      .then((respAcc) => {
+                                        const account = {
+                                          userId: respAcc.data[0].userId,
+                                          username: respAcc.data[0].username,
+                                          password: respAcc.data[0].password,
+                                          role: respAcc.data[0].role,
+                                          status: 2,
+                                          idTable: respAcc.data[0].idTable,
+                                          id: respAcc.data[0].id,
+                                        };
+                                        const url_5 =
+                                          "http://localhost:3000/api/accounts/" +
+                                          account.id +
+                                          "/replace";
+                                        axios.post(url_5, account);
+                                        const url =
+                                          "http://localhost:3000/api/managers/" +
+                                          manager.id +
+                                          "/replace";
+                                        axios.post(url, manager);
+                                        setTimeout(() => {
+                                          this.$router.push("/managers");
+                                          location.reload();
+                                        }, 100);
+                                        return 0;
+                                      });
+                                  });
+                              } else if (respPos.data[0].positionType == "Quản lý") {
+                                axios
+                                  .get(
+                                    "http://localhost:3000/api/roles?filter[where][roleName]=" +
+                                      "Quản lý"
+                                  )
+                                  .then((respRole) => {
+                                    axios
+                                      .get(
+                                        "http://localhost:3000/api/accounts?filter[where][role]=" +
+                                          respRole.data[0].id
+                                      )
+                                      .then((respAcc) => {
+                                        const account = {
+                                          userId: respAcc.data[0].userId,
+                                          username: respAcc.data[0].username,
+                                          password: respAcc.data[0].password,
+                                          role: respAcc.data[0].role,
+                                          status: 2,
+                                          idTable: respAcc.data[0].idTable,
+                                          id: respAcc.data[0].id,
+                                        };
+                                        const url_5 =
+                                          "http://localhost:3000/api/accounts/" +
+                                          account.id +
+                                          "/replace";
+                                        axios.post(url_5, account);
+                                        const url =
+                                          "http://localhost:3000/api/managers/" +
+                                          manager.id +
+                                          "/replace";
+                                        axios.post(url, manager);
+                                        setTimeout(() => {
+                                          this.$router.push("/managers");
+                                          location.reload();
+                                        }, 100);
+                                        return 0;
+                                      });
+                                  });
+                              } else if (respPos.data[0].positionType == "Giám học") {
+                                axios
+                                  .get(
+                                    "http://localhost:3000/api/roles?filter[where][roleName]=" +
+                                      "Giám học"
+                                  )
+                                  .then((respRole) => {
+                                    axios
+                                      .get(
+                                        "http://localhost:3000/api/accounts?filter[where][role]=" +
+                                          respRole.data[0].id
+                                      )
+                                      .then((respAcc) => {
+                                        const account = {
+                                          userId: respAcc.data[0].userId,
+                                          username: respAcc.data[0].username,
+                                          password: respAcc.data[0].password,
+                                          role: respAcc.data[0].role,
+                                          status: 2,
+                                          idTable: respAcc.data[0].idTable,
+                                          id: respAcc.data[0].id,
+                                        };
+                                        const url_5 =
+                                          "http://localhost:3000/api/accounts/" +
+                                          account.id +
+                                          "/replace";
+                                        axios.post(url_5, account);
+                                        const url =
+                                          "http://localhost:3000/api/managers/" +
+                                          manager.id +
+                                          "/replace";
+                                        axios.post(url, manager);
+                                        setTimeout(() => {
+                                          this.$router.push("/managers");
+                                          location.reload();
+                                        }, 100);
+                                        return 0;
+                                      });
+                                  });
+                              }
+                            });
+                        });
+                    } else {
+                      const url =
+                        "http://localhost:3000/api/managers/" +
+                        manager.id +
+                        "/replace";
+                      axios.post(url, manager);
+                      setTimeout(() => {
+                        this.$router.push("/managers");
+                        location.reload();
+                      }, 100);
+                      return 0;
+                    }
+                  }
+                }
+              });
+          }
+        });
+    }
+  } else {
+    alertify.alert("Thông báo", "Lưu dữ liệu thất bại!", function () {
+      alertify.success("Ok");
+    });
+  }
+},

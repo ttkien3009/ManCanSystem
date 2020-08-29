@@ -68,18 +68,47 @@ const ListCompanion = {
       });
     },
 
-    deleteDataCompanion(id) {
+    deleteDataCompanion(companion) {
+      var pos = companion.position;
       axios
-        .delete("http://localhost:3000/api/companions/" + id)
+        .delete("http://localhost:3000/api/companions/" + companion.id)
         .then((response) => {
           console.log(response);
-          this.companions.splice(id, 1);
-          this.$router.push("/");
-          setTimeout(() => {
-            this.$router.push("/companions");
-            location.reload();
-          }, 10);
+          this.companions.splice(companion.id, 1);
         });
+      if (companion.position == 6) {
+        axios
+          .get(
+            "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+              companion.id +
+              "&filter[where][and][1][role]=8"
+          )
+          .then((resp) => {
+            axios
+              .delete("http://localhost:3000/api/accounts/" + resp.data[0].id)
+              .then((respCom) => {
+                setTimeout(() => {
+                  location.reload();
+                }, 10);
+              });
+          });
+      } else if (companion.position == 7) {
+        axios
+          .get(
+            "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+              companion.id +
+              "&filter[where][and][1][role]=9"
+          )
+          .then((resp) => {
+            axios
+              .delete("http://localhost:3000/api/accounts/" + resp.data[0].id)
+              .then((respCom) => {
+                setTimeout(() => {
+                  location.reload();
+                }, 10);
+              });
+          });
+      }
     },
   },
   template: `
@@ -150,7 +179,7 @@ const ListCompanion = {
                     </button>
                   </div>
                   <div class="col-lg-4">
-                    <button :title="titleButtonEdit" @click="getDataCompanionUpdate(companion)"
+                    <button v-show="companion.status == 1" :title="titleButtonEdit" @click="getDataCompanionUpdate(companion)"
                       class="btn btn-warning btn-sm h-28px w-28px rounded" type="submit"
                       style="margin-left: -17px;">
                       <i class="fas fa-edit fa-md ml--2px"></i>
@@ -186,7 +215,7 @@ const ListCompanion = {
             <button class="btn btn-danger rounded" data-dismiss="modal">
               Hủy
             </button>
-            <button class="btn rounded text-white btn-hover-blue" style="background-color: #056299;" @click="deleteDataCompanion(companion.id)">
+            <button class="btn rounded text-white btn-hover-blue" style="background-color: #056299;" @click="deleteDataCompanion(companion)">
               Xác Nhận
             </button>
           </div>
@@ -867,6 +896,55 @@ const EditCompanion = {
                   status: this.status,
                   id: this.$route.params.id,
                 };
+                if (companion.status == 2) {
+                  if (companion.position == 6) {
+                    axios
+                      .get(
+                        "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                          companion.id +
+                          "&filter[where][and][1][role]=8"
+                      )
+                      .then((resp) => {
+                        const account = {
+                          userId: resp.data[0].userId,
+                          username: resp.data[0].username,
+                          password: resp.data[0].password,
+                          role: resp.data[0].role,
+                          status: 2,
+                          idTable: resp.data[0].idTable,
+                          id: resp.data[0].id,
+                        };
+                        const url_5 =
+                          "http://localhost:3000/api/accounts/" +
+                          account.id +
+                          "/replace";
+                        axios.post(url_5, account);
+                      });
+                  } else if (companion.position == 7) {
+                    axios
+                      .get(
+                        "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                          companion.id +
+                          "&filter[where][and][1][role]=9"
+                      )
+                      .then((resp) => {
+                        const account = {
+                          userId: resp.data[0].userId,
+                          username: resp.data[0].username,
+                          password: resp.data[0].password,
+                          role: resp.data[0].role,
+                          status: 2,
+                          idTable: resp.data[0].idTable,
+                          id: resp.data[0].id,
+                        };
+                        const url_5 =
+                          "http://localhost:3000/api/accounts/" +
+                          account.id +
+                          "/replace";
+                        axios.post(url_5, account);
+                      });
+                  }
+                }
                 const url =
                   "http://localhost:3000/api/companions/" +
                   companion.id +
@@ -905,6 +983,55 @@ const EditCompanion = {
                   status: this.status,
                   id: this.$route.params.id,
                 };
+                if (companion.status == 2) {
+                  if (companion.position == 6) {
+                    axios
+                      .get(
+                        "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                          companion.id +
+                          "&filter[where][and][1][role]=8"
+                      )
+                      .then((resp) => {
+                        const account = {
+                          userId: resp.data[0].userId,
+                          username: resp.data[0].username,
+                          password: resp.data[0].password,
+                          role: resp.data[0].role,
+                          status: 2,
+                          idTable: resp.data[0].idTable,
+                          id: resp.data[0].id,
+                        };
+                        const url_5 =
+                          "http://localhost:3000/api/accounts/" +
+                          account.id +
+                          "/replace";
+                        axios.post(url_5, account);
+                      });
+                  } else if (companion.position == 7) {
+                    axios
+                      .get(
+                        "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                          companion.id +
+                          "&filter[where][and][1][role]=9"
+                      )
+                      .then((resp) => {
+                        const account = {
+                          userId: resp.data[0].userId,
+                          username: resp.data[0].username,
+                          password: resp.data[0].password,
+                          role: resp.data[0].role,
+                          status: 2,
+                          idTable: resp.data[0].idTable,
+                          id: resp.data[0].id,
+                        };
+                        const url_5 =
+                          "http://localhost:3000/api/accounts/" +
+                          account.id +
+                          "/replace";
+                        axios.post(url_5, account);
+                      });
+                  }
+                }
                 const url =
                   "http://localhost:3000/api/companions/" +
                   companion.id +
@@ -935,6 +1062,55 @@ const EditCompanion = {
                 status: this.status,
                 id: this.$route.params.id,
               };
+              if (companion.status == 2) {
+                if (companion.position == 6) {
+                  axios
+                    .get(
+                      "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                        companion.id +
+                        "&filter[where][and][1][role]=8"
+                    )
+                    .then((resp) => {
+                      const account = {
+                        userId: resp.data[0].userId,
+                        username: resp.data[0].username,
+                        password: resp.data[0].password,
+                        role: resp.data[0].role,
+                        status: 2,
+                        idTable: resp.data[0].idTable,
+                        id: resp.data[0].id,
+                      };
+                      const url_5 =
+                        "http://localhost:3000/api/accounts/" +
+                        account.id +
+                        "/replace";
+                      axios.post(url_5, account);
+                    });
+                } else if (companion.position == 7) {
+                  axios
+                    .get(
+                      "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                        companion.id +
+                        "&filter[where][and][1][role]=9"
+                    )
+                    .then((resp) => {
+                      const account = {
+                        userId: resp.data[0].userId,
+                        username: resp.data[0].username,
+                        password: resp.data[0].password,
+                        role: resp.data[0].role,
+                        status: 2,
+                        idTable: resp.data[0].idTable,
+                        id: resp.data[0].id,
+                      };
+                      const url_5 =
+                        "http://localhost:3000/api/accounts/" +
+                        account.id +
+                        "/replace";
+                      axios.post(url_5, account);
+                    });
+                }
+              }
               const url =
                 "http://localhost:3000/api/companions/" +
                 companion.id +
@@ -999,6 +1175,55 @@ const EditCompanion = {
                       status: this.status,
                       id: this.$route.params.id,
                     };
+                    if (companion.status == 2) {
+                      if (companion.position == 6) {
+                        axios
+                          .get(
+                            "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                              companion.id +
+                              "&filter[where][and][1][role]=8"
+                          )
+                          .then((resp) => {
+                            const account = {
+                              userId: resp.data[0].userId,
+                              username: resp.data[0].username,
+                              password: resp.data[0].password,
+                              role: resp.data[0].role,
+                              status: 2,
+                              idTable: resp.data[0].idTable,
+                              id: resp.data[0].id,
+                            };
+                            const url_5 =
+                              "http://localhost:3000/api/accounts/" +
+                              account.id +
+                              "/replace";
+                            axios.post(url_5, account);
+                          });
+                      } else if (companion.position == 7) {
+                        axios
+                          .get(
+                            "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                              companion.id +
+                              "&filter[where][and][1][role]=9"
+                          )
+                          .then((resp) => {
+                            const account = {
+                              userId: resp.data[0].userId,
+                              username: resp.data[0].username,
+                              password: resp.data[0].password,
+                              role: resp.data[0].role,
+                              status: 2,
+                              idTable: resp.data[0].idTable,
+                              id: resp.data[0].id,
+                            };
+                            const url_5 =
+                              "http://localhost:3000/api/accounts/" +
+                              account.id +
+                              "/replace";
+                            axios.post(url_5, account);
+                          });
+                      }
+                    }
                     const url =
                       "http://localhost:3000/api/companions/" +
                       companion.id +
@@ -1037,6 +1262,55 @@ const EditCompanion = {
                       status: this.status,
                       id: this.$route.params.id,
                     };
+                    if (companion.status == 2) {
+                      if (companion.position == 6) {
+                        axios
+                          .get(
+                            "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                              companion.id +
+                              "&filter[where][and][1][role]=8"
+                          )
+                          .then((resp) => {
+                            const account = {
+                              userId: resp.data[0].userId,
+                              username: resp.data[0].username,
+                              password: resp.data[0].password,
+                              role: resp.data[0].role,
+                              status: 2,
+                              idTable: resp.data[0].idTable,
+                              id: resp.data[0].id,
+                            };
+                            const url_5 =
+                              "http://localhost:3000/api/accounts/" +
+                              account.id +
+                              "/replace";
+                            axios.post(url_5, account);
+                          });
+                      } else if (companion.position == 7) {
+                        axios
+                          .get(
+                            "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                              companion.id +
+                              "&filter[where][and][1][role]=9"
+                          )
+                          .then((resp) => {
+                            const account = {
+                              userId: resp.data[0].userId,
+                              username: resp.data[0].username,
+                              password: resp.data[0].password,
+                              role: resp.data[0].role,
+                              status: 2,
+                              idTable: resp.data[0].idTable,
+                              id: resp.data[0].id,
+                            };
+                            const url_5 =
+                              "http://localhost:3000/api/accounts/" +
+                              account.id +
+                              "/replace";
+                            axios.post(url_5, account);
+                          });
+                      }
+                    }
                     const url =
                       "http://localhost:3000/api/companions/" +
                       companion.id +
@@ -1067,6 +1341,55 @@ const EditCompanion = {
                     status: this.status,
                     id: this.$route.params.id,
                   };
+                  if (companion.status == 2) {
+                    if (companion.position == 6) {
+                      axios
+                        .get(
+                          "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                            companion.id +
+                            "&filter[where][and][1][role]=8"
+                        )
+                        .then((resp) => {
+                          const account = {
+                            userId: resp.data[0].userId,
+                            username: resp.data[0].username,
+                            password: resp.data[0].password,
+                            role: resp.data[0].role,
+                            status: 2,
+                            idTable: resp.data[0].idTable,
+                            id: resp.data[0].id,
+                          };
+                          const url_5 =
+                            "http://localhost:3000/api/accounts/" +
+                            account.id +
+                            "/replace";
+                          axios.post(url_5, account);
+                        });
+                    } else if (companion.position == 7) {
+                      axios
+                        .get(
+                          "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                            companion.id +
+                            "&filter[where][and][1][role]=9"
+                        )
+                        .then((resp) => {
+                          const account = {
+                            userId: resp.data[0].userId,
+                            username: resp.data[0].username,
+                            password: resp.data[0].password,
+                            role: resp.data[0].role,
+                            status: 2,
+                            idTable: resp.data[0].idTable,
+                            id: resp.data[0].id,
+                          };
+                          const url_5 =
+                            "http://localhost:3000/api/accounts/" +
+                            account.id +
+                            "/replace";
+                          axios.post(url_5, account);
+                        });
+                    }
+                  }
                   const url =
                     "http://localhost:3000/api/companions/" +
                     companion.id +
@@ -1136,6 +1459,55 @@ const EditCompanion = {
                       status: this.status,
                       id: this.$route.params.id,
                     };
+                    if (companion.status == 2) {
+                      if (companion.position == 6) {
+                        axios
+                          .get(
+                            "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                              companion.id +
+                              "&filter[where][and][1][role]=8"
+                          )
+                          .then((resp) => {
+                            const account = {
+                              userId: resp.data[0].userId,
+                              username: resp.data[0].username,
+                              password: resp.data[0].password,
+                              role: resp.data[0].role,
+                              status: 2,
+                              idTable: resp.data[0].idTable,
+                              id: resp.data[0].id,
+                            };
+                            const url_5 =
+                              "http://localhost:3000/api/accounts/" +
+                              account.id +
+                              "/replace";
+                            axios.post(url_5, account);
+                          });
+                      } else if (companion.position == 7) {
+                        axios
+                          .get(
+                            "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                              companion.id +
+                              "&filter[where][and][1][role]=9"
+                          )
+                          .then((resp) => {
+                            const account = {
+                              userId: resp.data[0].userId,
+                              username: resp.data[0].username,
+                              password: resp.data[0].password,
+                              role: resp.data[0].role,
+                              status: 2,
+                              idTable: resp.data[0].idTable,
+                              id: resp.data[0].id,
+                            };
+                            const url_5 =
+                              "http://localhost:3000/api/accounts/" +
+                              account.id +
+                              "/replace";
+                            axios.post(url_5, account);
+                          });
+                      }
+                    }
                     const url =
                       "http://localhost:3000/api/companions/" +
                       companion.id +
@@ -1174,6 +1546,55 @@ const EditCompanion = {
                       status: this.status,
                       id: this.$route.params.id,
                     };
+                    if (companion.status == 2) {
+                      if (companion.position == 6) {
+                        axios
+                          .get(
+                            "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                              companion.id +
+                              "&filter[where][and][1][role]=8"
+                          )
+                          .then((resp) => {
+                            const account = {
+                              userId: resp.data[0].userId,
+                              username: resp.data[0].username,
+                              password: resp.data[0].password,
+                              role: resp.data[0].role,
+                              status: 2,
+                              idTable: resp.data[0].idTable,
+                              id: resp.data[0].id,
+                            };
+                            const url_5 =
+                              "http://localhost:3000/api/accounts/" +
+                              account.id +
+                              "/replace";
+                            axios.post(url_5, account);
+                          });
+                      } else if (companion.position == 7) {
+                        axios
+                          .get(
+                            "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                              companion.id +
+                              "&filter[where][and][1][role]=9"
+                          )
+                          .then((resp) => {
+                            const account = {
+                              userId: resp.data[0].userId,
+                              username: resp.data[0].username,
+                              password: resp.data[0].password,
+                              role: resp.data[0].role,
+                              status: 2,
+                              idTable: resp.data[0].idTable,
+                              id: resp.data[0].id,
+                            };
+                            const url_5 =
+                              "http://localhost:3000/api/accounts/" +
+                              account.id +
+                              "/replace";
+                            axios.post(url_5, account);
+                          });
+                      }
+                    }
                     const url =
                       "http://localhost:3000/api/companions/" +
                       companion.id +
@@ -1204,6 +1625,55 @@ const EditCompanion = {
                     status: this.status,
                     id: this.$route.params.id,
                   };
+                  if (companion.status == 2) {
+                    if (companion.position == 6) {
+                      axios
+                        .get(
+                          "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                            companion.id +
+                            "&filter[where][and][1][role]=8"
+                        )
+                        .then((resp) => {
+                          const account = {
+                            userId: resp.data[0].userId,
+                            username: resp.data[0].username,
+                            password: resp.data[0].password,
+                            role: resp.data[0].role,
+                            status: 2,
+                            idTable: resp.data[0].idTable,
+                            id: resp.data[0].id,
+                          };
+                          const url_5 =
+                            "http://localhost:3000/api/accounts/" +
+                            account.id +
+                            "/replace";
+                          axios.post(url_5, account);
+                        });
+                    } else if (companion.position == 7) {
+                      axios
+                        .get(
+                          "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                            companion.id +
+                            "&filter[where][and][1][role]=9"
+                        )
+                        .then((resp) => {
+                          const account = {
+                            userId: resp.data[0].userId,
+                            username: resp.data[0].username,
+                            password: resp.data[0].password,
+                            role: resp.data[0].role,
+                            status: 2,
+                            idTable: resp.data[0].idTable,
+                            id: resp.data[0].id,
+                          };
+                          const url_5 =
+                            "http://localhost:3000/api/accounts/" +
+                            account.id +
+                            "/replace";
+                          axios.post(url_5, account);
+                        });
+                    }
+                  }
                   const url =
                     "http://localhost:3000/api/companions/" +
                     companion.id +
@@ -1286,6 +1756,55 @@ const EditCompanion = {
                             status: this.status,
                             id: this.$route.params.id,
                           };
+                          if (companion.status == 2) {
+                            if (companion.position == 6) {
+                              axios
+                                .get(
+                                  "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                                    companion.id +
+                                    "&filter[where][and][1][role]=8"
+                                )
+                                .then((resp) => {
+                                  const account = {
+                                    userId: resp.data[0].userId,
+                                    username: resp.data[0].username,
+                                    password: resp.data[0].password,
+                                    role: resp.data[0].role,
+                                    status: 2,
+                                    idTable: resp.data[0].idTable,
+                                    id: resp.data[0].id,
+                                  };
+                                  const url_5 =
+                                    "http://localhost:3000/api/accounts/" +
+                                    account.id +
+                                    "/replace";
+                                  axios.post(url_5, account);
+                                });
+                            } else if (companion.position == 7) {
+                              axios
+                                .get(
+                                  "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                                    companion.id +
+                                    "&filter[where][and][1][role]=9"
+                                )
+                                .then((resp) => {
+                                  const account = {
+                                    userId: resp.data[0].userId,
+                                    username: resp.data[0].username,
+                                    password: resp.data[0].password,
+                                    role: resp.data[0].role,
+                                    status: 2,
+                                    idTable: resp.data[0].idTable,
+                                    id: resp.data[0].id,
+                                  };
+                                  const url_5 =
+                                    "http://localhost:3000/api/accounts/" +
+                                    account.id +
+                                    "/replace";
+                                  axios.post(url_5, account);
+                                });
+                            }
+                          }
                           const url =
                             "http://localhost:3000/api/companions/" +
                             companion.id +
@@ -1324,6 +1843,55 @@ const EditCompanion = {
                             status: this.status,
                             id: this.$route.params.id,
                           };
+                          if (companion.status == 2) {
+                            if (companion.position == 6) {
+                              axios
+                                .get(
+                                  "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                                    companion.id +
+                                    "&filter[where][and][1][role]=8"
+                                )
+                                .then((resp) => {
+                                  const account = {
+                                    userId: resp.data[0].userId,
+                                    username: resp.data[0].username,
+                                    password: resp.data[0].password,
+                                    role: resp.data[0].role,
+                                    status: 2,
+                                    idTable: resp.data[0].idTable,
+                                    id: resp.data[0].id,
+                                  };
+                                  const url_5 =
+                                    "http://localhost:3000/api/accounts/" +
+                                    account.id +
+                                    "/replace";
+                                  axios.post(url_5, account);
+                                });
+                            } else if (companion.position == 7) {
+                              axios
+                                .get(
+                                  "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                                    companion.id +
+                                    "&filter[where][and][1][role]=9"
+                                )
+                                .then((resp) => {
+                                  const account = {
+                                    userId: resp.data[0].userId,
+                                    username: resp.data[0].username,
+                                    password: resp.data[0].password,
+                                    role: resp.data[0].role,
+                                    status: 2,
+                                    idTable: resp.data[0].idTable,
+                                    id: resp.data[0].id,
+                                  };
+                                  const url_5 =
+                                    "http://localhost:3000/api/accounts/" +
+                                    account.id +
+                                    "/replace";
+                                  axios.post(url_5, account);
+                                });
+                            }
+                          }
                           const url =
                             "http://localhost:3000/api/companions/" +
                             companion.id +
@@ -1354,6 +1922,55 @@ const EditCompanion = {
                           status: this.status,
                           id: this.$route.params.id,
                         };
+                        if (companion.status == 2) {
+                          if (companion.position == 6) {
+                            axios
+                              .get(
+                                "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                                  companion.id +
+                                  "&filter[where][and][1][role]=8"
+                              )
+                              .then((resp) => {
+                                const account = {
+                                  userId: resp.data[0].userId,
+                                  username: resp.data[0].username,
+                                  password: resp.data[0].password,
+                                  role: resp.data[0].role,
+                                  status: 2,
+                                  idTable: resp.data[0].idTable,
+                                  id: resp.data[0].id,
+                                };
+                                const url_5 =
+                                  "http://localhost:3000/api/accounts/" +
+                                  account.id +
+                                  "/replace";
+                                axios.post(url_5, account);
+                              });
+                          } else if (companion.position == 7) {
+                            axios
+                              .get(
+                                "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                                  companion.id +
+                                  "&filter[where][and][1][role]=9"
+                              )
+                              .then((resp) => {
+                                const account = {
+                                  userId: resp.data[0].userId,
+                                  username: resp.data[0].username,
+                                  password: resp.data[0].password,
+                                  role: resp.data[0].role,
+                                  status: 2,
+                                  idTable: resp.data[0].idTable,
+                                  id: resp.data[0].id,
+                                };
+                                const url_5 =
+                                  "http://localhost:3000/api/accounts/" +
+                                  account.id +
+                                  "/replace";
+                                axios.post(url_5, account);
+                              });
+                          }
+                        }
                         const url =
                           "http://localhost:3000/api/companions/" +
                           companion.id +

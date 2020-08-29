@@ -15,5 +15,16 @@
     "provider": "filesystem",
     "root": "./assets",
     "nameConflict": "makeUnique"
+  },
+  "mongodb": {
+    "host": "ds111754.mlab.com",
+    "port": 11754,
+    "url": "",
+    "database": "canhousedb",
+    "password": "CandidateHouse2020",
+    "name": "mongodb",
+    "user": "accounts",
+    "useNewUrlParser": true,
+    "connector": "loopback-connector-mongodb"
   }
 }

@@ -51,7 +51,7 @@
     "targetNextMonth": {
       "type": "string"
     },
-    "idSchedule": {
+    "idMetCompanion": {
       "type": "number",
       "required": true
     },

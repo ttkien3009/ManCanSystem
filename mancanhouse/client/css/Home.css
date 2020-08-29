@@ -1330,3 +1330,25 @@ body {
   color: white !important;
 }
 
+.table-report table,
+  td {
+    border: 1.5px dashed black;
+    border-collapse: collapse;
+  }
+
+  .table-report td {
+    padding: 5px;
+  }
+
+  .table-report-content th,
+  td {
+    padding: 9px;
+  }
+
+  .table-report-content table,
+  th,
+  td {
+    border: 1.5px solid black;
+    border-collapse: collapse;
+  }
+

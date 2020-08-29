@@ -32,205 +32,232 @@ const RegisteringScheduleSpiritualGuide = {
       scheduleSpiritualGuide: {},
       role: 0,
       idTable: 0,
+      roleName: null,
       metSpiritualGuides: [],
+      checkAdd: 0,
+      checkDelete: 0,
     };
   },
   mounted() {
-    // let promiseResponse = axios.get("http://localhost:3000/api/logins/findOne?filter[where][token]=token")
-    //                     .then(response => response.data)
-    //                     .then(data => {return data})
-    // Promise.resolve(promiseResponse).then((jsonResults) => {
-    //   console.log(jsonResults);
-    //   this.idTable = jsonResults.idTable;
-    //   console.log(this.idTable);
-    // })
+    axios.get("http://localhost:3000/api/candidates").then((resp) => {
+      this.candidates = resp.data;
+    });
+
     axios
       .get(
         "http://localhost:3000/api/logins/findOne?filter[where][token]=token"
       )
       .then((resp) => {
         this.idTable = resp.data.idTable;
-        this.role = resp.data.role; 
+        axios
+          .get(
+            "http://localhost:3000/api/roles?filter[where][id]=" +
+              resp.data.role
+          )
+          .then((respRole) => {
+            this.roleName = respRole.data[0].roleName;
+            if (this.roleName == "Quản trị viên") {
+              this.role = 1;
+            } else if (this.roleName == "Giám đốc") {
+              this.role = 2;
+            } else if (this.roleName == "Quản lý") {
+              this.role = 3;
+            } else if (this.roleName == "Giám học") {
+              this.role = 4;
+            } else if (this.roleName == "Ứng sinh") {
+              this.role = 5;
+            } else if (this.roleName == "Trưởng linh hướng") {
+              this.role = 6;
+            } else if (this.roleName == "Linh hướng") {
+              this.role = 7;
+            } else if (this.roleName == "Trưởng đồng hành") {
+              this.role = 8;
+            } else if (this.roleName == "Đồng hành") {
+              this.role = 9;
+            } else if (this.roleName == "Giảng viên") {
+              this.role = 10;
+            }
+            if (this.role == 6 || this.role == 7) {
+              axios
+                .get(
+                  "http://localhost:3000/api/scheduleSpiritualGuides?filter[where][spiritualGuide]=" +
+                    this.idTable
+                )
+                .then((response) => {
+                  this.scheduleSpiritualGuides = response.data;
+                  if (response.data.length == 0) {
+                    this.checkAdd = 1;
+                  } else {
+                    this.checkDelete = 1;
+                  }
+                });
+            } else if (this.role == 5) {
+              axios
+                .get(
+                  "http://localhost:3000/api/candidates?filter[where][id]=" +
+                    this.idTable
+                )
+                .then((respCan) => {
+                  var community = respCan.data[0].community;
+                  axios
+                    .get(
+                      "http://localhost:3000/api/groupCommunities?filter[where][firstCom]=" +
+                        community
+                    )
+                    .then((respGroupCom) => {
+                      var groupCommunity = {};
+                      groupCommunity = respGroupCom.data;
+                      if (groupCommunity != null) {
+                        var idGroup = respGroupCom.data[0].id;
+                        axios
+                          .get(
+                            "http://localhost:3000/api/spiritualGuides?filter[where][groupCommunity]=" +
+                              idGroup
+                          )
+                          .then((respCom) => {
+                            var spiritualGuide = respCom.data[0].id;
+                            axios
+                              .get(
+                                "http://localhost:3000/api/scheduleSpiritualGuides?filter[where][spiritualGuide]=" +
+                                  spiritualGuide
+                              )
+                              .then((respSchedule) => {
+                                this.scheduleSpiritualGuides =
+                                  respSchedule.data;
+                              });
+                          });
+                      } else {
+                        axios
+                          .get(
+                            "http://localhost:3000/api/groupCommunities?filter[where][secondCom]=" +
+                              community
+                          )
+                          .then((respGroupCom) => {
+                            var groupCommunity = {};
+                            groupCommunity = respGroupCom.data;
+                            if (groupCommunity != null) {
+                              var idGroup = respGroupCom.data[0].id;
+                              axios
+                                .get(
+                                  "http://localhost:3000/api/spiritualGuides?filter[where][groupCommunity]=" +
+                                    idGroup
+                                )
+                                .then((respCom) => {
+                                  var spiritualGuide = respCom.data[0].id;
+                                  axios
+                                    .get(
+                                      "http://localhost:3000/api/scheduleSpiritualGuides?filter[where][spiritualGuide]=" +
+                                        spiritualGuide
+                                    )
+                                    .then((resp) => {
+                                      this.scheduleSpiritualGuides = resp.data;
+                                    });
+                                });
+                            } else {
+                              axios
+                                .get(
+                                  "http://localhost:3000/api/groupCommunities?filter[where][thirdCom]=" +
+                                    community
+                                )
+                                .then((respGroupCom) => {
+                                  var groupCommunity = {};
+                                  groupCommunity = respGroupCom.data;
+                                  if (groupCommunity != null) {
+                                    var idGroup = respGroupCom.data[0].id;
+                                    axios
+                                      .get(
+                                        "http://localhost:3000/api/spiritualGuides?filter[where][groupCommunity]=" +
+                                          idGroup
+                                      )
+                                      .then((respCom) => {
+                                        var spiritualGuide = respCom.data[0].id;
+                                        axios
+                                          .get(
+                                            "http://localhost:3000/api/scheduleSpiritualGuides?filter[where][spiritualGuide]=" +
+                                              spiritualGuide
+                                          )
+                                          .then((respSchedule) => {
+                                            this.scheduleSpiritualGuides =
+                                              respSchedule.data;
+                                          });
+                                      });
+                                  } else {
+                                    axios
+                                      .get(
+                                        "http://localhost:3000/api/groupCommunities?filter[where][fourthCom]=" +
+                                          community
+                                      )
+                                      .then((respGroupCom) => {
+                                        var groupCommunity = {};
+                                        groupCommunity = respGroupCom.data;
+                                        if (groupCommunity != null) {
+                                          var idGroup = respGroupCom.data[0].id;
+                                          axios
+                                            .get(
+                                              "http://localhost:3000/api/spiritualGuides?filter[where][groupCommunity]=" +
+                                                idGroup
+                                            )
+                                            .then((respCom) => {
+                                              var spiritualGuide =
+                                                respCom.data[0].id;
+                                              axios
+                                                .get(
+                                                  "http://localhost:3000/api/scheduleSpiritualGuides?filter[where][spiritualGuide]=" +
+                                                    spiritualGuide
+                                                )
+                                                .then((respSchedule) => {
+                                                  this.scheduleSpiritualGuides =
+                                                    respSchedule.data;
+                                                });
+                                            });
+                                        } else {
+                                          axios
+                                            .get(
+                                              "http://localhost:3000/api/groupCommunities?filter[where][fifthCom]=" +
+                                                community
+                                            )
+                                            .then((respGroupCom) => {
+                                              var groupCommunity = {};
+                                              groupCommunity =
+                                                respGroupCom.data;
+                                              if (groupCommunity != null) {
+                                                var idGroup =
+                                                  respGroupCom.data[0].id;
+                                                axios
+                                                  .get(
+                                                    "http://localhost:3000/api/spiritualGuides?filter[where][groupCommunity]=" +
+                                                      idGroup
+                                                  )
+                                                  .then((respCom) => {
+                                                    var spiritualGuide =
+                                                      respCom.data[0].id;
+                                                    axios
+                                                      .get(
+                                                        "http://localhost:3000/api/scheduleSpiritualGuides?filter[where][spiritualGuide]=" +
+                                                          spiritualGuide
+                                                      )
+                                                      .then((respSchedule) => {
+                                                        this.scheduleSpiritualGuides =
+                                                          respSchedule.data;
+                                                      });
+                                                  });
+                                              }
+                                            });
+                                        }
+                                      });
+                                  }
+                                });
+                            }
+                          });
+                      }
+                    });
+                });
+            }
+          });
       });
-    axios
-      .get("http://localhost:3000/api/scheduleSpiritualGuides?filter[where][spiritualGuide]=8")
-      .then((response) => {
-        this.scheduleSpiritualGuides = response.data;
-      });
-    axios
-      .get("http://localhost:3000/api/candidates")
-      .then((resp) => {
-        this.candidates = resp.data;
-      });
-    
-    // axios
-    //   .get(
-    //     "http://localhost:3000/api/logins/findOne?filter[where][token]=token"
-    //   )
-    //   .then((resp) => {
-    //     this.idTable = resp.data.idTable;
-    //     this.role = resp.data.role;
-    //     if (this.role == 8 || this.role == 9) {
-    //       axios
-    //         .get(
-    //           "http://localhost:3000/api/scheduleSpiritualGuides?filter[where][spiritualGuide]=" +
-    //             this.idTable
-    //         )
-    //         .then((response) => {
-    //           this.scheduleSpiritualGuides = response.data; 
-    //           console.log(this.scheduleSpiritualGuides);
-    //         });
-    //     }
-    //     else if (this.role == 5) {
-    //       axios
-    //         .get(
-    //           "http://localhost:3000/api/candidates?filter[where][id]=" +
-    //             this.idTable
-    //         )
-    //         .then((respCan) => {
-    //           var community = respCan.data[0].community;
-    //           axios
-    //             .get(
-    //               "http://localhost:3000/api/groupCommunities?filter[where][firstCom]=" + community)
-    //             .then((respGroupCom) => {
-    //               var groupCommunity = {};
-    //               groupCommunity = respGroupCom.data;
-    //               if(groupCommunity != null){
-    //                 var idGroup = respGroupCom.data[0].id;
-    //                 axios
-    //                   .get(
-    //                     "http://localhost:3000/api/spiritualGuides?filter[where][groupCommunity]=" +
-    //                       idGroup
-    //                   )
-    //                   .then((respCom) => {
-    //                     var spiritualGuide = respCom.data[0].id;
-    //                     axios
-    //                       .get(
-    //                         "http://localhost:3000/api/scheduleSpiritualGuides?filter[where][spiritualGuide]=" +
-    //                           spiritualGuide
-    //                       )
-    //                       .then((respSchedule) => {
-    //                         this.scheduleSpiritualGuides = respSchedule.data;
-    //                       });
-    //                   });
-    //               } else{
-    //                 axios
-    //                   .get(
-    //                     "http://localhost:3000/api/groupCommunities?filter[where][secondCom]=" + community)
-    //                   .then((respGroupCom) => {
-    //                     var groupCommunity = {};
-    //                     groupCommunity = respGroupCom.data;
-    //                     if(groupCommunity != null){
-    //                       var idGroup = respGroupCom.data[0].id;
-    //                     axios
-    //                       .get(
-    //                         "http://localhost:3000/api/spiritualGuides?filter[where][groupCommunity]=" +
-    //                           idGroup
-    //                       )
-    //                       .then((respCom) => {
-    //                         var spiritualGuide = respCom.data[0].id;
-    //                         axios
-    //                           .get(
-    //                             "http://localhost:3000/api/scheduleSpiritualGuides?filter[where][spiritualGuide]=" +
-    //                               spiritualGuide
-    //                           )
-    //                           .then((resp) => {
-    //                             this.scheduleSpiritualGuides = resp.data;
-    //                           });
-    //                       });
-    //                     } else{
-    //                       axios
-    //                         .get(
-    //                           "http://localhost:3000/api/groupCommunities?filter[where][thirdCom]=" + community)
-    //                         .then((respGroupCom) => {
-    //                           var groupCommunity = {};
-    //                           groupCommunity = respGroupCom.data;
-    //                           if(groupCommunity != null){
-    //                             var idGroup = respGroupCom.data[0].id;
-    //                           axios
-    //                             .get(
-    //                               "http://localhost:3000/api/spiritualGuides?filter[where][groupCommunity]=" +
-    //                                 idGroup
-    //                             )
-    //                             .then((respCom) => {
-    //                               var spiritualGuide = respCom.data[0].id;
-    //                               axios
-    //                                 .get(
-    //                                   "http://localhost:3000/api/scheduleSpiritualGuides?filter[where][spiritualGuide]=" +
-    //                                     spiritualGuide
-    //                                 )
-    //                                 .then((respSchedule) => {
-    //                                   this.scheduleSpiritualGuides = respSchedule.data;
-    //                                 });
-    //                             });
-    //                           } else {
-    //                             axios
-    //                               .get(
-    //                                 "http://localhost:3000/api/groupCommunities?filter[where][fourthCom]=" + community)
-    //                               .then((respGroupCom) => {
-    //                                 var groupCommunity = {};
-    //                                 groupCommunity = respGroupCom.data;
-    //                                 if(groupCommunity != null){
-    //                                   var idGroup = respGroupCom.data[0].id;
-    //                                 axios
-    //                                   .get(
-    //                                     "http://localhost:3000/api/spiritualGuides?filter[where][groupCommunity]=" +
-    //                                       idGroup
-    //                                   )
-    //                                   .then((respCom) => {
-    //                                     var spiritualGuide = respCom.data[0].id;
-    //                                     axios
-    //                                       .get(
-    //                                         "http://localhost:3000/api/scheduleSpiritualGuides?filter[where][spiritualGuide]=" +
-    //                                           spiritualGuide
-    //                                       )
-    //                                       .then((respSchedule) => {
-    //                                         this.scheduleSpiritualGuides = respSchedule.data;
-    //                                       });
-    //                                   });
-    //                                 } else{
-    //                                   axios
-    //                                     .get(
-    //                                       "http://localhost:3000/api/groupCommunities?filter[where][fifthCom]=" + community)
-    //                                     .then((respGroupCom) => {
-    //                                       var groupCommunity = {};
-    //                                       groupCommunity = respGroupCom.data;
-    //                                       if(groupCommunity != null){
-    //                                         var idGroup = respGroupCom.data[0].id;
-    //                                       axios
-    //                                         .get(
-    //                                           "http://localhost:3000/api/spiritualGuides?filter[where][groupCommunity]=" +
-    //                                             idGroup
-    //                                         )
-    //                                         .then((respCom) => {
-    //                                           var spiritualGuide = respCom.data[0].id;
-    //                                           axios
-    //                                             .get(
-    //                                               "http://localhost:3000/api/scheduleSpiritualGuides?filter[where][spiritualGuide]=" +
-    //                                                 spiritualGuide
-    //                                             )
-    //                                             .then((respSchedule) => {
-    //                                               this.scheduleSpiritualGuides = respSchedule.data;
-    //                                             });
-    //                                         });
-    //                                       }
-    //                                     });
-    //                                 }
-    //                               });
-    //                           }
-    //                         });
-    //                     }
-    //                   });
-    //               }
-    //             });
-    //         });
-    //     }
-    //   });
-      axios
-        .get("http://localhost:3000/api/metSpiritualGuides")
-        .then((resp) => {
-          this.metSpiritualGuides = resp.data;
-        });
+    axios.get("http://localhost:3000/api/metSpiritualGuides").then((resp) => {
+      this.metSpiritualGuides = resp.data;
+    });
   },
   computed: {
     isThirtyOneTrue() {
@@ -398,70 +425,84 @@ const RegisteringScheduleSpiritualGuide = {
     DeleteScheduleSpiritualGuide() {
       axios
         .get(
-          "http://localhost:3000/api/scheduleSpiritualGuides?filter[where][spiritualGuide]=" + this.idTable
+          "http://localhost:3000/api/scheduleSpiritualGuides?filter[where][spiritualGuide]=" +
+            this.idTable
         )
         .then((resp) => {
           var arrayScheduleSpiritualGuides = resp.data;
-          var lengthScheduleSpiritualGuides = arrayScheduleSpiritualGuides.length;
-          if (lengthScheduleSpiritualGuides != 0){
+          var lengthScheduleSpiritualGuides =
+            arrayScheduleSpiritualGuides.length;
+          if (lengthScheduleSpiritualGuides != 0) {
             var firstId = arrayScheduleSpiritualGuides[0].id;
             // var maxId = lengthScheduleSpiritualGuides + firstId
             var maxIdFirst = firstId + 60;
-            for(i = firstId; i < maxIdFirst; i++){
+            for (i = firstId; i < maxIdFirst; i++) {
               axios
-                .delete("http://localhost:3000/api/scheduleSpiritualGuides/" + i)
+                .delete(
+                  "http://localhost:3000/api/scheduleSpiritualGuides/" + i
+                )
                 .then((response) => {
                   console.log(response);
                   this.scheduleSpiritualGuides.splice(i, 1);
                 });
             }
             var maxIdSecond = maxIdFirst + 60;
-            for(i = maxIdFirst; i < maxIdSecond; i++){
+            for (i = maxIdFirst; i < maxIdSecond; i++) {
               axios
-                .delete("http://localhost:3000/api/scheduleSpiritualGuides/" + i)
+                .delete(
+                  "http://localhost:3000/api/scheduleSpiritualGuides/" + i
+                )
                 .then((response) => {
                   console.log(response);
                   this.scheduleSpiritualGuides.splice(i, 1);
                 });
             }
-            if(lengthScheduleSpiritualGuides == 168){
+            if (lengthScheduleSpiritualGuides == 168) {
               var maxIdThird = maxIdSecond + 48;
-              for(i = maxIdSecond; i < maxIdThird; i++){
+              for (i = maxIdSecond; i < maxIdThird; i++) {
                 axios
-                  .delete("http://localhost:3000/api/scheduleSpiritualGuides/" + i)
+                  .delete(
+                    "http://localhost:3000/api/scheduleSpiritualGuides/" + i
+                  )
                   .then((response) => {
                     console.log(response);
                     this.scheduleSpiritualGuides.splice(i, 1);
                   });
               }
             }
-            if(lengthScheduleSpiritualGuides == 174){
+            if (lengthScheduleSpiritualGuides == 174) {
               var maxIdThird = maxIdSecond + 54;
-              for(i = maxIdSecond; i < maxIdThird; i++){
+              for (i = maxIdSecond; i < maxIdThird; i++) {
                 axios
-                  .delete("http://localhost:3000/api/scheduleSpiritualGuides/" + i)
+                  .delete(
+                    "http://localhost:3000/api/scheduleSpiritualGuides/" + i
+                  )
                   .then((response) => {
                     console.log(response);
                     this.scheduleSpiritualGuides.splice(i, 1);
                   });
               }
             }
-            if(lengthScheduleSpiritualGuides >= 180){
+            if (lengthScheduleSpiritualGuides >= 180) {
               var maxIdThird = maxIdSecond + 60;
-              for(i = maxIdSecond; i < maxIdThird; i++){
+              for (i = maxIdSecond; i < maxIdThird; i++) {
                 axios
-                  .delete("http://localhost:3000/api/scheduleSpiritualGuides/" + i)
+                  .delete(
+                    "http://localhost:3000/api/scheduleSpiritualGuides/" + i
+                  )
                   .then((response) => {
                     console.log(response);
                     this.scheduleSpiritualGuides.splice(i, 1);
                   });
               }
             }
-            if(lengthScheduleSpiritualGuides == 186){
+            if (lengthScheduleSpiritualGuides == 186) {
               var maxIdFourth = maxIdThird + 6;
-              for(i = maxIdThird; i < maxIdFourth; i++){
+              for (i = maxIdThird; i < maxIdFourth; i++) {
                 axios
-                  .delete("http://localhost:3000/api/scheduleSpiritualGuides/" + i)
+                  .delete(
+                    "http://localhost:3000/api/scheduleSpiritualGuides/" + i
+                  )
                   .then((response) => {
                     console.log(response);
                     this.scheduleSpiritualGuides.splice(i, 1);
@@ -474,7 +515,6 @@ const RegisteringScheduleSpiritualGuide = {
               location.reload();
             }, 1000);
           }
-          
         });
     },
 
@@ -514,37 +554,56 @@ const RegisteringScheduleSpiritualGuide = {
           } else if (this.role == 5) {
             var max = this.scheduleSpiritualGuides.length;
             var check = 0;
-            for(i = 0; i < max; i++){
-              if(this.scheduleSpiritualGuides[i].candidate == this.idTable && this.scheduleSpiritualGuides[i].status == 1){
+            for (i = 0; i < max; i++) {
+              if (
+                this.scheduleSpiritualGuides[i].candidate == this.idTable &&
+                this.scheduleSpiritualGuides[i].status == 1
+              ) {
                 check++;
               }
-              if(this.scheduleSpiritualGuides[i].candidate == this.idTable && this.scheduleSpiritualGuides[i].status == 2){
+              if (
+                this.scheduleSpiritualGuides[i].candidate == this.idTable &&
+                this.scheduleSpiritualGuides[i].status == 2
+              ) {
                 axios
                   .get(
-                    "http://localhost:3000/api/scheduleSpiritualGuides?filter[where][candidate]=" + this.idTable + "&filter[status]=2"
+                    "http://localhost:3000/api/scheduleSpiritualGuides?filter[where][candidate]=" +
+                      this.idTable +
+                      "&filter[status]=2"
                   )
                   .then((resp) => {
                     axios
                       .get(
-                        "http://localhost:3000/api/metSpiritualGuides?filter[where][idSchedule]=" + resp.data[0].id
+                        "http://localhost:3000/api/metSpiritualGuides?filter[where][idSchedule]=" +
+                          resp.data[0].id
                       )
                       .then((response) => {
-                          axios
-                            .delete("http://localhost:3000/api/metSpiritualGuides/" + response.data[0].id)
-                            .then((resp) => {
-                              this.metSpiritualGuides.splice(response.data[0].id, 1);
-                              setTimeout(() => {
-                                location.reload();
-                              }, 100);
-                            });
+                        axios
+                          .delete(
+                            "http://localhost:3000/api/metSpiritualGuides/" +
+                              response.data[0].id
+                          )
+                          .then((resp) => {
+                            this.metSpiritualGuides.splice(
+                              response.data[0].id,
+                              1
+                            );
+                            setTimeout(() => {
+                              location.reload();
+                            }, 100);
+                          });
                       });
                   });
               }
             }
-            if(check != 0){
-              alertify.alert("Thông báo", "Mỗi ứng sinh chỉ đăng ký một phiên!", function () {
-                alertify.success("Ok");
-              });
+            if (check != 0) {
+              alertify.alert(
+                "Thông báo",
+                "Mỗi ứng sinh chỉ đăng ký một phiên!",
+                function () {
+                  alertify.success("Ok");
+                }
+              );
             } else {
               const scheduleSpiritualGuideNew = {
                 spiritualGuide: scheduleSpiritualGuideOld.spiritualGuide,
@@ -562,6 +621,22 @@ const RegisteringScheduleSpiritualGuide = {
                 status: 1,
                 idSchedule: scheduleSpiritualGuideEdit.id,
               };
+              axios
+                .get(
+                  "http://localhost:3000/api/countMets?filter[where][candidate]=" +
+                    this.idTable
+                )
+                .then((respCountMet) => {
+                  if (respCountMet.data.length === 0) {
+                    const countMet = {
+                      candidate: this.idTable,
+                      countMetCompanion: 0,
+                      countMetSpiritualGuide: 0,
+                    };
+                    const url_3 = `http://localhost:3000/api/countMets`;
+                    axios.post(url_3, countMet);
+                  }
+                });
               const url_1 = `http://localhost:3000/api/metSpiritualGuides`;
               axios.post(url_1, metSpiritualGuide);
               const url =
@@ -594,7 +669,7 @@ const RegisteringScheduleSpiritualGuide = {
             groupSession: response.data.scheduleSpiritualGuide.groupSession,
           };
           if (this.role == 6 || this.role == 7) {
-            if(scheduleSpiritualGuideOld.status == 2){
+            if (scheduleSpiritualGuideOld.status == 2) {
               const scheduleSpiritualGuideNew = {
                 spiritualGuide: scheduleSpiritualGuideOld.spiritualGuide,
                 candidate: null,
@@ -611,28 +686,43 @@ const RegisteringScheduleSpiritualGuide = {
               setTimeout(() => {
                 location.reload();
               }, 50);
-            } else if(scheduleSpiritualGuideOld.candidate != null && scheduleSpiritualGuideOld.status == 1){
+            } else if (
+              scheduleSpiritualGuideOld.candidate != null &&
+              scheduleSpiritualGuideOld.status == 1
+            ) {
               var emailCandidate = null;
               axios
-                .get("http://localhost:3000/api/candidates?filter[where][id]=" + scheduleSpiritualGuideOld.candidate)
+                .get(
+                  "http://localhost:3000/api/candidates?filter[where][id]=" +
+                    scheduleSpiritualGuideOld.candidate
+                )
                 .then((resp) => {
                   emailCandidate = resp.data[0].email;
                   axios
-                    .get("http://localhost:3000/api/spiritualGuides?filter[where][id]=" + scheduleSpiritualGuideOld.spiritualGuide)
+                    .get(
+                      "http://localhost:3000/api/spiritualGuides?filter[where][id]=" +
+                        scheduleSpiritualGuideOld.spiritualGuide
+                    )
                     .then((respCom) => {
                       Email.send({
-                        Host : "smtp.gmail.com",
-                        Username : "mancanhouse2020@gmail.com",
-                        Password : "akyqnlcmanojglqb",
-                        To : emailCandidate,
-                        From : "mancanhouse2020@gmail.com",
-                        Subject : "Thông Báo Hủy Lịch Gặp Linh Hướng",
-                        Body : "Xin lỗi vì sự bất tiện này. Người linh hướng của bạn" +
-                        " đã có việc bận nên không thể có lịch gặp như bạn mong muốn. Vui lòng chọn một lịch gặp khác hoặc liên hệ" + 
-                        " với người linh hướng qua số điện thoại: " + respCom.data[0].phone + " hoặc địa chỉ email: " + respCom.data[0].email + ". Xin cảm ơn."
-                      }).then(
+                        Host: "smtp.gmail.com",
+                        Username: "mancanhouse2020@gmail.com",
+                        Password: "akyqnlcmanojglqb",
+                        To: emailCandidate,
+                        From: "mancanhouse2020@gmail.com",
+                        Subject: "Thông Báo Hủy Lịch Gặp Linh Hướng",
+                        Body:
+                          "Xin lỗi vì sự bất tiện này. Người linh hướng của bạn" +
+                          " đã có việc bận nên không thể có lịch gặp như bạn mong muốn. Vui lòng chọn một lịch gặp khác hoặc liên hệ" +
+                          " với người linh hướng qua số điện thoại: " +
+                          respCom.data[0].phone +
+                          " hoặc địa chỉ email: " +
+                          respCom.data[0].email +
+                          ". Xin cảm ơn.",
+                      })
+                        .then
                         // message => alert(message)
-                      );
+                        ();
                     });
                   //Gửi mail báo bận.
                 });
@@ -651,22 +741,29 @@ const RegisteringScheduleSpiritualGuide = {
               axios.post(url, scheduleSpiritualGuideNew);
               setTimeout(() => {
                 location.reload();
-              }, 2000);
+              }, 2500);
             }
           } else if (this.role == 5) {
             var max = this.scheduleSpiritualGuides.length;
             var checkCancel = 0;
             var idSchedule = 0;
-            for(i = 0; i < max; i++){
-              if(this.scheduleSpiritualGuides[i].candidate == this.idTable){
+            for (i = 0; i < max; i++) {
+              if (this.scheduleSpiritualGuides[i].candidate == this.idTable) {
                 checkCancel++;
                 idSchedule = this.scheduleSpiritualGuides[i].id;
               }
             }
-            if(checkCancel != 0 && scheduleSpiritualGuideEdit.id != idSchedule){
-              alertify.alert("Thông báo", "Hủy lịch gặp không hợp lệ. Vui lòng kiểm tra lại!", function () {
-                alertify.success("Ok");
-              });
+            if (
+              checkCancel != 0 &&
+              scheduleSpiritualGuideEdit.id != idSchedule
+            ) {
+              alertify.alert(
+                "Thông báo",
+                "Hủy lịch gặp không hợp lệ. Vui lòng kiểm tra lại!",
+                function () {
+                  alertify.success("Ok");
+                }
+              );
             } else {
               const scheduleSpiritualGuideNew = {
                 spiritualGuide: scheduleSpiritualGuideOld.spiritualGuide,
@@ -687,14 +784,17 @@ const RegisteringScheduleSpiritualGuide = {
                     scheduleSpiritualGuideEdit.id
                 )
                 .then((response) => {
-                    axios
-                      .delete("http://localhost:3000/api/metSpiritualGuides/" + response.data[0].id)
-                      .then((resp) => {
-                        this.metSpiritualGuides.splice(response.data[0].id, 1);
-                        setTimeout(() => {
-                          location.reload();
-                        }, 100);
-                      });
+                  axios
+                    .delete(
+                      "http://localhost:3000/api/metSpiritualGuides/" +
+                        response.data[0].id
+                    )
+                    .then((resp) => {
+                      this.metSpiritualGuides.splice(response.data[0].id, 1);
+                      setTimeout(() => {
+                        location.reload();
+                      }, 100);
+                    });
                 });
             }
           }
@@ -709,14 +809,14 @@ const RegisteringScheduleSpiritualGuide = {
           <h6 class="m-0 font-weight-bold text-dark">Đăng ký Lịch linh hướng</h6>
         </div>
         <div class="col-md-4"></div>
-        <div class="col-md-2" style="padding-left:110px;" v-show="role == 6 || role == 7">
+        <div class="col-md-2" style="padding-left:110px;" v-show="(role === 6 && checkDelete === 1) || (role == 7 && checkDelete === 1)">
           <button class="btn rounded btn-danger" style="font-size:14px;" 
           data-toggle="modal" data-target="#deleteScheduleSpiritualGuideModal">
             <i class="fas fa-trash-alt"></i>
             &nbsp;Xóa lịch
           </button>
         </div>
-        <div class="col-md-2" style="padding-left:50px;" v-show="role == 6 || role == 7">
+        <div class="col-md-2" style="padding-left:50px;" v-show="(role === 6 && checkAdd === 1) || (role == 7 && checkAdd === 1)">
           <button class="btn rounded btn-hover-blue"
             style="background-color: #056299;color: white;font-size:14px;" @click="CreateScheduleSpiritualGuide">
             <i class="fas fa-plus"></i>

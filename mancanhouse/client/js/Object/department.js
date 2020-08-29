@@ -20,6 +20,7 @@ const ListDepartment = {
   mounted() {
     axios.get("http://localhost:3000/api/departments").then((response) => {
       this.departments = response.data;
+      console.log(this.departments);
     });
   },
   computed: {},
@@ -51,10 +52,10 @@ const ListDepartment = {
   },
   template: `
   <div class="card shadow mb-4" style="margin-top: -5px;">
-    <div class="card-header py-3">
+    <div class="card-header py-3" style="margin-bottom:-40px">
       <div class="row">
         <div class="col-md-4">
-          <h5 class="m-0 font-weight-bold text-primary">Danh sách Phòng Ban</h5>
+          <h6 class="m-0 font-weight-bold text-dark">Danh sách Phòng Ban</h6>
         </div>
         <div class="col-md-6"></div>
         <div class="col-md-2" style="padding-left:68px;">
@@ -68,8 +69,9 @@ const ListDepartment = {
       </div>
     </div>
     <div class="card-body">
-      <div class="table-responsive">
-        <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+      <hr style="height:1px;color:lightgray;background-color:lightgray">
+      <div class="table-responsive" style="margin-top:-8px">
+        <table id="dataTable" class="table table-bordered" style="width:100%">
           <thead>
             <tr>
               <th scope="col">ID</th>
@@ -199,7 +201,7 @@ const AddDepartment = {
   template: `
   <div class="card shadow mb-4" style="margin-top: -5px;">
     <div class="card-header py-3">
-      <h5 class="m-0 font-weight-bold text-primary">Thêm Phòng Ban</h5>
+      <h6 class="m-0 font-weight-bold text-dark">Thêm Phòng Ban</h6>
     </div>
     <div class="card-body">
       <form @submit.prevent="submitAddDepaertmentForm" action="POST" method="" autocomplete="off">
@@ -271,12 +273,12 @@ const EditDepartment = {
     });
     axios
       .get(
-        "http://localhost:3000/api/departments/getDepartment?id=" +
+        "http://localhost:3000/api/departments?filter[where][id]=" +
           this.$route.params.id
       )
       .then((response) => {
-        this.name = response.data.department.name;
-        this.positionType = response.data.department.positionType;
+        this.name = response.data[0].name;
+        this.positionType = response.data[0].positionType;
       });
   },
   computed: {
@@ -302,10 +304,11 @@ const EditDepartment = {
         const department = {
           name: this.name,
           positionType: this.positionType,
-          id: this.$route.params.id,
         };
         const url =
-          "http://localhost:3000/api/departments/" + department.id + "/replace";
+          "http://localhost:3000/api/departments/" +
+          this.$route.params.id +
+          "/replace";
         axios.post(url, department);
         this.$router.push("/departments");
         location.reload();
@@ -332,7 +335,7 @@ const EditDepartment = {
   template: `
   <div class="card shadow mb-4" style="margin-top: -5px;">
   <div class="card-header py-3">
-    <h5 class="m-0 font-weight-bold text-primary">Chỉnh sửa Phòng Ban</h5>
+    <h6 class="m-0 font-weight-bold text-dark">Chỉnh sửa Phòng Ban</h6>
   </div>
   <div class="card-body">
     <form @submit.prevent="submitEditDepartmentForm" action="POST" method="" autocomplete="off">

@@ -18,6 +18,9 @@
     "reportCompanion": {
       "type": "number"
     },
+    "dataMet": {
+      "type": "string"
+    },
     "status": {
       "type": "number"
     },

@@ -68,18 +68,48 @@ const ListSpiritualGuide = {
       });
     },
 
-    deleteDataSpiritualGuide(id) {
+    deleteDataSpiritualGuide(spiritualGuide) {
       axios
-        .delete("http://localhost:3000/api/spiritualGuides/" + id)
+        .delete(
+          "http://localhost:3000/api/spiritualGuides/" + spiritualGuide.id
+        )
         .then((response) => {
           console.log(response);
-          this.spiritualGuides.splice(id, 1);
-          this.$router.push("/");
-          setTimeout(() => {
-            this.$router.push("/spiritualGuides");
-            location.reload();
-          }, 5);
+          this.spiritualGuides.splice(spiritualGuide.id, 1);
         });
+      if (spiritualGuide.position == 8) {
+        axios
+          .get(
+            "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+              spiritualGuide.id +
+              "&filter[where][and][1][role]=6"
+          )
+          .then((resp) => {
+            axios
+              .delete("http://localhost:3000/api/accounts/" + resp.data[0].id)
+              .then((respSprt) => {
+                setTimeout(() => {
+                  location.reload();
+                }, 10);
+              });
+          });
+      } else if (spiritualGuide.position == 9) {
+        axios
+          .get(
+            "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+              spiritualGuide.id +
+              "&filter[where][and][1][role]=7"
+          )
+          .then((resp) => {
+            axios
+              .delete("http://localhost:3000/api/accounts/" + resp.data[0].id)
+              .then((respCom) => {
+                setTimeout(() => {
+                  location.reload();
+                }, 10);
+              });
+          });
+      }
     },
   },
   template: `
@@ -150,7 +180,7 @@ const ListSpiritualGuide = {
                     </button>
                   </div>
                   <div class="col-lg-4">
-                    <button :title="titleButtonEdit" @click="getDataSpiritualGuideUpdate(spiritualGuide)"
+                    <button v-show="spiritualGuide.status == 1" :title="titleButtonEdit" @click="getDataSpiritualGuideUpdate(spiritualGuide)"
                       class="btn btn-warning btn-sm h-28px w-28px rounded" type="submit"
                       style="margin-left: -17px;">
                       <i class="fas fa-edit fa-md ml--2px"></i>
@@ -186,7 +216,7 @@ const ListSpiritualGuide = {
             <button class="btn btn-danger rounded" data-dismiss="modal">
               Hủy
             </button>
-            <button class="btn rounded text-white btn-hover-blue" style="background-color: #056299;" @click="deleteDataSpiritualGuide(spiritualGuide.id)">
+            <button class="btn rounded text-white btn-hover-blue" style="background-color: #056299;" @click="deleteDataSpiritualGuide(spiritualGuide)">
               Xác Nhận
             </button>
           </div>
@@ -869,6 +899,55 @@ const EditSpiritualGuide = {
                   status: this.status,
                   id: this.$route.params.id,
                 };
+                if (spiritualGuide.status == 2) {
+                  if (spiritualGuide.position == 8) {
+                    axios
+                      .get(
+                        "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                          spiritualGuide.id +
+                          "&filter[where][and][1][role]=6"
+                      )
+                      .then((resp) => {
+                        const account = {
+                          userId: resp.data[0].userId,
+                          username: resp.data[0].username,
+                          password: resp.data[0].password,
+                          role: resp.data[0].role,
+                          status: 2,
+                          idTable: resp.data[0].idTable,
+                          id: resp.data[0].id,
+                        };
+                        const url_5 =
+                          "http://localhost:3000/api/accounts/" +
+                          account.id +
+                          "/replace";
+                        axios.post(url_5, account);
+                      });
+                  } else if (spiritualGuide.position == 9) {
+                    axios
+                      .get(
+                        "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                          spiritualGuide.id +
+                          "&filter[where][and][1][role]=7"
+                      )
+                      .then((resp) => {
+                        const account = {
+                          userId: resp.data[0].userId,
+                          username: resp.data[0].username,
+                          password: resp.data[0].password,
+                          role: resp.data[0].role,
+                          status: 2,
+                          idTable: resp.data[0].idTable,
+                          id: resp.data[0].id,
+                        };
+                        const url_5 =
+                          "http://localhost:3000/api/accounts/" +
+                          account.id +
+                          "/replace";
+                        axios.post(url_5, account);
+                      });
+                  }
+                }
                 const url =
                   "http://localhost:3000/api/spiritualGuides/" +
                   spiritualGuide.id +
@@ -907,6 +986,55 @@ const EditSpiritualGuide = {
                   status: this.status,
                   id: this.$route.params.id,
                 };
+                if (spiritualGuide.status == 2) {
+                  if (spiritualGuide.position == 8) {
+                    axios
+                      .get(
+                        "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                          spiritualGuide.id +
+                          "&filter[where][and][1][role]=6"
+                      )
+                      .then((resp) => {
+                        const account = {
+                          userId: resp.data[0].userId,
+                          username: resp.data[0].username,
+                          password: resp.data[0].password,
+                          role: resp.data[0].role,
+                          status: 2,
+                          idTable: resp.data[0].idTable,
+                          id: resp.data[0].id,
+                        };
+                        const url_5 =
+                          "http://localhost:3000/api/accounts/" +
+                          account.id +
+                          "/replace";
+                        axios.post(url_5, account);
+                      });
+                  } else if (spiritualGuide.position == 9) {
+                    axios
+                      .get(
+                        "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                          spiritualGuide.id +
+                          "&filter[where][and][1][role]=7"
+                      )
+                      .then((resp) => {
+                        const account = {
+                          userId: resp.data[0].userId,
+                          username: resp.data[0].username,
+                          password: resp.data[0].password,
+                          role: resp.data[0].role,
+                          status: 2,
+                          idTable: resp.data[0].idTable,
+                          id: resp.data[0].id,
+                        };
+                        const url_5 =
+                          "http://localhost:3000/api/accounts/" +
+                          account.id +
+                          "/replace";
+                        axios.post(url_5, account);
+                      });
+                  }
+                }
                 const url =
                   "http://localhost:3000/api/spiritualGuides/" +
                   spiritualGuide.id +
@@ -937,6 +1065,55 @@ const EditSpiritualGuide = {
                 status: this.status,
                 id: this.$route.params.id,
               };
+              if (spiritualGuide.status == 2) {
+                if (spiritualGuide.position == 8) {
+                  axios
+                    .get(
+                      "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                        spiritualGuide.id +
+                        "&filter[where][and][1][role]=6"
+                    )
+                    .then((resp) => {
+                      const account = {
+                        userId: resp.data[0].userId,
+                        username: resp.data[0].username,
+                        password: resp.data[0].password,
+                        role: resp.data[0].role,
+                        status: 2,
+                        idTable: resp.data[0].idTable,
+                        id: resp.data[0].id,
+                      };
+                      const url_5 =
+                        "http://localhost:3000/api/accounts/" +
+                        account.id +
+                        "/replace";
+                      axios.post(url_5, account);
+                    });
+                } else if (spiritualGuide.position == 9) {
+                  axios
+                    .get(
+                      "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                        spiritualGuide.id +
+                        "&filter[where][and][1][role]=7"
+                    )
+                    .then((resp) => {
+                      const account = {
+                        userId: resp.data[0].userId,
+                        username: resp.data[0].username,
+                        password: resp.data[0].password,
+                        role: resp.data[0].role,
+                        status: 2,
+                        idTable: resp.data[0].idTable,
+                        id: resp.data[0].id,
+                      };
+                      const url_5 =
+                        "http://localhost:3000/api/accounts/" +
+                        account.id +
+                        "/replace";
+                      axios.post(url_5, account);
+                    });
+                }
+              }
               const url =
                 "http://localhost:3000/api/spiritualGuides/" +
                 spiritualGuide.id +
@@ -1002,6 +1179,55 @@ const EditSpiritualGuide = {
                       status: this.status,
                       id: this.$route.params.id,
                     };
+                    if (spiritualGuide.status == 2) {
+                      if (spiritualGuide.position == 8) {
+                        axios
+                          .get(
+                            "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                              spiritualGuide.id +
+                              "&filter[where][and][1][role]=6"
+                          )
+                          .then((resp) => {
+                            const account = {
+                              userId: resp.data[0].userId,
+                              username: resp.data[0].username,
+                              password: resp.data[0].password,
+                              role: resp.data[0].role,
+                              status: 2,
+                              idTable: resp.data[0].idTable,
+                              id: resp.data[0].id,
+                            };
+                            const url_5 =
+                              "http://localhost:3000/api/accounts/" +
+                              account.id +
+                              "/replace";
+                            axios.post(url_5, account);
+                          });
+                      } else if (spiritualGuide.position == 9) {
+                        axios
+                          .get(
+                            "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                              spiritualGuide.id +
+                              "&filter[where][and][1][role]=7"
+                          )
+                          .then((resp) => {
+                            const account = {
+                              userId: resp.data[0].userId,
+                              username: resp.data[0].username,
+                              password: resp.data[0].password,
+                              role: resp.data[0].role,
+                              status: 2,
+                              idTable: resp.data[0].idTable,
+                              id: resp.data[0].id,
+                            };
+                            const url_5 =
+                              "http://localhost:3000/api/accounts/" +
+                              account.id +
+                              "/replace";
+                            axios.post(url_5, account);
+                          });
+                      }
+                    }
                     const url =
                       "http://localhost:3000/api/spiritualGuides/" +
                       spiritualGuide.id +
@@ -1040,6 +1266,55 @@ const EditSpiritualGuide = {
                       status: this.status,
                       id: this.$route.params.id,
                     };
+                    if (spiritualGuide.status == 2) {
+                      if (spiritualGuide.position == 8) {
+                        axios
+                          .get(
+                            "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                              spiritualGuide.id +
+                              "&filter[where][and][1][role]=6"
+                          )
+                          .then((resp) => {
+                            const account = {
+                              userId: resp.data[0].userId,
+                              username: resp.data[0].username,
+                              password: resp.data[0].password,
+                              role: resp.data[0].role,
+                              status: 2,
+                              idTable: resp.data[0].idTable,
+                              id: resp.data[0].id,
+                            };
+                            const url_5 =
+                              "http://localhost:3000/api/accounts/" +
+                              account.id +
+                              "/replace";
+                            axios.post(url_5, account);
+                          });
+                      } else if (spiritualGuide.position == 9) {
+                        axios
+                          .get(
+                            "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                              spiritualGuide.id +
+                              "&filter[where][and][1][role]=7"
+                          )
+                          .then((resp) => {
+                            const account = {
+                              userId: resp.data[0].userId,
+                              username: resp.data[0].username,
+                              password: resp.data[0].password,
+                              role: resp.data[0].role,
+                              status: 2,
+                              idTable: resp.data[0].idTable,
+                              id: resp.data[0].id,
+                            };
+                            const url_5 =
+                              "http://localhost:3000/api/accounts/" +
+                              account.id +
+                              "/replace";
+                            axios.post(url_5, account);
+                          });
+                      }
+                    }
                     const url =
                       "http://localhost:3000/api/spiritualGuides/" +
                       spiritualGuide.id +
@@ -1070,6 +1345,55 @@ const EditSpiritualGuide = {
                     status: this.status,
                     id: this.$route.params.id,
                   };
+                  if (spiritualGuide.status == 2) {
+                    if (spiritualGuide.position == 8) {
+                      axios
+                        .get(
+                          "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                            spiritualGuide.id +
+                            "&filter[where][and][1][role]=6"
+                        )
+                        .then((resp) => {
+                          const account = {
+                            userId: resp.data[0].userId,
+                            username: resp.data[0].username,
+                            password: resp.data[0].password,
+                            role: resp.data[0].role,
+                            status: 2,
+                            idTable: resp.data[0].idTable,
+                            id: resp.data[0].id,
+                          };
+                          const url_5 =
+                            "http://localhost:3000/api/accounts/" +
+                            account.id +
+                            "/replace";
+                          axios.post(url_5, account);
+                        });
+                    } else if (spiritualGuide.position == 9) {
+                      axios
+                        .get(
+                          "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                            spiritualGuide.id +
+                            "&filter[where][and][1][role]=7"
+                        )
+                        .then((resp) => {
+                          const account = {
+                            userId: resp.data[0].userId,
+                            username: resp.data[0].username,
+                            password: resp.data[0].password,
+                            role: resp.data[0].role,
+                            status: 2,
+                            idTable: resp.data[0].idTable,
+                            id: resp.data[0].id,
+                          };
+                          const url_5 =
+                            "http://localhost:3000/api/accounts/" +
+                            account.id +
+                            "/replace";
+                          axios.post(url_5, account);
+                        });
+                    }
+                  }
                   const url =
                     "http://localhost:3000/api/spiritualGuides/" +
                     spiritualGuide.id +
@@ -1140,6 +1464,55 @@ const EditSpiritualGuide = {
                       status: this.status,
                       id: this.$route.params.id,
                     };
+                    if (spiritualGuide.status == 2) {
+                      if (spiritualGuide.position == 8) {
+                        axios
+                          .get(
+                            "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                              spiritualGuide.id +
+                              "&filter[where][and][1][role]=6"
+                          )
+                          .then((resp) => {
+                            const account = {
+                              userId: resp.data[0].userId,
+                              username: resp.data[0].username,
+                              password: resp.data[0].password,
+                              role: resp.data[0].role,
+                              status: 2,
+                              idTable: resp.data[0].idTable,
+                              id: resp.data[0].id,
+                            };
+                            const url_5 =
+                              "http://localhost:3000/api/accounts/" +
+                              account.id +
+                              "/replace";
+                            axios.post(url_5, account);
+                          });
+                      } else if (spiritualGuide.position == 9) {
+                        axios
+                          .get(
+                            "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                              spiritualGuide.id +
+                              "&filter[where][and][1][role]=7"
+                          )
+                          .then((resp) => {
+                            const account = {
+                              userId: resp.data[0].userId,
+                              username: resp.data[0].username,
+                              password: resp.data[0].password,
+                              role: resp.data[0].role,
+                              status: 2,
+                              idTable: resp.data[0].idTable,
+                              id: resp.data[0].id,
+                            };
+                            const url_5 =
+                              "http://localhost:3000/api/accounts/" +
+                              account.id +
+                              "/replace";
+                            axios.post(url_5, account);
+                          });
+                      }
+                    }
                     const url =
                       "http://localhost:3000/api/spiritualGuides/" +
                       spiritualGuide.id +
@@ -1178,6 +1551,55 @@ const EditSpiritualGuide = {
                       status: this.status,
                       id: this.$route.params.id,
                     };
+                    if (spiritualGuide.status == 2) {
+                      if (spiritualGuide.position == 8) {
+                        axios
+                          .get(
+                            "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                              spiritualGuide.id +
+                              "&filter[where][and][1][role]=6"
+                          )
+                          .then((resp) => {
+                            const account = {
+                              userId: resp.data[0].userId,
+                              username: resp.data[0].username,
+                              password: resp.data[0].password,
+                              role: resp.data[0].role,
+                              status: 2,
+                              idTable: resp.data[0].idTable,
+                              id: resp.data[0].id,
+                            };
+                            const url_5 =
+                              "http://localhost:3000/api/accounts/" +
+                              account.id +
+                              "/replace";
+                            axios.post(url_5, account);
+                          });
+                      } else if (spiritualGuide.position == 9) {
+                        axios
+                          .get(
+                            "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                              spiritualGuide.id +
+                              "&filter[where][and][1][role]=7"
+                          )
+                          .then((resp) => {
+                            const account = {
+                              userId: resp.data[0].userId,
+                              username: resp.data[0].username,
+                              password: resp.data[0].password,
+                              role: resp.data[0].role,
+                              status: 2,
+                              idTable: resp.data[0].idTable,
+                              id: resp.data[0].id,
+                            };
+                            const url_5 =
+                              "http://localhost:3000/api/accounts/" +
+                              account.id +
+                              "/replace";
+                            axios.post(url_5, account);
+                          });
+                      }
+                    }
                     const url =
                       "http://localhost:3000/api/spiritualGuides/" +
                       spiritualGuide.id +
@@ -1208,6 +1630,55 @@ const EditSpiritualGuide = {
                     status: this.status,
                     id: this.$route.params.id,
                   };
+                  if (spiritualGuide.status == 2) {
+                    if (spiritualGuide.position == 8) {
+                      axios
+                        .get(
+                          "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                            spiritualGuide.id +
+                            "&filter[where][and][1][role]=6"
+                        )
+                        .then((resp) => {
+                          const account = {
+                            userId: resp.data[0].userId,
+                            username: resp.data[0].username,
+                            password: resp.data[0].password,
+                            role: resp.data[0].role,
+                            status: 2,
+                            idTable: resp.data[0].idTable,
+                            id: resp.data[0].id,
+                          };
+                          const url_5 =
+                            "http://localhost:3000/api/accounts/" +
+                            account.id +
+                            "/replace";
+                          axios.post(url_5, account);
+                        });
+                    } else if (spiritualGuide.position == 9) {
+                      axios
+                        .get(
+                          "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                            spiritualGuide.id +
+                            "&filter[where][and][1][role]=7"
+                        )
+                        .then((resp) => {
+                          const account = {
+                            userId: resp.data[0].userId,
+                            username: resp.data[0].username,
+                            password: resp.data[0].password,
+                            role: resp.data[0].role,
+                            status: 2,
+                            idTable: resp.data[0].idTable,
+                            id: resp.data[0].id,
+                          };
+                          const url_5 =
+                            "http://localhost:3000/api/accounts/" +
+                            account.id +
+                            "/replace";
+                          axios.post(url_5, account);
+                        });
+                    }
+                  }
                   const url =
                     "http://localhost:3000/api/spiritualGuides/" +
                     spiritualGuide.id +
@@ -1290,6 +1761,55 @@ const EditSpiritualGuide = {
                             status: this.status,
                             id: this.$route.params.id,
                           };
+                          if (spiritualGuide.status == 2) {
+                            if (spiritualGuide.position == 8) {
+                              axios
+                                .get(
+                                  "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                                    spiritualGuide.id +
+                                    "&filter[where][and][1][role]=6"
+                                )
+                                .then((resp) => {
+                                  const account = {
+                                    userId: resp.data[0].userId,
+                                    username: resp.data[0].username,
+                                    password: resp.data[0].password,
+                                    role: resp.data[0].role,
+                                    status: 2,
+                                    idTable: resp.data[0].idTable,
+                                    id: resp.data[0].id,
+                                  };
+                                  const url_5 =
+                                    "http://localhost:3000/api/accounts/" +
+                                    account.id +
+                                    "/replace";
+                                  axios.post(url_5, account);
+                                });
+                            } else if (spiritualGuide.position == 9) {
+                              axios
+                                .get(
+                                  "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                                    spiritualGuide.id +
+                                    "&filter[where][and][1][role]=7"
+                                )
+                                .then((resp) => {
+                                  const account = {
+                                    userId: resp.data[0].userId,
+                                    username: resp.data[0].username,
+                                    password: resp.data[0].password,
+                                    role: resp.data[0].role,
+                                    status: 2,
+                                    idTable: resp.data[0].idTable,
+                                    id: resp.data[0].id,
+                                  };
+                                  const url_5 =
+                                    "http://localhost:3000/api/accounts/" +
+                                    account.id +
+                                    "/replace";
+                                  axios.post(url_5, account);
+                                });
+                            }
+                          }
                           const url =
                             "http://localhost:3000/api/spiritualGuides/" +
                             spiritualGuide.id +
@@ -1328,6 +1848,55 @@ const EditSpiritualGuide = {
                             status: this.status,
                             id: this.$route.params.id,
                           };
+                          if (spiritualGuide.status == 2) {
+                            if (spiritualGuide.position == 8) {
+                              axios
+                                .get(
+                                  "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                                    spiritualGuide.id +
+                                    "&filter[where][and][1][role]=6"
+                                )
+                                .then((resp) => {
+                                  const account = {
+                                    userId: resp.data[0].userId,
+                                    username: resp.data[0].username,
+                                    password: resp.data[0].password,
+                                    role: resp.data[0].role,
+                                    status: 2,
+                                    idTable: resp.data[0].idTable,
+                                    id: resp.data[0].id,
+                                  };
+                                  const url_5 =
+                                    "http://localhost:3000/api/accounts/" +
+                                    account.id +
+                                    "/replace";
+                                  axios.post(url_5, account);
+                                });
+                            } else if (spiritualGuide.position == 9) {
+                              axios
+                                .get(
+                                  "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                                    spiritualGuide.id +
+                                    "&filter[where][and][1][role]=7"
+                                )
+                                .then((resp) => {
+                                  const account = {
+                                    userId: resp.data[0].userId,
+                                    username: resp.data[0].username,
+                                    password: resp.data[0].password,
+                                    role: resp.data[0].role,
+                                    status: 2,
+                                    idTable: resp.data[0].idTable,
+                                    id: resp.data[0].id,
+                                  };
+                                  const url_5 =
+                                    "http://localhost:3000/api/accounts/" +
+                                    account.id +
+                                    "/replace";
+                                  axios.post(url_5, account);
+                                });
+                            }
+                          }
                           const url =
                             "http://localhost:3000/api/spiritualGuides/" +
                             spiritualGuide.id +
@@ -1358,6 +1927,55 @@ const EditSpiritualGuide = {
                           status: this.status,
                           id: this.$route.params.id,
                         };
+                        if (spiritualGuide.status == 2) {
+                          if (spiritualGuide.position == 8) {
+                            axios
+                              .get(
+                                "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                                  spiritualGuide.id +
+                                  "&filter[where][and][1][role]=6"
+                              )
+                              .then((resp) => {
+                                const account = {
+                                  userId: resp.data[0].userId,
+                                  username: resp.data[0].username,
+                                  password: resp.data[0].password,
+                                  role: resp.data[0].role,
+                                  status: 2,
+                                  idTable: resp.data[0].idTable,
+                                  id: resp.data[0].id,
+                                };
+                                const url_5 =
+                                  "http://localhost:3000/api/accounts/" +
+                                  account.id +
+                                  "/replace";
+                                axios.post(url_5, account);
+                              });
+                          } else if (spiritualGuide.position == 9) {
+                            axios
+                              .get(
+                                "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                                  spiritualGuide.id +
+                                  "&filter[where][and][1][role]=7"
+                              )
+                              .then((resp) => {
+                                const account = {
+                                  userId: resp.data[0].userId,
+                                  username: resp.data[0].username,
+                                  password: resp.data[0].password,
+                                  role: resp.data[0].role,
+                                  status: 2,
+                                  idTable: resp.data[0].idTable,
+                                  id: resp.data[0].id,
+                                };
+                                const url_5 =
+                                  "http://localhost:3000/api/accounts/" +
+                                  account.id +
+                                  "/replace";
+                                axios.post(url_5, account);
+                              });
+                          }
+                        }
                         const url =
                           "http://localhost:3000/api/spiritualGuides/" +
                           spiritualGuide.id +

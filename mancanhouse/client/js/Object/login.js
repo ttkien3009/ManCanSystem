@@ -33,27 +33,37 @@ const Login = {
                   this.username
               )
               .then((resp) => {
-                const userInfo = {
-                  idAccount: resp.data.id,
-                  userId: resp.data.userId,
-                  username: resp.data.username,
-                  password: crypt.decrypt(resp.data.password),
-                  role: resp.data.role,
-                  idTable: resp.data.idTable,
-                  token: "token",
-                };
-                if (this.password == userInfo.password) {
-                  const url = `http://localhost:3000/api/logins`;
-                  axios.post(url, userInfo);
-                  this.$router.push("/");
-                } else {
+                if (resp.data.status == 2) {
                   alertify.alert(
                     "Thông báo",
-                    "Mật khẩu không đúng!",
+                    "Tài khoản không tồn tại!",
                     function () {
                       alertify.success("Ok");
                     }
                   );
+                } else {
+                  const userInfo = {
+                    idAccount: resp.data.id,
+                    userId: resp.data.userId,
+                    username: resp.data.username,
+                    password: crypt.decrypt(resp.data.password),
+                    role: resp.data.role,
+                    idTable: resp.data.idTable,
+                    token: "token",
+                  };
+                  if (this.password == userInfo.password) {
+                    const url = `http://localhost:3000/api/logins`;
+                    axios.post(url, userInfo);
+                    this.$router.push("/");
+                  } else {
+                    alertify.alert(
+                      "Thông báo",
+                      "Mật khẩu không đúng!",
+                      function () {
+                        alertify.success("Ok");
+                      }
+                    );
+                  }
                 }
               });
           } else {
@@ -75,14 +85,14 @@ const Login = {
             <!--'Submit' event won't reload page-->
             <div class="wrap-input100 validate-input mt-2 ml-3">
               <input type="text" v-bind:title="titleUsername" name="username" id="username" v-model="username"
-                class="form-control input100" placeholder="Nhập Tài khoản" autofocus>
+                class="form-control input100" placeholder="Tài khoản" autofocus>
               <span class="symbol-input100">
                 <i class="fas fa-user fa-lg"></i>
               </span>
             </div>
             <div class="wrap-input100 validate-input mt-4 ml-3">
               <input type="password" v-bind:title="titlePassword" name="password" id="password" v-model="password"
-                class="form-control input100" placeholder="Nhập Mật khẩu">
+                class="form-control input100" placeholder="Mật khẩu">
               <span class="symbol-input100">
                 <i class="fa fa-lock fa-lg"></i>
               </span>

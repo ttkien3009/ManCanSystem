@@ -45,6 +45,7 @@ const DetailProfile = {
       groupCommunity: 0,
       role: 0,
       idTable: 0,
+      roleName: null,
       selectedFile: null,
       htmlImage: null,
       fullNameShow: null,
@@ -64,164 +65,200 @@ const DetailProfile = {
           role: resp.data.role,
           idTable: resp.data.idTable,
         };
-        this.role = resp.data.role;
         this.idTable = resp.data.idTable;
-        if (
-          this.role == 1 ||
-          this.role == 2 ||
-          this.role == 3 ||
-          this.role == 4
-        ) {
-          axios
-            .get(
-              "http://localhost:3000/api/managers/getManager?id=" + this.idTable
-            )
-            .then((response) => {
-              this.managerId = response.data.manager.managerId;
-              this.christianName = response.data.manager.christianName;
-              this.fullName = response.data.manager.fullName;
-              this.fullNameShow = response.data.manager.fullName;
-              this.birthday = crypt.formatDate(response.data.manager.birthday);
-              this.phone = response.data.manager.phone;
-              this.phoneEdit = response.data.manager.phone;
-              this.email = response.data.manager.email;
-              this.emailEdit = response.data.manager.email;
-              this.imageEdit = response.data.manager.image;
-              this.position = response.data.manager.position;
-              this.homeland = response.data.manager.homeland;
-              this.status = response.data.manager.status;
-              this.htmlImage =
-                `
-              <img class="profile-user-img img-fluid rounded-circle img-thumbnail" id="image"
-              src="../api/Photos/manager/download/` +
-                this.imageEdit +
-                `" alt="User Image">
-              `;
-            });
-        }
-        if (this.role == 5) {
-          axios
-            .get(
-              "http://localhost:3000/api/candidates/getCandidate?id=" +
-                this.idTable
-            )
-            .then((response) => {
-              this.candidateId = response.data.candidate.candidateId;
-              this.christianName = response.data.candidate.christianName;
-              this.fullName = response.data.candidate.fullName;
-              this.fullNameShow = response.data.candidate.fullName;
-              this.birthday = crypt.formatDate(
-                response.data.candidate.birthday
-              );
-              this.phone = response.data.candidate.phone;
-              this.phoneEdit = response.data.candidate.phone;
-              this.email = response.data.candidate.email;
-              this.emailEdit = response.data.candidate.email;
-              this.imageEdit = response.data.candidate.image;
-              this.position = response.data.candidate.position;
-              this.community = response.data.candidate.community;
-              this.communityEdit = response.data.candidate.community;
-              this.homeland = response.data.candidate.homeland;
-              this.status = response.data.candidate.status;
-              this.htmlImage =
-                `
-              <img class="profile-user-img img-fluid rounded-circle img-thumbnail" id="image"
-              src="../api/Photos/candidate/download/` +
-                this.imageEdit +
-                `" alt="User Image">
-              `;
-            });
-        }
-        if (this.role == 6 || this.role == 7) {
-          axios
-            .get(
-              "http://localhost:3000/api/spiritualGuides/getSpiritualGuide?id=" +
-                this.idTable
-            )
-            .then((response) => {
-              this.spiritualGuideId =
-                response.data.spiritualGuide.spiritualGuideId;
-              this.christianName = response.data.spiritualGuide.christianName;
-              this.fullName = response.data.spiritualGuide.fullName;
-              this.fullNameShow = response.data.spiritualGuide.fullName;
-              this.birthday = crypt.formatDate(
-                response.data.spiritualGuide.birthday
-              );
-              this.phone = response.data.spiritualGuide.phone;
-              this.phoneEdit = response.data.spiritualGuide.phone;
-              this.email = response.data.spiritualGuide.email;
-              this.emailEdit = response.data.spiritualGuide.email;
-              this.groupCommunity = response.data.spiritualGuide.groupCommunity;
-              this.position = response.data.spiritualGuide.position;
-              this.imageEdit = response.data.spiritualGuide.image;
-              this.status = response.data.spiritualGuide.status;
-              this.htmlImage =
-                `
-              <img class="profile-user-img img-fluid rounded-circle img-thumbnail" id="image"
-              src="../api/Photos/spiritualGuide/download/` +
-                this.imageEdit +
-                `" alt="User Image">
-              `;
-            });
-        }
-        if (this.role == 8 || this.role == 9) {
-          axios
-            .get(
-              "http://localhost:3000/api/companions/getCompanion?id=" +
-                this.idTable
-            )
-            .then((response) => {
-              this.companionId = response.data.companion.companionId;
-              this.christianName = response.data.companion.christianName;
-              this.fullName = response.data.companion.fullName;
-              this.fullNameShow = response.data.companion.fullName;
-              this.birthday = crypt.formatDate(
-                response.data.companion.birthday
-              );
-              this.phone = response.data.companion.phone;
-              this.phoneEdit = response.data.companion.phone;
-              this.email = response.data.companion.email;
-              this.emailEdit = response.data.companion.email;
-              this.groupCommunity = response.data.companion.groupCommunity;
-              this.position = response.data.companion.position;
-              this.imageEdit = response.data.companion.image;
-              this.status = response.data.companion.status;
-              this.htmlImage =
-                `
-              <img class="profile-user-img img-fluid rounded-circle img-thumbnail" id="image"
-              src="../api/Photos/companion/download/` +
-                this.imageEdit +
-                `" alt="User Image">
-              `;
-            });
-        }
-        if (this.role == 10) {
-          axios
-            .get(
-              "http://localhost:3000/api/teachers/getTeacher?id=" + this.idTable
-            )
-            .then((response) => {
-              this.teacherId = response.data.teacher.teacherId;
-              this.fullName = response.data.teacher.fullName;
-              this.fullNameShow = response.data.teacher.fullName;
-              this.gender = response.data.teacher.gender;
-              this.birthday = crypt.formatDate(response.data.teacher.birthday);
-              this.phone = response.data.teacher.phone;
-              this.phoneEdit = response.data.teacher.phone;
-              this.email = response.data.teacher.email;
-              this.emailEdit = response.data.teacher.email;
-              this.imageEdit = response.data.teacher.image;
-              this.subject = response.data.teacher.subject;
-              this.status = response.data.teacher.status;
-              this.htmlImage =
-                `
-              <img class="profile-user-img img-fluid rounded-circle img-thumbnail" id="image"
-              src="../api/Photos/teacher/download/` +
-                this.imageEdit +
-                `" alt="User Image">
-              `;
-            });
-        }
+        axios
+          .get(
+            "http://localhost:3000/api/roles?filter[where][id]=" +
+              resp.data.role
+          )
+          .then((respRole) => {
+            this.roleName = respRole.data[0].roleName;
+            if (this.roleName == "Quản trị viên") {
+              this.role = 1;
+            } else if (this.roleName == "Giám đốc") {
+              this.role = 2;
+            } else if (this.roleName == "Quản lý") {
+              this.role = 3;
+            } else if (this.roleName == "Giám học") {
+              this.role = 4;
+            } else if (this.roleName == "Ứng sinh") {
+              this.role = 5;
+            } else if (this.roleName == "Trưởng linh hướng") {
+              this.role = 6;
+            } else if (this.roleName == "Linh hướng") {
+              this.role = 7;
+            } else if (this.roleName == "Trưởng đồng hành") {
+              this.role = 8;
+            } else if (this.roleName == "Đồng hành") {
+              this.role = 9;
+            } else if (this.roleName == "Giảng viên") {
+              this.role = 10;
+            }
+            if (
+              this.role == 1 ||
+              this.role == 2 ||
+              this.role == 3 ||
+              this.role == 4
+            ) {
+              axios
+                .get(
+                  "http://localhost:3000/api/managers/getManager?id=" +
+                    this.idTable
+                )
+                .then((response) => {
+                  this.managerId = response.data.manager.managerId;
+                  this.christianName = response.data.manager.christianName;
+                  this.fullName = response.data.manager.fullName;
+                  this.fullNameShow = response.data.manager.fullName;
+                  this.birthday = crypt.formatDate(
+                    response.data.manager.birthday
+                  );
+                  this.phone = response.data.manager.phone;
+                  this.phoneEdit = response.data.manager.phone;
+                  this.email = response.data.manager.email;
+                  this.emailEdit = response.data.manager.email;
+                  this.imageEdit = response.data.manager.image;
+                  this.position = response.data.manager.position;
+                  this.homeland = response.data.manager.homeland;
+                  this.status = response.data.manager.status;
+                  this.htmlImage =
+                    `
+                  <img class="profile-user-img img-fluid rounded-circle img-thumbnail" id="image"
+                  src="../api/Photos/manager/download/` +
+                    this.imageEdit +
+                    `" alt="User Image">
+                  `;
+                });
+            }
+            if (this.role == 5) {
+              axios
+                .get(
+                  "http://localhost:3000/api/candidates/getCandidate?id=" +
+                    this.idTable
+                )
+                .then((response) => {
+                  this.candidateId = response.data.candidate.candidateId;
+                  this.christianName = response.data.candidate.christianName;
+                  this.fullName = response.data.candidate.fullName;
+                  this.fullNameShow = response.data.candidate.fullName;
+                  this.birthday = crypt.formatDate(
+                    response.data.candidate.birthday
+                  );
+                  this.phone = response.data.candidate.phone;
+                  this.phoneEdit = response.data.candidate.phone;
+                  this.email = response.data.candidate.email;
+                  this.emailEdit = response.data.candidate.email;
+                  this.imageEdit = response.data.candidate.image;
+                  this.position = response.data.candidate.position;
+                  this.community = response.data.candidate.community;
+                  this.communityEdit = response.data.candidate.community;
+                  this.homeland = response.data.candidate.homeland;
+                  this.status = response.data.candidate.status;
+                  this.htmlImage =
+                    `
+                  <img class="profile-user-img img-fluid rounded-circle img-thumbnail" id="image"
+                  src="../api/Photos/candidate/download/` +
+                    this.imageEdit +
+                    `" alt="User Image">
+                  `;
+                });
+            }
+            if (this.role == 6 || this.role == 7) {
+              axios
+                .get(
+                  "http://localhost:3000/api/spiritualGuides/getSpiritualGuide?id=" +
+                    this.idTable
+                )
+                .then((response) => {
+                  this.spiritualGuideId =
+                    response.data.spiritualGuide.spiritualGuideId;
+                  this.christianName =
+                    response.data.spiritualGuide.christianName;
+                  this.fullName = response.data.spiritualGuide.fullName;
+                  this.fullNameShow = response.data.spiritualGuide.fullName;
+                  this.birthday = crypt.formatDate(
+                    response.data.spiritualGuide.birthday
+                  );
+                  this.phone = response.data.spiritualGuide.phone;
+                  this.phoneEdit = response.data.spiritualGuide.phone;
+                  this.email = response.data.spiritualGuide.email;
+                  this.emailEdit = response.data.spiritualGuide.email;
+                  this.groupCommunity =
+                    response.data.spiritualGuide.groupCommunity;
+                  this.position = response.data.spiritualGuide.position;
+                  this.imageEdit = response.data.spiritualGuide.image;
+                  this.status = response.data.spiritualGuide.status;
+                  this.htmlImage =
+                    `
+                  <img class="profile-user-img img-fluid rounded-circle img-thumbnail" id="image"
+                  src="../api/Photos/spiritualGuide/download/` +
+                    this.imageEdit +
+                    `" alt="User Image">
+                  `;
+                });
+            }
+            if (this.role == 8 || this.role == 9) {
+              axios
+                .get(
+                  "http://localhost:3000/api/companions/getCompanion?id=" +
+                    this.idTable
+                )
+                .then((response) => {
+                  this.companionId = response.data.companion.companionId;
+                  this.christianName = response.data.companion.christianName;
+                  this.fullName = response.data.companion.fullName;
+                  this.fullNameShow = response.data.companion.fullName;
+                  this.birthday = crypt.formatDate(
+                    response.data.companion.birthday
+                  );
+                  this.phone = response.data.companion.phone;
+                  this.phoneEdit = response.data.companion.phone;
+                  this.email = response.data.companion.email;
+                  this.emailEdit = response.data.companion.email;
+                  this.groupCommunity = response.data.companion.groupCommunity;
+                  this.position = response.data.companion.position;
+                  this.imageEdit = response.data.companion.image;
+                  this.status = response.data.companion.status;
+                  this.htmlImage =
+                    `
+                  <img class="profile-user-img img-fluid rounded-circle img-thumbnail" id="image"
+                  src="../api/Photos/companion/download/` +
+                    this.imageEdit +
+                    `" alt="User Image">
+                  `;
+                });
+            }
+            if (this.role == 10) {
+              axios
+                .get(
+                  "http://localhost:3000/api/teachers/getTeacher?id=" +
+                    this.idTable
+                )
+                .then((response) => {
+                  this.teacherId = response.data.teacher.teacherId;
+                  this.fullName = response.data.teacher.fullName;
+                  this.fullNameShow = response.data.teacher.fullName;
+                  this.gender = response.data.teacher.gender;
+                  this.birthday = crypt.formatDate(
+                    response.data.teacher.birthday
+                  );
+                  this.phone = response.data.teacher.phone;
+                  this.phoneEdit = response.data.teacher.phone;
+                  this.email = response.data.teacher.email;
+                  this.emailEdit = response.data.teacher.email;
+                  this.imageEdit = response.data.teacher.image;
+                  this.subject = response.data.teacher.subject;
+                  this.status = response.data.teacher.status;
+                  this.htmlImage =
+                    `
+                  <img class="profile-user-img img-fluid rounded-circle img-thumbnail" id="image"
+                  src="../api/Photos/teacher/download/` +
+                    this.imageEdit +
+                    `" alt="User Image">
+                  `;
+                });
+            }
+          });
       });
   },
   computed: {

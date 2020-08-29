@@ -18,9 +18,6 @@
     "status": {
       "type": "number"
     },
-    "reportStatus": {
-      "type": "number"
-    },
     "isSchedule": {
       "type": "number"
     }

@@ -65,17 +65,27 @@ const ListTeacher = {
       this.$router.push({ name: "editTeacher", params: { id: teacher.id } });
     },
 
-    deleteDataTeacher(id) {
+    deleteDataTeacher(teacher) {
       axios
-        .delete("http://localhost:3000/api/teachers/" + id)
+        .delete("http://localhost:3000/api/teachers/" + teacher.id)
         .then((response) => {
           console.log(response);
           this.teachers.splice(id, 1);
-          this.$router.push("/");
-          setTimeout(() => {
-            this.$router.push("/teachers");
-            location.reload();
-          }, 5);
+        });
+      axios
+        .get(
+          "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+            teacher.id +
+            "&filter[where][and][1][role]=10"
+        )
+        .then((resp) => {
+          axios
+            .delete("http://localhost:3000/api/accounts/" + resp.data[0].id)
+            .then((respTeacher) => {
+              setTimeout(() => {
+                location.reload();
+              }, 10);
+            });
         });
     },
   },
@@ -150,7 +160,7 @@ const ListTeacher = {
                     </button>
                   </div>
                   <div class="col-lg-4">
-                    <button :title="titleButtonEdit" @click="getDataTeacherUpdate(teacher)"
+                    <button v-show="teacher.status == 1" :title="titleButtonEdit" @click="getDataTeacherUpdate(teacher)"
                       class="btn btn-warning btn-sm h-28px w-28px rounded" type="submit"
                       style="margin-left: -15.5px;">
                       <i class="fas fa-edit fa-md ml--2px"></i>
@@ -186,7 +196,7 @@ const ListTeacher = {
             <button class="btn btn-danger rounded" data-dismiss="modal">
               Hủy
             </button>
-            <button class="btn rounded text-white btn-hover-blue" style="background-color: #056299;" @click="deleteDataTeacher(teacher.id)">
+            <button class="btn rounded text-white btn-hover-blue" style="background-color: #056299;" @click="deleteDataTeacher(teacher)">
               Xác Nhận
             </button>
           </div>
@@ -819,6 +829,30 @@ const EditTeacher = {
                   status: this.status,
                   id: this.$route.params.id,
                 };
+                if (teacher.status == 2) {
+                  axios
+                    .get(
+                      "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                        teacher.id +
+                        "&filter[where][and][1][role]=10"
+                    )
+                    .then((resp) => {
+                      const account = {
+                        userId: resp.data[0].userId,
+                        username: resp.data[0].username,
+                        password: resp.data[0].password,
+                        role: resp.data[0].role,
+                        status: 2,
+                        idTable: resp.data[0].idTable,
+                        id: resp.data[0].id,
+                      };
+                      const url_5 =
+                        "http://localhost:3000/api/accounts/" +
+                        account.id +
+                        "/replace";
+                      axios.post(url_5, account);
+                    });
+                }
                 const url =
                   "http://localhost:3000/api/teachers/" +
                   teacher.id +
@@ -856,6 +890,30 @@ const EditTeacher = {
                   status: this.status,
                   id: this.$route.params.id,
                 };
+                if (teacher.status == 2) {
+                  axios
+                    .get(
+                      "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                        teacher.id +
+                        "&filter[where][and][1][role]=10"
+                    )
+                    .then((resp) => {
+                      const account = {
+                        userId: resp.data[0].userId,
+                        username: resp.data[0].username,
+                        password: resp.data[0].password,
+                        role: resp.data[0].role,
+                        status: 2,
+                        idTable: resp.data[0].idTable,
+                        id: resp.data[0].id,
+                      };
+                      const url_5 =
+                        "http://localhost:3000/api/accounts/" +
+                        account.id +
+                        "/replace";
+                      axios.post(url_5, account);
+                    });
+                }
                 const url =
                   "http://localhost:3000/api/teachers/" +
                   teacher.id +
@@ -885,6 +943,30 @@ const EditTeacher = {
                 status: this.status,
                 id: this.$route.params.id,
               };
+              if (teacher.status == 2) {
+                axios
+                  .get(
+                    "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                      teacher.id +
+                      "&filter[where][and][1][role]=10"
+                  )
+                  .then((resp) => {
+                    const account = {
+                      userId: resp.data[0].userId,
+                      username: resp.data[0].username,
+                      password: resp.data[0].password,
+                      role: resp.data[0].role,
+                      status: 2,
+                      idTable: resp.data[0].idTable,
+                      id: resp.data[0].id,
+                    };
+                    const url_5 =
+                      "http://localhost:3000/api/accounts/" +
+                      account.id +
+                      "/replace";
+                    axios.post(url_5, account);
+                  });
+              }
               const url =
                 "http://localhost:3000/api/teachers/" + teacher.id + "/replace";
               axios.post(url, teacher);
@@ -951,6 +1033,30 @@ const EditTeacher = {
                         status: this.status,
                         id: this.$route.params.id,
                       };
+                      if (teacher.status == 2) {
+                        axios
+                          .get(
+                            "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                              teacher.id +
+                              "&filter[where][and][1][role]=10"
+                          )
+                          .then((resp) => {
+                            const account = {
+                              userId: resp.data[0].userId,
+                              username: resp.data[0].username,
+                              password: resp.data[0].password,
+                              role: resp.data[0].role,
+                              status: 2,
+                              idTable: resp.data[0].idTable,
+                              id: resp.data[0].id,
+                            };
+                            const url_5 =
+                              "http://localhost:3000/api/accounts/" +
+                              account.id +
+                              "/replace";
+                            axios.post(url_5, account);
+                          });
+                      }
                       const url =
                         "http://localhost:3000/api/teachers/" +
                         teacher.id +
@@ -988,6 +1094,30 @@ const EditTeacher = {
                         status: this.status,
                         id: this.$route.params.id,
                       };
+                      if (teacher.status == 2) {
+                        axios
+                          .get(
+                            "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                              teacher.id +
+                              "&filter[where][and][1][role]=10"
+                          )
+                          .then((resp) => {
+                            const account = {
+                              userId: resp.data[0].userId,
+                              username: resp.data[0].username,
+                              password: resp.data[0].password,
+                              role: resp.data[0].role,
+                              status: 2,
+                              idTable: resp.data[0].idTable,
+                              id: resp.data[0].id,
+                            };
+                            const url_5 =
+                              "http://localhost:3000/api/accounts/" +
+                              account.id +
+                              "/replace";
+                            axios.post(url_5, account);
+                          });
+                      }
                       const url =
                         "http://localhost:3000/api/teachers/" +
                         teacher.id +
@@ -1017,6 +1147,30 @@ const EditTeacher = {
                       status: this.status,
                       id: this.$route.params.id,
                     };
+                    if (teacher.status == 2) {
+                      axios
+                        .get(
+                          "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                            teacher.id +
+                            "&filter[where][and][1][role]=10"
+                        )
+                        .then((resp) => {
+                          const account = {
+                            userId: resp.data[0].userId,
+                            username: resp.data[0].username,
+                            password: resp.data[0].password,
+                            role: resp.data[0].role,
+                            status: 2,
+                            idTable: resp.data[0].idTable,
+                            id: resp.data[0].id,
+                          };
+                          const url_5 =
+                            "http://localhost:3000/api/accounts/" +
+                            account.id +
+                            "/replace";
+                          axios.post(url_5, account);
+                        });
+                    }
                     const url =
                       "http://localhost:3000/api/teachers/" +
                       teacher.id +
@@ -1091,6 +1245,30 @@ const EditTeacher = {
                         status: this.status,
                         id: this.$route.params.id,
                       };
+                      if (teacher.status == 2) {
+                        axios
+                          .get(
+                            "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                              teacher.id +
+                              "&filter[where][and][1][role]=10"
+                          )
+                          .then((resp) => {
+                            const account = {
+                              userId: resp.data[0].userId,
+                              username: resp.data[0].username,
+                              password: resp.data[0].password,
+                              role: resp.data[0].role,
+                              status: 2,
+                              idTable: resp.data[0].idTable,
+                              id: resp.data[0].id,
+                            };
+                            const url_5 =
+                              "http://localhost:3000/api/accounts/" +
+                              account.id +
+                              "/replace";
+                            axios.post(url_5, account);
+                          });
+                      }
                       const url =
                         "http://localhost:3000/api/teachers/" +
                         teacher.id +
@@ -1128,6 +1306,30 @@ const EditTeacher = {
                         status: this.status,
                         id: this.$route.params.id,
                       };
+                      if (teacher.status == 2) {
+                        axios
+                          .get(
+                            "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                              teacher.id +
+                              "&filter[where][and][1][role]=10"
+                          )
+                          .then((resp) => {
+                            const account = {
+                              userId: resp.data[0].userId,
+                              username: resp.data[0].username,
+                              password: resp.data[0].password,
+                              role: resp.data[0].role,
+                              status: 2,
+                              idTable: resp.data[0].idTable,
+                              id: resp.data[0].id,
+                            };
+                            const url_5 =
+                              "http://localhost:3000/api/accounts/" +
+                              account.id +
+                              "/replace";
+                            axios.post(url_5, account);
+                          });
+                      }
                       const url =
                         "http://localhost:3000/api/teachers/" +
                         teacher.id +
@@ -1157,6 +1359,30 @@ const EditTeacher = {
                       status: this.status,
                       id: this.$route.params.id,
                     };
+                    if (teacher.status == 2) {
+                      axios
+                        .get(
+                          "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                            teacher.id +
+                            "&filter[where][and][1][role]=10"
+                        )
+                        .then((resp) => {
+                          const account = {
+                            userId: resp.data[0].userId,
+                            username: resp.data[0].username,
+                            password: resp.data[0].password,
+                            role: resp.data[0].role,
+                            status: 2,
+                            idTable: resp.data[0].idTable,
+                            id: resp.data[0].id,
+                          };
+                          const url_5 =
+                            "http://localhost:3000/api/accounts/" +
+                            account.id +
+                            "/replace";
+                          axios.post(url_5, account);
+                        });
+                    }
                     const url =
                       "http://localhost:3000/api/teachers/" +
                       teacher.id +
@@ -1240,6 +1466,30 @@ const EditTeacher = {
                               status: this.status,
                               id: this.$route.params.id,
                             };
+                            if (teacher.status == 2) {
+                              axios
+                                .get(
+                                  "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                                    teacher.id +
+                                    "&filter[where][and][1][role]=10"
+                                )
+                                .then((resp) => {
+                                  const account = {
+                                    userId: resp.data[0].userId,
+                                    username: resp.data[0].username,
+                                    password: resp.data[0].password,
+                                    role: resp.data[0].role,
+                                    status: 2,
+                                    idTable: resp.data[0].idTable,
+                                    id: resp.data[0].id,
+                                  };
+                                  const url_5 =
+                                    "http://localhost:3000/api/accounts/" +
+                                    account.id +
+                                    "/replace";
+                                  axios.post(url_5, account);
+                                });
+                            }
                             const url =
                               "http://localhost:3000/api/teachers/" +
                               teacher.id +
@@ -1277,6 +1527,30 @@ const EditTeacher = {
                               status: this.status,
                               id: this.$route.params.id,
                             };
+                            if (teacher.status == 2) {
+                              axios
+                                .get(
+                                  "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                                    teacher.id +
+                                    "&filter[where][and][1][role]=10"
+                                )
+                                .then((resp) => {
+                                  const account = {
+                                    userId: resp.data[0].userId,
+                                    username: resp.data[0].username,
+                                    password: resp.data[0].password,
+                                    role: resp.data[0].role,
+                                    status: 2,
+                                    idTable: resp.data[0].idTable,
+                                    id: resp.data[0].id,
+                                  };
+                                  const url_5 =
+                                    "http://localhost:3000/api/accounts/" +
+                                    account.id +
+                                    "/replace";
+                                  axios.post(url_5, account);
+                                });
+                            }
                             const url =
                               "http://localhost:3000/api/teachers/" +
                               teacher.id +
@@ -1306,6 +1580,30 @@ const EditTeacher = {
                             status: this.status,
                             id: this.$route.params.id,
                           };
+                          if (teacher.status == 2) {
+                            axios
+                              .get(
+                                "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                                  teacher.id +
+                                  "&filter[where][and][1][role]=10"
+                              )
+                              .then((resp) => {
+                                const account = {
+                                  userId: resp.data[0].userId,
+                                  username: resp.data[0].username,
+                                  password: resp.data[0].password,
+                                  role: resp.data[0].role,
+                                  status: 2,
+                                  idTable: resp.data[0].idTable,
+                                  id: resp.data[0].id,
+                                };
+                                const url_5 =
+                                  "http://localhost:3000/api/accounts/" +
+                                  account.id +
+                                  "/replace";
+                                axios.post(url_5, account);
+                              });
+                          }
                           const url =
                             "http://localhost:3000/api/teachers/" +
                             teacher.id +

@@ -11,6 +11,7 @@ const ChangePassword = {
     return {
       userId: null,
       role: 0,
+      roleName: null,
       status: 0,
       idTable: 0,
       username: null,
@@ -33,7 +34,35 @@ const ChangePassword = {
         this.id = resp.data.idAccount;
         this.idTable = resp.data.idTable;
         this.username = resp.data.username;
-        this.role = resp.data.role;
+        axios
+          .get(
+            "http://localhost:3000/api/roles?filter[where][id]=" +
+              resp.data.role
+          )
+          .then((respRole) => {
+            this.roleName = respRole.data[0].roleName;
+            if (this.roleName == "Quản trị viên") {
+              this.role = 1;
+            } else if (this.roleName == "Giám đốc") {
+              this.role = 2;
+            } else if (this.roleName == "Quản lý") {
+              this.role = 3;
+            } else if (this.roleName == "Giám học") {
+              this.role = 4;
+            } else if (this.roleName == "Ứng sinh") {
+              this.role = 5;
+            } else if (this.roleName == "Trưởng linh hướng") {
+              this.role = 6;
+            } else if (this.roleName == "Linh hướng") {
+              this.role = 7;
+            } else if (this.roleName == "Trưởng đồng hành") {
+              this.role = 8;
+            } else if (this.roleName == "Đồng hành") {
+              this.role = 9;
+            } else if (this.roleName == "Giảng viên") {
+              this.role = 10;
+            }
+          });
         this.oldPasswordEdit = resp.data.password;
         this.status = resp.data.status;
       });

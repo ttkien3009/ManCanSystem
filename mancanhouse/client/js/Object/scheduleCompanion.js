@@ -33,228 +33,260 @@ const RegisteringScheduleCompanion = {
       role: 0,
       idTable: 0,
       metCompanions: [],
+      checkRegister: 0,
+      checkAdd: 0,
+      checkDelete: 0,
+      roleName: null,
     };
   },
   mounted() {
-    // let promiseResponse = axios.get("http://localhost:3000/api/logins/findOne?filter[where][token]=token")
-    //                     .then(response => response.data)
-    //                     .then(data => {return data})
-    // console.log(promiseResponse);
-    // Promise.resolve(promiseResponse).then((jsonResults) => {
-    //   console.log(jsonResults);
-    //   this.data().idTable = jsonResults.idTable;
-    //   console.log(this.idTable);
-    // })
-    var path = "http://localhost:3000/api/logins/findOne?filter[where][token]=token";
-    function loadDataPromise(path){
-      return new Promise(function(res,rej){
-        axios.get(path)
-        .then(function(response){
-          res(response.data);
-        })
-        .catch(function(err){
-          rej(err);
-        })
-      })
-    }; 
-    async function Loaddata() {
-      let c = await loadDataPromise(path);
-      return c;
-    }
-    Loaddata().then(data => { console.log(data.idTable)});
+    axios.get("http://localhost:3000/api/candidates").then((resp) => {
+      this.candidates = resp.data;
+    });
 
-    
-    // var obj = loadDataPromise(path).then((resp) => {
-    //   return resp.json();
-    // });
-    // console.log(obj);
     axios
       .get(
         "http://localhost:3000/api/logins/findOne?filter[where][token]=token"
       )
       .then((resp) => {
         this.idTable = resp.data.idTable;
-        this.role = resp.data.role; 
+        console.log(resp.data.idTable)
+        console.log(resp.data);
+        axios
+          .get(
+            "http://localhost:3000/api/scheduleCompanions?filter[where][and][0][candidate]=" +
+              this.idTable +
+              "&filter[where][and][1][status]=1"
+          )
+          .then((respoSche) => {
+            var schedules = respoSche.data;
+            console.log(respoSche.data);
+            var lengthSchedule = schedules.length;
+            console.log(lengthSchedule);
+            if (lengthSchedule == 1) {
+              this.checkRegister = 1;
+              axios
+                .get(
+                  "http://localhost:3000/api/metCompanions?filter[where][idSchedule]=" +
+                    respoSche.data[0].id
+                )
+                .then((respMet) => {
+                  if (respMet.data[0].reportStatus == 2) {
+                    this.checkRegister = 0;
+                  }
+                });
+            }
+          });
+        axios
+          .get(
+            "http://localhost:3000/api/roles?filter[where][id]=" +
+              resp.data.role
+          )
+          .then((respRole) => {
+            this.roleName = respRole.data[0].roleName;
+            if (this.roleName == "Quản trị viên") {
+              this.role = 1;
+            } else if (this.roleName == "Giám đốc") {
+              this.role = 2;
+            } else if (this.roleName == "Quản lý") {
+              this.role = 3;
+            } else if (this.roleName == "Giám học") {
+              this.role = 4;
+            } else if (this.roleName == "Ứng sinh") {
+              this.role = 5;
+            } else if (this.roleName == "Trưởng linh hướng") {
+              this.role = 6;
+            } else if (this.roleName == "Linh hướng") {
+              this.role = 7;
+            } else if (this.roleName == "Trưởng đồng hành") {
+              this.role = 8;
+            } else if (this.roleName == "Đồng hành") {
+              this.role = 9;
+            } else if (this.roleName == "Giảng viên") {
+              this.role = 10;
+            }
+            if (this.role == 8 || this.role == 9) {
+              axios
+                .get(
+                  "http://localhost:3000/api/scheduleCompanions?filter[where][companion]=" +
+                    this.idTable
+                )
+                .then((response) => {
+                  var parsedobj = JSON.parse(JSON.stringify(response.data));
+                  this.scheduleCompanions = parsedobj;
+                  if (response.data.length != 0) {
+                    this.checkDelete = 1;
+                  } else {
+                    this.checkAdd = 1;
+                  }
+                });
+            } else if (this.role == 5) {
+              axios
+                .get(
+                  "http://localhost:3000/api/candidates?filter[where][id]=" +
+                    this.idTable
+                )
+                .then((respCan) => {
+                  var community = respCan.data[0].community;
+                  axios
+                    .get(
+                      "http://localhost:3000/api/groupCommunities?filter[where][firstCom]=" +
+                        community
+                    )
+                    .then((respGroupCom) => {
+                      var groupCommunity = {};
+                      groupCommunity = respGroupCom.data;
+                      if (groupCommunity != null) {
+                        var idGroup = respGroupCom.data[0].id;
+                        axios
+                          .get(
+                            "http://localhost:3000/api/companions?filter[where][groupCommunity]=" +
+                              idGroup
+                          )
+                          .then((respCom) => {
+                            var companion = respCom.data[0].id;
+                            axios
+                              .get(
+                                "http://localhost:3000/api/scheduleCompanions?filter[where][companion]=" +
+                                  companion
+                              )
+                              .then((respSchedule) => {
+                                this.scheduleCompanions = respSchedule.data;
+                              });
+                          });
+                      } else {
+                        axios
+                          .get(
+                            "http://localhost:3000/api/groupCommunities?filter[where][secondCom]=" +
+                              community
+                          )
+                          .then((respGroupCom) => {
+                            var groupCommunity = {};
+                            groupCommunity = respGroupCom.data;
+                            if (groupCommunity != null) {
+                              var idGroup = respGroupCom.data[0].id;
+                              axios
+                                .get(
+                                  "http://localhost:3000/api/companions?filter[where][groupCommunity]=" +
+                                    idGroup
+                                )
+                                .then((respCom) => {
+                                  var companion = respCom.data[0].id;
+                                  axios
+                                    .get(
+                                      "http://localhost:3000/api/scheduleCompanions?filter[where][companion]=" +
+                                        companion
+                                    )
+                                    .then((resp) => {
+                                      this.scheduleCompanions = resp.data;
+                                    });
+                                });
+                            } else {
+                              axios
+                                .get(
+                                  "http://localhost:3000/api/groupCommunities?filter[where][thirdCom]=" +
+                                    community
+                                )
+                                .then((respGroupCom) => {
+                                  var groupCommunity = {};
+                                  groupCommunity = respGroupCom.data;
+                                  if (groupCommunity != null) {
+                                    var idGroup = respGroupCom.data[0].id;
+                                    axios
+                                      .get(
+                                        "http://localhost:3000/api/companions?filter[where][groupCommunity]=" +
+                                          idGroup
+                                      )
+                                      .then((respCom) => {
+                                        var companion = respCom.data[0].id;
+                                        axios
+                                          .get(
+                                            "http://localhost:3000/api/scheduleCompanions?filter[where][companion]=" +
+                                              companion
+                                          )
+                                          .then((respSchedule) => {
+                                            this.scheduleCompanions =
+                                              respSchedule.data;
+                                          });
+                                      });
+                                  } else {
+                                    axios
+                                      .get(
+                                        "http://localhost:3000/api/groupCommunities?filter[where][fourthCom]=" +
+                                          community
+                                      )
+                                      .then((respGroupCom) => {
+                                        var groupCommunity = {};
+                                        groupCommunity = respGroupCom.data;
+                                        if (groupCommunity != null) {
+                                          var idGroup = respGroupCom.data[0].id;
+                                          axios
+                                            .get(
+                                              "http://localhost:3000/api/companions?filter[where][groupCommunity]=" +
+                                                idGroup
+                                            )
+                                            .then((respCom) => {
+                                              var companion =
+                                                respCom.data[0].id;
+                                              axios
+                                                .get(
+                                                  "http://localhost:3000/api/scheduleCompanions?filter[where][companion]=" +
+                                                    companion
+                                                )
+                                                .then((respSchedule) => {
+                                                  // var parsedobj = JSON.parse(JSON.stringify(respSchedule.data))
+                                                  this.scheduleCompanions =
+                                                    respSchedule.data;
+                                                });
+                                            });
+                                        } else {
+                                          axios
+                                            .get(
+                                              "http://localhost:3000/api/groupCommunities?filter[where][fifthCom]=" +
+                                                community
+                                            )
+                                            .then((respGroupCom) => {
+                                              var groupCommunity = {};
+                                              groupCommunity =
+                                                respGroupCom.data;
+                                              if (groupCommunity != null) {
+                                                var idGroup =
+                                                  respGroupCom.data[0].id;
+                                                axios
+                                                  .get(
+                                                    "http://localhost:3000/api/companions?filter[where][groupCommunity]=" +
+                                                      idGroup
+                                                  )
+                                                  .then((respCom) => {
+                                                    var companion =
+                                                      respCom.data[0].id;
+                                                    axios
+                                                      .get(
+                                                        "http://localhost:3000/api/scheduleCompanions?filter[where][companion]=" +
+                                                          companion
+                                                      )
+                                                      .then((respSchedule) => {
+                                                        this.scheduleCompanions =
+                                                          respSchedule.data;
+                                                      });
+                                                  });
+                                              }
+                                            });
+                                        }
+                                      });
+                                  }
+                                });
+                            }
+                          });
+                      }
+                    });
+                });
+            }
+          });
       });
-    axios
-      .get("http://localhost:3000/api/scheduleCompanions?filter[where][companion]=12")
-      .then((response) => {
-        this.scheduleCompanions = response.data;
-      });
-    axios
-      .get("http://localhost:3000/api/candidates")
-      .then((resp) => {
-        this.candidates = resp.data;
-      });
-    
-    // axios
-    //   .get(
-    //     "http://localhost:3000/api/logins/findOne?filter[where][token]=token"
-    //   )
-    //   .then((resp) => {
-    //     this.idTable = resp.data.idTable;
-    //     this.role = resp.data.role;
-    //     if (this.role == 8 || this.role == 9) {
-    //       axios
-    //         .get(
-    //           "http://localhost:3000/api/scheduleCompanions?filter[where][companion]=" +
-    //             this.idTable
-    //         )
-    //         .then((response) => {
-    //           this.scheduleCompanions = response.data; 
-    //           console.log(this.scheduleCompanions);
-    //         });
-    //     }
-    //     else if (this.role == 5) {
-    //       axios
-    //         .get(
-    //           "http://localhost:3000/api/candidates?filter[where][id]=" +
-    //             this.idTable
-    //         )
-    //         .then((respCan) => {
-    //           var community = respCan.data[0].community;
-    //           axios
-    //             .get(
-    //               "http://localhost:3000/api/groupCommunities?filter[where][firstCom]=" + community)
-    //             .then((respGroupCom) => {
-    //               var groupCommunity = {};
-    //               groupCommunity = respGroupCom.data;
-    //               if(groupCommunity != null){
-    //                 var idGroup = respGroupCom.data[0].id;
-    //                 axios
-    //                   .get(
-    //                     "http://localhost:3000/api/companions?filter[where][groupCommunity]=" +
-    //                       idGroup
-    //                   )
-    //                   .then((respCom) => {
-    //                     var companion = respCom.data[0].id;
-    //                     axios
-    //                       .get(
-    //                         "http://localhost:3000/api/scheduleCompanions?filter[where][companion]=" +
-    //                           companion
-    //                       )
-    //                       .then((respSchedule) => {
-    //                         this.scheduleCompanions = respSchedule.data;
-    //                       });
-    //                   });
-    //               } else{
-    //                 axios
-    //                   .get(
-    //                     "http://localhost:3000/api/groupCommunities?filter[where][secondCom]=" + community)
-    //                   .then((respGroupCom) => {
-    //                     var groupCommunity = {};
-    //                     groupCommunity = respGroupCom.data;
-    //                     if(groupCommunity != null){
-    //                       var idGroup = respGroupCom.data[0].id;
-    //                     axios
-    //                       .get(
-    //                         "http://localhost:3000/api/companions?filter[where][groupCommunity]=" +
-    //                           idGroup
-    //                       )
-    //                       .then((respCom) => {
-    //                         var companion = respCom.data[0].id;
-    //                         axios
-    //                           .get(
-    //                             "http://localhost:3000/api/scheduleCompanions?filter[where][companion]=" +
-    //                               companion
-    //                           )
-    //                           .then((resp) => {
-    //                             this.scheduleCompanions = resp.data;
-    //                           });
-    //                       });
-    //                     } else{
-    //                       axios
-    //                         .get(
-    //                           "http://localhost:3000/api/groupCommunities?filter[where][thirdCom]=" + community)
-    //                         .then((respGroupCom) => {
-    //                           var groupCommunity = {};
-    //                           groupCommunity = respGroupCom.data;
-    //                           if(groupCommunity != null){
-    //                             var idGroup = respGroupCom.data[0].id;
-    //                           axios
-    //                             .get(
-    //                               "http://localhost:3000/api/companions?filter[where][groupCommunity]=" +
-    //                                 idGroup
-    //                             )
-    //                             .then((respCom) => {
-    //                               var companion = respCom.data[0].id;
-    //                               axios
-    //                                 .get(
-    //                                   "http://localhost:3000/api/scheduleCompanions?filter[where][companion]=" +
-    //                                     companion
-    //                                 )
-    //                                 .then((respSchedule) => {
-    //                                   this.scheduleCompanions = respSchedule.data;
-    //                                 });
-    //                             });
-    //                           } else {
-    //                             axios
-    //                               .get(
-    //                                 "http://localhost:3000/api/groupCommunities?filter[where][fourthCom]=" + community)
-    //                               .then((respGroupCom) => {
-    //                                 var groupCommunity = {};
-    //                                 groupCommunity = respGroupCom.data;
-    //                                 if(groupCommunity != null){
-    //                                   var idGroup = respGroupCom.data[0].id;
-    //                                 axios
-    //                                   .get(
-    //                                     "http://localhost:3000/api/companions?filter[where][groupCommunity]=" +
-    //                                       idGroup
-    //                                   )
-    //                                   .then((respCom) => {
-    //                                     var companion = respCom.data[0].id;
-    //                                     axios
-    //                                       .get(
-    //                                         "http://localhost:3000/api/scheduleCompanions?filter[where][companion]=" +
-    //                                           companion
-    //                                       )
-    //                                       .then((respSchedule) => {
-    //                                         this.scheduleCompanions = respSchedule.data;
-    //                                       });
-    //                                   });
-    //                                 } else{
-    //                                   axios
-    //                                     .get(
-    //                                       "http://localhost:3000/api/groupCommunities?filter[where][fifthCom]=" + community)
-    //                                     .then((respGroupCom) => {
-    //                                       var groupCommunity = {};
-    //                                       groupCommunity = respGroupCom.data;
-    //                                       if(groupCommunity != null){
-    //                                         var idGroup = respGroupCom.data[0].id;
-    //                                       axios
-    //                                         .get(
-    //                                           "http://localhost:3000/api/companions?filter[where][groupCommunity]=" +
-    //                                             idGroup
-    //                                         )
-    //                                         .then((respCom) => {
-    //                                           var companion = respCom.data[0].id;
-    //                                           axios
-    //                                             .get(
-    //                                               "http://localhost:3000/api/scheduleCompanions?filter[where][companion]=" +
-    //                                                 companion
-    //                                             )
-    //                                             .then((respSchedule) => {
-    //                                               this.scheduleCompanions = respSchedule.data;
-    //                                             });
-    //                                         });
-    //                                       }
-    //                                     });
-    //                                 }
-    //                               });
-    //                           }
-    //                         });
-    //                     }
-    //                   });
-    //               }
-    //             });
-    //         });
-    //     }
-    //   });
-      axios
-        .get("http://localhost:3000/api/metCompanions")
-        .then((resp) => {
-          this.metCompanions = resp.data;
-        });
+    axios.get("http://localhost:3000/api/metCompanions").then((resp) => {
+      this.metCompanions = resp.data;
+    });
   },
   computed: {
     isThirtyOneTrue() {
@@ -422,16 +454,17 @@ const RegisteringScheduleCompanion = {
     DeleteScheduleCompanion() {
       axios
         .get(
-          "http://localhost:3000/api/scheduleCompanions?filter[where][companion]=" + this.idTable
+          "http://localhost:3000/api/scheduleCompanions?filter[where][companion]=" +
+            this.idTable
         )
         .then((resp) => {
           var arrayScheduleCompanions = resp.data;
           var lengthScheduleCompanions = arrayScheduleCompanions.length;
-          if (lengthScheduleCompanions != 0){
+          if (lengthScheduleCompanions != 0) {
             var firstId = arrayScheduleCompanions[0].id;
             // var maxId = lengthScheduleCompanions + firstId
             var maxIdFirst = firstId + 60;
-            for(i = firstId; i < maxIdFirst; i++){
+            for (i = firstId; i < maxIdFirst; i++) {
               axios
                 .delete("http://localhost:3000/api/scheduleCompanions/" + i)
                 .then((response) => {
@@ -440,7 +473,7 @@ const RegisteringScheduleCompanion = {
                 });
             }
             var maxIdSecond = maxIdFirst + 60;
-            for(i = maxIdFirst; i < maxIdSecond; i++){
+            for (i = maxIdFirst; i < maxIdSecond; i++) {
               axios
                 .delete("http://localhost:3000/api/scheduleCompanions/" + i)
                 .then((response) => {
@@ -448,9 +481,9 @@ const RegisteringScheduleCompanion = {
                   this.scheduleCompanions.splice(i, 1);
                 });
             }
-            if(lengthScheduleCompanions == 168){
+            if (lengthScheduleCompanions == 168) {
               var maxIdThird = maxIdSecond + 48;
-              for(i = maxIdSecond; i < maxIdThird; i++){
+              for (i = maxIdSecond; i < maxIdThird; i++) {
                 axios
                   .delete("http://localhost:3000/api/scheduleCompanions/" + i)
                   .then((response) => {
@@ -459,9 +492,9 @@ const RegisteringScheduleCompanion = {
                   });
               }
             }
-            if(lengthScheduleCompanions == 174){
+            if (lengthScheduleCompanions == 174) {
               var maxIdThird = maxIdSecond + 54;
-              for(i = maxIdSecond; i < maxIdThird; i++){
+              for (i = maxIdSecond; i < maxIdThird; i++) {
                 axios
                   .delete("http://localhost:3000/api/scheduleCompanions/" + i)
                   .then((response) => {
@@ -470,9 +503,9 @@ const RegisteringScheduleCompanion = {
                   });
               }
             }
-            if(lengthScheduleCompanions >= 180){
+            if (lengthScheduleCompanions >= 180) {
               var maxIdThird = maxIdSecond + 60;
-              for(i = maxIdSecond; i < maxIdThird; i++){
+              for (i = maxIdSecond; i < maxIdThird; i++) {
                 axios
                   .delete("http://localhost:3000/api/scheduleCompanions/" + i)
                   .then((response) => {
@@ -481,9 +514,9 @@ const RegisteringScheduleCompanion = {
                   });
               }
             }
-            if(lengthScheduleCompanions == 186){
+            if (lengthScheduleCompanions == 186) {
               var maxIdFourth = maxIdThird + 6;
-              for(i = maxIdThird; i < maxIdFourth; i++){
+              for (i = maxIdThird; i < maxIdFourth; i++) {
                 axios
                   .delete("http://localhost:3000/api/scheduleCompanions/" + i)
                   .then((response) => {
@@ -496,11 +529,11 @@ const RegisteringScheduleCompanion = {
               location.reload();
             }, 1000);
           }
-          
         });
     },
 
     updateScheduleCompanion(scheduleCompanionEdit) {
+      var reportStatus = 1;
       axios
         .get(
           "http://localhost:3000/api/scheduleCompanions/getScheduleCompanion?id=" +
@@ -535,37 +568,73 @@ const RegisteringScheduleCompanion = {
           } else if (this.role == 5) {
             var max = this.scheduleCompanions.length;
             var check = 0;
-            for(i = 0; i < max; i++){
-              if(this.scheduleCompanions[i].candidate == this.idTable && this.scheduleCompanions[i].status == 1){
+            for (i = 0; i < max; i++) {
+              if (
+                this.scheduleCompanions[i].candidate == this.idTable &&
+                this.scheduleCompanions[i].status == 1
+              ) {
                 check++;
               }
-              if(this.scheduleCompanions[i].candidate == this.idTable && this.scheduleCompanions[i].status == 2){
+              if (
+                this.scheduleCompanions[i].candidate == this.idTable &&
+                this.scheduleCompanions[i].status == 2
+              ) {
                 axios
                   .get(
-                    "http://localhost:3000/api/scheduleCompanions?filter[where][candidate]=" + this.idTable + "&filter[status]=2"
+                    "http://localhost:3000/api/scheduleCompanions?filter[where][candidate]=" +
+                      this.idTable +
+                      "&filter[status]=2"
                   )
                   .then((resp) => {
                     axios
                       .get(
-                        "http://localhost:3000/api/metCompanions?filter[where][idSchedule]=" + resp.data[0].id
+                        "http://localhost:3000/api/metCompanions?filter[where][idSchedule]=" +
+                          resp.data[0].id
                       )
                       .then((response) => {
-                          axios
-                            .delete("http://localhost:3000/api/metCompanions/" + response.data[0].id)
-                            .then((resp) => {
-                              this.metCompanions.splice(response.data[0].id, 1);
-                              setTimeout(() => {
-                                location.reload();
-                              }, 100);
-                            });
+                        var currentDate = new Date();
+                        var date =
+                          currentDate.getFullYear() +
+                          "-" +
+                          (currentDate.getMonth() > 8
+                            ? currentDate.getMonth() + 1
+                            : "0" + (date.getMonth() + 1)) +
+                          "-" +
+                          (currentDate.getDate() > 9
+                            ? currentDate.getDate()
+                            : "0" + currentDate.getDate());
+                        const metCompanionUpdate = {
+                          candidate: response.data[0].candidate,
+                          companion: response.data[0].companion,
+                          registeredDate: date,
+                          status: 1,
+                          reportStatus: response.data[0].reportStatus,
+                          dateMet:
+                            scheduleCompanionEdit.date +
+                            "/" +
+                            currentDate.getFullYear(),
+                          idSchedule: scheduleCompanionEdit.id,
+                        };
+                        const url =
+                          "http://localhost:3000/api/metCompanions/" +
+                          response.data[0].id +
+                          "/replace";
+                        axios.post(url, metCompanionUpdate);
+                        setTimeout(() => {
+                          location.reload();
+                        }, 50);
                       });
                   });
               }
             }
-            if(check != 0){
-              alertify.alert("Thông báo", "Mỗi ứng sinh chỉ đăng ký một phiên!", function () {
-                alertify.success("Ok");
-              });
+            if (check != 0) {
+              alertify.alert(
+                "Thông báo",
+                "Mỗi ứng sinh chỉ đăng ký một phiên!",
+                function () {
+                  alertify.success("Ok");
+                }
+              );
             } else {
               const scheduleCompanionNew = {
                 companion: scheduleCompanionOld.companion,
@@ -576,13 +645,42 @@ const RegisteringScheduleCompanion = {
                 groupSession: scheduleCompanionOld.groupSession,
               };
               var currentDate = new Date();
+              var date =
+                currentDate.getFullYear() +
+                "-" +
+                (currentDate.getMonth() > 8
+                  ? currentDate.getMonth() + 1
+                  : "0" + (currentDate.getMonth() + 1)) +
+                "-" +
+                (currentDate.getDate() > 9
+                  ? currentDate.getDate()
+                  : "0" + currentDate.getDate());
               const metCompanion = {
                 companion: scheduleCompanionNew.companion,
                 candidate: this.idTable,
-                registeredDate: currentDate,
+                registeredDate: date,
+                reportStatus: reportStatus,
+                dateMet:
+                  scheduleCompanionNew.date + "/" + currentDate.getFullYear(),
                 status: 1,
                 idSchedule: scheduleCompanionEdit.id,
               };
+              axios
+                .get(
+                  "http://localhost:3000/api/countMets?filter[where][candidate]=" +
+                    this.idTable
+                )
+                .then((respCountMet) => {
+                  if (respCountMet.data.length === 0) {
+                    const countMet = {
+                      candidate: this.idTable,
+                      countMetCompanion: 0,
+                      countMetSpiritualGuide: 0,
+                    };
+                    const url_3 = `http://localhost:3000/api/countMets`;
+                    axios.post(url_3, countMet);
+                  }
+                });
               const url_1 = `http://localhost:3000/api/metCompanions`;
               axios.post(url_1, metCompanion);
               const url =
@@ -614,7 +712,7 @@ const RegisteringScheduleCompanion = {
             groupSession: response.data.scheduleCompanion.groupSession,
           };
           if (this.role == 8 || this.role == 9) {
-            if(scheduleCompanionOld.status == 2){
+            if (scheduleCompanionOld.status == 2) {
               const scheduleCompanionNew = {
                 companion: scheduleCompanionOld.companion,
                 candidate: null,
@@ -631,30 +729,44 @@ const RegisteringScheduleCompanion = {
               setTimeout(() => {
                 location.reload();
               }, 50);
-            } else if(scheduleCompanionOld.candidate != null && scheduleCompanionOld.status == 1){
+            } else if (
+              scheduleCompanionOld.candidate != null &&
+              scheduleCompanionOld.status == 1
+            ) {
               var emailCandidate = null;
               axios
-                .get("http://localhost:3000/api/candidates?filter[where][id]=" + scheduleCompanionOld.candidate)
+                .get(
+                  "http://localhost:3000/api/candidates?filter[where][id]=" +
+                    scheduleCompanionOld.candidate
+                )
                 .then((resp) => {
                   emailCandidate = resp.data[0].email;
                   axios
-                    .get("http://localhost:3000/api/companions?filter[where][id]=" + scheduleCompanionOld.companion)
+                    .get(
+                      "http://localhost:3000/api/companions?filter[where][id]=" +
+                        scheduleCompanionOld.companion
+                    )
                     .then((respCom) => {
                       Email.send({
-                        Host : "smtp.gmail.com",
-                        Username : "mancanhouse2020@gmail.com",
-                        Password : "akyqnlcmanojglqb",
-                        To : emailCandidate,
-                        From : "mancanhouse2020@gmail.com",
-                        Subject : "Thông Báo Hủy Lịch Gặp Đồng Hành",
-                        Body : "Xin lỗi vì sự bất tiện này. Người đồng hành của bạn" +
-                        " đã có việc bận nên không thể có lịch gặp như bạn mong muốn. Vui lòng chọn một lịch gặp khác hoặc liên hệ" + 
-                        " với người đồng hành qua số điện thoại: " + respCom.data[0].phone + " hoặc địa chỉ email: " + respCom.data[0].email + ". Xin cảm ơn."
-                      }).then(
+                        Host: "smtp.gmail.com",
+                        Username: "mancanhouse2020@gmail.com",
+                        Password: "akyqnlcmanojglqb",
+                        To: emailCandidate,
+                        From: "mancanhouse2020@gmail.com",
+                        Subject: "Thông Báo Hủy Lịch Gặp Đồng Hành",
+                        Body:
+                          "Xin lỗi vì sự bất tiện này. Người đồng hành của bạn" +
+                          " đã có việc bận nên không thể có lịch gặp như bạn mong muốn. Vui lòng chọn một lịch gặp khác hoặc liên hệ" +
+                          " với người đồng hành qua số điện thoại: " +
+                          respCom.data[0].phone +
+                          " hoặc địa chỉ email: " +
+                          respCom.data[0].email +
+                          ". Xin cảm ơn.",
+                      })
+                        .then
                         // message => alert(message)
-                      );
+                        ();
                     });
-                  //Gửi mail báo bận.
                 });
               const scheduleCompanionNew = {
                 companion: scheduleCompanionOld.companion,
@@ -671,22 +783,26 @@ const RegisteringScheduleCompanion = {
               axios.post(url, scheduleCompanionNew);
               setTimeout(() => {
                 location.reload();
-              }, 2000);
+              }, 2500);
             }
           } else if (this.role == 5) {
             var max = this.scheduleCompanions.length;
             var checkCancel = 0;
             var idSchedule = 0;
-            for(i = 0; i < max; i++){
-              if(this.scheduleCompanions[i].candidate == this.idTable){
+            for (i = 0; i < max; i++) {
+              if (this.scheduleCompanions[i].candidate == this.idTable) {
                 checkCancel++;
                 idSchedule = this.scheduleCompanions[i].id;
               }
             }
-            if(checkCancel != 0 && scheduleCompanionEdit.id != idSchedule){
-              alertify.alert("Thông báo", "Hủy lịch gặp không hợp lệ. Vui lòng kiểm tra lại!", function () {
-                alertify.success("Ok");
-              });
+            if (checkCancel != 0 && scheduleCompanionEdit.id != idSchedule) {
+              alertify.alert(
+                "Thông báo",
+                "Hủy lịch gặp không hợp lệ. Vui lòng kiểm tra lại!",
+                function () {
+                  alertify.success("Ok");
+                }
+              );
             } else {
               const scheduleCompanionNew = {
                 companion: scheduleCompanionOld.companion,
@@ -696,6 +812,21 @@ const RegisteringScheduleCompanion = {
                 status: 1,
                 groupSession: scheduleCompanionOld.groupSession,
               };
+              axios
+                .get(
+                  "http://localhost:3000/api/rateCandidates?filter[where][idSchedule]=" +
+                    scheduleCompanionEdit.id
+                )
+                .then((respRate) => {
+                  axios
+                    .delete(
+                      "http://localhost:3000/api/rateCandidates/" +
+                        respRate.data[0].id
+                    )
+                    .then((resp) => {
+                      // this.rateCandidates.splice(respRate.data[0].id, 1);
+                    });
+                });
               const url =
                 "http://localhost:3000/api/scheduleCompanions/" +
                 scheduleCompanionEdit.id +
@@ -707,18 +838,27 @@ const RegisteringScheduleCompanion = {
                     scheduleCompanionEdit.id
                 )
                 .then((response) => {
-                    axios
-                      .delete("http://localhost:3000/api/metCompanions/" + response.data[0].id)
-                      .then((resp) => {
-                        this.metCompanions.splice(response.data[0].id, 1);
-                        setTimeout(() => {
-                          location.reload();
-                        }, 100);
-                      });
+                  axios
+                    .delete(
+                      "http://localhost:3000/api/metCompanions/" +
+                        response.data[0].id
+                    )
+                    .then((resp) => {
+                      this.metCompanions.splice(response.data[0].id, 1);
+                      setTimeout(() => {
+                        location.reload();
+                      }, 100);
+                    });
                 });
             }
           }
         });
+    },
+
+    CreateReportCompanion() {
+      this.$router.push({
+        name: "addReportCompanion",
+      });
     },
   },
   template: `
@@ -728,19 +868,26 @@ const RegisteringScheduleCompanion = {
         <div class="col-md-4">
           <h6 class="m-0 font-weight-bold text-dark">Đăng ký Lịch đồng hành</h6>
         </div>
-        <div class="col-md-4"></div>
-        <div class="col-md-2" style="padding-left:110px;" v-show="role == 8 || role == 9">
+        <div class="col-md-2"></div>
+        <div class="col-md-2" style="padding-left:390px;" v-show="(role === 8 && checkDelete === 1) || (role === 9 && checkDelete === 1)">
           <button class="btn rounded btn-danger" style="font-size:14px;" 
           data-toggle="modal" data-target="#deleteScheduleCompanionModal">
             <i class="fas fa-trash-alt"></i>
             &nbsp;Xóa lịch
           </button>
         </div>
-        <div class="col-md-2" style="padding-left:50px;" v-show="role == 8 || role == 9">
+        <div class="col-md-2" style="padding-left:400px;" v-show="(role === 8 && checkAdd === 1) || (role == 9 && checkAdd === 1)">
           <button class="btn rounded btn-hover-blue"
             style="background-color: #056299;color: white;font-size:14px;" @click="CreateScheduleCompanion">
             <i class="fas fa-plus"></i>
             &nbsp;Tạo lịch
+          </button>
+        </div>
+        <div class="col-md-2" style="padding-left:355px;" v-show="role == 5 && checkRegister == 1">
+          <button class="btn rounded btn-hover-blue"
+            style="background-color: #056299;color: white;font-size:14px;" @click="CreateReportCompanion">
+            <i class="fas fa-file-signature"></i>
+            &nbsp;Tạo báo cáo
           </button>
         </div>
       </div>
@@ -764,7 +911,7 @@ const RegisteringScheduleCompanion = {
           <tbody>
             <tr>
               <th v-if="!scheduleCompanionsIsNull">{{ scheduleCompanions[0].date }}</th>
-              <td class="align-middle text-center" scope="row" v-for="scheduleCompanion in scheduleCompanions"
+              <td class="align-middle text-center" scope="row" v-for="scheduleCompanion in scheduleCompanions.__ob__.value"
                 :key="scheduleCompanion.id" v-if="scheduleCompanion.groupSession == 1">
                 <span class="text-center" v-if="scheduleCompanion.status === 2">Bận Việc</span>
                 <span class="text-center" v-else-if="scheduleCompanion.candidate === null && scheduleCompanion.status === 1">Trống</span>

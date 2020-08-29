@@ -111,7 +111,7 @@ const ListAccount = {
               <td class="align-middle">
                 <div class="row" style="margin-left:-15px;">
                   <div class="col-4" style="margin-left:-6px;">
-                    <button :title="titleButtonEdit" @click="getDataAccountUpdate(account)" class="btn btn-warning btn-sm h-28px w-28px rounded"
+                    <button v-show="account.status == 1" :title="titleButtonEdit" @click="getDataAccountUpdate(account)" class="btn btn-warning btn-sm h-28px w-28px rounded"
                       type="submit">
                       <i class="fas fa-edit fa-md ml--2px"></i>
                     </button>
@@ -458,19 +458,34 @@ const EditAccount = {
     axios.get("http://localhost:3000/api/accounts").then((response) => {
       this.accounts = response.data;
     });
+    // axios
+    //   .get(
+    //     "http://localhost:3000/api/accounts/getAccount?id=" +
+    //       this.$route.params.id
+    //   )
+    //   .then((response) => {
+    //     this.userIdEdit = response.data.account.userId;
+    //     this.username = response.data.account.username;
+    //     this.usernameEdit = response.data.account.username;
+    //     this.passwordEdit = crypt.decrypt(response.data.account.password);
+    //     this.roleEdit = response.data.account.role;
+    //     this.statusEdit = response.data.account.status;
+    //     this.idTableEdit = response.data.account.idTable;
+    //   });
     axios
       .get(
-        "http://localhost:3000/api/accounts/getAccount?id=" +
+        "http://localhost:3000/api/accounts?filter[where][id]=" +
           this.$route.params.id
       )
       .then((response) => {
-        this.userIdEdit = response.data.account.userId;
-        this.username = response.data.account.username;
-        this.usernameEdit = response.data.account.username;
-        this.passwordEdit = crypt.decrypt(response.data.account.password);
-        this.roleEdit = response.data.account.role;
-        this.statusEdit = response.data.account.status;
-        this.idTableEdit = response.data.account.idTable;
+        console.log(response.data);
+        this.userIdEdit = response.data[0].userId;
+        this.username = response.data[0].username;
+        this.usernameEdit = response.data[0].username;
+        this.passwordEdit = crypt.decrypt(response.data[0].password);
+        this.roleEdit = response.data[0].role;
+        this.statusEdit = response.data[0].status;
+        this.idTableEdit = response.data[0].idTable;
       });
   },
 
@@ -562,10 +577,11 @@ const EditAccount = {
           role: this.roleEdit,
           status: this.statusEdit,
           idTable: this.idTableEdit,
-          id: this.$route.params.id,
         };
         const url =
-          "http://localhost:3000/api/accounts/" + account.id + "/replace";
+          "http://localhost:3000/api/accounts/" +
+          this.$route.params.id +
+          "/replace";
         axios.post(url, account);
         this.$router.push("/accounts");
         location.reload();

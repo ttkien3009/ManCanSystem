@@ -69,17 +69,27 @@ const ListCandidate = {
       });
     },
 
-    deleteDataCandidate(id) {
+    deleteDataCandidate(candidate) {
       axios
-        .delete("http://localhost:3000/api/candidates/" + id)
+        .delete("http://localhost:3000/api/candidates/" + candidate.id)
         .then((response) => {
           console.log(response);
           this.candidates.splice(id, 1);
-          this.$router.push("/");
-          setTimeout(() => {
-            this.$router.push("/candidates");
-            location.reload();
-          }, 10);
+        });
+      axios
+        .get(
+          "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+            candidate.id +
+            "&filter[where][and][1][role]=5"
+        )
+        .then((resp) => {
+          axios
+            .delete("http://localhost:3000/api/accounts/" + resp.data[0].id)
+            .then((respCan) => {
+              setTimeout(() => {
+                location.reload();
+              }, 10);
+            });
         });
     },
   },
@@ -113,7 +123,6 @@ const ListCandidate = {
               <th>Số Điện Thoại</th>
               <th>Email</th>
               <th>Cộng Đoàn</th>
-              <th>Quê Quán</th>
               <th>Trạng Thái</th>
               <th>Action</th>
             </tr>
@@ -125,7 +134,6 @@ const ListCandidate = {
               <th>Số Điện Thoại</th>
               <th>Email</th>
               <th>Cộng Đoàn</th>
-              <th>Quê Quán</th>
               <th>Trạng Thái</th>
               <th>Action</th>
             </tr>
@@ -137,7 +145,6 @@ const ListCandidate = {
               <td>{{ candidate.phone }}</td>
               <td>{{ candidate.email }}</td>
               <td v-for="community in communities" v-if="community.id == candidate.community">{{ community.communityName }}</td>
-              <td>{{ candidate.homeland }}</td>
               <td v-if="candidate.status == 1">
                 <i class="fas fa-toggle-on fa-lg text-success"></i>
               </td>
@@ -154,16 +161,16 @@ const ListCandidate = {
                     </button>
                   </div>
                   <div class="col-lg-4">
-                    <button :title="titleButtonEdit" @click="getDataCandidateUpdate(candidate)"
+                    <button v-show="candidate.status == 1" :title="titleButtonEdit" @click="getDataCandidateUpdate(candidate)"
                       class="btn btn-warning btn-sm h-28px w-28px rounded" type="submit"
-                      style="margin-left: -12.5px;">
+                      style="margin-left: -15px;">
                       <i class="fas fa-edit fa-md ml--2px"></i>
                     </button>
                   </div>
                   <div class="col-lg-4">
                     <button :title="titleButtonDelete" data-toggle="modal" @click="getDetailCandidate(candidate)"
                       data-target="#deleteCandidateModal" class="btn btn-danger btn-sm h-28px w-28px rounded"
-                      style="margin-left: -25.5px;">
+                      style="margin-left: -30px;">
                       <i class="far fa-trash-alt fa-md ml--1px"></i>
                     </button>
                   </div>
@@ -190,7 +197,7 @@ const ListCandidate = {
             <button class="btn btn-danger rounded" data-dismiss="modal">
               Hủy
             </button>
-            <button class="btn rounded text-white btn-hover-blue" style="background-color: #056299;" @click="deleteDataCandidate(candidate.id)">
+            <button class="btn rounded text-white btn-hover-blue" style="background-color: #056299;" @click="deleteDataCandidate(candidate)">
               Xác Nhận
             </button>
           </div>
@@ -477,13 +484,6 @@ const AddCandidate = {
                       homeland: this.homeland,
                       status: this.status,
                     };
-                    const account = {
-                      userId: this.candidateId,
-                      username: this.email,
-                      password: crypt.encrypt(this.phone),
-                      role: 5,
-                      status: this.status,
-                    };
                     axios
                       .get(
                         "http://localhost:3000/api/communities/getCommunity?id=" +
@@ -522,6 +522,32 @@ const AddCandidate = {
                               status: resp.data.status,
                               idTable: resp.data.id,
                             };
+                            var current = new Date();
+                            var year = current.getFullYear();
+                            for (i = 1; i < 7; i++) {
+                              const rateCandidate = {
+                                candidate: resp.data.id,
+                                month: i,
+                                year: year,
+                                score: 0,
+                                idSchedule: 0,
+                              };
+                              const url_3 =
+                                "http://localhost:3000/api/rateCandidates";
+                              axios.post(url_3, rateCandidate);
+                            }
+                            for (i = 7; i < 13; i++) {
+                              const rateCandidate = {
+                                candidate: resp.data.id,
+                                month: i,
+                                year: year,
+                                score: 0,
+                                idSchedule: 0,
+                              };
+                              const url_3 =
+                                "http://localhost:3000/api/rateCandidates";
+                              axios.post(url_3, rateCandidate);
+                            }
                             const url_2 =
                               "http://localhost:3000/api/communities/" +
                               community.id +
@@ -541,13 +567,13 @@ const AddCandidate = {
                                 })
                                 .catch((err) => console.log(err));
                             }
+                            setTimeout(() => {
+                              this.$router.push("/candidates");
+                              location.reload();
+                            }, 100);
+                            return 0;
                           });
                       });
-                    setTimeout(() => {
-                      this.$router.push("/candidates");
-                      location.reload();
-                    }, 100);
-                    return 0;
                   }
                 });
             }
@@ -921,32 +947,263 @@ const EditCandidate = {
                   community: this.community,
                   homeland: this.homeland,
                   status: this.status,
-                  id: this.$route.params.id,
                 };
-                const url =
-                  "http://localhost:3000/api/candidates/" +
-                  candidate.id +
-                  "/replace";
-                axios.post(url, candidate);
-                axios
-                  .delete(
-                    "http://localhost:3000/api/Photos/candidate/files/" +
-                      this.imageEdit
-                  )
-                  .then((resp) => {
-                    console.log(resp);
-                  })
-                  .catch((err) => console.log(err));
-                axios
-                  .post(
-                    "http://localhost:3000/api/Photos/candidate/upload?filename=" +
-                      fileName,
-                    fd
-                  )
-                  .then((res) => {
-                    console.log(res);
-                  })
-                  .catch((err) => console.log(err));
+                if (candidate.status == 2) {
+                  axios
+                    .get(
+                      "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                        candidate.id +
+                        "&filter[where][and][1][role]=5"
+                    )
+                    .then((resp) => {
+                      const account = {
+                        userId: resp.data[0].userId,
+                        username: resp.data[0].username,
+                        password: resp.data[0].password,
+                        role: resp.data[0].role,
+                        status: 2,
+                        idTable: resp.data[0].idTable,
+                        id: resp.data[0].id,
+                      };
+                      if (this.community != this.communityEdit) {
+                        axios
+                          .get(
+                            "http://localhost:3000/api/communities/getCommunity?id=" +
+                              this.communityEdit
+                          )
+                          .then((response) => {
+                            this.communityName =
+                              response.data.community.communityName;
+                            this.patron = response.data.community.patron;
+                            this.address = response.data.community.address;
+                            this.amount = response.data.community.amount;
+                            let amount = 0;
+                            amount = Number(this.amount) - 1;
+                            const communityEdit = {
+                              communityName: this.communityName,
+                              patron: this.patron,
+                              address: this.address,
+                              amount: amount,
+                              id: this.communityEdit,
+                            };
+                            const url_2 =
+                              "http://localhost:3000/api/communities/" +
+                              communityEdit.id +
+                              "/replace";
+                            axios.post(url_2, communityEdit);
+                            axios
+                              .get(
+                                "http://localhost:3000/api/communities/getCommunity?id=" +
+                                  this.community
+                              )
+                              .then((response) => {
+                                this.communityName =
+                                  response.data.community.communityName;
+                                this.patron = response.data.community.patron;
+                                this.address = response.data.community.address;
+                                this.amount = response.data.community.amount;
+                                let amount = 0;
+                                amount = Number(this.amount) + 1;
+                                const community = {
+                                  communityName: this.communityName,
+                                  patron: this.patron,
+                                  address: this.address,
+                                  amount: amount,
+                                  id: this.community,
+                                };
+                                axios
+                                  .delete(
+                                    "http://localhost:3000/api/Photos/candidate/files/" +
+                                      this.imageEdit
+                                  )
+                                  .then((resp) => {
+                                    console.log(resp);
+                                  })
+                                  .catch((err) => console.log(err));
+                                axios
+                                  .post(
+                                    "http://localhost:3000/api/Photos/candidate/upload?filename=" +
+                                      fileName,
+                                    fd
+                                  )
+                                  .then((res) => {
+                                    console.log(res);
+                                  })
+                                  .catch((err) => console.log(err));
+                                const url_5 =
+                                  "http://localhost:3000/api/accounts/" +
+                                  account.id +
+                                  "/replace";
+                                axios.post(url_5, account);
+                                const url =
+                                  "http://localhost:3000/api/candidates/" +
+                                  this.$route.params.id +
+                                  "/replace";
+                                axios.post(url, candidate);
+                                const url_1 =
+                                  "http://localhost:3000/api/communities/" +
+                                  community.id +
+                                  "/replace";
+                                axios.post(url_1, community);
+                                setTimeout(() => {
+                                  this.$router.push("/candidates");
+                                  location.reload();
+                                }, 500);
+                                return 0;
+                              });
+                          });
+                      } else {
+                        axios
+                          .delete(
+                            "http://localhost:3000/api/Photos/candidate/files/" +
+                              this.imageEdit
+                          )
+                          .then((resp) => {
+                            console.log(resp);
+                          })
+                          .catch((err) => console.log(err));
+                        axios
+                          .post(
+                            "http://localhost:3000/api/Photos/candidate/upload?filename=" +
+                              fileName,
+                            fd
+                          )
+                          .then((res) => {
+                            console.log(res);
+                          })
+                          .catch((err) => console.log(err));
+                        const url_5 =
+                          "http://localhost:3000/api/accounts/" +
+                          account.id +
+                          "/replace";
+                        axios.post(url_5, account);
+                        const url =
+                          "http://localhost:3000/api/candidates/" +
+                          this.$route.params.id +
+                          "/replace";
+                        axios.post(url, candidate);
+                        setTimeout(() => {
+                          this.$router.push("/candidates");
+                          location.reload();
+                        }, 500);
+                        return 0;
+                      }
+                    });
+                } else {
+                  if (this.community != this.communityEdit) {
+                    axios
+                      .get(
+                        "http://localhost:3000/api/communities/getCommunity?id=" +
+                          this.communityEdit
+                      )
+                      .then((response) => {
+                        this.communityName =
+                          response.data.community.communityName;
+                        this.patron = response.data.community.patron;
+                        this.address = response.data.community.address;
+                        this.amount = response.data.community.amount;
+                        let amount = 0;
+                        amount = Number(this.amount) - 1;
+                        const communityEdit = {
+                          communityName: this.communityName,
+                          patron: this.patron,
+                          address: this.address,
+                          amount: amount,
+                          id: this.communityEdit,
+                        };
+                        const url_2 =
+                          "http://localhost:3000/api/communities/" +
+                          communityEdit.id +
+                          "/replace";
+                        axios.post(url_2, communityEdit);
+                        axios
+                          .get(
+                            "http://localhost:3000/api/communities/getCommunity?id=" +
+                              this.community
+                          )
+                          .then((response) => {
+                            this.communityName =
+                              response.data.community.communityName;
+                            this.patron = response.data.community.patron;
+                            this.address = response.data.community.address;
+                            this.amount = response.data.community.amount;
+                            let amount = 0;
+                            amount = Number(this.amount) + 1;
+                            const community = {
+                              communityName: this.communityName,
+                              patron: this.patron,
+                              address: this.address,
+                              amount: amount,
+                              id: this.community,
+                            };
+                            axios
+                              .delete(
+                                "http://localhost:3000/api/Photos/candidate/files/" +
+                                  this.imageEdit
+                              )
+                              .then((resp) => {
+                                console.log(resp);
+                              })
+                              .catch((err) => console.log(err));
+                            axios
+                              .post(
+                                "http://localhost:3000/api/Photos/candidate/upload?filename=" +
+                                  fileName,
+                                fd
+                              )
+                              .then((res) => {
+                                console.log(res);
+                              })
+                              .catch((err) => console.log(err));
+                            const url =
+                              "http://localhost:3000/api/candidates/" +
+                              this.$route.params.id +
+                              "/replace";
+                            axios.post(url, candidate);
+                            const url_1 =
+                              "http://localhost:3000/api/communities/" +
+                              community.id +
+                              "/replace";
+                            axios.post(url_1, community);
+                            setTimeout(() => {
+                              this.$router.push("/candidates");
+                              location.reload();
+                            }, 500);
+                            return 0;
+                          });
+                      });
+                  } else {
+                    axios
+                      .delete(
+                        "http://localhost:3000/api/Photos/candidate/files/" +
+                          this.imageEdit
+                      )
+                      .then((resp) => {
+                        console.log(resp);
+                      })
+                      .catch((err) => console.log(err));
+                    axios
+                      .post(
+                        "http://localhost:3000/api/Photos/candidate/upload?filename=" +
+                          fileName,
+                        fd
+                      )
+                      .then((res) => {
+                        console.log(res);
+                      })
+                      .catch((err) => console.log(err));
+                    const url =
+                      "http://localhost:3000/api/candidates/" +
+                      this.$route.params.id +
+                      "/replace";
+                    axios.post(url, candidate);
+                    setTimeout(() => {
+                      this.$router.push("/candidates");
+                      location.reload();
+                    }, 500);
+                    return 0;
+                  }
+                }
               } else {
                 const candidate = {
                   candidateId: this.candidateId,
@@ -962,21 +1219,235 @@ const EditCandidate = {
                   status: this.status,
                   id: this.$route.params.id,
                 };
-                const url =
-                  "http://localhost:3000/api/candidates/" +
-                  candidate.id +
-                  "/replace";
-                axios.post(url, candidate);
-                axios
-                  .post(
-                    "http://localhost:3000/api/Photos/candidate/upload?filename=" +
-                      fileName,
-                    fd
-                  )
-                  .then((res) => {
-                    console.log(res);
-                  })
-                  .catch((err) => console.log(err));
+                if (candidate.status == 2) {
+                  axios
+                    .get(
+                      "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                        candidate.id +
+                        "&filter[where][and][1][role]=5"
+                    )
+                    .then((resp) => {
+                      if (this.community != this.communityEdit) {
+                        axios
+                          .get(
+                            "http://localhost:3000/api/communities/getCommunity?id=" +
+                              this.communityEdit
+                          )
+                          .then((response) => {
+                            this.communityName =
+                              response.data.community.communityName;
+                            this.patron = response.data.community.patron;
+                            this.address = response.data.community.address;
+                            this.amount = response.data.community.amount;
+                            let amount = 0;
+                            amount = Number(this.amount) - 1;
+                            const communityEdit = {
+                              communityName: this.communityName,
+                              patron: this.patron,
+                              address: this.address,
+                              amount: amount,
+                              id: this.communityEdit,
+                            };
+                            const url_2 =
+                              "http://localhost:3000/api/communities/" +
+                              communityEdit.id +
+                              "/replace";
+                            axios.post(url_2, communityEdit);
+                            axios
+                              .get(
+                                "http://localhost:3000/api/communities/getCommunity?id=" +
+                                  this.community
+                              )
+                              .then((response) => {
+                                this.communityName =
+                                  response.data.community.communityName;
+                                this.patron = response.data.community.patron;
+                                this.address = response.data.community.address;
+                                this.amount = response.data.community.amount;
+                                let amount = 0;
+                                amount = Number(this.amount) + 1;
+                                const community = {
+                                  communityName: this.communityName,
+                                  patron: this.patron,
+                                  address: this.address,
+                                  amount: amount,
+                                  id: this.community,
+                                };
+                                const account = {
+                                  userId: resp.data[0].userId,
+                                  username: resp.data[0].username,
+                                  password: resp.data[0].password,
+                                  role: resp.data[0].role,
+                                  status: 2,
+                                  idTable: resp.data[0].idTable,
+                                  id: resp.data[0].id,
+                                };
+                                axios
+                                  .post(
+                                    "http://localhost:3000/api/Photos/candidate/upload?filename=" +
+                                      fileName,
+                                    fd
+                                  )
+                                  .then((res) => {
+                                    console.log(res);
+                                  })
+                                  .catch((err) => console.log(err));
+                                const url_1 =
+                                  "http://localhost:3000/api/communities/" +
+                                  community.id +
+                                  "/replace";
+                                axios.post(url_1, community);
+                                const url_5 =
+                                  "http://localhost:3000/api/accounts/" +
+                                  account.id +
+                                  "/replace";
+                                axios.post(url_5, account);
+                                const url =
+                                  "http://localhost:3000/api/candidates/" +
+                                  candidate.id +
+                                  "/replace";
+                                axios.post(url, candidate);
+                                setTimeout(() => {
+                                  this.$router.push("/candidates");
+                                  location.reload();
+                                }, 500);
+                                return 0;
+                              });
+                          });
+                      } else {
+                        const account = {
+                          userId: resp.data[0].userId,
+                          username: resp.data[0].username,
+                          password: resp.data[0].password,
+                          role: resp.data[0].role,
+                          status: 2,
+                          idTable: resp.data[0].idTable,
+                          id: resp.data[0].id,
+                        };
+                        axios
+                          .post(
+                            "http://localhost:3000/api/Photos/candidate/upload?filename=" +
+                              fileName,
+                            fd
+                          )
+                          .then((res) => {
+                            console.log(res);
+                          })
+                          .catch((err) => console.log(err));
+                        const url_5 =
+                          "http://localhost:3000/api/accounts/" +
+                          account.id +
+                          "/replace";
+                        axios.post(url_5, account);
+                        const url =
+                          "http://localhost:3000/api/candidates/" +
+                          candidate.id +
+                          "/replace";
+                        axios.post(url, candidate);
+                        setTimeout(() => {
+                          this.$router.push("/candidates");
+                          location.reload();
+                        }, 500);
+                        return 0;
+                      }
+                    });
+                } else {
+                  if (this.community != this.communityEdit) {
+                    axios
+                      .get(
+                        "http://localhost:3000/api/communities/getCommunity?id=" +
+                          this.communityEdit
+                      )
+                      .then((response) => {
+                        this.communityName =
+                          response.data.community.communityName;
+                        this.patron = response.data.community.patron;
+                        this.address = response.data.community.address;
+                        this.amount = response.data.community.amount;
+                        let amount = 0;
+                        amount = Number(this.amount) - 1;
+                        const communityEdit = {
+                          communityName: this.communityName,
+                          patron: this.patron,
+                          address: this.address,
+                          amount: amount,
+                          id: this.communityEdit,
+                        };
+                        const url_2 =
+                          "http://localhost:3000/api/communities/" +
+                          communityEdit.id +
+                          "/replace";
+                        axios.post(url_2, communityEdit);
+                        axios
+                          .get(
+                            "http://localhost:3000/api/communities/getCommunity?id=" +
+                              this.community
+                          )
+                          .then((response) => {
+                            this.communityName =
+                              response.data.community.communityName;
+                            this.patron = response.data.community.patron;
+                            this.address = response.data.community.address;
+                            this.amount = response.data.community.amount;
+                            let amount = 0;
+                            amount = Number(this.amount) + 1;
+                            const community = {
+                              communityName: this.communityName,
+                              patron: this.patron,
+                              address: this.address,
+                              amount: amount,
+                              id: this.community,
+                            };
+                            axios
+                              .post(
+                                "http://localhost:3000/api/Photos/candidate/upload?filename=" +
+                                  fileName,
+                                fd
+                              )
+                              .then((res) => {
+                                console.log(res);
+                              })
+                              .catch((err) => console.log(err));
+                            const url_1 =
+                              "http://localhost:3000/api/communities/" +
+                              community.id +
+                              "/replace";
+                            axios.post(url_1, community);
+                            const url =
+                              "http://localhost:3000/api/candidates/" +
+                              candidate.id +
+                              "/replace";
+                            axios.post(url, candidate);
+                            setTimeout(() => {
+                              this.$router.push("/candidates");
+                              location.reload();
+                            }, 500);
+                            return 0;
+                          });
+                      });
+                  } else {
+                    axios
+                      .post(
+                        "http://localhost:3000/api/Photos/candidate/upload?filename=" +
+                          fileName,
+                        fd
+                      )
+                      .then((res) => {
+                        console.log(res);
+                      })
+                      .catch((err) => console.log(err));
+                    const url =
+                      "http://localhost:3000/api/candidates/" +
+                      candidate.id +
+                      "/replace";
+                    axios.post(url, candidate);
+                    setTimeout(() => {
+                      this.$router.push("/candidates");
+                      location.reload();
+                    }, 500);
+                    return 0;
+                  }
+                }
               }
             } else {
               const candidate = {
@@ -993,43 +1464,115 @@ const EditCandidate = {
                 status: this.status,
                 id: this.$route.params.id,
               };
-              const url =
-                "http://localhost:3000/api/candidates/" +
-                candidate.id +
-                "/replace";
-              axios.post(url, candidate);
-            }
-            if (this.community != this.communityEdit) {
-              axios
-                .get(
-                  "http://localhost:3000/api/communities/getCommunity?id=" +
-                    this.communityEdit
-                )
-                .then((response) => {
-                  this.communityName = response.data.community.communityName;
-                  this.patron = response.data.community.patron;
-                  this.address = response.data.community.address;
-                  this.amount = response.data.community.amount;
-                  let amount = 0;
-                  amount = Number(this.amount) - 1;
-                  const communityEdit = {
-                    communityName: this.communityName,
-                    patron: this.patron,
-                    address: this.address,
-                    amount: amount,
-                    id: this.communityEdit,
-                  };
-                  console.log(communityEdit.amount);
-                  console.log(communityEdit.id);
-                  const url_2 =
-                    "http://localhost:3000/api/communities/" +
-                    communityEdit.id +
-                    "/replace";
-                  axios.post(url_2, communityEdit);
+              if (candidate.status == 2) {
+                axios
+                  .get(
+                    "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                      candidate.id +
+                      "&filter[where][and][1][role]=5"
+                  )
+                  .then((resp) => {
+                    const account = {
+                      userId: resp.data[0].userId,
+                      username: resp.data[0].username,
+                      password: resp.data[0].password,
+                      role: resp.data[0].role,
+                      status: 2,
+                      idTable: resp.data[0].idTable,
+                      id: resp.data[0].id,
+                    };
+                    if (this.community != this.communityEdit) {
+                      axios
+                        .get(
+                          "http://localhost:3000/api/communities/getCommunity?id=" +
+                            this.communityEdit
+                        )
+                        .then((response) => {
+                          this.communityName =
+                            response.data.community.communityName;
+                          this.patron = response.data.community.patron;
+                          this.address = response.data.community.address;
+                          this.amount = response.data.community.amount;
+                          let amount = 0;
+                          amount = Number(this.amount) - 1;
+                          const communityEdit = {
+                            communityName: this.communityName,
+                            patron: this.patron,
+                            address: this.address,
+                            amount: amount,
+                            id: this.communityEdit,
+                          };
+                          const url_2 =
+                            "http://localhost:3000/api/communities/" +
+                            communityEdit.id +
+                            "/replace";
+                          axios.post(url_2, communityEdit);
+                          axios
+                            .get(
+                              "http://localhost:3000/api/communities/getCommunity?id=" +
+                                this.community
+                            )
+                            .then((response) => {
+                              this.communityName =
+                                response.data.community.communityName;
+                              this.patron = response.data.community.patron;
+                              this.address = response.data.community.address;
+                              this.amount = response.data.community.amount;
+                              let amount = 0;
+                              amount = Number(this.amount) + 1;
+                              const community = {
+                                communityName: this.communityName,
+                                patron: this.patron,
+                                address: this.address,
+                                amount: amount,
+                                id: this.community,
+                              };
+                              const url_5 =
+                                "http://localhost:3000/api/accounts/" +
+                                account.id +
+                                "/replace";
+                              axios.post(url_5, account);
+                              const url =
+                                "http://localhost:3000/api/candidates/" +
+                                candidate.id +
+                                "/replace";
+                              axios.post(url, candidate);
+                              const url_1 =
+                                "http://localhost:3000/api/communities/" +
+                                community.id +
+                                "/replace";
+                              axios.post(url_1, community);
+                              setTimeout(() => {
+                                this.$router.push("/candidates");
+                                location.reload();
+                              }, 500);
+                              return 0;
+                            });
+                        });
+                    } else {
+                      const url_5 =
+                        "http://localhost:3000/api/accounts/" +
+                        account.id +
+                        "/replace";
+                      axios.post(url_5, account);
+                      const url =
+                        "http://localhost:3000/api/candidates/" +
+                        candidate.id +
+                        "/replace";
+                      axios.post(url, candidate);
+                      setTimeout(() => {
+                        this.$router.push("/candidates");
+                        location.reload();
+                      }, 500);
+                      return 0;
+                    }
+                  });
+              } else {
+                if (this.community != this.communityEdit) {
                   axios
                     .get(
                       "http://localhost:3000/api/communities/getCommunity?id=" +
-                        this.community
+                        this.communityEdit
                     )
                     .then((response) => {
                       this.communityName =
@@ -1038,29 +1581,70 @@ const EditCandidate = {
                       this.address = response.data.community.address;
                       this.amount = response.data.community.amount;
                       let amount = 0;
-                      amount = Number(this.amount) + 1;
-                      const community = {
+                      amount = Number(this.amount) - 1;
+                      const communityEdit = {
                         communityName: this.communityName,
                         patron: this.patron,
                         address: this.address,
                         amount: amount,
-                        id: this.community,
+                        id: this.communityEdit,
                       };
-                      console.log(community.amount);
-                      console.log(community.id);
-                      const url_1 =
+                      const url_2 =
                         "http://localhost:3000/api/communities/" +
-                        community.id +
+                        communityEdit.id +
                         "/replace";
-                      axios.post(url_1, community);
+                      axios.post(url_2, communityEdit);
+                      axios
+                        .get(
+                          "http://localhost:3000/api/communities/getCommunity?id=" +
+                            this.community
+                        )
+                        .then((response) => {
+                          this.communityName =
+                            response.data.community.communityName;
+                          this.patron = response.data.community.patron;
+                          this.address = response.data.community.address;
+                          this.amount = response.data.community.amount;
+                          let amount = 0;
+                          amount = Number(this.amount) + 1;
+                          const community = {
+                            communityName: this.communityName,
+                            patron: this.patron,
+                            address: this.address,
+                            amount: amount,
+                            id: this.community,
+                          };
+                          const url =
+                            "http://localhost:3000/api/candidates/" +
+                            candidate.id +
+                            "/replace";
+                          axios.post(url, candidate);
+                          const url_1 =
+                            "http://localhost:3000/api/communities/" +
+                            community.id +
+                            "/replace";
+                          axios.post(url_1, community);
+                          setTimeout(() => {
+                            this.$router.push("/candidates");
+                            location.reload();
+                          }, 500);
+                          return 0;
+                        });
                     });
-                });
+                } else {
+                  const url =
+                    "http://localhost:3000/api/candidates/" +
+                    candidate.id +
+                    "/replace";
+                  axios.post(url, candidate);
+                  setTimeout(() => {
+                    this.$router.push("/candidates");
+                    location.reload();
+                  }, 500);
+                  return 0;
+                }
+              }
             }
-            setTimeout(() => {
-              this.$router.push("/candidates");
-              location.reload();
-            }, 500);
-            return 0;
           }
         } else if (
           this.emailEdit != this.email &&
@@ -1093,20 +1677,6 @@ const EditCandidate = {
                   }
                 );
               } else {
-                const candidate = {
-                  candidateId: null,
-                  christianName: null,
-                  fullName: null,
-                  birthday: null,
-                  phone: null,
-                  email: null,
-                  image: null,
-                  position: null,
-                  community: null,
-                  homeland: null,
-                  status: null,
-                  id: null,
-                };
                 if (this.selectedFile != null) {
                   const fd = new FormData();
                   fd.append("image", this.selectedFile, this.selectedFile.name);
@@ -1115,7 +1685,7 @@ const EditCandidate = {
                   var fileName =
                     this.candidateId + this.selectedFile.name.slice(start, end);
                   if (this.imageEdit != null) {
-                    candidate = {
+                    const candidate = {
                       candidateId: this.candidateId,
                       christianName: this.christianName,
                       fullName: this.fullName,
@@ -1129,27 +1699,241 @@ const EditCandidate = {
                       status: this.status,
                       id: this.$route.params.id,
                     };
-                    axios
-                      .delete(
-                        "http://localhost:3000/api/Photos/candidate/files/" +
-                          this.imageEdit
-                      )
-                      .then((resp) => {
-                        console.log(resp);
-                      })
-                      .catch((err) => console.log(err));
-                    axios
-                      .post(
-                        "http://localhost:3000/api/Photos/candidate/upload?filename=" +
-                          fileName,
-                        fd
-                      )
-                      .then((res) => {
-                        console.log(res);
-                      })
-                      .catch((err) => console.log(err));
+                    if (this.community != this.communityEdit) {
+                      axios
+                        .get(
+                          "http://localhost:3000/api/communities/getCommunity?id=" +
+                            this.communityEdit
+                        )
+                        .then((response) => {
+                          this.communityName =
+                            response.data.community.communityName;
+                          this.patron = response.data.community.patron;
+                          this.address = response.data.community.address;
+                          this.amount = response.data.community.amount;
+                          console.log(this.address);
+                          let amount = 0;
+                          amount = Number(this.amount) - 1;
+                          console.log(this.amount);
+                          const communityEdit = {
+                            communityName: this.communityName,
+                            patron: this.patron,
+                            address: this.address,
+                            amount: amount,
+                            id: this.communityEdit,
+                          };
+                          axios
+                            .get(
+                              "http://localhost:3000/api/communities/getCommunity?id=" +
+                                this.community
+                            )
+                            .then((response) => {
+                              this.communityName =
+                                response.data.community.communityName;
+                              this.patron = response.data.community.patron;
+                              this.address = response.data.community.address;
+                              this.amount = response.data.community.amount;
+                              let amount = 0;
+                              amount = Number(this.amount) + 1;
+                              const community = {
+                                communityName: this.communityName,
+                                patron: this.patron,
+                                address: this.address,
+                                amount: amount,
+                                id: this.community,
+                              };
+                              if (this.candidate.status == 2) {
+                                axios
+                                  .get(
+                                    "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                                      candidate.id +
+                                      "&filter[where][and][1][role]=5"
+                                  )
+                                  .then((resp) => {
+                                    const account = {
+                                      userId: resp.data[0].userId,
+                                      username: resp.data[0].username,
+                                      password: resp.data[0].password,
+                                      role: resp.data[0].role,
+                                      status: 2,
+                                      idTable: resp.data[0].idTable,
+                                      id: resp.data[0].id,
+                                    };
+                                    const url_5 =
+                                      "http://localhost:3000/api/accounts/" +
+                                      account.id +
+                                      "/replace";
+                                    axios.post(url_5, account);
+                                    const url_1 =
+                                      "http://localhost:3000/api/communities/" +
+                                      community.id +
+                                      "/replace";
+                                    axios.post(url_1, community);
+                                    const url_2 =
+                                      "http://localhost:3000/api/communities/" +
+                                      communityEdit.id +
+                                      "/replace";
+                                    axios.post(url_2, communityEdit);
+                                    const url =
+                                      "http://localhost:3000/api/candidates/" +
+                                      candidate.id +
+                                      "/replace";
+                                    axios.post(url, candidate);
+                                    axios
+                                      .delete(
+                                        "http://localhost:3000/api/Photos/candidate/files/" +
+                                          this.imageEdit
+                                      )
+                                      .then((resp) => {
+                                        console.log(resp);
+                                      })
+                                      .catch((err) => console.log(err));
+                                    axios
+                                      .post(
+                                        "http://localhost:3000/api/Photos/candidate/upload?filename=" +
+                                          fileName,
+                                        fd
+                                      )
+                                      .then((res) => {
+                                        console.log(res);
+                                      })
+                                      .catch((err) => console.log(err));
+                                    setTimeout(() => {
+                                      this.$router.push("/candidates");
+                                      location.reload();
+                                    }, 100);
+                                    return 0;
+                                  });
+                              } else {
+                                const url_1 =
+                                  "http://localhost:3000/api/communities/" +
+                                  community.id +
+                                  "/replace";
+                                axios.post(url_1, community);
+                                const url_2 =
+                                  "http://localhost:3000/api/communities/" +
+                                  communityEdit.id +
+                                  "/replace";
+                                axios.post(url_2, communityEdit);
+                                const url =
+                                  "http://localhost:3000/api/candidates/" +
+                                  candidate.id +
+                                  "/replace";
+                                axios.post(url, candidate);
+                                axios
+                                  .delete(
+                                    "http://localhost:3000/api/Photos/candidate/files/" +
+                                      this.imageEdit
+                                  )
+                                  .then((resp) => {
+                                    console.log(resp);
+                                  })
+                                  .catch((err) => console.log(err));
+                                axios
+                                  .post(
+                                    "http://localhost:3000/api/Photos/candidate/upload?filename=" +
+                                      fileName,
+                                    fd
+                                  )
+                                  .then((res) => {
+                                    console.log(res);
+                                  })
+                                  .catch((err) => console.log(err));
+                                setTimeout(() => {
+                                  this.$router.push("/candidates");
+                                  location.reload();
+                                }, 100);
+                                return 0;
+                              }
+                            });
+                        });
+                    } else {
+                      if (this.candidate.status == 2) {
+                        axios
+                          .get(
+                            "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                              candidate.id +
+                              "&filter[where][and][1][role]=5"
+                          )
+                          .then((resp) => {
+                            const account = {
+                              userId: resp.data[0].userId,
+                              username: resp.data[0].username,
+                              password: resp.data[0].password,
+                              role: resp.data[0].role,
+                              status: 2,
+                              idTable: resp.data[0].idTable,
+                              id: resp.data[0].id,
+                            };
+                            const url_5 =
+                              "http://localhost:3000/api/accounts/" +
+                              account.id +
+                              "/replace";
+                            axios.post(url_5, account);
+                            const url =
+                              "http://localhost:3000/api/candidates/" +
+                              candidate.id +
+                              "/replace";
+                            axios.post(url, this.candidate);
+                            axios
+                              .delete(
+                                "http://localhost:3000/api/Photos/candidate/files/" +
+                                  this.imageEdit
+                              )
+                              .then((resp) => {
+                                console.log(resp);
+                              })
+                              .catch((err) => console.log(err));
+                            axios
+                              .post(
+                                "http://localhost:3000/api/Photos/candidate/upload?filename=" +
+                                  fileName,
+                                fd
+                              )
+                              .then((res) => {
+                                console.log(res);
+                              })
+                              .catch((err) => console.log(err));
+                            setTimeout(() => {
+                              this.$router.push("/candidates");
+                              location.reload();
+                            }, 100);
+                            return 0;
+                          });
+                      } else {
+                        const url =
+                          "http://localhost:3000/api/candidates/" +
+                          candidate.id +
+                          "/replace";
+                        axios.post(url, this.candidate);
+                        axios
+                          .delete(
+                            "http://localhost:3000/api/Photos/candidate/files/" +
+                              this.imageEdit
+                          )
+                          .then((resp) => {
+                            console.log(resp);
+                          })
+                          .catch((err) => console.log(err));
+                        axios
+                          .post(
+                            "http://localhost:3000/api/Photos/candidate/upload?filename=" +
+                              fileName,
+                            fd
+                          )
+                          .then((res) => {
+                            console.log(res);
+                          })
+                          .catch((err) => console.log(err));
+                        setTimeout(() => {
+                          this.$router.push("/candidates");
+                          location.reload();
+                        }, 100);
+                        return 0;
+                      }
+                    }
                   } else {
-                    candidate = {
+                    const candidate = {
                       candidateId: this.candidateId,
                       christianName: this.christianName,
                       fullName: this.fullName,
@@ -1163,19 +1947,206 @@ const EditCandidate = {
                       status: this.status,
                       id: this.$route.params.id,
                     };
-                    axios
-                      .post(
-                        "http://localhost:3000/api/Photos/candidate/upload?filename=" +
-                          fileName,
-                        fd
-                      )
-                      .then((res) => {
-                        console.log(res);
-                      })
-                      .catch((err) => console.log(err));
+                    if (this.community != this.communityEdit) {
+                      axios
+                        .get(
+                          "http://localhost:3000/api/communities/getCommunity?id=" +
+                            this.communityEdit
+                        )
+                        .then((response) => {
+                          this.communityName =
+                            response.data.community.communityName;
+                          this.patron = response.data.community.patron;
+                          this.address = response.data.community.address;
+                          this.amount = response.data.community.amount;
+                          console.log(this.address);
+                          let amount = 0;
+                          amount = Number(this.amount) - 1;
+                          console.log(this.amount);
+                          const communityEdit = {
+                            communityName: this.communityName,
+                            patron: this.patron,
+                            address: this.address,
+                            amount: amount,
+                            id: this.communityEdit,
+                          };
+                          axios
+                            .get(
+                              "http://localhost:3000/api/communities/getCommunity?id=" +
+                                this.community
+                            )
+                            .then((response) => {
+                              this.communityName =
+                                response.data.community.communityName;
+                              this.patron = response.data.community.patron;
+                              this.address = response.data.community.address;
+                              this.amount = response.data.community.amount;
+                              let amount = 0;
+                              amount = Number(this.amount) + 1;
+                              const community = {
+                                communityName: this.communityName,
+                                patron: this.patron,
+                                address: this.address,
+                                amount: amount,
+                                id: this.community,
+                              };
+                              if (this.candidate.status == 2) {
+                                axios
+                                  .get(
+                                    "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                                      candidate.id +
+                                      "&filter[where][and][1][role]=5"
+                                  )
+                                  .then((resp) => {
+                                    const account = {
+                                      userId: resp.data[0].userId,
+                                      username: resp.data[0].username,
+                                      password: resp.data[0].password,
+                                      role: resp.data[0].role,
+                                      status: 2,
+                                      idTable: resp.data[0].idTable,
+                                      id: resp.data[0].id,
+                                    };
+                                    const url_5 =
+                                      "http://localhost:3000/api/accounts/" +
+                                      account.id +
+                                      "/replace";
+                                    axios.post(url_5, account);
+                                    const url_1 =
+                                      "http://localhost:3000/api/communities/" +
+                                      community.id +
+                                      "/replace";
+                                    axios.post(url_1, community);
+                                    const url_2 =
+                                      "http://localhost:3000/api/communities/" +
+                                      communityEdit.id +
+                                      "/replace";
+                                    axios.post(url_2, communityEdit);
+                                    const url =
+                                      "http://localhost:3000/api/candidates/" +
+                                      candidate.id +
+                                      "/replace";
+                                    axios.post(url, candidate);
+                                    axios
+                                      .post(
+                                        "http://localhost:3000/api/Photos/candidate/upload?filename=" +
+                                          fileName,
+                                        fd
+                                      )
+                                      .then((res) => {
+                                        console.log(res);
+                                      })
+                                      .catch((err) => console.log(err));
+                                    setTimeout(() => {
+                                      this.$router.push("/candidates");
+                                      location.reload();
+                                    }, 100);
+                                    return 0;
+                                  });
+                              } else {
+                                const url_1 =
+                                  "http://localhost:3000/api/communities/" +
+                                  community.id +
+                                  "/replace";
+                                axios.post(url_1, community);
+                                const url_2 =
+                                  "http://localhost:3000/api/communities/" +
+                                  communityEdit.id +
+                                  "/replace";
+                                axios.post(url_2, communityEdit);
+                                const url =
+                                  "http://localhost:3000/api/candidates/" +
+                                  candidate.id +
+                                  "/replace";
+                                axios.post(url, candidate);
+                                axios
+                                  .post(
+                                    "http://localhost:3000/api/Photos/candidate/upload?filename=" +
+                                      fileName,
+                                    fd
+                                  )
+                                  .then((res) => {
+                                    console.log(res);
+                                  })
+                                  .catch((err) => console.log(err));
+                                setTimeout(() => {
+                                  this.$router.push("/candidates");
+                                  location.reload();
+                                }, 100);
+                                return 0;
+                              }
+                            });
+                        });
+                    } else {
+                      if (this.candidate.status == 2) {
+                        axios
+                          .get(
+                            "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                              candidate.id +
+                              "&filter[where][and][1][role]=5"
+                          )
+                          .then((resp) => {
+                            const account = {
+                              userId: resp.data[0].userId,
+                              username: resp.data[0].username,
+                              password: resp.data[0].password,
+                              role: resp.data[0].role,
+                              status: 2,
+                              idTable: resp.data[0].idTable,
+                              id: resp.data[0].id,
+                            };
+                            const url_5 =
+                              "http://localhost:3000/api/accounts/" +
+                              account.id +
+                              "/replace";
+                            axios.post(url_5, account);
+                            const url =
+                              "http://localhost:3000/api/candidates/" +
+                              candidate.id +
+                              "/replace";
+                            axios.post(url, candidate);
+                            axios
+                              .post(
+                                "http://localhost:3000/api/Photos/candidate/upload?filename=" +
+                                  fileName,
+                                fd
+                              )
+                              .then((res) => {
+                                console.log(res);
+                              })
+                              .catch((err) => console.log(err));
+                            setTimeout(() => {
+                              this.$router.push("/candidates");
+                              location.reload();
+                            }, 100);
+                            return 0;
+                          });
+                      } else {
+                        const url =
+                          "http://localhost:3000/api/candidates/" +
+                          candidate.id +
+                          "/replace";
+                        axios.post(url, candidate);
+                        axios
+                          .post(
+                            "http://localhost:3000/api/Photos/candidate/upload?filename=" +
+                              fileName,
+                            fd
+                          )
+                          .then((res) => {
+                            console.log(res);
+                          })
+                          .catch((err) => console.log(err));
+                        setTimeout(() => {
+                          this.$router.push("/candidates");
+                          location.reload();
+                        }, 100);
+                        return 0;
+                      }
+                    }
                   }
                 } else {
-                  candidate = {
+                  const candidate = {
                     candidateId: this.candidateId,
                     christianName: this.christianName,
                     fullName: this.fullName,
@@ -1189,73 +2160,164 @@ const EditCandidate = {
                     status: this.status,
                     id: this.$route.params.id,
                   };
-                }
-                if (this.community != this.communityEdit) {
-                  axios
-                    .get(
-                      "http://localhost:3000/api/communities/getCommunity?id=" +
-                        this.communityEdit
-                    )
-                    .then((response) => {
-                      this.communityName =
-                        response.data.community.communityName;
-                      this.patron = response.data.community.patron;
-                      this.address = response.data.community.address;
-                      this.amount = response.data.community.amount;
-                      console.log(this.address);
-                      let amount = 0;
-                      amount = Number(this.amount) - 1;
-                      console.log(this.amount);
-                      const communityEdit = {
-                        communityName: this.communityName,
-                        patron: this.patron,
-                        address: this.address,
-                        amount: amount,
-                        id: this.communityEdit,
-                      };
+                  if (this.community != this.communityEdit) {
+                    axios
+                      .get(
+                        "http://localhost:3000/api/communities/getCommunity?id=" +
+                          this.communityEdit
+                      )
+                      .then((response) => {
+                        this.communityName =
+                          response.data.community.communityName;
+                        this.patron = response.data.community.patron;
+                        this.address = response.data.community.address;
+                        this.amount = response.data.community.amount;
+                        console.log(this.address);
+                        let amount = 0;
+                        amount = Number(this.amount) - 1;
+                        console.log(this.amount);
+                        const communityEdit = {
+                          communityName: this.communityName,
+                          patron: this.patron,
+                          address: this.address,
+                          amount: amount,
+                          id: this.communityEdit,
+                        };
+                        axios
+                          .get(
+                            "http://localhost:3000/api/communities/getCommunity?id=" +
+                              this.community
+                          )
+                          .then((response) => {
+                            this.communityName =
+                              response.data.community.communityName;
+                            this.patron = response.data.community.patron;
+                            this.address = response.data.community.address;
+                            this.amount = response.data.community.amount;
+                            let amount = 0;
+                            amount = Number(this.amount) + 1;
+                            const community = {
+                              communityName: this.communityName,
+                              patron: this.patron,
+                              address: this.address,
+                              amount: amount,
+                              id: this.community,
+                            };
+                            if (this.candidate.status == 2) {
+                              axios
+                                .get(
+                                  "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                                    candidate.id +
+                                    "&filter[where][and][1][role]=5"
+                                )
+                                .then((resp) => {
+                                  const account = {
+                                    userId: resp.data[0].userId,
+                                    username: resp.data[0].username,
+                                    password: resp.data[0].password,
+                                    role: resp.data[0].role,
+                                    status: 2,
+                                    idTable: resp.data[0].idTable,
+                                    id: resp.data[0].id,
+                                  };
+                                  const url_5 =
+                                    "http://localhost:3000/api/accounts/" +
+                                    account.id +
+                                    "/replace";
+                                  axios.post(url_5, account);
+                                  const url_1 =
+                                    "http://localhost:3000/api/communities/" +
+                                    community.id +
+                                    "/replace";
+                                  axios.post(url_1, community);
+                                  const url_2 =
+                                    "http://localhost:3000/api/communities/" +
+                                    communityEdit.id +
+                                    "/replace";
+                                  axios.post(url_2, communityEdit);
+                                  const url =
+                                    "http://localhost:3000/api/candidates/" +
+                                    candidate.id +
+                                    "/replace";
+                                  axios.post(url, candidate);
+                                  setTimeout(() => {
+                                    this.$router.push("/candidates");
+                                    location.reload();
+                                  }, 100);
+                                  return 0;
+                                });
+                            } else {
+                              const url_1 =
+                                "http://localhost:3000/api/communities/" +
+                                community.id +
+                                "/replace";
+                              axios.post(url_1, community);
+                              const url_2 =
+                                "http://localhost:3000/api/communities/" +
+                                communityEdit.id +
+                                "/replace";
+                              axios.post(url_2, communityEdit);
+                              const url =
+                                "http://localhost:3000/api/candidates/" +
+                                candidate.id +
+                                "/replace";
+                              axios.post(url, candidate);
+                              setTimeout(() => {
+                                this.$router.push("/candidates");
+                                location.reload();
+                              }, 100);
+                              return 0;
+                            }
+                          });
+                      });
+                  } else {
+                    if (this.candidate.status == 2) {
                       axios
                         .get(
-                          "http://localhost:3000/api/communities/getCommunity?id=" +
-                            this.community
+                          "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                            candidate.id +
+                            "&filter[where][and][1][role]=5"
                         )
-                        .then((response) => {
-                          this.communityName =
-                            response.data.community.communityName;
-                          this.patron = response.data.community.patron;
-                          this.address = response.data.community.address;
-                          this.amount = response.data.community.amount;
-                          let amount = 0;
-                          amount = Number(this.amount) + 1;
-                          const community = {
-                            communityName: this.communityName,
-                            patron: this.patron,
-                            address: this.address,
-                            amount: amount,
-                            id: this.community,
+                        .then((resp) => {
+                          const account = {
+                            userId: resp.data[0].userId,
+                            username: resp.data[0].username,
+                            password: resp.data[0].password,
+                            role: resp.data[0].role,
+                            status: 2,
+                            idTable: resp.data[0].idTable,
+                            id: resp.data[0].id,
                           };
-                          const url_1 =
-                            "http://localhost:3000/api/communities/" +
-                            community.id +
+                          const url_5 =
+                            "http://localhost:3000/api/accounts/" +
+                            account.id +
                             "/replace";
-                          axios.post(url_1, community);
-                          const url_2 =
-                            "http://localhost:3000/api/communities/" +
-                            communityEdit.id +
-                            "/replace";
-                          axios.post(url_2, communityEdit);
+                          axios.post(url_5, account);
                           const url =
                             "http://localhost:3000/api/candidates/" +
                             candidate.id +
                             "/replace";
                           axios.post(url, candidate);
+                          setTimeout(() => {
+                            this.$router.push("/candidates");
+                            location.reload();
+                          }, 100);
+                          return 0;
                         });
-                    });
+                    } else {
+                      const url =
+                        "http://localhost:3000/api/candidates/" +
+                        candidate.id +
+                        "/replace";
+                      axios.post(url, candidate);
+                      setTimeout(() => {
+                        this.$router.push("/candidates");
+                        location.reload();
+                      }, 100);
+                      return 0;
+                    }
+                  }
                 }
-                setTimeout(() => {
-                  this.$router.push("/candidates");
-                  location.reload();
-                }, 100);
-                return 0;
               }
             });
         } else if (
@@ -1293,20 +2355,6 @@ const EditCandidate = {
                   }
                 );
               } else {
-                const candidate = {
-                  candidateId: null,
-                  christianName: null,
-                  fullName: null,
-                  birthday: null,
-                  phone: null,
-                  email: null,
-                  image: null,
-                  position: null,
-                  community: null,
-                  homeland: null,
-                  status: null,
-                  id: null,
-                };
                 if (this.selectedFile != null) {
                   const fd = new FormData();
                   fd.append("image", this.selectedFile, this.selectedFile.name);
@@ -1315,7 +2363,7 @@ const EditCandidate = {
                   var fileName =
                     this.candidateId + this.selectedFile.name.slice(start, end);
                   if (this.imageEdit != null) {
-                    candidate = {
+                    const candidate = {
                       candidateId: this.candidateId,
                       christianName: this.christianName,
                       fullName: this.fullName,
@@ -1329,27 +2377,241 @@ const EditCandidate = {
                       status: this.status,
                       id: this.$route.params.id,
                     };
-                    axios
-                      .delete(
-                        "http://localhost:3000/api/Photos/candidate/files/" +
-                          this.imageEdit
-                      )
-                      .then((resp) => {
-                        console.log(resp);
-                      })
-                      .catch((err) => console.log(err));
-                    axios
-                      .post(
-                        "http://localhost:3000/api/Photos/candidate/upload?filename=" +
-                          fileName,
-                        fd
-                      )
-                      .then((res) => {
-                        console.log(res);
-                      })
-                      .catch((err) => console.log(err));
+                    if (this.community != this.communityEdit) {
+                      axios
+                        .get(
+                          "http://localhost:3000/api/communities/getCommunity?id=" +
+                            this.communityEdit
+                        )
+                        .then((response) => {
+                          this.communityName =
+                            response.data.community.communityName;
+                          this.patron = response.data.community.patron;
+                          this.address = response.data.community.address;
+                          this.amount = response.data.community.amount;
+                          console.log(this.address);
+                          let amount = 0;
+                          amount = Number(this.amount) - 1;
+                          console.log(this.amount);
+                          const communityEdit = {
+                            communityName: this.communityName,
+                            patron: this.patron,
+                            address: this.address,
+                            amount: amount,
+                            id: this.communityEdit,
+                          };
+                          axios
+                            .get(
+                              "http://localhost:3000/api/communities/getCommunity?id=" +
+                                this.community
+                            )
+                            .then((response) => {
+                              this.communityName =
+                                response.data.community.communityName;
+                              this.patron = response.data.community.patron;
+                              this.address = response.data.community.address;
+                              this.amount = response.data.community.amount;
+                              let amount = 0;
+                              amount = Number(this.amount) + 1;
+                              const community = {
+                                communityName: this.communityName,
+                                patron: this.patron,
+                                address: this.address,
+                                amount: amount,
+                                id: this.community,
+                              };
+                              if (this.candidate.status == 2) {
+                                axios
+                                  .get(
+                                    "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                                      candidate.id +
+                                      "&filter[where][and][1][role]=5"
+                                  )
+                                  .then((resp) => {
+                                    const account = {
+                                      userId: resp.data[0].userId,
+                                      username: resp.data[0].username,
+                                      password: resp.data[0].password,
+                                      role: resp.data[0].role,
+                                      status: 2,
+                                      idTable: resp.data[0].idTable,
+                                      id: resp.data[0].id,
+                                    };
+                                    const url_5 =
+                                      "http://localhost:3000/api/accounts/" +
+                                      account.id +
+                                      "/replace";
+                                    axios.post(url_5, account);
+                                    const url_1 =
+                                      "http://localhost:3000/api/communities/" +
+                                      community.id +
+                                      "/replace";
+                                    axios.post(url_1, community);
+                                    const url_2 =
+                                      "http://localhost:3000/api/communities/" +
+                                      communityEdit.id +
+                                      "/replace";
+                                    axios.post(url_2, communityEdit);
+                                    const url =
+                                      "http://localhost:3000/api/candidates/" +
+                                      candidate.id +
+                                      "/replace";
+                                    axios.post(url, candidate);
+                                    axios
+                                      .delete(
+                                        "http://localhost:3000/api/Photos/candidate/files/" +
+                                          this.imageEdit
+                                      )
+                                      .then((resp) => {
+                                        console.log(resp);
+                                      })
+                                      .catch((err) => console.log(err));
+                                    axios
+                                      .post(
+                                        "http://localhost:3000/api/Photos/candidate/upload?filename=" +
+                                          fileName,
+                                        fd
+                                      )
+                                      .then((res) => {
+                                        console.log(res);
+                                      })
+                                      .catch((err) => console.log(err));
+                                    setTimeout(() => {
+                                      this.$router.push("/candidates");
+                                      location.reload();
+                                    }, 100);
+                                    return 0;
+                                  });
+                              } else {
+                                const url_1 =
+                                  "http://localhost:3000/api/communities/" +
+                                  community.id +
+                                  "/replace";
+                                axios.post(url_1, community);
+                                const url_2 =
+                                  "http://localhost:3000/api/communities/" +
+                                  communityEdit.id +
+                                  "/replace";
+                                axios.post(url_2, communityEdit);
+                                const url =
+                                  "http://localhost:3000/api/candidates/" +
+                                  candidate.id +
+                                  "/replace";
+                                axios.post(url, candidate);
+                                axios
+                                  .delete(
+                                    "http://localhost:3000/api/Photos/candidate/files/" +
+                                      this.imageEdit
+                                  )
+                                  .then((resp) => {
+                                    console.log(resp);
+                                  })
+                                  .catch((err) => console.log(err));
+                                axios
+                                  .post(
+                                    "http://localhost:3000/api/Photos/candidate/upload?filename=" +
+                                      fileName,
+                                    fd
+                                  )
+                                  .then((res) => {
+                                    console.log(res);
+                                  })
+                                  .catch((err) => console.log(err));
+                                setTimeout(() => {
+                                  this.$router.push("/candidates");
+                                  location.reload();
+                                }, 100);
+                                return 0;
+                              }
+                            });
+                        });
+                    } else {
+                      if (this.candidate.status == 2) {
+                        axios
+                          .get(
+                            "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                              candidate.id +
+                              "&filter[where][and][1][role]=5"
+                          )
+                          .then((resp) => {
+                            const account = {
+                              userId: resp.data[0].userId,
+                              username: resp.data[0].username,
+                              password: resp.data[0].password,
+                              role: resp.data[0].role,
+                              status: 2,
+                              idTable: resp.data[0].idTable,
+                              id: resp.data[0].id,
+                            };
+                            const url_5 =
+                              "http://localhost:3000/api/accounts/" +
+                              account.id +
+                              "/replace";
+                            axios.post(url_5, account);
+                            const url =
+                              "http://localhost:3000/api/candidates/" +
+                              candidate.id +
+                              "/replace";
+                            axios.post(url, this.candidate);
+                            axios
+                              .delete(
+                                "http://localhost:3000/api/Photos/candidate/files/" +
+                                  this.imageEdit
+                              )
+                              .then((resp) => {
+                                console.log(resp);
+                              })
+                              .catch((err) => console.log(err));
+                            axios
+                              .post(
+                                "http://localhost:3000/api/Photos/candidate/upload?filename=" +
+                                  fileName,
+                                fd
+                              )
+                              .then((res) => {
+                                console.log(res);
+                              })
+                              .catch((err) => console.log(err));
+                            setTimeout(() => {
+                              this.$router.push("/candidates");
+                              location.reload();
+                            }, 100);
+                            return 0;
+                          });
+                      } else {
+                        const url =
+                          "http://localhost:3000/api/candidates/" +
+                          candidate.id +
+                          "/replace";
+                        axios.post(url, this.candidate);
+                        axios
+                          .delete(
+                            "http://localhost:3000/api/Photos/candidate/files/" +
+                              this.imageEdit
+                          )
+                          .then((resp) => {
+                            console.log(resp);
+                          })
+                          .catch((err) => console.log(err));
+                        axios
+                          .post(
+                            "http://localhost:3000/api/Photos/candidate/upload?filename=" +
+                              fileName,
+                            fd
+                          )
+                          .then((res) => {
+                            console.log(res);
+                          })
+                          .catch((err) => console.log(err));
+                        setTimeout(() => {
+                          this.$router.push("/candidates");
+                          location.reload();
+                        }, 100);
+                        return 0;
+                      }
+                    }
                   } else {
-                    candidate = {
+                    const candidate = {
                       candidateId: this.candidateId,
                       christianName: this.christianName,
                       fullName: this.fullName,
@@ -1363,19 +2625,206 @@ const EditCandidate = {
                       status: this.status,
                       id: this.$route.params.id,
                     };
-                    axios
-                      .post(
-                        "http://localhost:3000/api/Photos/candidate/upload?filename=" +
-                          fileName,
-                        fd
-                      )
-                      .then((res) => {
-                        console.log(res);
-                      })
-                      .catch((err) => console.log(err));
+                    if (this.community != this.communityEdit) {
+                      axios
+                        .get(
+                          "http://localhost:3000/api/communities/getCommunity?id=" +
+                            this.communityEdit
+                        )
+                        .then((response) => {
+                          this.communityName =
+                            response.data.community.communityName;
+                          this.patron = response.data.community.patron;
+                          this.address = response.data.community.address;
+                          this.amount = response.data.community.amount;
+                          console.log(this.address);
+                          let amount = 0;
+                          amount = Number(this.amount) - 1;
+                          console.log(this.amount);
+                          const communityEdit = {
+                            communityName: this.communityName,
+                            patron: this.patron,
+                            address: this.address,
+                            amount: amount,
+                            id: this.communityEdit,
+                          };
+                          axios
+                            .get(
+                              "http://localhost:3000/api/communities/getCommunity?id=" +
+                                this.community
+                            )
+                            .then((response) => {
+                              this.communityName =
+                                response.data.community.communityName;
+                              this.patron = response.data.community.patron;
+                              this.address = response.data.community.address;
+                              this.amount = response.data.community.amount;
+                              let amount = 0;
+                              amount = Number(this.amount) + 1;
+                              const community = {
+                                communityName: this.communityName,
+                                patron: this.patron,
+                                address: this.address,
+                                amount: amount,
+                                id: this.community,
+                              };
+                              if (this.candidate.status == 2) {
+                                axios
+                                  .get(
+                                    "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                                      candidate.id +
+                                      "&filter[where][and][1][role]=5"
+                                  )
+                                  .then((resp) => {
+                                    const account = {
+                                      userId: resp.data[0].userId,
+                                      username: resp.data[0].username,
+                                      password: resp.data[0].password,
+                                      role: resp.data[0].role,
+                                      status: 2,
+                                      idTable: resp.data[0].idTable,
+                                      id: resp.data[0].id,
+                                    };
+                                    const url_5 =
+                                      "http://localhost:3000/api/accounts/" +
+                                      account.id +
+                                      "/replace";
+                                    axios.post(url_5, account);
+                                    const url_1 =
+                                      "http://localhost:3000/api/communities/" +
+                                      community.id +
+                                      "/replace";
+                                    axios.post(url_1, community);
+                                    const url_2 =
+                                      "http://localhost:3000/api/communities/" +
+                                      communityEdit.id +
+                                      "/replace";
+                                    axios.post(url_2, communityEdit);
+                                    const url =
+                                      "http://localhost:3000/api/candidates/" +
+                                      candidate.id +
+                                      "/replace";
+                                    axios.post(url, candidate);
+                                    axios
+                                      .post(
+                                        "http://localhost:3000/api/Photos/candidate/upload?filename=" +
+                                          fileName,
+                                        fd
+                                      )
+                                      .then((res) => {
+                                        console.log(res);
+                                      })
+                                      .catch((err) => console.log(err));
+                                    setTimeout(() => {
+                                      this.$router.push("/candidates");
+                                      location.reload();
+                                    }, 100);
+                                    return 0;
+                                  });
+                              } else {
+                                const url_1 =
+                                  "http://localhost:3000/api/communities/" +
+                                  community.id +
+                                  "/replace";
+                                axios.post(url_1, community);
+                                const url_2 =
+                                  "http://localhost:3000/api/communities/" +
+                                  communityEdit.id +
+                                  "/replace";
+                                axios.post(url_2, communityEdit);
+                                const url =
+                                  "http://localhost:3000/api/candidates/" +
+                                  candidate.id +
+                                  "/replace";
+                                axios.post(url, candidate);
+                                axios
+                                  .post(
+                                    "http://localhost:3000/api/Photos/candidate/upload?filename=" +
+                                      fileName,
+                                    fd
+                                  )
+                                  .then((res) => {
+                                    console.log(res);
+                                  })
+                                  .catch((err) => console.log(err));
+                                setTimeout(() => {
+                                  this.$router.push("/candidates");
+                                  location.reload();
+                                }, 100);
+                                return 0;
+                              }
+                            });
+                        });
+                    } else {
+                      if (this.candidate.status == 2) {
+                        axios
+                          .get(
+                            "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                              candidate.id +
+                              "&filter[where][and][1][role]=5"
+                          )
+                          .then((resp) => {
+                            const account = {
+                              userId: resp.data[0].userId,
+                              username: resp.data[0].username,
+                              password: resp.data[0].password,
+                              role: resp.data[0].role,
+                              status: 2,
+                              idTable: resp.data[0].idTable,
+                              id: resp.data[0].id,
+                            };
+                            const url_5 =
+                              "http://localhost:3000/api/accounts/" +
+                              account.id +
+                              "/replace";
+                            axios.post(url_5, account);
+                            const url =
+                              "http://localhost:3000/api/candidates/" +
+                              candidate.id +
+                              "/replace";
+                            axios.post(url, candidate);
+                            axios
+                              .post(
+                                "http://localhost:3000/api/Photos/candidate/upload?filename=" +
+                                  fileName,
+                                fd
+                              )
+                              .then((res) => {
+                                console.log(res);
+                              })
+                              .catch((err) => console.log(err));
+                            setTimeout(() => {
+                              this.$router.push("/candidates");
+                              location.reload();
+                            }, 100);
+                            return 0;
+                          });
+                      } else {
+                        const url =
+                          "http://localhost:3000/api/candidates/" +
+                          candidate.id +
+                          "/replace";
+                        axios.post(url, candidate);
+                        axios
+                          .post(
+                            "http://localhost:3000/api/Photos/candidate/upload?filename=" +
+                              fileName,
+                            fd
+                          )
+                          .then((res) => {
+                            console.log(res);
+                          })
+                          .catch((err) => console.log(err));
+                        setTimeout(() => {
+                          this.$router.push("/candidates");
+                          location.reload();
+                        }, 100);
+                        return 0;
+                      }
+                    }
                   }
                 } else {
-                  candidate = {
+                  const candidate = {
                     candidateId: this.candidateId,
                     christianName: this.christianName,
                     fullName: this.fullName,
@@ -1389,73 +2838,164 @@ const EditCandidate = {
                     status: this.status,
                     id: this.$route.params.id,
                   };
-                }
-                if (this.community != this.communityEdit) {
-                  axios
-                    .get(
-                      "http://localhost:3000/api/communities/getCommunity?id=" +
-                        this.communityEdit
-                    )
-                    .then((response) => {
-                      this.communityName =
-                        response.data.community.communityName;
-                      this.patron = response.data.community.patron;
-                      this.address = response.data.community.address;
-                      this.amount = response.data.community.amount;
-                      console.log(this.address);
-                      let amount = 0;
-                      amount = Number(this.amount) - 1;
-                      console.log(this.amount);
-                      const communityEdit = {
-                        communityName: this.communityName,
-                        patron: this.patron,
-                        address: this.address,
-                        amount: amount,
-                        id: this.communityEdit,
-                      };
+                  if (this.community != this.communityEdit) {
+                    axios
+                      .get(
+                        "http://localhost:3000/api/communities/getCommunity?id=" +
+                          this.communityEdit
+                      )
+                      .then((response) => {
+                        this.communityName =
+                          response.data.community.communityName;
+                        this.patron = response.data.community.patron;
+                        this.address = response.data.community.address;
+                        this.amount = response.data.community.amount;
+                        console.log(this.address);
+                        let amount = 0;
+                        amount = Number(this.amount) - 1;
+                        console.log(this.amount);
+                        const communityEdit = {
+                          communityName: this.communityName,
+                          patron: this.patron,
+                          address: this.address,
+                          amount: amount,
+                          id: this.communityEdit,
+                        };
+                        axios
+                          .get(
+                            "http://localhost:3000/api/communities/getCommunity?id=" +
+                              this.community
+                          )
+                          .then((response) => {
+                            this.communityName =
+                              response.data.community.communityName;
+                            this.patron = response.data.community.patron;
+                            this.address = response.data.community.address;
+                            this.amount = response.data.community.amount;
+                            let amount = 0;
+                            amount = Number(this.amount) + 1;
+                            const community = {
+                              communityName: this.communityName,
+                              patron: this.patron,
+                              address: this.address,
+                              amount: amount,
+                              id: this.community,
+                            };
+                            if (this.candidate.status == 2) {
+                              axios
+                                .get(
+                                  "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                                    candidate.id +
+                                    "&filter[where][and][1][role]=5"
+                                )
+                                .then((resp) => {
+                                  const account = {
+                                    userId: resp.data[0].userId,
+                                    username: resp.data[0].username,
+                                    password: resp.data[0].password,
+                                    role: resp.data[0].role,
+                                    status: 2,
+                                    idTable: resp.data[0].idTable,
+                                    id: resp.data[0].id,
+                                  };
+                                  const url_5 =
+                                    "http://localhost:3000/api/accounts/" +
+                                    account.id +
+                                    "/replace";
+                                  axios.post(url_5, account);
+                                  const url_1 =
+                                    "http://localhost:3000/api/communities/" +
+                                    community.id +
+                                    "/replace";
+                                  axios.post(url_1, community);
+                                  const url_2 =
+                                    "http://localhost:3000/api/communities/" +
+                                    communityEdit.id +
+                                    "/replace";
+                                  axios.post(url_2, communityEdit);
+                                  const url =
+                                    "http://localhost:3000/api/candidates/" +
+                                    candidate.id +
+                                    "/replace";
+                                  axios.post(url, candidate);
+                                  setTimeout(() => {
+                                    this.$router.push("/candidates");
+                                    location.reload();
+                                  }, 100);
+                                  return 0;
+                                });
+                            } else {
+                              const url_1 =
+                                "http://localhost:3000/api/communities/" +
+                                community.id +
+                                "/replace";
+                              axios.post(url_1, community);
+                              const url_2 =
+                                "http://localhost:3000/api/communities/" +
+                                communityEdit.id +
+                                "/replace";
+                              axios.post(url_2, communityEdit);
+                              const url =
+                                "http://localhost:3000/api/candidates/" +
+                                candidate.id +
+                                "/replace";
+                              axios.post(url, candidate);
+                              setTimeout(() => {
+                                this.$router.push("/candidates");
+                                location.reload();
+                              }, 100);
+                              return 0;
+                            }
+                          });
+                      });
+                  } else {
+                    if (this.candidate.status == 2) {
                       axios
                         .get(
-                          "http://localhost:3000/api/communities/getCommunity?id=" +
-                            this.community
+                          "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                            candidate.id +
+                            "&filter[where][and][1][role]=5"
                         )
-                        .then((response) => {
-                          this.communityName =
-                            response.data.community.communityName;
-                          this.patron = response.data.community.patron;
-                          this.address = response.data.community.address;
-                          this.amount = response.data.community.amount;
-                          let amount = 0;
-                          amount = Number(this.amount) + 1;
-                          const community = {
-                            communityName: this.communityName,
-                            patron: this.patron,
-                            address: this.address,
-                            amount: amount,
-                            id: this.community,
+                        .then((resp) => {
+                          const account = {
+                            userId: resp.data[0].userId,
+                            username: resp.data[0].username,
+                            password: resp.data[0].password,
+                            role: resp.data[0].role,
+                            status: 2,
+                            idTable: resp.data[0].idTable,
+                            id: resp.data[0].id,
                           };
-                          const url_1 =
-                            "http://localhost:3000/api/communities/" +
-                            community.id +
+                          const url_5 =
+                            "http://localhost:3000/api/accounts/" +
+                            account.id +
                             "/replace";
-                          axios.post(url_1, community);
-                          const url_2 =
-                            "http://localhost:3000/api/communities/" +
-                            communityEdit.id +
-                            "/replace";
-                          axios.post(url_2, communityEdit);
+                          axios.post(url_5, account);
                           const url =
                             "http://localhost:3000/api/candidates/" +
                             candidate.id +
                             "/replace";
                           axios.post(url, candidate);
+                          setTimeout(() => {
+                            this.$router.push("/candidates");
+                            location.reload();
+                          }, 100);
+                          return 0;
                         });
-                    });
+                    } else {
+                      const url =
+                        "http://localhost:3000/api/candidates/" +
+                        candidate.id +
+                        "/replace";
+                      axios.post(url, candidate);
+                      setTimeout(() => {
+                        this.$router.push("/candidates");
+                        location.reload();
+                      }, 100);
+                      return 0;
+                    }
+                  }
                 }
-                setTimeout(() => {
-                  this.$router.push("/candidates");
-                  location.reload();
-                }, 100);
-                return 0;
               }
             });
         } else {
@@ -1501,20 +3041,6 @@ const EditCandidate = {
                         }
                       );
                     } else {
-                      const candidate = {
-                        candidateId: null,
-                        christianName: null,
-                        fullName: null,
-                        birthday: null,
-                        phone: null,
-                        email: null,
-                        image: null,
-                        position: null,
-                        community: null,
-                        homeland: null,
-                        status: null,
-                        id: null,
-                      };
                       if (this.selectedFile != null) {
                         const fd = new FormData();
                         fd.append(
@@ -1528,7 +3054,7 @@ const EditCandidate = {
                           this.candidateId +
                           this.selectedFile.name.slice(start, end);
                         if (this.imageEdit != null) {
-                          candidate = {
+                          const candidate = {
                             candidateId: this.candidateId,
                             christianName: this.christianName,
                             fullName: this.fullName,
@@ -1542,27 +3068,244 @@ const EditCandidate = {
                             status: this.status,
                             id: this.$route.params.id,
                           };
-                          axios
-                            .delete(
-                              "http://localhost:3000/api/Photos/candidate/files/" +
-                                this.imageEdit
-                            )
-                            .then((resp) => {
-                              console.log(resp);
-                            })
-                            .catch((err) => console.log(err));
-                          axios
-                            .post(
-                              "http://localhost:3000/api/Photos/candidate/upload?filename=" +
-                                fileName,
-                              fd
-                            )
-                            .then((res) => {
-                              console.log(res);
-                            })
-                            .catch((err) => console.log(err));
+                          if (this.community != this.communityEdit) {
+                            axios
+                              .get(
+                                "http://localhost:3000/api/communities/getCommunity?id=" +
+                                  this.communityEdit
+                              )
+                              .then((response) => {
+                                this.communityName =
+                                  response.data.community.communityName;
+                                this.patron = response.data.community.patron;
+                                this.address = response.data.community.address;
+                                this.amount = response.data.community.amount;
+                                console.log(this.address);
+                                let amount = 0;
+                                amount = Number(this.amount) - 1;
+                                console.log(this.amount);
+                                const communityEdit = {
+                                  communityName: this.communityName,
+                                  patron: this.patron,
+                                  address: this.address,
+                                  amount: amount,
+                                  id: this.communityEdit,
+                                };
+                                axios
+                                  .get(
+                                    "http://localhost:3000/api/communities/getCommunity?id=" +
+                                      this.community
+                                  )
+                                  .then((response) => {
+                                    this.communityName =
+                                      response.data.community.communityName;
+                                    this.patron =
+                                      response.data.community.patron;
+                                    this.address =
+                                      response.data.community.address;
+                                    this.amount =
+                                      response.data.community.amount;
+                                    let amount = 0;
+                                    amount = Number(this.amount) + 1;
+                                    const community = {
+                                      communityName: this.communityName,
+                                      patron: this.patron,
+                                      address: this.address,
+                                      amount: amount,
+                                      id: this.community,
+                                    };
+                                    if (this.candidate.status == 2) {
+                                      axios
+                                        .get(
+                                          "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                                            candidate.id +
+                                            "&filter[where][and][1][role]=5"
+                                        )
+                                        .then((resp) => {
+                                          const account = {
+                                            userId: resp.data[0].userId,
+                                            username: resp.data[0].username,
+                                            password: resp.data[0].password,
+                                            role: resp.data[0].role,
+                                            status: 2,
+                                            idTable: resp.data[0].idTable,
+                                            id: resp.data[0].id,
+                                          };
+                                          const url_5 =
+                                            "http://localhost:3000/api/accounts/" +
+                                            account.id +
+                                            "/replace";
+                                          axios.post(url_5, account);
+                                          const url_1 =
+                                            "http://localhost:3000/api/communities/" +
+                                            community.id +
+                                            "/replace";
+                                          axios.post(url_1, community);
+                                          const url_2 =
+                                            "http://localhost:3000/api/communities/" +
+                                            communityEdit.id +
+                                            "/replace";
+                                          axios.post(url_2, communityEdit);
+                                          const url =
+                                            "http://localhost:3000/api/candidates/" +
+                                            candidate.id +
+                                            "/replace";
+                                          axios.post(url, candidate);
+                                          axios
+                                            .delete(
+                                              "http://localhost:3000/api/Photos/candidate/files/" +
+                                                this.imageEdit
+                                            )
+                                            .then((resp) => {
+                                              console.log(resp);
+                                            })
+                                            .catch((err) => console.log(err));
+                                          axios
+                                            .post(
+                                              "http://localhost:3000/api/Photos/candidate/upload?filename=" +
+                                                fileName,
+                                              fd
+                                            )
+                                            .then((res) => {
+                                              console.log(res);
+                                            })
+                                            .catch((err) => console.log(err));
+                                          setTimeout(() => {
+                                            this.$router.push("/candidates");
+                                            location.reload();
+                                          }, 100);
+                                          return 0;
+                                        });
+                                    } else {
+                                      const url_1 =
+                                        "http://localhost:3000/api/communities/" +
+                                        community.id +
+                                        "/replace";
+                                      axios.post(url_1, community);
+                                      const url_2 =
+                                        "http://localhost:3000/api/communities/" +
+                                        communityEdit.id +
+                                        "/replace";
+                                      axios.post(url_2, communityEdit);
+                                      const url =
+                                        "http://localhost:3000/api/candidates/" +
+                                        candidate.id +
+                                        "/replace";
+                                      axios.post(url, candidate);
+                                      axios
+                                        .delete(
+                                          "http://localhost:3000/api/Photos/candidate/files/" +
+                                            this.imageEdit
+                                        )
+                                        .then((resp) => {
+                                          console.log(resp);
+                                        })
+                                        .catch((err) => console.log(err));
+                                      axios
+                                        .post(
+                                          "http://localhost:3000/api/Photos/candidate/upload?filename=" +
+                                            fileName,
+                                          fd
+                                        )
+                                        .then((res) => {
+                                          console.log(res);
+                                        })
+                                        .catch((err) => console.log(err));
+                                      setTimeout(() => {
+                                        this.$router.push("/candidates");
+                                        location.reload();
+                                      }, 100);
+                                      return 0;
+                                    }
+                                  });
+                              });
+                          } else {
+                            if (this.candidate.status == 2) {
+                              axios
+                                .get(
+                                  "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                                    candidate.id +
+                                    "&filter[where][and][1][role]=5"
+                                )
+                                .then((resp) => {
+                                  const account = {
+                                    userId: resp.data[0].userId,
+                                    username: resp.data[0].username,
+                                    password: resp.data[0].password,
+                                    role: resp.data[0].role,
+                                    status: 2,
+                                    idTable: resp.data[0].idTable,
+                                    id: resp.data[0].id,
+                                  };
+                                  const url_5 =
+                                    "http://localhost:3000/api/accounts/" +
+                                    account.id +
+                                    "/replace";
+                                  axios.post(url_5, account);
+                                  const url =
+                                    "http://localhost:3000/api/candidates/" +
+                                    candidate.id +
+                                    "/replace";
+                                  axios.post(url, this.candidate);
+                                  axios
+                                    .delete(
+                                      "http://localhost:3000/api/Photos/candidate/files/" +
+                                        this.imageEdit
+                                    )
+                                    .then((resp) => {
+                                      console.log(resp);
+                                    })
+                                    .catch((err) => console.log(err));
+                                  axios
+                                    .post(
+                                      "http://localhost:3000/api/Photos/candidate/upload?filename=" +
+                                        fileName,
+                                      fd
+                                    )
+                                    .then((res) => {
+                                      console.log(res);
+                                    })
+                                    .catch((err) => console.log(err));
+                                  setTimeout(() => {
+                                    this.$router.push("/candidates");
+                                    location.reload();
+                                  }, 100);
+                                  return 0;
+                                });
+                            } else {
+                              const url =
+                                "http://localhost:3000/api/candidates/" +
+                                candidate.id +
+                                "/replace";
+                              axios.post(url, this.candidate);
+                              axios
+                                .delete(
+                                  "http://localhost:3000/api/Photos/candidate/files/" +
+                                    this.imageEdit
+                                )
+                                .then((resp) => {
+                                  console.log(resp);
+                                })
+                                .catch((err) => console.log(err));
+                              axios
+                                .post(
+                                  "http://localhost:3000/api/Photos/candidate/upload?filename=" +
+                                    fileName,
+                                  fd
+                                )
+                                .then((res) => {
+                                  console.log(res);
+                                })
+                                .catch((err) => console.log(err));
+                              setTimeout(() => {
+                                this.$router.push("/candidates");
+                                location.reload();
+                              }, 100);
+                              return 0;
+                            }
+                          }
                         } else {
-                          candidate = {
+                          const candidate = {
                             candidateId: this.candidateId,
                             christianName: this.christianName,
                             fullName: this.fullName,
@@ -1576,19 +3319,209 @@ const EditCandidate = {
                             status: this.status,
                             id: this.$route.params.id,
                           };
-                          axios
-                            .post(
-                              "http://localhost:3000/api/Photos/candidate/upload?filename=" +
-                                fileName,
-                              fd
-                            )
-                            .then((res) => {
-                              console.log(res);
-                            })
-                            .catch((err) => console.log(err));
+                          if (this.community != this.communityEdit) {
+                            axios
+                              .get(
+                                "http://localhost:3000/api/communities/getCommunity?id=" +
+                                  this.communityEdit
+                              )
+                              .then((response) => {
+                                this.communityName =
+                                  response.data.community.communityName;
+                                this.patron = response.data.community.patron;
+                                this.address = response.data.community.address;
+                                this.amount = response.data.community.amount;
+                                console.log(this.address);
+                                let amount = 0;
+                                amount = Number(this.amount) - 1;
+                                console.log(this.amount);
+                                const communityEdit = {
+                                  communityName: this.communityName,
+                                  patron: this.patron,
+                                  address: this.address,
+                                  amount: amount,
+                                  id: this.communityEdit,
+                                };
+                                axios
+                                  .get(
+                                    "http://localhost:3000/api/communities/getCommunity?id=" +
+                                      this.community
+                                  )
+                                  .then((response) => {
+                                    this.communityName =
+                                      response.data.community.communityName;
+                                    this.patron =
+                                      response.data.community.patron;
+                                    this.address =
+                                      response.data.community.address;
+                                    this.amount =
+                                      response.data.community.amount;
+                                    let amount = 0;
+                                    amount = Number(this.amount) + 1;
+                                    const community = {
+                                      communityName: this.communityName,
+                                      patron: this.patron,
+                                      address: this.address,
+                                      amount: amount,
+                                      id: this.community,
+                                    };
+                                    if (this.candidate.status == 2) {
+                                      axios
+                                        .get(
+                                          "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                                            candidate.id +
+                                            "&filter[where][and][1][role]=5"
+                                        )
+                                        .then((resp) => {
+                                          const account = {
+                                            userId: resp.data[0].userId,
+                                            username: resp.data[0].username,
+                                            password: resp.data[0].password,
+                                            role: resp.data[0].role,
+                                            status: 2,
+                                            idTable: resp.data[0].idTable,
+                                            id: resp.data[0].id,
+                                          };
+                                          const url_5 =
+                                            "http://localhost:3000/api/accounts/" +
+                                            account.id +
+                                            "/replace";
+                                          axios.post(url_5, account);
+                                          const url_1 =
+                                            "http://localhost:3000/api/communities/" +
+                                            community.id +
+                                            "/replace";
+                                          axios.post(url_1, community);
+                                          const url_2 =
+                                            "http://localhost:3000/api/communities/" +
+                                            communityEdit.id +
+                                            "/replace";
+                                          axios.post(url_2, communityEdit);
+                                          const url =
+                                            "http://localhost:3000/api/candidates/" +
+                                            candidate.id +
+                                            "/replace";
+                                          axios.post(url, candidate);
+                                          axios
+                                            .post(
+                                              "http://localhost:3000/api/Photos/candidate/upload?filename=" +
+                                                fileName,
+                                              fd
+                                            )
+                                            .then((res) => {
+                                              console.log(res);
+                                            })
+                                            .catch((err) => console.log(err));
+                                          setTimeout(() => {
+                                            this.$router.push("/candidates");
+                                            location.reload();
+                                          }, 100);
+                                          return 0;
+                                        });
+                                    } else {
+                                      const url_1 =
+                                        "http://localhost:3000/api/communities/" +
+                                        community.id +
+                                        "/replace";
+                                      axios.post(url_1, community);
+                                      const url_2 =
+                                        "http://localhost:3000/api/communities/" +
+                                        communityEdit.id +
+                                        "/replace";
+                                      axios.post(url_2, communityEdit);
+                                      const url =
+                                        "http://localhost:3000/api/candidates/" +
+                                        candidate.id +
+                                        "/replace";
+                                      axios.post(url, candidate);
+                                      axios
+                                        .post(
+                                          "http://localhost:3000/api/Photos/candidate/upload?filename=" +
+                                            fileName,
+                                          fd
+                                        )
+                                        .then((res) => {
+                                          console.log(res);
+                                        })
+                                        .catch((err) => console.log(err));
+                                      setTimeout(() => {
+                                        this.$router.push("/candidates");
+                                        location.reload();
+                                      }, 100);
+                                      return 0;
+                                    }
+                                  });
+                              });
+                          } else {
+                            if (this.candidate.status == 2) {
+                              axios
+                                .get(
+                                  "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                                    candidate.id +
+                                    "&filter[where][and][1][role]=5"
+                                )
+                                .then((resp) => {
+                                  const account = {
+                                    userId: resp.data[0].userId,
+                                    username: resp.data[0].username,
+                                    password: resp.data[0].password,
+                                    role: resp.data[0].role,
+                                    status: 2,
+                                    idTable: resp.data[0].idTable,
+                                    id: resp.data[0].id,
+                                  };
+                                  const url_5 =
+                                    "http://localhost:3000/api/accounts/" +
+                                    account.id +
+                                    "/replace";
+                                  axios.post(url_5, account);
+                                  const url =
+                                    "http://localhost:3000/api/candidates/" +
+                                    candidate.id +
+                                    "/replace";
+                                  axios.post(url, candidate);
+                                  axios
+                                    .post(
+                                      "http://localhost:3000/api/Photos/candidate/upload?filename=" +
+                                        fileName,
+                                      fd
+                                    )
+                                    .then((res) => {
+                                      console.log(res);
+                                    })
+                                    .catch((err) => console.log(err));
+                                  setTimeout(() => {
+                                    this.$router.push("/candidates");
+                                    location.reload();
+                                  }, 100);
+                                  return 0;
+                                });
+                            } else {
+                              const url =
+                                "http://localhost:3000/api/candidates/" +
+                                candidate.id +
+                                "/replace";
+                              axios.post(url, candidate);
+                              axios
+                                .post(
+                                  "http://localhost:3000/api/Photos/candidate/upload?filename=" +
+                                    fileName,
+                                  fd
+                                )
+                                .then((res) => {
+                                  console.log(res);
+                                })
+                                .catch((err) => console.log(err));
+                              setTimeout(() => {
+                                this.$router.push("/candidates");
+                                location.reload();
+                              }, 100);
+                              return 0;
+                            }
+                          }
                         }
                       } else {
-                        candidate = {
+                        const candidate = {
                           candidateId: this.candidateId,
                           christianName: this.christianName,
                           fullName: this.fullName,
@@ -1602,73 +3535,165 @@ const EditCandidate = {
                           status: this.status,
                           id: this.$route.params.id,
                         };
-                      }
-                      if (this.community != this.communityEdit) {
-                        axios
-                          .get(
-                            "http://localhost:3000/api/communities/getCommunity?id=" +
-                              this.communityEdit
-                          )
-                          .then((response) => {
-                            this.communityName =
-                              response.data.community.communityName;
-                            this.patron = response.data.community.patron;
-                            this.address = response.data.community.address;
-                            this.amount = response.data.community.amount;
-                            console.log(this.address);
-                            let amount = 0;
-                            amount = Number(this.amount) - 1;
-                            console.log(this.amount);
-                            const communityEdit = {
-                              communityName: this.communityName,
-                              patron: this.patron,
-                              address: this.address,
-                              amount: amount,
-                              id: this.communityEdit,
-                            };
+                        if (this.community != this.communityEdit) {
+                          axios
+                            .get(
+                              "http://localhost:3000/api/communities/getCommunity?id=" +
+                                this.communityEdit
+                            )
+                            .then((response) => {
+                              this.communityName =
+                                response.data.community.communityName;
+                              this.patron = response.data.community.patron;
+                              this.address = response.data.community.address;
+                              this.amount = response.data.community.amount;
+                              console.log(this.address);
+                              let amount = 0;
+                              amount = Number(this.amount) - 1;
+                              console.log(this.amount);
+                              const communityEdit = {
+                                communityName: this.communityName,
+                                patron: this.patron,
+                                address: this.address,
+                                amount: amount,
+                                id: this.communityEdit,
+                              };
+                              axios
+                                .get(
+                                  "http://localhost:3000/api/communities/getCommunity?id=" +
+                                    this.community
+                                )
+                                .then((response) => {
+                                  this.communityName =
+                                    response.data.community.communityName;
+                                  this.patron = response.data.community.patron;
+                                  this.address =
+                                    response.data.community.address;
+                                  this.amount = response.data.community.amount;
+                                  let amount = 0;
+                                  amount = Number(this.amount) + 1;
+                                  const community = {
+                                    communityName: this.communityName,
+                                    patron: this.patron,
+                                    address: this.address,
+                                    amount: amount,
+                                    id: this.community,
+                                  };
+                                  if (this.candidate.status == 2) {
+                                    axios
+                                      .get(
+                                        "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                                          candidate.id +
+                                          "&filter[where][and][1][role]=5"
+                                      )
+                                      .then((resp) => {
+                                        const account = {
+                                          userId: resp.data[0].userId,
+                                          username: resp.data[0].username,
+                                          password: resp.data[0].password,
+                                          role: resp.data[0].role,
+                                          status: 2,
+                                          idTable: resp.data[0].idTable,
+                                          id: resp.data[0].id,
+                                        };
+                                        const url_5 =
+                                          "http://localhost:3000/api/accounts/" +
+                                          account.id +
+                                          "/replace";
+                                        axios.post(url_5, account);
+                                        const url_1 =
+                                          "http://localhost:3000/api/communities/" +
+                                          community.id +
+                                          "/replace";
+                                        axios.post(url_1, community);
+                                        const url_2 =
+                                          "http://localhost:3000/api/communities/" +
+                                          communityEdit.id +
+                                          "/replace";
+                                        axios.post(url_2, communityEdit);
+                                        const url =
+                                          "http://localhost:3000/api/candidates/" +
+                                          candidate.id +
+                                          "/replace";
+                                        axios.post(url, candidate);
+                                        setTimeout(() => {
+                                          this.$router.push("/candidates");
+                                          location.reload();
+                                        }, 100);
+                                        return 0;
+                                      });
+                                  } else {
+                                    const url_1 =
+                                      "http://localhost:3000/api/communities/" +
+                                      community.id +
+                                      "/replace";
+                                    axios.post(url_1, community);
+                                    const url_2 =
+                                      "http://localhost:3000/api/communities/" +
+                                      communityEdit.id +
+                                      "/replace";
+                                    axios.post(url_2, communityEdit);
+                                    const url =
+                                      "http://localhost:3000/api/candidates/" +
+                                      candidate.id +
+                                      "/replace";
+                                    axios.post(url, candidate);
+                                    setTimeout(() => {
+                                      this.$router.push("/candidates");
+                                      location.reload();
+                                    }, 100);
+                                    return 0;
+                                  }
+                                });
+                            });
+                        } else {
+                          if (this.candidate.status == 2) {
                             axios
                               .get(
-                                "http://localhost:3000/api/communities/getCommunity?id=" +
-                                  this.community
+                                "http://localhost:3000/api/accounts?filter[where][and][0][idTable]=" +
+                                  candidate.id +
+                                  "&filter[where][and][1][role]=5"
                               )
-                              .then((response) => {
-                                this.communityName =
-                                  response.data.community.communityName;
-                                this.patron = response.data.community.patron;
-                                this.address = response.data.community.address;
-                                this.amount = response.data.community.amount;
-                                let amount = 0;
-                                amount = Number(this.amount) + 1;
-                                const community = {
-                                  communityName: this.communityName,
-                                  patron: this.patron,
-                                  address: this.address,
-                                  amount: amount,
-                                  id: this.community,
+                              .then((resp) => {
+                                const account = {
+                                  userId: resp.data[0].userId,
+                                  username: resp.data[0].username,
+                                  password: resp.data[0].password,
+                                  role: resp.data[0].role,
+                                  status: 2,
+                                  idTable: resp.data[0].idTable,
+                                  id: resp.data[0].id,
                                 };
-                                const url_1 =
-                                  "http://localhost:3000/api/communities/" +
-                                  community.id +
+                                const url_5 =
+                                  "http://localhost:3000/api/accounts/" +
+                                  account.id +
                                   "/replace";
-                                axios.post(url_1, community);
-                                const url_2 =
-                                  "http://localhost:3000/api/communities/" +
-                                  communityEdit.id +
-                                  "/replace";
-                                axios.post(url_2, communityEdit);
+                                axios.post(url_5, account);
                                 const url =
                                   "http://localhost:3000/api/candidates/" +
                                   candidate.id +
                                   "/replace";
                                 axios.post(url, candidate);
+                                setTimeout(() => {
+                                  this.$router.push("/candidates");
+                                  location.reload();
+                                }, 100);
+                                return 0;
                               });
-                          });
+                          } else {
+                            const url =
+                              "http://localhost:3000/api/candidates/" +
+                              candidate.id +
+                              "/replace";
+                            axios.post(url, candidate);
+                            setTimeout(() => {
+                              this.$router.push("/candidates");
+                              location.reload();
+                            }, 100);
+                            return 0;
+                          }
+                        }
                       }
-                      setTimeout(() => {
-                        this.$router.push("/candidates");
-                        location.reload();
-                      }, 100);
-                      return 0;
                     }
                   });
               }
